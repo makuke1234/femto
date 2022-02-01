@@ -41,7 +41,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | <kbd>Ctrl+Q</kbd>              | Exit editor                                   |
     | [ ] <kbd>Ctrl+N</kbd>          | Create new blank file                         |
     | [ ] <kbd>Ctrl+O</kbd>          | Open file                                     |
-    | <kbd>Ctrl+S</kbd>              | Safe file                                     |
+    | <kbd>Ctrl+S</kbd>              | Save file                                     |
     | [ ] <kbd>Ctrl+Shift+S</kbd>    | Save file as...                               |
     | [ ] <kbd>Ctrl+Tab</kbd>        | Switch forwards between open files            |
     | [ ] <kbd>Ctrl+Shift+Tab</kbd>  | Switch backwards between open files           |
