@@ -117,7 +117,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
     * [x] Tweak keypress status messages
-	* [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
+    * [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
 
 * 1.0
     * [x] Theoretical multi-file support
