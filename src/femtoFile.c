@@ -984,8 +984,9 @@ void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t de
 	}
 	else if (deltaCh > 0)
 	{
-		uint32_t curx = self->data.curx + (uint32_t)deltaCh;
-		if (curx < (self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen))
+		uint32_t curx = self->data.curx + (uint32_t)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
+		--width;
+		if ((total >= width) && (curx <= (total - width)))
 		{
 			self->data.curx = curx;
 		}

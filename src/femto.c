@@ -438,11 +438,12 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 	
 	for (uint32_t i = 0; i < peditor->scrbuf.h - 1 && node != NULL; ++i)
 	{
-		// if line is active line
-		if (node == pfile->data.currentNode)
+		// if line is active line and cursor fits
+		uint32_t curx = node->curx - pfile->data.curx;
+		if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
 		{
 			// Update cursor position
-			peditor->cursorpos = (COORD){ .X = (int16_t)u32Min(node->curx - pfile->data.curx, peditor->scrbuf.w - 1), .Y = (int16_t)i };
+			peditor->cursorpos = (COORD){ .X = (int16_t)curx, .Y = (int16_t)i };
 			// Make cursor visible, if necessary
 			if (cci.bVisible == FALSE)
 			{
