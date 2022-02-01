@@ -324,6 +324,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 	else if (ir.EventType == MOUSE_EVENT)
 	{
 		wchar_t tempstr[MAX_STATUS];
+		bool draw = true;
 
 		if (ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED)
 		{
@@ -345,7 +346,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 				femtoData_refresh(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
-			femtoData_statusDraw(peditor, tempstr, NULL);
 		}
 		else if (ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED)
 		{
@@ -367,7 +367,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 				femtoData_refresh(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
-			femtoData_statusDraw(peditor, tempstr, NULL);
 		}
 		// Mouse click
 		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
@@ -378,7 +377,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
 
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
-				femtoData_statusDraw(peditor, tempstr, NULL);
 			}
 			else
 			{
@@ -395,8 +393,15 @@ bool femto_loop(femtoData_t * restrict peditor)
 					femtoData_refresh(peditor);
 				}
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
-				femtoData_statusDraw(peditor, tempstr, NULL);
 			}
+		}
+		else
+		{
+			draw = false;
+		}
+		if (draw)
+		{
+			femtoData_statusDraw(peditor, tempstr, NULL);
 		}
 	}
 
