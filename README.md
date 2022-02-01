@@ -39,7 +39,7 @@ Features inherited from [femto](https://github.com/makuke1234/atto):
 - [x] 2 ways to start the program:
     | Syntax          | Action                                                                                                   |
     | --------------- | -------------------------------------------------------------------------------------------------------- |
-    | `femto`          | Shows help<br>![help image](./images/help.PNG)                                                          |
+    | `femto`          | Shows help<br>![help image](./images/help.png)                                                          |
     | `femto` \[file\] | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
 New features:
 - [ ] none yet.
