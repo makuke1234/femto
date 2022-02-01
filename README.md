@@ -59,11 +59,12 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | <kbd>Alt+Up</kbd>              | Move current line up                          |
     | <kbd>Alt+Down</kbd>            | Move current line down                        |
 - [x] Ways to start the editor:
-    | Syntax                       | Action                                                                                                  |
-    | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
-    | `femto` \[options\]          | Starts editor with empty file                                                                           |
-    | `femto` \[options\] \[file\] | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
-    | `femto` --help               | Shows help<br>![help image](./images/help.png)                                                          |
+    | Syntax                              | Action                                                                                                  |
+    | ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+    | `femto` \[options\]                 | Starts editor with empty file                                                                           |
+    | `femto` \[options\] \[file\]        | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
+    | `femto` \[options\] --file=\[file\] | Same as above, just a different syntax                                                                  |
+    | `femto` --help                      | Shows help<br>![help image](./images/help.png)                                                          |
 - [ ] About options:
     * Basic option syntax:
         *   | Syntax         | Description           |
@@ -78,6 +79,12 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * `--`\[option\]`=`\[argument 1\]`;`\[argument 2\]`;`\[argument 3\]
     * If quotation marks (`""`) are used around the whole option, spaces can also be used as a separator:
         * `"--`\[option\]`=`\[argument 1\]` `\[argument 2\]` `\[argument 3\]`"`
+- [ ] List of options:
+    | Option          | Effect                                            |
+    | --------------- | ------------------------------------------------- |
+    | --help          | Shows help                                        |
+    | --file=\[file\] | Specifies file name to open                       |
+    | \[file\]        | Same as above, must be given as the last argument |
 
 
 # Screenshots
