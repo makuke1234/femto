@@ -293,9 +293,18 @@ void femtoFile_updateCury(femtoFile_t * restrict self, uint32_t height);
  * 
  * @param self Pointer to femtoFile_t structure
  * @param height Editor window height
- * @param deltaLines Lines to scroll, positive values means scrolling down, negative valus means scrolling up
+ * @param deltaLines Lines to scroll, positive values mean scrolling down, negative values mean scrolling up
  */
 void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t deltaLines);
+/**
+ * @brief Scrolls current viewpoint if possible, updates viewpoint if necessary
+ * 
+ * @param self Pointer to femtoFile_t structure
+ * @param width Editor window width
+ * @param deltaCh Characters to scroll, positive values mean scrolling right, negative values mean scrolling up
+ */
+void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t deltaCh);
+
 
 /**
  * @brief Destroys femtoFile_t structure

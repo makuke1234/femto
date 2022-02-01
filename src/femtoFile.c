@@ -976,6 +976,21 @@ void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t delt
 		femtoLine_moveCursorVert(&self->data.pcury, deltaLines);	
 	}
 }
+void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t deltaCh)
+{
+	if ((deltaCh < 0) && ((uint32_t)-deltaCh <= self->data.curx))
+	{
+		self->data.curx -= (uint32_t)-deltaCh;
+	}
+	else if (deltaCh > 0)
+	{
+		uint32_t curx = self->data.curx + (uint32_t)deltaCh;
+		if (curx < (self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen))
+		{
+			self->data.curx = curx;
+		}
+	}
+}
 
 
 void femtoFile_destroy(femtoFile_t * restrict self)

@@ -356,22 +356,51 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'");
 		}
+		else if (ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED)
+		{
+			static int32_t s_delta = 0;
+			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
+			writeProfiler("femto_loop", "Mouse hwhell was used, delta %d", delta);
+
+			if ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0))
+			{
+				s_delta = 0;
+			}
+			s_delta += delta;
+
+			int32_t chDelta = s_delta / WHEEL_DELTA;
+			if (chDelta != 0)
+			{
+				s_delta -= chDelta * WHEEL_DELTA;
+				femtoFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
+				femtoData_refresh(peditor);
+			}
+			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-RIGHT'" : L"'WHEEL-LEFT'");
+		}
 		// Mouse click
 		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
 		{
-			COORD pos = ir.Event.MouseEvent.dwMousePosition;
-			writeProfiler("femto_loop", "Mouse click @%hd, %hd", pos.X, pos.Y);
-
-			if (pfile->data.pcury != NULL)
+			// Check if mouse is moving
+			if (ir.Event.MouseEvent.dwEventFlags & MOUSE_MOVED)
 			{
-				pfile->data.currentNode = pfile->data.pcury;
-				femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
-				// Now move the cursor to correct X position
-				femtoLine_moveCursorAbs(pfile->data.currentNode, (uint32_t)pos.X);
-				femtoData_refresh(peditor);
-			}
 
-			femtoData_statusDraw(peditor, L"'LCLICK'");
+			}
+			else
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;
+				writeProfiler("femto_loop", "Mouse click @%hd, %hd", pos.X, pos.Y);
+
+				if (pfile->data.pcury != NULL)
+				{
+					pfile->data.currentNode = pfile->data.pcury;
+					femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
+					// Now move the cursor to correct X position
+					femtoLine_moveCursorAbs(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx);
+					femtoData_refresh(peditor);
+				}
+
+				femtoData_statusDraw(peditor, L"'LCLICK'");
+			}
 		}
 	}
 
@@ -384,17 +413,17 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 	{
 		pfile->data.typed = false;
 		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
+		int32_t delta = (int32_t)pfile->data.currentNode->curx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
+		if (delta >= 0)
+		{
+			pfile->data.curx += (uint32_t)(delta + 1);
+		}
+		else if (pfile->data.curx > pfile->data.currentNode->curx)
+		{
+			pfile->data.curx = u32Max(1, pfile->data.currentNode->curx) - 1;
+		}
 	}
 
-	int32_t delta = (int32_t)pfile->data.currentNode->curx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
-	if (delta >= 0)
-	{
-		pfile->data.curx += (uint32_t)(delta + 1);
-	}
-	else if (pfile->data.curx > pfile->data.currentNode->curx)
-	{
-		pfile->data.curx = u32Max(1, pfile->data.currentNode->curx) - 1;
-	}
 	uint32_t size = peditor->scrbuf.w * peditor->scrbuf.h;
 	for (uint32_t i = 0; i < size; ++i)
 	{
