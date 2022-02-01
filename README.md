@@ -48,12 +48,12 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | <kbd>Ctrl+E</kbd> <kbd>F</kbd> | Switch to CRLF EOL sequence                   |
     | <kbd>Ctrl+E</kbd> <kbd>L</kbd> | Switch to LF EOL sequence                     |
     | <kbd>Ctrl+E</kbd> <kbd>C</kbd> | Switch to CR EOL sequence                     |
-    | [ ] <kbd>Shift+DEL</kbd>       | Delete whole line                             |
-    | [ ] <kbd>Alt+DEL</kbd>         | Delete whole line                             |
-    | [ ] <kbd>PgUp</kbd>            | Scroll whole screen-buffer worth of text up   |
-    | [ ] <kbd>PgDown</kbd>          | Scroll whole screen-buffer worth of text down |
-    | [ ] <kbd>Home</kbd>            | Move to the begginning of the line            |
-    | [ ] <kbd>End</kbd>             | Move to the end of the line                   |
+    | <kbd>Shift+DEL</kbd>           | Delete whole line                             |
+    | <kbd>Alt+DEL</kbd>             | Delete whole line                             |
+    | <kbd>PgUp</kbd>                | Scroll whole screen-buffer worth of text up   |
+    | <kbd>PgDown</kbd>              | Scroll whole screen-buffer worth of text down |
+    | <kbd>Home</kbd>                | Move to the begginning of the line            |
+    | <kbd>End</kbd>                 | Move to the end of the line                   |
     | [ ] <kbd>Alt+Up</kbd>          | Move current line up                          |
     | [ ] <kbd>Alt+Down</kbd>        | Move current line down                        |
 - [x] ways to start the editor:
