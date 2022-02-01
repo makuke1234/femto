@@ -1,6 +1,6 @@
 # femto
 
-> Fully Equipped Minimal Text editOr
+> Fully Equipped Minimal Text editOr - basically [atto](https://github.com/makuke1234/atto) on steroids
 
 [![Release version](https://img.shields.io/github/v/release/makuke1234/femto?display_name=release&include_prereleases)](https://github.com/makuke1234/femto/releases/latest)
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/femto/total)](https://github.com/makuke1234/femto/releases)
