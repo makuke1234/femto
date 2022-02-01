@@ -102,6 +102,14 @@ void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx);
 void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta);
 
 /**
+ * @brief Swaps internally data between 2 nodes
+ * 
+ * @param node1 First node
+ * @param node2 Second node
+ */
+void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2);
+
+/**
  * @brief Destroys line node, frees memory
  * 
  * @param self Pointer to line node

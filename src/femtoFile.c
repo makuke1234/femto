@@ -278,6 +278,23 @@ void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta)
 	*self = node;
 }
 
+void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2)
+{
+	assert(node1 != NULL);
+	assert(node2 != NULL);
+
+	femtoLineNode_t temp = *node1;
+	node1->line         = node2->line;
+	node1->lineEndx     = node2->lineEndx;
+	node1->curx         = node2->curx;
+	node1->freeSpaceLen = node2->freeSpaceLen;
+
+	node2->line         = temp.line;
+	node2->lineEndx     = temp.lineEndx;
+	node2->curx         = temp.curx;
+	node2->freeSpaceLen = temp.freeSpaceLen;
+}
+
 void femtoLine_destroy(femtoLineNode_t * restrict self)
 {
 	if (self->line != NULL)
@@ -749,6 +766,24 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 
 			// Destroy current line
 			femtoLine_destroy(node);
+		}
+		break;
+	case FEMTO_MOVELINE_UP:
+		// Swap current line with previous if possible
+		if (self->data.currentNode->prevNode != NULL)
+		{
+			femtoLine_swap(self->data.currentNode, self->data.currentNode->prevNode);
+			self->data.currentNode = self->data.currentNode->prevNode;
+			self->data.lastx       = self->data.currentNode->curx;
+		}
+		break;
+	case FEMTO_MOVELINE_DOWN:
+		// Swap current line with next if possible
+		if (self->data.currentNode->nextNode != NULL)
+		{
+			femtoLine_swap(self->data.currentNode, self->data.currentNode->nextNode);
+			self->data.currentNode = self->data.currentNode->nextNode;
+			self->data.lastx       = self->data.currentNode->curx;
 		}
 		break;
 	case VK_LEFT:	// Left arrow

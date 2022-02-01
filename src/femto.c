@@ -229,37 +229,65 @@ bool femto_loop(femtoData_t * restrict peditor)
 					{
 						femtoData_statusDraw(peditor, L"\u2191 + 'TAB'");
 						wVirtKey = VK_OEM_BACKTAB;
-						break;
 					}
-					/* fall through */
-				case VK_DELETE:
-					if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					else
 					{
-						femtoData_statusDraw(peditor, L"\u2191 + 'DEL'");
-						wVirtKey = FEMTO_SHIFT_DEL;
-						break;
+						femtoData_statusDraw(peditor, L"'TAB'");
 					}
-					/* fall through */
+					break;
+				case VK_DELETE:
+				{
+					bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+					// Check for shift to alt key
+					if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
+					{
+						femtoData_statusDraw(peditor, shift ? L"\u2191 + 'DEL'" : L"'ALT' + 'DEL'");
+						wVirtKey = FEMTO_SHIFT_DEL;
+					}
+					else
+					{
+						femtoData_statusDraw(peditor, L"'DEL'");
+					}
+					break;
+				}
+				case VK_UP:		// Up arrow
+					// Check for alt key
+					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+					{
+						femtoData_statusDraw(peditor, L"'ALT' + \u2191");
+						wVirtKey = FEMTO_MOVELINE_UP;
+					}
+					else
+					{
+						femtoData_statusDraw(peditor, L"\u2191");
+					}
+					break;
+				case VK_DOWN:	// Down arrow
+					// Check for alt key
+					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+					{
+						femtoData_statusDraw(peditor, L"'ALT' + \u2193");
+						wVirtKey = FEMTO_MOVELINE_DOWN;
+					}
+					else
+					{
+						femtoData_statusDraw(peditor, L"\u2193");
+					}
+					break;
 				case VK_RETURN:	// Enter key
 				case VK_BACK:	// Backspace
 				case VK_LEFT:	// Left arrow
 				case VK_RIGHT:	// Right arrow
-				case VK_UP:		// Up arrow
-				case VK_DOWN:	// Down arrow
 				case VK_PRIOR:	// Page up
 				case VK_NEXT:	// Page down
 				case VK_END:
 				case VK_HOME:
 				{
 					static const wchar_t * buf[] = {
-						[VK_TAB]    = L"'TAB'",
-						[VK_DELETE] = L"'DEL'",
 						[VK_RETURN] = L"'RET'",
 						[VK_BACK]   = L"'BS'",
 						[VK_LEFT]   = L"\u2190",
 						[VK_RIGHT]  = L"\u2192",
-						[VK_UP]     = L"\u2191",
-						[VK_DOWN]   = L"\u2193",
 						[VK_PRIOR]  = L"'PGUP'",
 						[VK_NEXT]   = L"'PGDOWN'",
 						[VK_END]	= L"'END'",

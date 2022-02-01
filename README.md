@@ -22,18 +22,19 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 
 # Features
 
-- [x] all saved files use CRLF line-ending format by default, LF and CR are also supported
-- [x] femto editor utilizes the whole command prompt window, window is as big as your console currently is
-- [x] the last line of the window is dedicated to status, for example showing success or failure when an attempting to save a file
-- [ ] search results highlighting
-- [ ] syntax highlighting
-- [ ] mouse scrolling
-- [ ] proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces
-- [ ] optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
-    * *If multiple files exist with any of the names above, the settings file would be preferred with the priority order above*
-- [ ] all settings can be given by command line arguments
-- [ ] multi-file support
-- [x] keyboard shortcuts:
+- [x] All saved files use CRLF line-ending format by default, LF and CR are also supported
+- [x] The femto editor utilizes the whole command prompt window, window is as big as your console currently is
+- [x] The last line of the window is dedicated to status, for example showing success or failure when an attempting to save a file
+- [ ] Search support & search results highlighting
+- [ ] Syntax highlighting
+- [x] Mouse scrolling
+- [ ] Mouse operated text cursor
+- [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces
+- [ ] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
+    * *If multiple files exist with any of the names above, the settings file will be selected following the order above*
+- [ ] All settings can be given by command line arguments
+- [ ] Multi-file support
+- [x] Keyboard shortcuts:
     | Key                            | Action                                        |
     | ------------------------------ | --------------------------------------------- |
     | <kbd>ESC</kbd>                 | Exit editor                                   |
@@ -54,9 +55,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | <kbd>PgDown</kbd>              | Scroll whole screen-buffer worth of text down |
     | <kbd>Home</kbd>                | Move to the begginning of the line            |
     | <kbd>End</kbd>                 | Move to the end of the line                   |
-    | [ ] <kbd>Alt+Up</kbd>          | Move current line up                          |
-    | [ ] <kbd>Alt+Down</kbd>        | Move current line down                        |
-- [x] ways to start the editor:
+    | <kbd>Alt+Up</kbd>              | Move current line up                          |
+    | <kbd>Alt+Down</kbd>            | Move current line down                        |
+- [x] Ways to start the editor:
     | Syntax                       | Action                                                                                                  |
     | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
     | `femto` \[options\]          | Starts editor with empty file                                                                           |
@@ -95,6 +96,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 * 1.0 (planned)
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
+	* [ ] Mouse support for controlling the cursor
     * [ ] Color rendering support
     * [x] Scrolling whole screen worth of text with page up & page down
     * [x] Moving cursor to the beggining/end of line with home/end
