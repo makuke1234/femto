@@ -85,8 +85,8 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * [ ] C
         * [ ] C++
         * [ ] Markdown
-    * [ ] Text pasting support
-        * *Copying is implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+    * [ ] Proper text copying/pasting support
+        * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] Proper command line program argument handling, optional settings file
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
