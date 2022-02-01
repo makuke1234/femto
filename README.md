@@ -103,7 +103,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [x] Better cursor movement when using left/right arrows between lines
     * [x] Better cursor movement when using up/down arrows between lines
 * 0.1
-    * Initial release, basically a copy of [femto](https://github.com/makuke1234/atto)
+    * Initial release, basically a copy of [atto](https://github.com/makuke1234/atto)
 
 
 # Contributing
@@ -112,7 +112,8 @@ This project is by no means perfect. Feel free to report any bugs, that you may 
 **[Issues](https://github.com/makuke1234/femto/issues)**.
 Also feel free to make any feature requests that come into your mind. Currently our end goal
 is to achieve an editor that's comfortable to use. Please be patient though because my first
-priorities are bug fixing and implementing pre-planned [features](./#Features).
+priorities are bug fixing and implementing pre-planned [features](#Features). For more savvy
+users, the [changelog](#Changelog) may be more useful to keep track of the progress.
 
 
 # License
