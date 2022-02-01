@@ -10,7 +10,7 @@ It is a bigger more feature-rich version of my other console text editor [atto](
 It is also written in vanilla C + Win32 Console API - it's designed to be used solely on Microsoft Windows.
 It has been compiled with MinGW GCC.
 
-Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports 2080 source code lines (excluding whitespace & comments):
+Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports 2076 source code lines (excluding whitespace & comments):
 
 ![SLOC](./images/sloc.png)
 
@@ -95,7 +95,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 ## Last key shown on status bar with respective repeat count
 ![Key frequency](./images/keyFreq.png)
 
-## Saving was successful, file size is now 48 bytes
+## Saving was successful, file size is now 140 bytes
 ![!Saving success](./images/savingSuc.png)
 
 
@@ -117,6 +117,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
     * [x] Tweak keypress status messages
+	* [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
 
 * 1.0
     * [x] Theoretical multi-file support

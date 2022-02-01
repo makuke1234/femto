@@ -118,6 +118,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			boolPut(keybuffer, key, true);
 			wchar_t tempstr[MAX_STATUS];
+			bool draw = true;
 
 			if (wVirtKey == VK_ESCAPE || key == sac_Ctrl_Q)	// Exit on Escape or Ctrl+Q
 			{
@@ -141,7 +142,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					pfile->eolSeq = EOL_CR;
 					break;
 				default:
-					femtoData_statusDraw(peditor, L"Unknown EOL combination!", NULL);
+					swprintf_s(tempstr, MAX_STATUS, L"Unknown EOL combination!");
 					done = false;
 				}
 				if (done)
@@ -153,7 +154,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 						(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
 						(pfile->eolSeq & EOL_LF) ? L"LF" : L""
 					);
-					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 
 				waitingEnc = false;
@@ -163,7 +163,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				const wchar_t * res;
 				if ((res = femtoFile_read(pfile)) != NULL)
 				{
-					femtoData_statusDraw(peditor, res, NULL);
+					swprintf_s(tempstr, MAX_STATUS, res);
 				}
 				else
 				{
@@ -174,7 +174,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 						(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
 						(pfile->eolSeq & EOL_LF) ? L"LF" : L""
 					);
-					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 				femtoData_refresh(peditor);
 			}
@@ -184,32 +183,30 @@ bool femto_loop(femtoData_t * restrict peditor)
 				switch (saved)
 				{
 				case writeRes_nothingNew:
-					femtoData_statusDraw(peditor, L"Nothing new to save", NULL);
+					swprintf_s(tempstr, MAX_STATUS, L"Nothing new to save");
 					break;
 				case writeRes_openError:
-					femtoData_statusDraw(peditor, L"File open error!", NULL);
+					swprintf_s(tempstr, MAX_STATUS, L"File open error!");
 					break;
 				case writeRes_writeError:
-					femtoData_statusDraw(peditor, L"File is write-protected!", NULL);
+					swprintf_s(tempstr, MAX_STATUS, L"File is write-protected!");
 					break;
 				case writeRes_memError:
-					femtoData_statusDraw(peditor, L"Memory allocation error!", NULL);
+					swprintf_s(tempstr, MAX_STATUS, L"Memory allocation error!");
 					break;
 				default:
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes.", saved);
-					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 			}
 			else if (boolGet(keybuffer, sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
 			{
 				waitingEnc = true;
-				femtoData_statusDraw(peditor, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...", NULL);
+				swprintf_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
 			}
 			// Normal keys
 			else if (key > sac_last_code)
 			{
 				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
-				femtoData_statusDraw(peditor, tempstr, NULL);
 				if (femtoFile_addNormalCh(pfile, key))
 				{
 					femtoData_refresh(peditor);
@@ -218,7 +215,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 			// Special keys
 			else
 			{
-				bool draw = true;
 				switch (wVirtKey)
 				{
 				case VK_TAB:
@@ -306,15 +302,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 					draw = false;
 				}
 
-				if (draw)
-				{
-					femtoData_statusDraw(peditor, tempstr, NULL);
-				}
-
 				if (femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey))
 				{
 					femtoData_refresh(peditor);
 				}
+			}
+			if (draw)
+			{
+				femtoData_statusDraw(peditor, tempstr, NULL);
 			}
 		}
 		else
