@@ -14,7 +14,7 @@ typedef struct femtoData_t
 	struct
 	{
 		HANDLE handle;
-		wchar_t * mem;
+		CHAR_INFO * mem;
 		uint32_t w, h;
 	} scrbuf;
 	COORD cursorpos;
@@ -57,7 +57,7 @@ void femtoData_refreshAll(femtoData_t * restrict self);
  * @param self Pointer to femtoData_t structure
  * @param message 
  */
-void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * message);
+void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict message, const WORD * restrict colorData);
 /**
  * @brief Refreshes status bar
  * 

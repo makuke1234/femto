@@ -139,7 +139,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					pfile->eolSeq = EOL_CR;
 					break;
 				default:
-					femtoData_statusDraw(peditor, L"Unknown EOL combination!");
+					femtoData_statusDraw(peditor, L"Unknown EOL combination!", NULL);
 					done = false;
 				}
 				if (done)
@@ -152,7 +152,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
 						(pfile->eolSeq & EOL_LF) ? L"LF" : L""
 					);
-					femtoData_statusDraw(peditor, tempstr);
+					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 
 				waitingEnc = false;
@@ -162,7 +162,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				const wchar_t * res;
 				if ((res = femtoFile_read(pfile)) != NULL)
 				{
-					femtoData_statusDraw(peditor, res);
+					femtoData_statusDraw(peditor, res, NULL);
 				}
 				else
 				{
@@ -174,7 +174,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
 						(pfile->eolSeq & EOL_LF) ? L"LF" : L""
 					);
-					femtoData_statusDraw(peditor, tempstr);
+					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 				femtoData_refresh(peditor);
 			}
@@ -184,36 +184,36 @@ bool femto_loop(femtoData_t * restrict peditor)
 				switch (saved)
 				{
 				case writeRes_nothingNew:
-					femtoData_statusDraw(peditor, L"Nothing new to save");
+					femtoData_statusDraw(peditor, L"Nothing new to save", NULL);
 					break;
 				case writeRes_openError:
-					femtoData_statusDraw(peditor, L"File open error!");
+					femtoData_statusDraw(peditor, L"File open error!", NULL);
 					break;
 				case writeRes_writeError:
-					femtoData_statusDraw(peditor, L"File is write-protected!");
+					femtoData_statusDraw(peditor, L"File is write-protected!", NULL);
 					break;
 				case writeRes_memError:
-					femtoData_statusDraw(peditor, L"Memory allocation error!");
+					femtoData_statusDraw(peditor, L"Memory allocation error!", NULL);
 					break;
 				default:
 				{
 					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes.", saved);
-					femtoData_statusDraw(peditor, tempstr);
+					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 				}
 			}
 			else if (boolGet(keybuffer, sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
 			{
 				waitingEnc = true;
-				femtoData_statusDraw(peditor, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
+				femtoData_statusDraw(peditor, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...", NULL);
 			}
 			// Normal keys
 			else if (key > sac_last_code)
 			{
 				wchar_t tempstr[MAX_STATUS];
 				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%d", key, keyCount);
-				femtoData_statusDraw(peditor, tempstr);
+				femtoData_statusDraw(peditor, tempstr, NULL);
 				if (femtoFile_addNormalCh(pfile, key))
 				{
 					femtoData_refresh(peditor);
@@ -227,12 +227,12 @@ bool femto_loop(femtoData_t * restrict peditor)
 				case VK_TAB:
 					if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
 					{
-						femtoData_statusDraw(peditor, L"\u2191 + 'TAB'");
+						femtoData_statusDraw(peditor, L"\u2191 + 'TAB'", NULL);
 						wVirtKey = VK_OEM_BACKTAB;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"'TAB'");
+						femtoData_statusDraw(peditor, L"'TAB'", NULL);
 					}
 					break;
 				case VK_DELETE:
@@ -241,12 +241,12 @@ bool femto_loop(femtoData_t * restrict peditor)
 					// Check for shift to alt key
 					if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
 					{
-						femtoData_statusDraw(peditor, shift ? L"\u2191 + 'DEL'" : L"'ALT' + 'DEL'");
+						femtoData_statusDraw(peditor, shift ? L"\u2191 + 'DEL'" : L"'ALT' + 'DEL'", NULL);
 						wVirtKey = FEMTO_SHIFT_DEL;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"'DEL'");
+						femtoData_statusDraw(peditor, L"'DEL'", NULL);
 					}
 					break;
 				}
@@ -254,24 +254,24 @@ bool femto_loop(femtoData_t * restrict peditor)
 					// Check for alt key
 					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 					{
-						femtoData_statusDraw(peditor, L"'ALT' + \u2191");
+						femtoData_statusDraw(peditor, L"'ALT' + \u2191", NULL);
 						wVirtKey = FEMTO_MOVELINE_UP;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"\u2191");
+						femtoData_statusDraw(peditor, L"\u2191", NULL);
 					}
 					break;
 				case VK_DOWN:	// Down arrow
 					// Check for alt key
 					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 					{
-						femtoData_statusDraw(peditor, L"'ALT' + \u2193");
+						femtoData_statusDraw(peditor, L"'ALT' + \u2193", NULL);
 						wVirtKey = FEMTO_MOVELINE_DOWN;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"\u2193");
+						femtoData_statusDraw(peditor, L"\u2193", NULL);
 					}
 					break;
 				case VK_RETURN:	// Enter key
@@ -293,28 +293,28 @@ bool femto_loop(femtoData_t * restrict peditor)
 						[VK_END]	= L"'END'",
 						[VK_HOME]   = L"'HOME'",
 					};
-					femtoData_statusDraw(peditor, buf[wVirtKey]);
+					femtoData_statusDraw(peditor, buf[wVirtKey], NULL);
 					break;
 				}
 				case VK_CAPITAL:
 				{
 					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"'CAPS' %s", (GetKeyState(VK_CAPITAL) & 0x0001) ? L"On" : L"Off");
-					femtoData_statusDraw(peditor, tempstr);
+					femtoData_statusDraw(peditor, tempstr, NULL);
 					break;
 				}
 				case VK_NUMLOCK:
 				{
 					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"'NUMLOCK' %s", (GetKeyState(VK_NUMLOCK) & 0x0001) ? L"On" : L"Off");
-					femtoData_statusDraw(peditor, tempstr);
+					femtoData_statusDraw(peditor, tempstr, NULL);
 					break;
 				}
 				case VK_SCROLL:
 				{
 					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"'SCRLOCK' %s", (GetKeyState(VK_SCROLL) & 0x0001) ? L"On" : L"Off");
-					femtoData_statusDraw(peditor, tempstr);
+					femtoData_statusDraw(peditor, tempstr, NULL);
 					break;
 				}
 				}
@@ -354,7 +354,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
 				femtoData_refresh(peditor);
 			}
-			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'");
+			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'", NULL);
 		}
 		else if (ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED)
 		{
@@ -375,7 +375,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				femtoFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
 				femtoData_refresh(peditor);
 			}
-			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-RIGHT'" : L"'WHEEL-LEFT'");
+			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-RIGHT'" : L"'WHEEL-LEFT'", NULL);
 		}
 		// Mouse click
 		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
@@ -396,10 +396,11 @@ bool femto_loop(femtoData_t * restrict peditor)
 					femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
 					// Now move the cursor to correct X position
 					femtoLine_moveCursorAbs(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx);
+					pfile->data.lastx = pfile->data.currentNode->curx;
 					femtoData_refresh(peditor);
 				}
 
-				femtoData_statusDraw(peditor, L"'LCLICK'");
+				femtoData_statusDraw(peditor, L"'LCLICK'", NULL);
 			}
 		}
 	}
@@ -427,7 +428,10 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 	uint32_t size = peditor->scrbuf.w * peditor->scrbuf.h;
 	for (uint32_t i = 0; i < size; ++i)
 	{
-		peditor->scrbuf.mem[i] = L' ';
+		peditor->scrbuf.mem[i] = (CHAR_INFO){
+			.Char       = { .UnicodeChar = L' ' },
+			.Attributes = FEMTO_DEFAULT_COLOR
+		};
 	}
 	femtoLineNode_t * node = pfile->data.pcury;
 	bool drawCursor = false;
@@ -454,7 +458,7 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 			SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
 			drawCursor = true;
 		}
-		wchar_t * destination = &peditor->scrbuf.mem[i * peditor->scrbuf.w];
+		CHAR_INFO * destination = &peditor->scrbuf.mem[i * peditor->scrbuf.w];
 
 		// Drawing
 
@@ -477,7 +481,11 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 				idx += node->freeSpaceLen;
 				continue;
 			}
-			destination[j] = node->line[idx];
+			destination[j] = (CHAR_INFO){
+				.Char       = { .UnicodeChar = node->line[idx] },
+				.Attributes = FEMTO_DEFAULT_COLOR
+			};
+				
 			++idx;
 			++j;
 		}

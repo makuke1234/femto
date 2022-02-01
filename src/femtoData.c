@@ -83,7 +83,7 @@ bool femtoData_init(femtoData_t * restrict self)
 		return false;
 	}
 
-	self->scrbuf.mem = malloc((size_t)(self->scrbuf.w * self->scrbuf.h) * sizeof(wchar_t));
+	self->scrbuf.mem = malloc((size_t)(self->scrbuf.w * self->scrbuf.h) * sizeof(CHAR_INFO));
 	if (self->scrbuf.mem == NULL)
 	{
 		return false;
@@ -91,7 +91,10 @@ bool femtoData_init(femtoData_t * restrict self)
 
 	for (uint32_t i = 0, sz = self->scrbuf.w * self->scrbuf.h; i < sz; ++i)
 	{
-		self->scrbuf.mem[i] = L' ';
+		self->scrbuf.mem[i] = (CHAR_INFO){
+			.Char       = { .UnicodeChar = L' ' },
+			.Attributes = FEMTO_DEFAULT_COLOR
+		};
 	}
 	if (!SetConsoleScreenBufferSize(self->scrbuf.handle, (COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h }))
 	{
@@ -107,51 +110,62 @@ bool femtoData_init(femtoData_t * restrict self)
 void femtoData_refresh(femtoData_t * restrict self)
 {
 	femto_updateScrbuf(self);
-	DWORD dwBytes;
-	WriteConsoleOutputCharacterW(
+	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
-		self->scrbuf.w * (self->scrbuf.h - 1),
+		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 		(COORD){ 0, 0 },
-		&dwBytes
+		&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2) }
 	);
 }
 void femtoData_refreshAll(femtoData_t * restrict self)
 {
 	femto_updateScrbuf(self);
-	DWORD dwBytes;
-	WriteConsoleOutputCharacterW(
+	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
-		self->scrbuf.w * self->scrbuf.h,
+		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 		(COORD){ 0, 0 },
-		&dwBytes
+		&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1) }
 	);
 }
-void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * message)
+void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict message, const WORD * restrict colorData)
 {
+	assert(message != NULL);
+
 	uint32_t effLen = u32Min((uint32_t)wcslen(message), self->scrbuf.w);
-	wchar_t * restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
-	memcpy(
-		lastLine,
-		message,
-		sizeof(wchar_t) * effLen
-	);
+	CHAR_INFO * restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
+	for (size_t i = 0; i < effLen; ++i)
+	{
+		lastLine[i] = (CHAR_INFO){
+			.Char       = { .UnicodeChar = message[i] },
+			.Attributes = FEMTO_DEFAULT_COLOR
+		};
+	}
+	if (colorData != NULL)
+	{
+		for (size_t i = 0; i < effLen; ++i)
+		{
+			lastLine[i].Attributes = colorData[i];
+		}
+	}
 	for (size_t i = effLen; i < self->scrbuf.w; ++i)
 	{
-		lastLine[i] = L' ';
+		lastLine[i] = (CHAR_INFO){
+			.Char       = { .UnicodeChar = L' ' },
+			.Attributes = FEMTO_DEFAULT_COLOR
+		};
 	}
 	femtoData_statusRefresh(self);
 }
 void femtoData_statusRefresh(femtoData_t * restrict self)
 {
-	DWORD dwBytes;
-	WriteConsoleOutputCharacterW(
+	WriteConsoleOutputW(
 		self->scrbuf.handle,
-		self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w,
-		self->scrbuf.w,
+		self->scrbuf.mem,
+		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 		(COORD){ .X = 0, .Y = (SHORT)(self->scrbuf.h - 1) },
-		&dwBytes
+		&(SMALL_RECT){ .Left = 0, .Top = (SHORT)(self->scrbuf.h - 1), .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1) }
 	);
 }
 

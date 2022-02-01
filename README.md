@@ -111,7 +111,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] Proper command line argument handling
-	* [ ] Optional settings file
+    * [ ] Optional settings file
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
     * [ ] Warning when there's any unsaved work
@@ -119,9 +119,10 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 * 1.0 (planned)
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
-	* [x] Horizontal scrolling support
+    * [x] Horizontal scrolling support
     * [x] Mouse support for controlling the cursor
-    * [ ] Color rendering support
+    * [x] Color rendering support
+        * *Changed the foreground color to cyan*
     * [x] Scrolling whole screen worth of text with page up & page down
     * [x] Moving cursor to the beggining/end of line with home/end
     * [ ] Line numbers, absolute & relative mode
