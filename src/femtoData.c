@@ -2,9 +2,11 @@
 #include "femto.h"
 
 
-void femtoData_reset(femtoData_t * restrict self)
+bool femtoData_reset(femtoData_t * restrict self)
 {
 	*self = (femtoData_t){
+		.prevConsoleMode    = 0,
+		.prevConsoleModeSet = false,
 		.conIn  = INVALID_HANDLE_VALUE,
 		.conOut = INVALID_HANDLE_VALUE,
 		.scrbuf = {
@@ -13,9 +15,25 @@ void femtoData_reset(femtoData_t * restrict self)
 			.w      = 0,
 			.h      = 0
 		},
-		.cursorpos = { 0, 0 }
+		.cursorpos = { 0, 0 },
+		.filesSize = 1,
+		.filesMax  = 1,
+		.files     = malloc(sizeof(femtoFile_t *)),
+		.file      = NULL
 	};
-	femtoFile_reset(&self->file);
+
+	if (self->files == NULL)
+	{
+		return false;
+	}
+	// Allocate memory for 1 file
+	if ((self->files[0] = femtoFile_resetDyn()) == NULL)
+	{
+		return false;
+	};
+	self->file = self->files[0];
+
+	return true;
 }
 bool femtoData_init(femtoData_t * restrict self)
 {
@@ -23,6 +41,23 @@ bool femtoData_init(femtoData_t * restrict self)
 	self->conOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Set exit handler
 	atexit(&femto_exitHandler);
+
+	if (!GetConsoleMode(self->conIn, &self->prevConsoleMode))
+	{
+		return false;
+	}
+
+	// Set extended mode
+	if (!SetConsoleMode(self->conIn, ENABLE_EXTENDED_FLAGS))
+	{
+		return false;
+	}
+	// Disable quick edit mode
+	if (!SetConsoleMode(self->conIn, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
+	{
+		return false;
+	}
+	self->prevConsoleModeSet = true;
 
 	// Get console current size
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -33,6 +68,8 @@ bool femtoData_init(femtoData_t * restrict self)
 
 	self->scrbuf.w = (uint32_t)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
 	self->scrbuf.h = (uint32_t)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
+
+	writeProfiler("femtoData_init", "Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
 	self->scrbuf.handle = CreateConsoleScreenBuffer(
 		GENERIC_WRITE,
@@ -129,5 +166,21 @@ void femtoData_destroy(femtoData_t * restrict self)
 	{
 		SetConsoleActiveScreenBuffer(self->conOut);
 	}
-	femtoFile_destroy(&self->file);
+
+	if (self->prevConsoleModeSet)
+	{
+		self->prevConsoleModeSet = false;
+		SetConsoleMode(self->conIn, self->prevConsoleMode);
+	}
+
+	self->file = NULL;
+	for (size_t i = 0; i < self->filesSize; ++i)
+	{
+		femtoFile_destroy(self->files[i]);
+		free(self->files[i]);
+	}
+	free(self->files);
+	self->files     = NULL;
+	self->filesSize = 0;
+	self->filesMax  = 0;
 }

@@ -12,5 +12,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
+#include <stdarg.h>
+
+#include "femtoProfiler.h"
 
 #endif

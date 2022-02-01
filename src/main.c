@@ -1,12 +1,16 @@
 #include "femto.h"
-#include "profiling.h"
+
 
 static femtoData_t editor;
 
 int wmain(int argc, const wchar_t * argv[])
 {
 	femto_exitHandlerSetVars(&editor);
-	femtoData_reset(&editor);
+	if (!femtoData_reset(&editor))
+	{
+		femto_printErr(femtoErr_memory);
+		return 2;
+	}
 
 	// Initialise profiler, if applicable
 	initProfiler();
@@ -18,25 +22,25 @@ int wmain(int argc, const wchar_t * argv[])
 		return 1;
 	}
 
-	if (!femtoFile_open(&editor.file, fileName, false))
+	if (!femtoFile_open(editor.file, fileName, false))
 	{
-		femto_printErr(femtoE_file);
+		femto_printErr(femtoErr_file);
 		return 2;
 	}
-	femtoFile_close(&editor.file);
+	femtoFile_close(editor.file);
 
 	// Set console title
-	femtoFile_setConTitle(&editor.file);
+	femtoFile_setConTitle(editor.file);
 
 	if (!femtoData_init(&editor))
 	{
-		femto_printErr(femtoE_window);
+		femto_printErr(femtoErr_window);
 		return 3;
 	}
 
 	const wchar_t * res;
 	writeProfiler("wmain", "Starting to read file...");
-	if ((res = femtoFile_read(&editor.file)) != NULL)
+	if ((res = femtoFile_read(editor.file)) != NULL)
 	{
 		femtoData_statusDraw(&editor, res);
 	}
@@ -47,8 +51,8 @@ int wmain(int argc, const wchar_t * argv[])
 			tempstr,
 			MAX_STATUS,
 			L"File loaded successfully! %s%s line endings.",
-			(editor.file.eolSeq & EOL_CR) ? L"CR" : L"",
-			(editor.file.eolSeq & EOL_LF) ? L"LF" : L""
+			(editor.file->eolSeq & EOL_CR) ? L"CR" : L"",
+			(editor.file->eolSeq & EOL_LF) ? L"LF" : L""
 		);
 		femtoData_statusDraw(&editor, tempstr);
 	}

@@ -1,6 +1,5 @@
 #include "femtoFile.h"
 #include "femto.h"
-#include "profiling.h"
 
 
 femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode)
@@ -258,9 +257,21 @@ void femtoFile_reset(femtoFile_t * restrict self)
 			.firstNode   = NULL,
 			.currentNode = NULL,
 			.pcury       = NULL,
-			.curx        = 0
+			.curx        = 0,
+			.typed       = false
 		}
 	};
+}
+femtoFile_t * femtoFile_resetDyn(void)
+{
+	femtoFile_t * file = malloc(sizeof(femtoFile_t));
+	if (file == NULL)
+	{
+		return NULL;
+	}
+
+	femtoFile_reset(file);
+	return file;
 }
 bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileName, bool writemode)
 {
@@ -613,6 +624,8 @@ void femtoFile_setConTitle(const femtoFile_t * restrict self)
 bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch)
 {
 	assert(self->data.currentNode != NULL);
+	self->data.typed = true;
+	
 	writeProfiler("femtoFile_addNormalCh", "Add character %C", ch);
 	femtoLineNode_t * node = self->data.currentNode;
 
@@ -630,6 +643,7 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch)
 }
 bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch)
 {
+	self->data.typed = true;
 	switch (ch)
 	{
 	case VK_TAB:
@@ -832,6 +846,36 @@ void femtoFile_updateCury(femtoFile_t * restrict self, uint32_t height)
 		self->data.pcury = NULL;
 		femtoFile_updateCury(self, height);
 	}
+}
+void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t deltaLines)
+{
+	if (self->data.pcury == NULL)
+	{
+		femtoFile_updateCury(self, height);
+	}
+
+
+	femtoLineNode_t * pcury = self->data.pcury;
+
+	if (deltaLines != 0 && pcury != NULL)
+	{
+		if (deltaLines < 0)
+		{
+			for (; deltaLines != 0 && pcury->prevNode != NULL; ++deltaLines)
+			{
+				pcury = pcury->prevNode;
+			}
+		}
+		else
+		{
+			for (; deltaLines != 0 && pcury->nextNode != NULL; --deltaLines)
+			{
+				pcury = pcury->nextNode;
+			}
+		}
+	}
+
+	self->data.pcury = pcury;
 }
 
 

@@ -1,4 +1,4 @@
-#include "profiling.h"
+#include "femtoProfiler.h"
 
 #if PROFILING_ENABLE == 1
 

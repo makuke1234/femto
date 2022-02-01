@@ -7,6 +7,9 @@
 
 typedef struct femtoData_t
 {
+	DWORD prevConsoleMode;
+	bool prevConsoleModeSet;
+
 	HANDLE conIn, conOut;
 	struct
 	{
@@ -16,7 +19,10 @@ typedef struct femtoData_t
 	} scrbuf;
 	COORD cursorpos;
 
-	femtoFile_t file;
+	size_t filesSize, filesMax;
+	femtoFile_t ** files;
+
+	femtoFile_t * file;
 } femtoData_t;
 
 /**
@@ -24,7 +30,7 @@ typedef struct femtoData_t
  * 
  * @param self Pointer to femtoData_t structure
  */
-void femtoData_reset(femtoData_t * restrict self);
+bool femtoData_reset(femtoData_t * restrict self);
 /**
  * @brief Initialises editor data strucutre, also sets atexit() handler function
  * 

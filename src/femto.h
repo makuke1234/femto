@@ -50,20 +50,21 @@ void femto_exitHandler(void);
 const wchar_t * femto_getFileName(int argc, const wchar_t * const * const argv);
 void femto_printHelp(const wchar_t * restrict app);
 
-enum femtoErr
+enum femtoError
 {
-	femtoE_unknown,
-	femtoE_file,
-	femtoE_window,
+	femtoErr_unknown,
+	femtoErr_file,
+	femtoErr_window,
+	femtoErr_memory,
 
-	femtoE_num_of_elems
+	femtoErr_num_of_elems
 };
 /**
  * @brief Prints error message to stderr, adds newline character
  * 
  * @param errCode Error code
  */
-void femto_printErr(enum femtoErr errCode);
+void femto_printErr(enum femtoError errCode);
 /**
  * @brief Performs text editor loop tasks
  * 

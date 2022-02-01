@@ -117,6 +117,8 @@ typedef struct femtoFile_t
 		femtoLineNode_t * currentNode;
 		femtoLineNode_t * pcury;
 		uint32_t curx;
+
+		bool typed;
 	} data;
 } femtoFile_t;
 
@@ -126,6 +128,12 @@ typedef struct femtoFile_t
  * @param self Pointer to femtoFile_t structure
  */
 void femtoFile_reset(femtoFile_t * restrict self);
+/**
+ * @brief Allocates dynamicaly memory for femtoFile_t structure and resets its memory layout
+ * 
+ * @return femtoFile_t* Pointer to the newly allocated structure
+ */
+femtoFile_t * femtoFile_resetDyn(void);
 /**
  * @brief Opens new file with desired name and write access
  * 
@@ -251,12 +259,20 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self);
  */
 bool femtoFile_addNewLine(femtoFile_t * restrict self);
 /**
- * @brief Updates current viewpoint if necessary, shifts view vertically
+ * @brief Updates current viewpoint if necessary
  * 
  * @param self Pointer to femtoFile_t structure
  * @param height Editor window height
  */
 void femtoFile_updateCury(femtoFile_t * restrict self, uint32_t height);
+/**
+ * @brief Scrolls current viewpoint if possible, updates viewpoint if necessary
+ * 
+ * @param self Pointer to femtoFile_t structure
+ * @param height Editor window height
+ * @param deltaLines Lines to scroll, positive values means scrolling down, negative valus means scrolling up
+ */
+void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t deltaLines);
 
 /**
  * @brief Destroys femtoFile_t structure

@@ -1,5 +1,4 @@
 #include "femto.h"
-#include "profiling.h"
 
 
 bool boolGet(uint8_t * restrict arr, size_t index)
@@ -49,26 +48,27 @@ const wchar_t * femto_getFileName(int argc, const wchar_t * const * const argv)
 }
 void femto_printHelp(const wchar_t * restrict app)
 {
-	fwprintf(stderr, L"Correct usage:\n%S [file]\n", app);
+	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
 }
 
-static const char * femto_errCodes[femtoE_num_of_elems] = {
-	"Uknown error occurred!",
-	"Error reading file!",
-	"Error initialising window!"
+static const char * femto_errCodes[femtoErr_num_of_elems] = {
+	[femtoErr_unknown] = "Uknown error occurred!",
+	[femtoErr_file]    = "Error reading file!",
+	[femtoErr_window]  = "Error initialising window!",
+	[femtoErr_memory]  = "Error allocating memory!",
 };
-void femto_printErr(enum femtoErr errCode)
+void femto_printErr(enum femtoError errCode)
 {
-	if (errCode >= femtoE_num_of_elems)
+	if (errCode >= femtoErr_num_of_elems)
 	{
-		errCode = femtoE_unknown;
+		errCode = femtoErr_unknown;
 	}
 	fprintf(stderr, "%s\n", femto_errCodes[errCode]);
 }
 
 bool femto_loop(femtoData_t * restrict peditor)
 {
-	femtoFile_t * restrict pfile = &peditor->file;
+	femtoFile_t * restrict pfile = peditor->file;
 	enum SpecialAsciiCodes
 	{
 		sac_Ctrl_Q = 17,
@@ -81,11 +81,16 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 	INPUT_RECORD ir;
 	DWORD evRead;
-	if (!ReadConsoleInputW(peditor->conIn, &ir, 1, &evRead))
+	if (!ReadConsoleInputW(peditor->conIn, &ir, 1, &evRead) || !evRead)
 	{
 		return true;
 	}
-	if (evRead && ir.EventType == KEY_EVENT)
+	else if (evRead)
+	{
+		FlushConsoleInputBuffer(peditor->conIn);
+	}
+
+	if (ir.EventType == KEY_EVENT)
 	{
 		static uint8_t keybuffer[32] = { 0 }, prevkeybuffer[32] = { 0 };
 		static wchar_t prevkey;
@@ -283,15 +288,41 @@ bool femto_loop(femtoData_t * restrict peditor)
 		}
 		prevkey = key;
 		memcpy(prevkeybuffer, keybuffer, 32 * sizeof(uint8_t));
-		FlushConsoleInputBuffer(peditor->conIn);
+	}
+	// Mouse wheel was used
+	else if (ir.EventType == MOUSE_EVENT && (ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED))
+	{
+		static int32_t s_delta = 0;
+		int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
+		writeProfiler("femto_loop", "Mouse wheel was used, delta: %d", delta);
+
+		if ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0))
+		{
+			s_delta = 0;
+		}
+		s_delta += delta;
+
+		int32_t lineDelta = 2 * s_delta / WHEEL_DELTA;
+		if (lineDelta != 0)
+		{
+			s_delta -= lineDelta * WHEEL_DELTA / 2;
+			femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
+			femtoData_refresh(peditor);
+		}
+		femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'");
 	}
 
 	return true;
 }
 void femto_updateScrbuf(femtoData_t * restrict peditor)
 {
-	femtoFile_t * restrict pfile = &peditor->file;
-	femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
+	femtoFile_t * restrict pfile = peditor->file;
+	if (pfile->data.typed || (pfile->data.pcury == NULL))
+	{
+		pfile->data.typed = false;
+		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
+	}
+
 	int32_t delta = (int32_t)pfile->data.currentNode->curx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
 	if (delta >= 0)
 	{
@@ -307,6 +338,12 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 		peditor->scrbuf.mem[i] = L' ';
 	}
 	femtoLineNode_t * node = pfile->data.pcury;
+	bool drawCursor = false;
+
+	// Get cursor information
+	CONSOLE_CURSOR_INFO cci = { 0 };
+	GetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
+	
 	for (uint32_t i = 0; i < peditor->scrbuf.h - 1 && node != NULL; ++i)
 	{
 		// if line is active line
@@ -314,7 +351,15 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 		{
 			// Update cursor position
 			peditor->cursorpos = (COORD){ .X = (int16_t)u32Min(node->curx - pfile->data.curx, peditor->scrbuf.w - 1), .Y = (int16_t)i };
+			// Make cursor visible, if necessary
+			if (cci.bVisible == FALSE)
+			{
+				cci.bVisible = TRUE;
+				SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
+			}
+
 			SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
+			drawCursor = true;
 		}
 		wchar_t * destination = &peditor->scrbuf.mem[i * peditor->scrbuf.w];
 
@@ -345,6 +390,12 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 		}
 
 		node = node->nextNode;
+	}
+	// Hide cursor, if necessary
+	if (drawCursor == false && cci.bVisible == TRUE)
+	{
+		cci.bVisible = FALSE;
+		SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 	}
 }
 
