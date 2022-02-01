@@ -6,7 +6,7 @@
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/femto/total)](https://github.com/makuke1234/femto/releases)
 ![C version](https://img.shields.io/badge/version-C99-blue.svg)
 
-It is a bigger more feature-rich version of my other console text editor [femto](https://github.com/makuke1234/femto).
+It is a bigger more feature-rich version of my other console text editor [atto](https://github.com/makuke1234/atto).
 It is also written in vanilla C + Win32 Console API - it's designed to be used solely in Microsoft Windows.
 It has been compiled with MinGW GCC.
 
@@ -22,7 +22,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 
 # Features
 
-Features inherited from [femto](https://github.com/makuke1234/femto):
+Features inherited from [femto](https://github.com/makuke1234/atto):
 - [x] file must be given as a command-line argument, 'raw editing'/'saving later to a file' is impossible for a reason
 - [x] all saved files use CRLF line-ending format by default, LF and CR are also supported with version 1.8
 - [x] femto editor utilizes the whole command prompt window, window is as big as your console currently is
@@ -60,7 +60,7 @@ New features:
 # Changelog
 
 * 0.1
-	* Initial release, basically a copy of [femto](https://github.com/makuke1234/femto)
+	* Initial release, basically a copy of [femto](https://github.com/makuke1234/atto)
 
 
 # License
