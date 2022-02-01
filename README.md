@@ -27,7 +27,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 - [x] The last line of the window is dedicated to status, for example showing success or failure when an attempting to save a file
 - [ ] Search support & search results highlighting
 - [ ] Syntax highlighting
-- [x] Mouse scrolling
+- [x] Mouse scrolling, also horizontal scrolling
 - [x] Mouse operated text cursor
 - [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces
 - [ ] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
@@ -118,6 +118,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 * 1.0 (planned)
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
+	* [x] Horizontal scrolling support
     * [x] Mouse support for controlling the cursor
     * [ ] Color rendering support
     * [x] Scrolling whole screen worth of text with page up & page down
