@@ -115,8 +115,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
     * [ ] Warning when there's any unsaved work
+    * [ ] Line numbers, absolute & relative mode
 
-* 1.0 (planned)
+* 1.0
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
     * [x] Horizontal scrolling support
@@ -125,7 +126,6 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * *Changed the foreground color to cyan*
     * [x] Scrolling whole screen worth of text with page up & page down
     * [x] Moving cursor to the beggining/end of line with home/end
-    * [ ] Line numbers, absolute & relative mode
     * [x] Whole line deletion
     * [x] Line moving
     * [x] Better cursor movement when using left/right arrows between lines
