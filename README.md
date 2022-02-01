@@ -96,12 +96,12 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
     * [ ] Color rendering support
-    * [ ] Scrolling whole screen worth of text with page up & page down
-    * [ ] Moving cursor to the beggining/end of line with home/end
+    * [x] Scrolling whole screen worth of text with page up & page down
+    * [x] Moving cursor to the beggining/end of line with home/end
     * [ ] Line numbers, absolute & relative mode
-    * [ ] Whole line deletion
-    * [ ] Better cursor movement when using left/right arrows between lines
-    * [ ] Better cursor movement when using up/down arrows between lines
+    * [x] Whole line deletion
+    * [x] Better cursor movement when using left/right arrows between lines
+    * [x] Better cursor movement when using up/down arrows between lines
 * 0.1
     * Initial release, basically a copy of [femto](https://github.com/makuke1234/atto)
 

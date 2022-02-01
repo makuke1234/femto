@@ -86,6 +86,20 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
  * negative values to move left
  */
 void femtoLine_moveCursor(femtoLineNode_t * restrict self, int32_t delta);
+/**
+ * @brief Moves (internal) cursor on current line node, clamps movement
+ * 
+ * @param self Pointer to current line node
+ * @param curx Absolute cursor position to move to
+ */
+void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx);
+/**
+ * @brief Moves active line node, clamps movement
+ * 
+ * @param self Address of pointer to current line node
+ * @param delta Amount of lines to move, positive values move down, negative values move up
+ */
+void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta);
 
 /**
  * @brief Destroys line node, frees memory
@@ -116,7 +130,7 @@ typedef struct femtoFile_t
 		femtoLineNode_t * firstNode;
 		femtoLineNode_t * currentNode;
 		femtoLineNode_t * pcury;
-		uint32_t curx;
+		uint32_t curx, lastx;
 
 		bool typed;
 	} data;
@@ -214,11 +228,12 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch);
  * @brief Inserts a special character to current line
  * 
  * @param self Pointer to femtoFile_t structure
+ * @param height Screenbuffer height in lines
  * @param ch Character to insert
  * @return true Success
  * @return false Failure
  */
-bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch);
+bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch);
 
 /**
  * @brief Checks current line contents for matching string

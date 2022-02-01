@@ -235,6 +235,48 @@ void femtoLine_moveCursor(femtoLineNode_t * restrict self, int32_t delta)
 		}
 	}
 }
+void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx)
+{
+	if (curx < self->curx)
+	{
+		for (uint32_t idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx > 0;)
+		{
+			--idx;
+			--self->curx;
+			self->line[idx] = self->line[self->curx];
+		}
+	}
+	else
+	{
+		for (uint32_t total = self->lineEndx - self->freeSpaceLen, idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx < total;)
+		{
+			self->line[self->curx] = self->line[idx];
+			++idx;
+			++self->curx;
+		}
+	}
+}
+void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta)
+{
+	assert(*self != NULL);
+
+	femtoLineNode_t * node = *self;
+	if (delta < 0)
+	{
+		for (; delta != 0 && node->prevNode != NULL; ++delta)
+		{
+			node = node->prevNode;
+		}
+	}
+	else
+	{
+		for (; delta != 0 && node->nextNode != NULL; --delta)
+		{
+			node = node->nextNode;
+		}
+	}
+	*self = node;
+}
 
 void femtoLine_destroy(femtoLineNode_t * restrict self)
 {
@@ -258,6 +300,7 @@ void femtoFile_reset(femtoFile_t * restrict self)
 			.currentNode = NULL,
 			.pcury       = NULL,
 			.curx        = 0,
+			.lastx       = 0,
 			.typed       = false
 		}
 	};
@@ -639,9 +682,11 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch)
 	node->line[node->curx] = ch;
 	++node->curx;
 	--node->freeSpaceLen;
+
+	self->data.lastx = self->data.currentNode->curx;
 	return true;
 }
-bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch)
+bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch)
 {
 	self->data.typed = true;
 	switch (ch)
@@ -654,6 +699,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch)
 				return false;
 			}
 		}
+		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_OEM_BACKTAB:
 		// Check if there's 4 spaces before the caret
@@ -672,17 +718,39 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch)
 				femtoFile_deleteForward(self);
 			}
 		}
+		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_RETURN:	// Enter key
 		femtoFile_addNewLine(self);
+		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_BACK:	// Backspace
 		femtoFile_deleteBackward(self);
+		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_DELETE:	// Delete
 		femtoFile_deleteForward(self);
+		self->data.lastx = self->data.currentNode->curx;
 		break;
-	// Move cursor
+	case FEMTO_SHIFT_DEL:	// Shift+Delete
+		if (self->data.currentNode->nextNode != NULL)
+		{
+			if (self->data.pcury == self->data.currentNode)
+			{
+				self->data.pcury = self->data.pcury->nextNode;
+			}
+			femtoLineNode_t * node = self->data.currentNode;
+			self->data.currentNode = node->nextNode;
+			self->data.currentNode->prevNode = node->prevNode;
+			if (node->prevNode != NULL)
+			{
+				node->prevNode->nextNode = self->data.currentNode;
+			}
+
+			// Destroy current line
+			femtoLine_destroy(node);
+		}
+		break;
 	case VK_LEFT:	// Left arrow
 		if (self->data.currentNode->curx > 0)
 		{
@@ -691,7 +759,9 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch)
 		else if (self->data.currentNode->prevNode != NULL)
 		{
 			self->data.currentNode = self->data.currentNode->prevNode;
+			femtoLine_moveCursor(self->data.currentNode, (int32_t)self->data.currentNode->lineEndx);
 		}
+		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_RIGHT:	// Right arrow
 		if ((self->data.currentNode->curx + self->data.currentNode->freeSpaceLen) < self->data.currentNode->lineEndx)
@@ -701,19 +771,31 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, wchar_t ch)
 		else if (self->data.currentNode->nextNode != NULL)
 		{
 			self->data.currentNode = self->data.currentNode->nextNode;
+			femtoLine_moveCursor(self->data.currentNode, -(int32_t)self->data.currentNode->lineEndx);
 		}
+		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_UP:		// Up arrow
-		if (self->data.currentNode->prevNode != NULL)
-		{
-			self->data.currentNode = self->data.currentNode->prevNode;
-		}
+		femtoLine_moveCursorVert(&self->data.currentNode, -1);
+		femtoLine_moveCursorAbs(self->data.currentNode, self->data.lastx);
 		break;
 	case VK_DOWN:	// Down arrow
-		if (self->data.currentNode->nextNode != NULL)
-		{
-			self->data.currentNode = self->data.currentNode->nextNode;
-		}
+		femtoLine_moveCursorVert(&self->data.currentNode, 1);
+		femtoLine_moveCursorAbs(self->data.currentNode, self->data.lastx);
+		break;
+	case VK_PRIOR:	// Page up
+		femtoLine_moveCursorVert(&self->data.currentNode, -(int32_t)height);
+		femtoLine_moveCursorAbs(self->data.currentNode, self->data.lastx);
+		break;
+	case VK_NEXT:	// Page down
+		femtoLine_moveCursorVert(&self->data.currentNode, (int32_t)height);
+		femtoLine_moveCursorAbs(self->data.currentNode, self->data.lastx);
+		break;
+	case VK_END:
+		femtoLine_moveCursor(self->data.currentNode, (int32_t)self->data.currentNode->lineEndx);
+		break;
+	case VK_HOME:
+		femtoLine_moveCursor(self->data.currentNode, -(int32_t)self->data.currentNode->lineEndx);
 		break;
 	default:
 		return false;
@@ -854,28 +936,10 @@ void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t delt
 		femtoFile_updateCury(self, height);
 	}
 
-
-	femtoLineNode_t * pcury = self->data.pcury;
-
-	if (deltaLines != 0 && pcury != NULL)
+	if ((deltaLines != 0) && (self->data.pcury != NULL))
 	{
-		if (deltaLines < 0)
-		{
-			for (; deltaLines != 0 && pcury->prevNode != NULL; ++deltaLines)
-			{
-				pcury = pcury->prevNode;
-			}
-		}
-		else
-		{
-			for (; deltaLines != 0 && pcury->nextNode != NULL; --deltaLines)
-			{
-				pcury = pcury->nextNode;
-			}
-		}
+		femtoLine_moveCursorVert(&self->data.pcury, deltaLines);	
 	}
-
-	self->data.pcury = pcury;
 }
 
 

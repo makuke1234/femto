@@ -232,23 +232,38 @@ bool femto_loop(femtoData_t * restrict peditor)
 						break;
 					}
 					/* fall through */
+				case VK_DELETE:
+					if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					{
+						femtoData_statusDraw(peditor, L"\u2191 + 'DEL'");
+						wVirtKey = FEMTO_SHIFT_DEL;
+						break;
+					}
+					/* fall through */
 				case VK_RETURN:	// Enter key
 				case VK_BACK:	// Backspace
-				case VK_DELETE:	// Delete
 				case VK_LEFT:	// Left arrow
 				case VK_RIGHT:	// Right arrow
 				case VK_UP:		// Up arrow
 				case VK_DOWN:	// Down arrow
+				case VK_PRIOR:	// Page up
+				case VK_NEXT:	// Page down
+				case VK_END:
+				case VK_HOME:
 				{
 					static const wchar_t * buf[] = {
 						[VK_TAB]    = L"'TAB'",
+						[VK_DELETE] = L"'DEL'",
 						[VK_RETURN] = L"'RET'",
 						[VK_BACK]   = L"'BS'",
-						[VK_DELETE] = L"'DEL'",
 						[VK_LEFT]   = L"\u2190",
 						[VK_RIGHT]  = L"\u2192",
 						[VK_UP]     = L"\u2191",
-						[VK_DOWN]   = L"\u2193"
+						[VK_DOWN]   = L"\u2193",
+						[VK_PRIOR]  = L"'PGUP'",
+						[VK_NEXT]   = L"'PGDOWN'",
+						[VK_END]	= L"'END'",
+						[VK_HOME]   = L"'HOME'",
 					};
 					femtoData_statusDraw(peditor, buf[wVirtKey]);
 					break;
@@ -276,7 +291,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				}
 				}
 
-				if (femtoFile_addSpecialCh(pfile, wVirtKey))
+				if (femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey))
 				{
 					femtoData_refresh(peditor);
 				}
