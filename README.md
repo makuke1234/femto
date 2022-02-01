@@ -114,7 +114,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Optional settings file
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
-    * [ ] Warning when there's any unsaved work
+    * [ ] Warning about any unsaved work
     * [ ] Line numbers, absolute & relative mode
 
 * 1.0
@@ -131,7 +131,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [x] Better cursor movement when using left/right arrows between lines
     * [x] Better cursor movement when using up/down arrows between lines
 * 0.1
-    * Initial release, basically a copy of [atto](https://github.com/makuke1234/atto)
+    * [x] Initial release, basically a copy of [atto](https://github.com/makuke1234/atto)
 
 
 # Contributing
