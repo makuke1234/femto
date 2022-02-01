@@ -63,6 +63,20 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | `femto` \[options\]          | Starts editor with empty file                                                                           |
     | `femto` \[options\] \[file\] | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
     | `femto` --help               | Shows help<br>![help image](./images/help.png)                                                          |
+- [ ] About options:
+    * Basic option syntax:
+    | Syntax         | Description           |
+    | -------------- | --------------------- |
+    | `--`\[option\] | Just selects the flag |
+    | `-`\[option\]  | Same as above         |
+    | `/`\[option\]  | Same as above         |
+    * Option arguments (note that the `--` before option can be replaced following the pattern in the above table):
+        * `--`\[option\]`=`\[argument 1\]`,`\[argument 2\]`,`\[argument 3\]
+    * Also note that the number of arguments mandatory to be passed isn't fixed
+    * There is also an alternate syntax for passing arguments:
+        * `--`\[option\]`=`\[argument 1\]`;`\[argument 2\]`;`\[argument 3\]
+    * If quotation marks (`"`) are used around the whole option, spaces can also be used as a separator:
+        * `--`\[option\]`=`\[argument 1\]` `\[argument 2\]` `\[argument 3\]
 
 
 # Screenshots
@@ -96,13 +110,13 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 * 1.0 (planned)
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
-	* [ ] Mouse support for controlling the cursor
+    * [ ] Mouse support for controlling the cursor
     * [ ] Color rendering support
     * [x] Scrolling whole screen worth of text with page up & page down
     * [x] Moving cursor to the beggining/end of line with home/end
     * [ ] Line numbers, absolute & relative mode
     * [x] Whole line deletion
-	* [x] Line moving
+    * [x] Line moving
     * [x] Better cursor movement when using left/right arrows between lines
     * [x] Better cursor movement when using up/down arrows between lines
 * 0.1
