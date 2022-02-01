@@ -333,26 +333,46 @@ bool femto_loop(femtoData_t * restrict peditor)
 		memcpy(prevkeybuffer, keybuffer, 32 * sizeof(uint8_t));
 	}
 	// Mouse wheel was used
-	else if (ir.EventType == MOUSE_EVENT && (ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED))
+	else if (ir.EventType == MOUSE_EVENT)
 	{
-		static int32_t s_delta = 0;
-		int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
-		writeProfiler("femto_loop", "Mouse wheel was used, delta: %d", delta);
-
-		if ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0))
+		if (ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED)
 		{
-			s_delta = 0;
-		}
-		s_delta += delta;
+			static int32_t s_delta = 0;
+			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
+			writeProfiler("femto_loop", "Mouse wheel was used, delta: %d", delta);
 
-		int32_t lineDelta = 2 * s_delta / WHEEL_DELTA;
-		if (lineDelta != 0)
-		{
-			s_delta -= lineDelta * WHEEL_DELTA / 2;
-			femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
-			femtoData_refresh(peditor);
+			if ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0))
+			{
+				s_delta = 0;
+			}
+			s_delta += delta;
+
+			int32_t lineDelta = 2 * s_delta / WHEEL_DELTA;
+			if (lineDelta != 0)
+			{
+				s_delta -= lineDelta * WHEEL_DELTA / 2;
+				femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
+				femtoData_refresh(peditor);
+			}
+			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'");
 		}
-		femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'");
+		// Mouse click
+		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
+		{
+			COORD pos = ir.Event.MouseEvent.dwMousePosition;
+			writeProfiler("femto_loop", "Mouse click @%hd, %hd", pos.X, pos.Y);
+
+			if (pfile->data.pcury != NULL)
+			{
+				pfile->data.currentNode = pfile->data.pcury;
+				femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
+				// Now move the cursor to correct X position
+				femtoLine_moveCursorAbs(pfile->data.currentNode, (uint32_t)pos.X);
+				femtoData_refresh(peditor);
+			}
+
+			femtoData_statusDraw(peditor, L"'LCLICK'");
+		}
 	}
 
 	return true;
