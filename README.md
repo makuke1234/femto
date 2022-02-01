@@ -10,7 +10,7 @@ It is a bigger more feature-rich version of my other console text editor [atto](
 It is also written in vanilla C + Win32 Console API - it's designed to be used solely in Microsoft Windows.
 It has been compiled with MinGW GCC.
 
-Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports 2001 source code lines (excluding whitespace & comments):
+Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports 2017 source code lines (excluding whitespace & comments):
 
 ![SLOC](./images/sloc.png)
 
@@ -45,6 +45,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | [ ] <kbd>Ctrl+Shift+S</kbd>    | Save file as...                               |
     | [ ] <kbd>Ctrl+Tab</kbd>        | Switch forwards between open files            |
     | [ ] <kbd>Ctrl+Shift+Tab</kbd>  | Switch backwards between open files           |
+    | [ ] <kbd>Ctrl+W</kbd>          | Close current tab                             |
     | <kbd>Ctrl+R</kbd>              | Reload current file contents                  |
     | <kbd>Ctrl+E</kbd> <kbd>F</kbd> | Switch to CRLF EOL sequence                   |
     | <kbd>Ctrl+E</kbd> <kbd>L</kbd> | Switch to LF EOL sequence                     |
