@@ -102,6 +102,8 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 # Changelog
 
 * 1.1 (planned)
+    * [ ] Line numbers, absolute & relative mode
+    * [ ] Warning about any unsaved work
     * [ ] Practical multi-file support
     * [ ] Search support, also search result highlighting
     * [ ] Syntax highlighting, supported languages:
@@ -114,8 +116,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Optional settings file
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
-    * [ ] Warning about any unsaved work
-    * [ ] Line numbers, absolute & relative mode
+	* [x] Tweak keypress status messages
 
 * 1.0
     * [x] Theoretical multi-file support

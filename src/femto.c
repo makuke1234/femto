@@ -93,9 +93,9 @@ bool femto_loop(femtoData_t * restrict peditor)
 	if (ir.EventType == KEY_EVENT)
 	{
 		static uint8_t keybuffer[32] = { 0 }, prevkeybuffer[32] = { 0 };
-		static wchar_t prevkey;
+		static wchar_t prevkey, prevwVirtKey;
 
-		static int keyCount = 1;
+		static uint32_t keyCount = 1;
 		static bool waitingEnc = false;
 
 		wchar_t key      = ir.Event.KeyEvent.uChar.UnicodeChar;
@@ -104,7 +104,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 		if (keydown)
 		{
-			if (key == prevkey)
+			if ((key == prevkey) && (wVirtKey == prevwVirtKey))
 			{
 				++keyCount;
 			}
@@ -117,6 +117,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 		if (keydown)
 		{
 			boolPut(keybuffer, key, true);
+			wchar_t tempstr[MAX_STATUS];
+
 			if (wVirtKey == VK_ESCAPE || key == sac_Ctrl_Q)	// Exit on Escape or Ctrl+Q
 			{
 				return false;
@@ -144,7 +146,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 				}
 				if (done)
 				{
-					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(
 						tempstr,
 						MAX_STATUS,
@@ -166,7 +167,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 				}
 				else
 				{
-					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(
 						tempstr,
 						MAX_STATUS,
@@ -196,11 +196,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 					femtoData_statusDraw(peditor, L"Memory allocation error!", NULL);
 					break;
 				default:
-				{
-					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes.", saved);
 					femtoData_statusDraw(peditor, tempstr, NULL);
-				}
 				}
 			}
 			else if (boolGet(keybuffer, sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
@@ -211,8 +208,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			// Normal keys
 			else if (key > sac_last_code)
 			{
-				wchar_t tempstr[MAX_STATUS];
-				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%d", key, keyCount);
+				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 				femtoData_statusDraw(peditor, tempstr, NULL);
 				if (femtoFile_addNormalCh(pfile, key))
 				{
@@ -222,17 +218,18 @@ bool femto_loop(femtoData_t * restrict peditor)
 			// Special keys
 			else
 			{
+				bool draw = true;
 				switch (wVirtKey)
 				{
 				case VK_TAB:
 					if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
 					{
-						femtoData_statusDraw(peditor, L"\u2191 + 'TAB'", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"\u2191 + 'TAB' #%u", keyCount);
 						wVirtKey = VK_OEM_BACKTAB;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"'TAB'", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"'TAB' #%u", keyCount);
 					}
 					break;
 				case VK_DELETE:
@@ -241,12 +238,12 @@ bool femto_loop(femtoData_t * restrict peditor)
 					// Check for shift to alt key
 					if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
 					{
-						femtoData_statusDraw(peditor, shift ? L"\u2191 + 'DEL'" : L"'ALT' + 'DEL'", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"%s + 'DEL' #%u", shift ? L"\u2191" : L"'ALT'", keyCount);
 						wVirtKey = FEMTO_SHIFT_DEL;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"'DEL'", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"'DEL' #%u", keyCount);
 					}
 					break;
 				}
@@ -254,24 +251,24 @@ bool femto_loop(femtoData_t * restrict peditor)
 					// Check for alt key
 					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 					{
-						femtoData_statusDraw(peditor, L"'ALT' + \u2191", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2191 #%u", keyCount);
 						wVirtKey = FEMTO_MOVELINE_UP;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"\u2191", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"\u2191 #%u", keyCount);
 					}
 					break;
 				case VK_DOWN:	// Down arrow
 					// Check for alt key
 					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 					{
-						femtoData_statusDraw(peditor, L"'ALT' + \u2193", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2193 #%u", keyCount);
 						wVirtKey = FEMTO_MOVELINE_DOWN;
 					}
 					else
 					{
-						femtoData_statusDraw(peditor, L"\u2193", NULL);
+						swprintf_s(tempstr, MAX_STATUS, L"\u2193 #%u", keyCount);
 					}
 					break;
 				case VK_RETURN:	// Enter key
@@ -293,30 +290,25 @@ bool femto_loop(femtoData_t * restrict peditor)
 						[VK_END]	= L"'END'",
 						[VK_HOME]   = L"'HOME'",
 					};
-					femtoData_statusDraw(peditor, buf[wVirtKey], NULL);
+					swprintf_s(tempstr, MAX_STATUS, L"%s #%u", buf[wVirtKey], keyCount);
 					break;
 				}
 				case VK_CAPITAL:
-				{
-					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"'CAPS' %s", (GetKeyState(VK_CAPITAL) & 0x0001) ? L"On" : L"Off");
-					femtoData_statusDraw(peditor, tempstr, NULL);
 					break;
-				}
 				case VK_NUMLOCK:
-				{
-					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"'NUMLOCK' %s", (GetKeyState(VK_NUMLOCK) & 0x0001) ? L"On" : L"Off");
-					femtoData_statusDraw(peditor, tempstr, NULL);
 					break;
-				}
 				case VK_SCROLL:
-				{
-					wchar_t tempstr[MAX_STATUS];
 					swprintf_s(tempstr, MAX_STATUS, L"'SCRLOCK' %s", (GetKeyState(VK_SCROLL) & 0x0001) ? L"On" : L"Off");
-					femtoData_statusDraw(peditor, tempstr, NULL);
 					break;
+				default:
+					draw = false;
 				}
+
+				if (draw)
+				{
+					femtoData_statusDraw(peditor, tempstr, NULL);
 				}
 
 				if (femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey))
@@ -330,11 +322,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 			boolPut(keybuffer, key, false);
 		}
 		prevkey = key;
+		prevwVirtKey = wVirtKey;
 		memcpy(prevkeybuffer, keybuffer, 32 * sizeof(uint8_t));
 	}
 	// Mouse wheel was used
 	else if (ir.EventType == MOUSE_EVENT)
 	{
+		wchar_t tempstr[MAX_STATUS];
+
 		if (ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED)
 		{
 			static int32_t s_delta = 0;
@@ -354,7 +349,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 				femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
 				femtoData_refresh(peditor);
 			}
-			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-UP'" : L"'WHEEL-DOWN'", NULL);
+			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
+			femtoData_statusDraw(peditor, tempstr, NULL);
 		}
 		else if (ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED)
 		{
@@ -375,7 +371,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 				femtoFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
 				femtoData_refresh(peditor);
 			}
-			femtoData_statusDraw(peditor, (delta > 0) ? L"'WHEEL-RIGHT'" : L"'WHEEL-LEFT'", NULL);
+			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
+			femtoData_statusDraw(peditor, tempstr, NULL);
 		}
 		// Mouse click
 		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
@@ -383,7 +380,10 @@ bool femto_loop(femtoData_t * restrict peditor)
 			// Check if mouse is moving
 			if (ir.Event.MouseEvent.dwEventFlags & MOUSE_MOVED)
 			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;
 
+				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
+				femtoData_statusDraw(peditor, tempstr, NULL);
 			}
 			else
 			{
@@ -399,8 +399,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 					pfile->data.lastx = pfile->data.currentNode->curx;
 					femtoData_refresh(peditor);
 				}
-
-				femtoData_statusDraw(peditor, L"'LCLICK'", NULL);
+				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
+				femtoData_statusDraw(peditor, tempstr, NULL);
 			}
 		}
 	}
