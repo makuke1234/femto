@@ -10,7 +10,7 @@ It is a bigger more feature-rich version of my other console text editor [atto](
 It is also written in vanilla C + Win32 Console API - it's designed to be used solely on Microsoft Windows.
 It has been compiled with MinGW GCC.
 
-Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports 2081 source code lines (excluding whitespace & comments):
+Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports 2109 source code lines (excluding whitespace & comments):
 
 ![SLOC](./images/sloc.png)
 
@@ -120,6 +120,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
     * [ ] Optimise screen buffer updating frequency on keyboard/mouse input
     * [ ] Only update line that's being edited, if viewport doesn't change
+	* [x] Refactor, check all pointers in debug mode
 * 1.0
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
