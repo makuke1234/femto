@@ -4,6 +4,7 @@
 
 bool femtoData_reset(femtoData_t * restrict self)
 {
+	assert(self != NULL);
 	*self = (femtoData_t){
 		.prevConsoleMode    = 0,
 		.prevConsoleModeSet = false,
@@ -37,6 +38,7 @@ bool femtoData_reset(femtoData_t * restrict self)
 }
 bool femtoData_init(femtoData_t * restrict self)
 {
+	assert(self != NULL);
 	self->conIn  = GetStdHandle(STD_INPUT_HANDLE);
 	self->conOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Set exit handler
@@ -109,6 +111,8 @@ bool femtoData_init(femtoData_t * restrict self)
 }
 void femtoData_refresh(femtoData_t * restrict self)
 {
+	assert(self != NULL);
+	assert(self->scrbuf.mem != NULL);
 	femto_updateScrbuf(self);
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
@@ -120,6 +124,8 @@ void femtoData_refresh(femtoData_t * restrict self)
 }
 void femtoData_refreshAll(femtoData_t * restrict self)
 {
+	assert(self != NULL);
+	assert(self->scrbuf.mem != NULL);
 	femto_updateScrbuf(self);
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
@@ -131,6 +137,7 @@ void femtoData_refreshAll(femtoData_t * restrict self)
 }
 void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict message, const WORD * restrict colorData)
 {
+	assert(self != NULL);
 	assert(message != NULL);
 
 	uint32_t effLen = u32Min((uint32_t)wcslen(message), self->scrbuf.w);
@@ -160,6 +167,8 @@ void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict 
 }
 void femtoData_statusRefresh(femtoData_t * restrict self)
 {
+	assert(self != NULL);
+	assert(self->scrbuf.mem != NULL);
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
@@ -171,6 +180,7 @@ void femtoData_statusRefresh(femtoData_t * restrict self)
 
 void femtoData_destroy(femtoData_t * restrict self)
 {
+	assert(self != NULL);
 	if (self->scrbuf.mem != NULL)
 	{
 		free(self->scrbuf.mem);

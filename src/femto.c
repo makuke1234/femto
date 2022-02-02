@@ -3,10 +3,12 @@
 
 bool boolGet(uint8_t * restrict arr, size_t index)
 {
+	assert(arr != NULL);
 	return (arr[index / 8] & (0x01 << (index % 8))) != 0;
 }
 void boolPut(uint8_t * restrict arr, size_t index, bool value)
 {
+	assert(arr != NULL);
 	const uint8_t pattern = 0x01 << (index % 8);
 	value ? (arr[index / 8] |= pattern) : (arr[index / 8] &= (uint8_t)~pattern);
 }
@@ -33,6 +35,7 @@ static femtoData_t * s_atExitData = NULL;
 
 void femto_exitHandlerSetVars(femtoData_t * pdata)
 {
+	assert(pdata != NULL);
 	s_atExitData = pdata;
 }
 void femto_exitHandler(void)
@@ -43,10 +46,12 @@ void femto_exitHandler(void)
 
 const wchar_t * femto_getFileName(int argc, const wchar_t * const * const argv)
 {
+	assert(argv != NULL);
 	return (argc > 1) ? argv[1] : NULL;
 }
 void femto_printHelp(const wchar_t * restrict app)
 {
+	assert(app != NULL);
 	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
 }
 
@@ -67,7 +72,9 @@ void femto_printErr(enum femtoError errCode)
 
 bool femto_loop(femtoData_t * restrict peditor)
 {
+	assert(peditor != NULL);
 	femtoFile_t * restrict pfile = peditor->file;
+	assert(pfile != NULL);
 	enum SpecialAsciiCodes
 	{
 		sac_Ctrl_Q = 17,
@@ -408,7 +415,10 @@ bool femto_loop(femtoData_t * restrict peditor)
 }
 void femto_updateScrbuf(femtoData_t * restrict peditor)
 {
+	assert(peditor != NULL);
+	assert(peditor->scrbuf.mem != NULL);
 	femtoFile_t * restrict pfile = peditor->file;
+	assert(pfile != NULL);
 	if (pfile->data.typed || (pfile->data.pcury == NULL))
 	{
 		pfile->data.typed = false;
@@ -501,26 +511,10 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 
 uint32_t femto_convToUnicode(const char * restrict utf8, int numBytes, wchar_t ** restrict putf16, uint32_t * restrict sz)
 {
-	if (numBytes == 0)
-	{
-		if (sz != NULL && *sz < 1)
-		{
-			*putf16 = realloc(*putf16, sizeof(wchar_t));
-		}
-		else if (*putf16 == NULL || sz == NULL)
-		{
-			*putf16 = malloc(sizeof(wchar_t));
-		}
-
-		if (*putf16 != NULL)
-		{
-			*putf16[0] = L'\0';
-		}
-
-		return 0;
-	}
+	assert(utf8 != NULL);
+	assert(putf16 != NULL);
 	// Query the needed size
-	uint32_t size = (uint32_t)MultiByteToWideChar(
+	uint32_t size = (numBytes == 0) ? 1 : (uint32_t)MultiByteToWideChar(
 		CP_UTF8,
 		MB_PRECOMPOSED,
 		utf8,
@@ -548,40 +542,29 @@ uint32_t femto_convToUnicode(const char * restrict utf8, int numBytes, wchar_t *
 		}
 	}
 
-	// Make conversion
-	MultiByteToWideChar(
-		CP_UTF8,
-		MB_PRECOMPOSED,
-		utf8,
-		numBytes,
-		*putf16,
-		(int)size
-	);
+	if (numBytes != 0)
+	{
+		// Make conversion
+		MultiByteToWideChar(
+			CP_UTF8,
+			MB_PRECOMPOSED,
+			utf8,
+			numBytes,
+			*putf16,
+			(int)size
+		);
+	}
+	else
+	{
+		(*putf16)[0] = L'\0';
+	}
 	return size;
 }
 uint32_t femto_convFromUnicode(const wchar_t * restrict utf16, int numChars, char ** restrict putf8, uint32_t * restrict sz)
 {
-	if (numChars == 0)
-	{
-		if (sz != NULL && *sz < 1)
-		{
-			*putf8 = realloc(*putf8, sizeof(wchar_t));
-		}
-		else if (*putf8 == NULL || sz == NULL)
-		{
-			*putf8 = malloc(sizeof(wchar_t));
-		}
-
-		if (*putf8 != NULL)
-		{
-			*putf8[0] = L'\0';
-		}
-
-		return 0;
-	}
-	
-	// Quory the needed size
-	uint32_t size = (uint32_t)WideCharToMultiByte(
+	assert(utf16 != NULL);
+	assert(putf8 != NULL);
+	uint32_t size = (numChars == 0) ? 1 : (uint32_t)WideCharToMultiByte(
 		CP_UTF8,
 		0,
 		utf16,
@@ -613,16 +596,23 @@ uint32_t femto_convFromUnicode(const wchar_t * restrict utf16, int numChars, cha
 	}
 
 	// Convert
-	WideCharToMultiByte(
-		CP_UTF8,
-		0,
-		utf16,
-		numChars,
-		*putf8,
-		(int)size,
-		NULL,
-		NULL
-	);
+	if (numChars != 0)
+	{
+		WideCharToMultiByte(
+			CP_UTF8,
+			0,
+			utf16,
+			numChars,
+			*putf8,
+			(int)size,
+			NULL,
+			NULL
+		);
+	}
+	else
+	{
+		(*putf8)[0] = '\0';
+	}
 	return size;
 }
 uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t *** restrict lines, enum femtoEOLsequence * restrict eolSeq)
@@ -675,6 +665,7 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
 }
 uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len)
 {
+	assert(str != NULL);
 	uint32_t realLen = ((len == NULL || *len == 0) ? (uint32_t)wcslen(*str) + 1 : *len), realCap = realLen;
 
 	// Conversion happens here
