@@ -7,9 +7,8 @@ bool boolGet(uint8_t * restrict arr, size_t index)
 }
 void boolPut(uint8_t * restrict arr, size_t index, bool value)
 {
-	const size_t in1 = index / 8;
 	const uint8_t pattern = 0x01 << (index % 8);
-	value ? (arr[in1] |= pattern) : (arr[in1] &= (uint8_t)~pattern);
+	value ? (arr[index / 8] |= pattern) : (arr[index / 8] &= (uint8_t)~pattern);
 }
 
 int32_t i32Min(int32_t a, int32_t b)
