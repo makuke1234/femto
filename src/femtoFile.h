@@ -211,10 +211,10 @@ enum femtoFile_writeRes
  * file if anything has been changed
  * 
  * @param self Pointer to femtoFile_t structure
- * @return int Negative values represent error code, positive values (0 inclusive)
+ * @return int32_t Negative values represent error code, positive values (0 inclusive)
  * represent number of bytes written to disc
  */
-int femtoFile_write(femtoFile_t * restrict self);
+int32_t femtoFile_write(femtoFile_t * restrict self);
 /**
  * @brief Set console title according to last given filename, also shows
  * editor name on the titlebar

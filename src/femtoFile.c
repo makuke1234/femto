@@ -500,7 +500,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 
 	return NULL;
 }
-int femtoFile_write(femtoFile_t * restrict self)
+int32_t femtoFile_write(femtoFile_t * restrict self)
 {
 	// Generate lines
 	wchar_t * lines = NULL, * line = NULL;
@@ -668,7 +668,7 @@ int femtoFile_write(femtoFile_t * restrict self)
 	}
 	else
 	{
-		return (int)dwWritten;
+		return (int32_t)dwWritten;
 	}
 }
 void femtoFile_setConTitle(const femtoFile_t * restrict self)

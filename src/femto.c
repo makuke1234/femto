@@ -179,7 +179,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			else if (boolGet(keybuffer, sac_Ctrl_S) && !boolGet(prevkeybuffer, sac_Ctrl_S))	// Save file
 			{
-				int saved = femtoFile_write(pfile);
+				int32_t saved = femtoFile_write(pfile);
 				switch (saved)
 				{
 				case writeRes_nothingNew:
