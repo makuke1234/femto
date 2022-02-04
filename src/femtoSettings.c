@@ -7,12 +7,13 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 {
 	assert(self != NULL);
 	*self = (femtoSettings_t){
-		.helpRequested = false,
-		.fileName      = NULL,
+		.helpRequested    = false,
+		.fileName         = NULL,
+		.settingsFileName = NULL,
 
 
 
-		.lastErr       = { 0 }
+		.lastErr = { 0 }
 	};
 }
 
@@ -141,7 +142,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 {
 	// Try to load file
-	
+
 
 	return femtoErr_ok;
 }
@@ -153,6 +154,11 @@ void femtoSettings_destroy(femtoSettings_t * restrict self)
 	{
 		free(self->fileName);
 		self->fileName = NULL;
+	}
+	if (self->settingsFileName != NULL)
+	{
+		free(self->settingsFileName);
+		self->settingsFileName = NULL;
 	}
 	// Clear last error, just in case
 	self->lastErr[0] = L'\0';
