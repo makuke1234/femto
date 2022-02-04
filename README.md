@@ -121,6 +121,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [x] Optimise screen buffer updating frequency on keyboard/mouse input
     * [x] Only update line that's being edited, if viewport doesn't change
     * [x] Refactor, check all pointers in debug mode
+    * [x] Tweak status messages, optimise for clarity, minimise redundant punctuation
 * 1.0
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support
