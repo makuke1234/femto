@@ -30,9 +30,78 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 	 * --option=value1 value2 value3
 	 * 
 	 */
+	const wchar_t * restrict rawIt = rawStr;
+	const wchar_t * restrict endp = rawIt + len;
+	if ((len > 1) && ((*rawIt == '-') || (*rawIt == '/')))
+	{
+		++rawIt;
+		if ((len > 2) || (*rawIt == '-'))
+		{
+			++rawIt;
+		}
+	}
+	else
+	{
+		return 0;
+	}
 
-	return 0;
+	// Scan for a match
+	size_t matchLen = wcslen(argMatch);
+	if (strncmp(rawIt, argMatch, matchLen) != 0)
+	{
+		// Didn't find a match
+		return 0;
+	}
+
+	// Advance search location
+	rawIt += matchLen;
+
+	if (*rawIt == '=')
+	{
+		++rawIt;
+		// Search for arguments
+		uint32_t numArgs = 0;
+
+		const wchar_t * restrict argStart = rawIt;
+
+		for (; rawIt != endp; ++rawIt)
+		{
+			if (*rawIt == '\\')
+			{
+				++rawIt;
+				continue;
+			}
+			else if ((*rawIt == L',') || (*rawIt == L';') || (*rawIt == L'?'))
+			{
+				if (numArgs < maxParams)
+				{
+					femtoArgument_t * arg = va_arg(ap, femtoArgument_t *);
+					++numArgs;
+
+					// Set argument settings
+					arg->begin = argStart;
+					arg->end   = rawIt;
+
+					// Set new argument start position
+					++rawIt;
+					argStart = rawIt;
+				}
+				else
+				{
+					return numArgs + 1;
+				}
+			}
+		}
+
+		return numArgs + 1;
+	}
+	else
+	{
+		// Argument itself counts as 1
+		return 1;
+	}
 }
+
 
 uint32_t femtoArg_fetchArgv(int argc, const wchar_t ** restrict argv, const wchar_t * restrict argMatch, int * restrict matchedIndex, uint32_t maxParams, ...)
 {

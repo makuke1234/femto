@@ -112,6 +112,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * [ ] Markdown
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+    * [x] Command line argument parsing support
     * [ ] Proper command line argument handling
     * [ ] Optional settings file
     * [ ] Optional tabs-to-spaces, tab width adjustment
