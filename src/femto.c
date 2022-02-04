@@ -21,6 +21,10 @@ int32_t i32Max(int32_t a, int32_t b)
 {
 	return (a < b) ? b : a;
 }
+int32_t i32Clamp(int32_t value, int32_t min, int32_t max)
+{
+	return (value < min) ? min : (value > max) ? max : value;
+}
 uint32_t u32Min(uint32_t a, uint32_t b)
 {
 	return (a < b) ? a : b;
@@ -28,6 +32,10 @@ uint32_t u32Min(uint32_t a, uint32_t b)
 uint32_t u32Max(uint32_t a, uint32_t b)
 {
 	return (a < b) ? b : a;
+}
+uint32_t u32Clamp(uint32_t value, uint32_t min, uint32_t max)
+{
+	return (value < min) ? min : (value > max) ? max : value;
 }
 
 

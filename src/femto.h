@@ -25,8 +25,10 @@ void boolPut(uint8_t * restrict arr, size_t index, bool value);
 
 int32_t i32Min(int32_t a, int32_t b);
 int32_t i32Max(int32_t a, int32_t b);
+int32_t i32Clamp(int32_t value, int32_t min, int32_t max);
 uint32_t u32Min(uint32_t a, uint32_t b);
 uint32_t u32Max(uint32_t a, uint32_t b);
+uint32_t u32Clamp(uint32_t value, uint32_t min, uint32_t max);
 
 /**
  * @brief Set exit handler data argument pointer
