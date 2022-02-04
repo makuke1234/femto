@@ -19,6 +19,7 @@ typedef struct femtoSettings
 
 	bool tabsToSpaces;
 	uint8_t tabWidth;
+	wchar_t * tabSpaceStr;
 
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
@@ -41,6 +42,15 @@ void femtoSettings_reset(femtoSettings_t * restrict self);
  * @return false No last error set
  */
 bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restrict errArr, uint32_t errMax);
+
+/**
+ * @brief Generate tabs to spaces string, consisting of spaces to represent the tab
+ * 
+ * @param self Pointer to femtoSettings_t structure
+ * @return true Success
+ * @return false Failure
+ */
+bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self);
 
 /**
  * @brief Populate settings using command line arguments

@@ -725,10 +725,12 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
 
 	return newlines;
 }
-uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len)
+uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len, uint8_t tabWidth)
 {
 	assert(str != NULL);
-	uint32_t realLen = ((len == NULL || *len == 0) ? (uint32_t)wcslen(*str) + 1 : *len), realCap = realLen;
+	assert((tabWidth > 1) && (tabWidth <= 32));
+	uint32_t realLen = ((len == NULL || *len == 0) ? (uint32_t)wcslen(*str) + 1 : *len);
+	uint32_t realCap = realLen;
 
 	// Conversion happens here
 	wchar_t * s = *str;
@@ -737,21 +739,21 @@ uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len)
 	{
 		if (s[i] == L'\t')
 		{
-			if ((realLen + 3) > realCap)
+			if ((realLen + tabWidth - 1) > realCap)
 			{
-				realCap = (realLen + 3) * 2;
+				realCap = (realLen + tabWidth - 1) * 2;
 				s = realloc(s, sizeof(wchar_t) * realCap);
 				if (s == NULL)
 				{
 					return 0;
 				}
 			}
-			memmove(&s[i + 3], &s[i], sizeof(wchar_t) * (realLen - i));
-			for (uint32_t j = 0; j < 4; ++i, ++j)
+			memmove(&s[i + tabWidth - 1], &s[i], sizeof(wchar_t) * (realLen - i));
+			for (uint32_t j = 0; j < tabWidth; ++i, ++j)
 			{
 				s[i] = L' ';
 			}
-			realLen += 3;
+			realLen += tabWidth - 1;
 		}
 		else
 		{

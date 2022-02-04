@@ -13,10 +13,16 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 
 		.tabsToSpaces = false,
 		.tabWidth     = 4,
+		.tabSpaceStr  = NULL,
 
 
 		.lastErr = { 0 }
 	};
+	if (!femtoSettings_makeTabSpaceStr(self))
+	{
+		fprintf(stderr, "Cannot recover from this memory allocation error!\n");
+		exit(1);
+	}
 }
 
 bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restrict errArr, uint32_t errMax)
@@ -31,6 +37,22 @@ bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restr
 	uint32_t copyLen = u32Min((uint32_t)wcslen(self->lastErr) + 1, errMax);
 	memcpy(errArr, self->lastErr, sizeof(wchar_t) * copyLen);
 	self->lastErr[copyLen - 1] = L'\0';
+	return true;
+}
+
+bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self)
+{
+	wchar_t * mem = realloc(self->tabSpaceStr, sizeof(wchar_t) * (self->tabWidth + 1));
+	if (mem == NULL)
+	{
+		return false;
+	}
+	self->tabSpaceStr[self->tabWidth] = L'\0';
+	for (uint8_t i = 0; i < self->tabWidth; ++i)
+	{
+		self->tabSpaceStr[i] = L' ';
+	}
+	self->tabSpaceStr = mem;
 	return true;
 }
 
@@ -124,10 +146,14 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	if (mi != 0)
 	{
 		self->tabWidth = (uint8_t)u32Clamp((uint32_t)wcstol(tabs.begin, NULL, 10), 1, 32);
+		if (!femtoSettings_makeTabSpaceStr(self))
+		{
+			free(argumentsUsed);
+			return femtoErr_memory;
+		}
+
 		argumentsUsed[mi - 1] = true;
 	}
-
-
 
 	/* *************************************************** */
 
@@ -178,7 +204,7 @@ femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 	femtoSettings_t def;
 	femtoSettings_reset(&def);
 
-	// Try to load file, for every value, change value only if it's default value
+	// Try to load file, for every value, change it only if it's default value
 
 
 	return femtoErr_ok;
@@ -196,6 +222,11 @@ void femtoSettings_destroy(femtoSettings_t * restrict self)
 	{
 		free(self->settingsFileName);
 		self->settingsFileName = NULL;
+	}
+	if (self->tabSpaceStr != NULL)
+	{
+		free(self->tabSpaceStr);
+		self->tabSpaceStr = NULL;
 	}
 	// Clear last error, just in case
 	self->lastErr[0] = L'\0';
