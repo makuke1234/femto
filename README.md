@@ -10,7 +10,7 @@ It is a bigger more feature-rich version of my other console text editor [atto](
 It is also written in vanilla C + Win32 Console API - it's designed to be used solely on Microsoft Windows.
 It has been compiled with MinGW GCC.
 
-Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports ~2500 source code lines (excluding whitespace & comments):
+Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports ~2700 source code lines (excluding whitespace & comments):
 
 ![SLOC](./images/sloc.png)
 
@@ -30,8 +30,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 - [x] Mouse scrolling, also horizontal scrolling
 - [x] Mouse operated text cursor
 - [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces wide
+- [x] Automatic indentation, on by default
 - [x] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
-    * *If multiple files exist with any of the names above, the settings file will be selected following the order above*
+    * *If multiple files exist with any of the names above, the settings file will be selected following this exact order*
 - [x] All settings can be given by command line arguments
 - [ ] Multi-file support
 - [x] Keyboard shortcuts:
@@ -90,6 +91,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | --tabsSpaces=\[value\] | Value can be either true/false or 1/0             |
     | --tabWidth=\[value\]   | Value can be any number from 1-32                 |
     | --tabw=\[value\]       | Same as above                                     |
+    | --autoindent=\[value\] | Value can be either true/false or 1/0             |
+    | --autoi=\[value\]      | Same as above                                     |
+    | --aindent=\[value\]    | Same as above                                     |
 
 
 # Screenshots
@@ -107,6 +111,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 # Changelog
 
 * 1.1 (planned)
+    * [x] Automatic indentation, turned on by default, new settings
     * [ ] Line numbers, absolute & relative mode
     * [ ] Warning about any unsaved work
     * [ ] Practical multi-file support
@@ -158,3 +163,4 @@ users, the [changelog](#Changelog) may be more useful to keep track of the progr
 # License
 
 This project is using the MIT license.
+

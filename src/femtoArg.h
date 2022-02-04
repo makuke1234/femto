@@ -8,6 +8,13 @@ typedef struct femtoArgument
 	const wchar_t * begin, * end;
 } femtoArgument_t, femtoArg_t;
 
+/**
+ * @brief Convert string to boolean
+ * 
+ * @param arg String wrapper
+ */
+bool femtoArg_strToBool(femtoArgument_t arg);
+
 
 /**
  * @brief Fetches individual parameters from raw command-line argument

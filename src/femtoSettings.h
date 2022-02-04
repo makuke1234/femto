@@ -22,7 +22,7 @@ typedef struct femtoSettings
 	wchar_t * tabSpaceStr1;	// Contains space characters
 	wchar_t * tabSpaceStr2;	// Contains tab characters
 
-	bool insertTabs;
+	bool autoIndent;
 
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];

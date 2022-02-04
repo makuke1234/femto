@@ -171,11 +171,11 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self);
  * 
  * @param self Pointer to femtoFile_t structure
  * @param tabsToSpaces Tabs are converted to spaces
- * @param insertTabs Automatically insert tabs to match whitespace of the previous line
+ * @param autoIndent Automatically insert tabs to match whitespace of the previous line
  * @return true Success
  * @return false Failure
  */
-bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool insertTabs);
+bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool autoIndent);
 /**
  * @brief Updates current viewpoint if necessary
  * 

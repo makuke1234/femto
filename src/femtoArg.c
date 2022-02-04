@@ -1,5 +1,22 @@
 #include "femtoArg.h"
 
+bool femtoArg_strToBool(femtoArgument_t arg)
+{
+	if (((arg.end - arg.begin) >= 4) && (wcsncmp(arg.begin, L"true", 4) == 0))
+	{
+		return true;
+	}
+	else if (((arg.end - arg.begin) >= 5) && (wcsncmp(arg.begin, L"false", 5) == 0))
+	{
+		return false;
+	}
+	else
+	{
+		// String to int conversion
+		return wcstol(arg.begin, NULL, 10) != 0;
+	}
+}
+
 uint32_t femtoArg_fetch(const wchar_t * restrict rawStr, int32_t maxStr, const wchar_t * restrict argMatch, uint32_t maxParams, ...)
 {
 	va_list ap;

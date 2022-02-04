@@ -1,7 +1,7 @@
 #include "femtoLine.h"
 
 
-femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool insertTabs)
+femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool autoIndent)
 {
 	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
 	if (node == NULL)
@@ -12,7 +12,7 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
 	wchar_t tch = tabsToSpaces ? L' ' : L'\t';
 
 	uint32_t space = 0;
-	if (insertTabs)
+	if (autoIndent)
 	{
 		for (uint32_t i = 0; i < curnode->lineEndx;)
 		{

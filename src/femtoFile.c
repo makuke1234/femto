@@ -454,7 +454,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_RETURN:	// Enter key
-		femtoFile_addNewLine(self, pset->tabsToSpaces, pset->insertTabs);
+		femtoFile_addNewLine(self, pset->tabsToSpaces, pset->autoIndent);
 		self->data.lastx = self->data.currentNode->curx;
 		break;
 	case VK_BACK:	// Backspace
@@ -638,10 +638,10 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self)
 		return false;
 	}
 }
-bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool insertTabs)
+bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool autoIndent)
 {
 	assert(self != NULL);
-	femtoLineNode_t * node = femtoLine_create(self->data.currentNode, self->data.currentNode->nextNode, tabsToSpaces, insertTabs);
+	femtoLineNode_t * node = femtoLine_create(self->data.currentNode, self->data.currentNode->nextNode, tabsToSpaces, autoIndent);
 	if (node == NULL)
 	{
 		return false;

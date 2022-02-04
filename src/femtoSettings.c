@@ -16,7 +16,7 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.tabSpaceStr1 = NULL,
 		.tabSpaceStr2 = NULL,
 
-		.insertTabs = true,
+		.autoIndent = true,
 
 
 		.lastErr = { 0 }
@@ -138,19 +138,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	femtoArg_fetchArgv(argc, argv, L"tabsSpaces", &mi, 1, &tabs);
 	if (mi != 0)
 	{
-		if (((tabs.end - tabs.begin) >= 4) && (wcsncmp(tabs.begin, L"true", 4) == 0))
-		{
-			self->tabsToSpaces = true;
-		}
-		else if (((tabs.end - tabs.begin) >= 5) && (wcsncmp(tabs.begin, L"false", 5) == 0))
-		{
-			self->tabsToSpaces = false;
-		}
-		else
-		{
-			// String to int conversion
-			self->tabsToSpaces = wcstol(tabs.begin, NULL, 10) != 0;
-		}
+		self->tabsToSpaces = femtoArg_strToBool(tabs);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -168,6 +156,22 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 			return femtoErr_memory;
 		}
 
+		argumentsUsed[mi - 1] = true;
+	}
+
+	femtoArg_t aindent;
+	femtoArg_fetchArgv(argc, argv, L"autoindent", &mi, 1, &aindent);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"autoi", &mi, 1, &aindent);
+	}
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"aindent", &mi, 1, &aindent);
+	}
+	if (mi != 0)
+	{
+		self->autoIndent = femtoArg_strToBool(aindent);
 		argumentsUsed[mi - 1] = true;
 	}
 
