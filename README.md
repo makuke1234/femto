@@ -77,8 +77,8 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * Also note that the number of arguments to be passed is variable, depending on the option
     * There is also an alternate syntax for passing arguments:
         * `--`\[option\]`=`\[argument 1\]`;`\[argument 2\]`;`\[argument 3\]
-    * If quotation marks (`""`) are used around the whole option, spaces can also be used as a separator:
-        * `"--`\[option\]`=`\[argument 1\]` `\[argument 2\]` `\[argument 3\]`"`
+    * A question mark can also be used as a separator:
+        * `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [ ] List of options:
     | Option          | Effect                                            |
     | --------------- | ------------------------------------------------- |
