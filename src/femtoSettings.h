@@ -2,6 +2,7 @@
 #define FEMTOSETTINGS_H
 
 #include "common.h"
+#include "femto.h"
 
 #define FEMTO_SETTINGS_ERR_MAX 256
 
@@ -27,11 +28,11 @@ void femtoSettings_reset(femtoSettings_t * restrict self);
  * 
  * @param self Pointer to femtoSettings_t structure
  * @param errArr Pointer to an array to copy error message to
- * @param errMax Maximum amount of characters to copy, -1, if all can be copied
+ * @param errMax Maximum amount of characters to copy
  * @return true Getting last error succeeded
  * @return false No last error set
  */
-bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restrict errArr, int32_t errMax);
+bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restrict errArr, uint32_t errMax);
 
 /**
  * @brief Populate settings using command line arguments
@@ -39,10 +40,10 @@ bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restr
  * @param self Pointer to femtoSettings_t structure
  * @param argc Number of command line arguments
  * @param argv Command line argument vector
- * @return true Success
- * @return false Some error occurred, that can be fetched by femtoSettings_getLastError function
+ * @return femtoErr_t femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
+ * information is necessary, get it via femtoSettings_getLastError()
  */
-bool femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv);
+femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv);
 
 /**
  * @brief Destroy femtoSettings_t structure

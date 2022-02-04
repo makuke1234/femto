@@ -47,7 +47,7 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 
 	// Scan for a match
 	size_t matchLen = wcslen(argMatch);
-	if (strncmp(rawIt, argMatch, matchLen) != 0)
+	if (wcsncmp(rawIt, argMatch, matchLen) != 0)
 	{
 		// Didn't find a match
 		return 0;

@@ -6,7 +6,8 @@
 typedef struct femtoArgument
 {
 	const wchar_t * begin, * end;
-} femtoArgument_t;
+} femtoArgument_t, femtoArg_t;
+
 
 /**
  * @brief Fetches individual parameters from raw command-line argument
@@ -52,7 +53,7 @@ uint32_t femtoArg_fetchArgv(int argc, const wchar_t ** restrict argv, const wcha
  * @param argv Argument vector
  * @param argMatch Argument to match against
  * @param matchedIndex Address of matched argument index in argv, filled by function,
- * will be set to 0, if argMatch doesn't match any arguments
+ * will be set to 0, if argMatch doesn't match any arguments, CANNOT be NULL
  * @param maxParams Maximum number of variadic paramater to scan for
  * @param ap Variadic argument list
  * @return uint32_t Number of parameters matched, argument itself counts as 1, 0 if none were found or argMatch doesn't match

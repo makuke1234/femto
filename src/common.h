@@ -15,6 +15,7 @@
 #include <stdarg.h>
 
 #include "femtoProfiler.h"
+#include "safec.h"
 
 // Since 0x88 - 0x8F are unassigned, they are free to be used by my editor
 #define FEMTO_SHIFT_DEL 0x88

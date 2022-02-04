@@ -1,5 +1,5 @@
-#ifndef femto_H
-#define femto_H
+#ifndef FEMTO_H
+#define FEMTO_H
 
 #include "common.h"
 #include "femtoData.h"
@@ -53,21 +53,22 @@ void femto_printHelp(const wchar_t * restrict app);
  */
 void femto_printHelpClue(const wchar_t * restrict app);
 
-enum femtoError
+typedef enum femtoErr
 {
+	femtoErr_ok,
 	femtoErr_unknown,
 	femtoErr_file,
 	femtoErr_window,
 	femtoErr_memory,
 
 	femtoErr_num_of_elems
-};
+} femtoErr_t;
 /**
  * @brief Prints error message to stderr, adds newline character
  * 
  * @param errCode Error code
  */
-void femto_printErr(enum femtoError errCode);
+void femto_printErr(femtoErr_t errCode);
 /**
  * @brief Performs text editor loop tasks
  * 
