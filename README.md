@@ -110,8 +110,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 
 # Changelog
 
-* 1.1 (planned)
-    * [x] Automatic indentation, turned on by default, new settings
+* 1.2 (planned)
     * [ ] Line numbers, absolute & relative mode
     * [ ] Warning about any unsaved work
     * [ ] Practical multi-file support
@@ -122,11 +121,13 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * [ ] Markdown
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+    * [ ] 'Raw editing'/'saving later to a file' support
+* 1.1 (planned)
+    * [x] Automatic indentation, turned on by default, new settings
     * [x] Command line argument parsing support
     * [x] Proper command line argument handling
     * [x] Optional settings file
-    * [ ] Optional tabs-to-spaces, tab width adjustment
-    * [ ] 'Raw editing'/'saving later to a file' support
+    * [x] Optional tabs-to-spaces, tab width adjustment
     * [x] Tweak keypress status messages
     * [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
     * [x] Optimise screen buffer updating frequency on keyboard/mouse input
