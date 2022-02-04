@@ -16,6 +16,8 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.tabSpaceStr1 = NULL,
 		.tabSpaceStr2 = NULL,
 
+		.insertTabs = true,
+
 
 		.lastErr = { 0 }
 	};

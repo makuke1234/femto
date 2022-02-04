@@ -170,10 +170,12 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self);
  * @brief Adds a new line after current active line
  * 
  * @param self Pointer to femtoFile_t structure
+ * @param tabsToSpaces Tabs are converted to spaces
+ * @param insertTabs Automatically insert tabs to match whitespace of the previous line
  * @return true Success
  * @return false Failure
  */
-bool femtoFile_addNewLine(femtoFile_t * restrict self);
+bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool insertTabs);
 /**
  * @brief Updates current viewpoint if necessary
  * 

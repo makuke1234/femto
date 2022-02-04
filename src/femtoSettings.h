@@ -22,6 +22,8 @@ typedef struct femtoSettings
 	wchar_t * tabSpaceStr1;	// Contains space characters
 	wchar_t * tabSpaceStr2;	// Contains tab characters
 
+	bool insertTabs;
+
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
 } femtoSettings_t;

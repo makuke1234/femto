@@ -1,7 +1,7 @@
 #include "femtoLine.h"
 
 
-femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode)
+femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool insertTabs)
 {
 	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
 	if (node == NULL)
@@ -9,36 +9,67 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
 		return NULL;
 	}
 
+	wchar_t tch = tabsToSpaces ? L' ' : L'\t';
+
+	uint32_t space = 0;
+	if (insertTabs)
+	{
+		for (uint32_t i = 0; i < curnode->lineEndx;)
+		{
+			if ((i == curnode->curx) && (curnode->freeSpaceLen > 0))
+			{
+				i += curnode->freeSpaceLen;
+				continue;
+			}
+
+			if (curnode->line[i] != L' ' && curnode->line[i] != L'\t')
+			{
+				break;
+			}
+
+			++space;
+			++i;
+		}
+	}
+
 	if (curnode != NULL)
 	{
 		// Create normal empty line
 		if ((curnode->curx + curnode->freeSpaceLen) == curnode->lineEndx)
 		{
-			node->line = malloc(sizeof(wchar_t) * FEMTO_LNODE_DEFAULT_FREE);
+			node->line = malloc(sizeof(wchar_t) * (FEMTO_LNODE_DEFAULT_FREE + space));
 			if (node->line == NULL)
 			{
 				free(node);
 				return NULL;
 			}
-			node->lineEndx = FEMTO_LNODE_DEFAULT_FREE;
+			node->lineEndx = FEMTO_LNODE_DEFAULT_FREE + space;
+			for (uint32_t i = 0; i < space; ++i)
+			{
+				node->line[i] = tch;
+			}
 		}
 		// Copy contents after cursor to this line
 		else
 		{
 			uint32_t contStart = curnode->curx + curnode->freeSpaceLen, contLen = curnode->lineEndx - contStart;
-			node->lineEndx = contLen + FEMTO_LNODE_DEFAULT_FREE;
+			node->lineEndx = contLen + FEMTO_LNODE_DEFAULT_FREE + space;
 			node->line = malloc(sizeof(wchar_t) * node->lineEndx);
 			if (node->line == NULL)
 			{
 				free(node);
 				return NULL;
 			}
-			memcpy(node->line + FEMTO_LNODE_DEFAULT_FREE, curnode->line + contStart, sizeof(wchar_t) * contLen);
+			for (uint32_t i = 0; i < space; ++i)
+			{
+				node->line[i] = tch;
+			}
+			memcpy(node->line + FEMTO_LNODE_DEFAULT_FREE + space, curnode->line + contStart, sizeof(wchar_t) * contLen);
 			curnode->freeSpaceLen += contLen;
 		}
 	}
 
-	node->curx = 0;
+	node->curx = space;
 	node->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
 	node->prevNode = curnode;
 	node->nextNode = nextnode;

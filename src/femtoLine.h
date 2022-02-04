@@ -24,9 +24,11 @@ typedef struct femtoLineNode
  * 
  * @param curnode Pointer to current line node, can be NULL
  * @param nextnode Pointer to next line node, can be NULL
+ * @param tabsToSpaces Tabs are converted to spaces
+ * @param insertTabs Automatically insert tabs to match whitespace of the previous line
  * @return femtoLineNode_t* Pointer to newly created line node, NULL on failure
  */
-femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode);
+femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool insertTabs);
 /**
  * @brief Creates new line in-between current line and next line
  * 
