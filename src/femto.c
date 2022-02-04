@@ -413,14 +413,69 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 	return true;
 }
-void femto_updateScrbuf(femtoData_t * restrict peditor)
+bool femto_updateScrbuf(femtoData_t * restrict peditor, uint32_t * curline)
+{
+	assert(peditor != NULL);
+	assert(curline != NULL);
+	assert(peditor->scrbuf.mem != NULL);
+	femtoFile_t * restrict pfile = peditor->file;
+	assert(pfile != NULL);
+
+	// Count to current line
+	uint32_t line = 0;
+	femtoLineNode_t * node = pfile->data.pcury;
+	while ((node != NULL) && (node != pfile->data.currentNode))
+	{
+		node = node->nextNode;
+		++line;
+	}
+	if (femto_updateScrbufLine(peditor, pfile->data.currentNode, line) == false)
+	{
+		// Whole screen buffer will be updated anyways
+		node = pfile->data.pcury;
+		bool drawCursor = false;
+		for (uint32_t i = 0; i < peditor->scrbuf.h; ++i)
+		{
+			femto_updateScrbufLine(peditor, node, i);
+			
+			if (node == pfile->data.currentNode)
+			{
+				drawCursor = true;
+			}
+
+			if (node != NULL)
+			{
+				node = node->nextNode;
+			}
+		}
+
+		CONSOLE_CURSOR_INFO cci = { 0 };
+		GetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
+
+		if ((drawCursor == false) && (cci.bVisible == TRUE))
+		{
+			cci.bVisible = FALSE;
+			SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
+		}
+
+		return false;
+	}
+
+	*curline = line;
+	return true;
+}
+bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * restrict node, uint32_t line)
 {
 	assert(peditor != NULL);
 	assert(peditor->scrbuf.mem != NULL);
 	femtoFile_t * restrict pfile = peditor->file;
 	assert(pfile != NULL);
+	
 	if (pfile->data.typed || (pfile->data.pcury == NULL))
 	{
+		uint32_t prevcurx          = pfile->data.curx;
+		femtoLineNode_t * prevcury = pfile->data.pcury;
+
 		pfile->data.typed = false;
 		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
 		int32_t delta = (int32_t)pfile->data.currentNode->curx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
@@ -432,81 +487,94 @@ void femto_updateScrbuf(femtoData_t * restrict peditor)
 		{
 			pfile->data.curx = u32Max(1, pfile->data.currentNode->curx) - 1;
 		}
+
+		if ((prevcurx != pfile->data.curx) || (prevcury != pfile->data.pcury))
+		{
+			pfile->data.updateAll = false;
+			return false;
+		}
+	}
+	if (pfile->data.updateAll)
+	{
+		pfile->data.updateAll = false;
+		return false;
 	}
 
-	uint32_t size = peditor->scrbuf.w * peditor->scrbuf.h;
-	for (uint32_t i = 0; i < size; ++i)
+	CHAR_INFO * destination = &peditor->scrbuf.mem[line * peditor->scrbuf.w];
+	for (uint32_t i = 0; i < peditor->scrbuf.w; ++i)
 	{
-		peditor->scrbuf.mem[i] = (CHAR_INFO){
+		destination[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = L' ' },
 			.Attributes = FEMTO_DEFAULT_COLOR
 		};
 	}
-	femtoLineNode_t * node = pfile->data.pcury;
+	if (node == NULL)
+	{
+		return true;
+	}
+
 	bool drawCursor = false;
 
-	// Get cursor information
 	CONSOLE_CURSOR_INFO cci = { 0 };
-	GetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 	
-	for (uint32_t i = 0; i < peditor->scrbuf.h - 1 && node != NULL; ++i)
+	// if line is active line and cursor fits
+	uint32_t curx = node->curx - pfile->data.curx;
+	if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
 	{
-		// if line is active line and cursor fits
-		uint32_t curx = node->curx - pfile->data.curx;
-		if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
-		{
-			// Update cursor position
-			peditor->cursorpos = (COORD){ .X = (int16_t)curx, .Y = (int16_t)i };
-			// Make cursor visible, if necessary
-			if (cci.bVisible == FALSE)
-			{
-				cci.bVisible = TRUE;
-				SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
-			}
+		// Get cursor information
+		GetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 
-			SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
-			drawCursor = true;
-		}
-		CHAR_INFO * destination = &peditor->scrbuf.mem[i * peditor->scrbuf.w];
-
-		// Drawing
-
-		// Advance idx by file.data.curx
-		uint32_t idx = 0;
-		for (uint32_t j = pfile->data.curx; j > 0 && idx < node->lineEndx;)
+		// Update cursor position
+		peditor->cursorpos = (COORD){ .X = (int16_t)curx, .Y = (int16_t)line };
+		// Make cursor visible, if necessary
+		if (cci.bVisible == FALSE)
 		{
-			if (idx == node->curx && node->freeSpaceLen > 0)
-			{
-				idx += node->freeSpaceLen;
-				continue;
-			}
-			++idx;
-			--j;
-		}
-		for (uint32_t j = 0; idx < node->lineEndx && j < peditor->scrbuf.w;)
-		{
-			if (idx == node->curx && node->freeSpaceLen > 0)
-			{
-				idx += node->freeSpaceLen;
-				continue;
-			}
-			destination[j] = (CHAR_INFO){
-				.Char       = { .UnicodeChar = node->line[idx] },
-				.Attributes = FEMTO_DEFAULT_COLOR
-			};
-				
-			++idx;
-			++j;
+			cci.bVisible = TRUE;
+			SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 		}
 
-		node = node->nextNode;
+		SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
+		drawCursor = true;
 	}
+
+	// Drawing
+
+	// Advance idx by file.data.curx
+	uint32_t idx = 0;
+	for (uint32_t j = pfile->data.curx; j > 0 && idx < node->lineEndx;)
+	{
+		if ((idx == node->curx) && (node->freeSpaceLen > 0))
+		{
+			idx += node->freeSpaceLen;
+			continue;
+		}
+		++idx;
+		--j;
+	}
+	for (uint32_t j = 0; idx < node->lineEndx && j < peditor->scrbuf.w;)
+	{
+		if ((idx == node->curx) && (node->freeSpaceLen > 0))
+		{
+			idx += node->freeSpaceLen;
+			continue;
+		}
+		destination[j] = (CHAR_INFO){
+			.Char       = { .UnicodeChar = node->line[idx] },
+			.Attributes = FEMTO_DEFAULT_COLOR
+		};
+			
+		++idx;
+		++j;
+	}
+
 	// Hide cursor, if necessary
-	if (drawCursor == false && cci.bVisible == TRUE)
+	if ((drawCursor == false) && (cci.bVisible == TRUE))
 	{
 		cci.bVisible = FALSE;
 		SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 	}
+
+	return true;
 }
 
 uint32_t femto_convToUnicode(const char * restrict utf8, int numBytes, wchar_t ** restrict putf16, uint32_t * restrict sz)

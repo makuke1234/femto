@@ -77,8 +77,21 @@ bool femto_loop(femtoData_t * restrict pdata);
  * @brief Update screen buffer
  * 
  * @param peditor Pointer to femtoData_t structure
+ * @param line Pointer to Y-index of current line in relation to current viewpoint, this variable is a receiver
+ * @return true Only current line needs redrawing
+ * @return false Whole buffer needs redrawing
  */
-void femto_updateScrbuf(femtoData_t * restrict peditor);
+bool femto_updateScrbuf(femtoData_t * restrict peditor, uint32_t * line);
+/**
+ * @brief Update one line in screen buffer
+ * 
+ * @param peditor Pointer to femtoData_t structure
+ * @param node Pointer to line node
+ * @param line Line number to update, starting from 0
+ * @return true Update only one line
+ * @return false Whole screen buffer needs updating
+ */
+bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * restrict node, uint32_t line);
 
 /**
  * @brief Convert UTF-8 string to UTF-16 string, allocates memory only if

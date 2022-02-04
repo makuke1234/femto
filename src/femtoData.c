@@ -113,20 +113,35 @@ void femtoData_refresh(femtoData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	femto_updateScrbuf(self);
-	WriteConsoleOutputW(
-		self->scrbuf.handle,
-		self->scrbuf.mem,
-		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
-		(COORD){ 0, 0 },
-		&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2) }
-	);
+	uint32_t line;
+	if (femto_updateScrbuf(self, &line) == false)
+	{
+		WriteConsoleOutputW(
+			self->scrbuf.handle,
+			self->scrbuf.mem,
+			(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
+			(COORD){ 0, 0 },
+			&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2) }
+		);
+	}
+	else
+	{
+		// Only refresh 1 line
+		WriteConsoleOutputW(
+			self->scrbuf.handle,
+			self->scrbuf.mem,
+			(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
+			(COORD){ .X = 0, .Y = (SHORT)line },
+			&(SMALL_RECT){ .Left = 0, .Top = (SHORT)line, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)line }
+		);
+	}
 }
 void femtoData_refreshAll(femtoData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	femto_updateScrbuf(self);
+	uint32_t line;	// Phantom variable
+	femto_updateScrbuf(self, &line);
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
@@ -138,6 +153,7 @@ void femtoData_refreshAll(femtoData_t * restrict self)
 void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict message, const WORD * restrict colorData)
 {
 	assert(self != NULL);
+	assert(self->scrbuf.mem != NULL);
 	assert(message != NULL);
 
 	uint32_t effLen = u32Min((uint32_t)wcslen(message), self->scrbuf.w);

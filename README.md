@@ -118,9 +118,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] 'Raw editing'/'saving later to a file' support
     * [x] Tweak keypress status messages
     * [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
-    * [ ] Optimise screen buffer updating frequency on keyboard/mouse input
-    * [ ] Only update line that's being edited, if viewport doesn't change
-	* [x] Refactor, check all pointers in debug mode
+    * [x] Optimise screen buffer updating frequency on keyboard/mouse input
+    * [x] Only update line that's being edited, if viewport doesn't change
+    * [x] Refactor, check all pointers in debug mode
 * 1.0
     * [x] Theoretical multi-file support
     * [x] Mouse scrolling support

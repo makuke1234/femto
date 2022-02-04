@@ -141,6 +141,7 @@ typedef struct femtoFile_t
 		uint32_t curx, lastx;
 
 		bool typed;
+		bool updateAll;
 	} data;
 } femtoFile_t;
 

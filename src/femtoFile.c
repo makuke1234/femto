@@ -327,7 +327,8 @@ void femtoFile_reset(femtoFile_t * restrict self)
 			.pcury       = NULL,
 			.curx        = 0,
 			.lastx       = 0,
-			.typed       = false
+			.typed       = false,
+			.updateAll   = false
 		}
 	};
 }
@@ -779,6 +780,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 
 			// Destroy current line
 			femtoLine_destroy(node);
+			self->data.updateAll = true;
 		}
 		break;
 	case FEMTO_MOVELINE_UP:
@@ -788,6 +790,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			femtoLine_swap(self->data.currentNode, self->data.currentNode->prevNode);
 			self->data.currentNode = self->data.currentNode->prevNode;
 			self->data.lastx       = self->data.currentNode->curx;
+			self->data.updateAll   = true;
 		}
 		break;
 	case FEMTO_MOVELINE_DOWN:
@@ -797,6 +800,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			femtoLine_swap(self->data.currentNode, self->data.currentNode->nextNode);
 			self->data.currentNode = self->data.currentNode->nextNode;
 			self->data.lastx       = self->data.currentNode->curx;
+			self->data.updateAll   = true;
 		}
 		break;
 	case VK_LEFT:	// Left arrow
@@ -903,6 +907,7 @@ bool femtoFile_deleteForward(femtoFile_t * restrict self)
 	else if (node->nextNode != NULL)
 	{
 		return femtoLine_mergeNext(node, &self->data.pcury);
+		self->data.updateAll = true;
 	}
 	else
 	{
@@ -924,6 +929,7 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self)
 		// Add current node data to previous node data
 		self->data.currentNode = node->prevNode;
 		return femtoLine_mergeNext(self->data.currentNode, &self->data.pcury);
+		self->data.updateAll = true;
 	}
 	else
 	{
@@ -941,6 +947,7 @@ bool femtoFile_addNewLine(femtoFile_t * restrict self)
 
 	self->data.currentNode->nextNode = node;
 	self->data.currentNode = node;
+	self->data.updateAll = true;
 	return true;
 }
 
@@ -993,7 +1000,8 @@ void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t delt
 
 	if ((deltaLines != 0) && (self->data.pcury != NULL))
 	{
-		femtoLine_moveCursorVert(&self->data.pcury, deltaLines);	
+		femtoLine_moveCursorVert(&self->data.pcury, deltaLines);
+		self->data.updateAll = true;
 	}
 }
 void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t deltaCh)
@@ -1012,6 +1020,11 @@ void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t de
 			self->data.curx = curx;
 		}
 	}
+	else
+	{
+		return;
+	}
+	self->data.updateAll = true;
 }
 
 
