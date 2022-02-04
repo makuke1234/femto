@@ -95,7 +95,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 ## Last key shown on status bar with respective repeat count
 ![Key frequency](./images/keyFreq.png)
 
-## Saving was successful, file size is now 140 bytes
+## Saving was successful, file size is now 151 bytes
 ![!Saving success](./images/savingSuc.png)
 
 
