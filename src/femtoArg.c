@@ -18,7 +18,18 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 	// Get real rawStr length
 	uint32_t len = (maxStr == -1) ? (uint32_t)wcslen(rawStr) : (uint32_t)maxStr;
 
-	// TODO
+	/*
+	 * Pattern
+	 * --option
+	 * -option
+	 * /option
+	 * 
+	 * Values:
+	 * --option=value1,value2,value3
+	 * --option=value1;value2;value3
+	 * --option=value1 value2 value3
+	 * 
+	 */
 
 	return 0;
 }
