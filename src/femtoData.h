@@ -6,7 +6,7 @@
 #include "femtoSettings.h"
 
 
-typedef struct femtoData_t
+typedef struct femtoData
 {
 	DWORD prevConsoleMode;
 	bool prevConsoleModeSet;

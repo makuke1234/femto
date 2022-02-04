@@ -34,28 +34,29 @@ bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restr
 femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv)
 {
 	assert(self != NULL);
+	assert(argc > 0);
 	assert(argv != NULL);
 
-	bool * argumentsUsed = calloc(argc - 1, sizeof(bool));
+	bool * argumentsUsed = calloc((size_t)(argc - 1), sizeof(bool));
 	if (argumentsUsed == NULL)
 	{
 		return femtoErr_memory;
 	}
 
-	uint32_t mi;
+	int mi;
 	// Search for help argument first
 	femtoArg_fetchArgv(argc, argv, L"help", &mi, 0);
 	if (mi != 0)
 	{
 		self->helpRequested = true;
 		free(argumentsUsed);
-		return true;
+		return femtoErr_ok;
 	}
 	femtoArg_t fname;
 	femtoArg_fetchArgv(argc, argv, L"file", &mi, 1, &fname);
 	if (mi != 0)
 	{
-		self->fileName = wcsdup_s(fname.begin, fname.end - fname.begin);
+		self->fileName = wcsdup_s(fname.begin, (size_t)(fname.end - fname.begin));
 		if (self->fileName == NULL)
 		{
 			free(argumentsUsed);
@@ -64,9 +65,13 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		argumentsUsed[mi - 1] = true;
 	}
 
-	// Other settings
+	/* **************** Other settings ******************* */
 
 
+
+
+
+	/* *************************************************** */
 
 	// If filename wasn't specified and the last argument isn't used, take the last argument
 	// If the last argument is already in use, leave fileName as NULL, opens an empty new file

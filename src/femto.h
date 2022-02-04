@@ -53,22 +53,7 @@ void femto_printHelp(const wchar_t * restrict app);
  */
 void femto_printHelpClue(const wchar_t * restrict app);
 
-typedef enum femtoErr
-{
-	femtoErr_ok,
-	femtoErr_unknown,
-	femtoErr_file,
-	femtoErr_window,
-	femtoErr_memory,
 
-	femtoErr_num_of_elems
-} femtoErr_t;
-/**
- * @brief Prints error message to stderr, adds newline character
- * 
- * @param errCode Error code
- */
-void femto_printErr(femtoErr_t errCode);
 /**
  * @brief Performs text editor loop tasks
  * 
@@ -95,7 +80,7 @@ bool femto_updateScrbuf(femtoData_t * restrict peditor, uint32_t * line);
  * @return true Update only one line
  * @return false Whole screen buffer needs updating
  */
-bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * restrict node, uint32_t line);
+bool femto_updateScrbufLine(femtoData_t * restrict peditor, struct femtoLineNode * restrict node, uint32_t line);
 
 /**
  * @brief Convert UTF-8 string to UTF-16 string, allocates memory only if

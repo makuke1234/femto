@@ -2,7 +2,6 @@
 #define FEMTOSETTINGS_H
 
 #include "common.h"
-#include "femto.h"
 
 #define FEMTO_SETTINGS_ERR_MAX 256
 
@@ -10,7 +9,7 @@
 typedef struct femtoSettings
 {
 	bool helpRequested;
-	const wchar_t * fileName;
+	wchar_t * fileName;
 
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];

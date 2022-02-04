@@ -12,11 +12,11 @@
 				  <----------> - freeSpaceLen = 6
 */
 
-typedef struct femtoLineNode_t
+typedef struct femtoLineNode
 {
 	wchar_t * line;
 	uint32_t lineEndx, curx, freeSpaceLen;
-	struct femtoLineNode_t * prevNode, * nextNode;
+	struct femtoLineNode * prevNode, * nextNode;
 } femtoLineNode_t;
 
 /**
@@ -126,7 +126,7 @@ enum femtoEOLsequence
 	EOL_def  = EOL_CRLF,
 };
 
-typedef struct femtoFile_t
+typedef struct femtoFile
 {
 	const wchar_t * fileName;
 	HANDLE hFile;
