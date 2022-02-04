@@ -44,15 +44,15 @@ void femto_exitHandler(void)
 	femtoData_destroy(s_atExitData);
 }
 
-const wchar_t * femto_getFileName(int argc, const wchar_t * const * const argv)
-{
-	assert(argv != NULL);
-	return (argc > 1) ? argv[1] : NULL;
-}
 void femto_printHelp(const wchar_t * restrict app)
 {
 	assert(app != NULL);
 	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
+}
+void femto_printHelpClue(const wchar_t * restrict app)
+{
+	assert(app != NULL);
+	fwprintf(stderr, L"To show all available commands type:\n%S --help\n", app);
 }
 
 static const char * femto_errCodes[femtoErr_num_of_elems] = {

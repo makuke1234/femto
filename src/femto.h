@@ -41,14 +41,17 @@ void femto_exitHandlerSetVars(femtoData_t * pdata);
 void femto_exitHandler(void);
 
 /**
- * @brief Gets file name from argument vector
+ * @brief Shows help
  * 
- * @param argc Argument vector count
- * @param argv Wide-stringed argument vector
- * @return const wchar_t* File name argument
+ * @param app Pointer to application pathname
  */
-const wchar_t * femto_getFileName(int argc, const wchar_t * const * const argv);
 void femto_printHelp(const wchar_t * restrict app);
+/**
+ * @brief Shows clue how to get help
+ * 
+ * @param app Pointer to application pathname
+ */
+void femto_printHelpClue(const wchar_t * restrict app);
 
 enum femtoError
 {

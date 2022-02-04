@@ -1,4 +1,5 @@
 #include "femto.h"
+#include "femtoArg.h"
 
 
 static femtoData_t editor;
@@ -15,14 +16,23 @@ int wmain(int argc, const wchar_t * argv[])
 	// Initialise profiler, if applicable
 	initProfiler();
 
-	const wchar_t * fileName = femto_getFileName(argc, argv);
-	if (fileName == NULL)
+	if (!femtoSettings_populate(&editor.settings, argc, argv))
+	{
+		// Get last error
+		wchar_t errMsg[FEMTO_SETTINGS_ERR_MAX];
+		femtoSettings_getLastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
+		fputws(errMsg, stdout);
+		femto_printHelpClue(argv[0]);
+		return 1;
+	}
+	else if (editor.settings.helpRequested)
 	{
 		femto_printHelp(argv[0]);
 		return 1;
 	}
 
-	if (!femtoFile_open(editor.file, fileName, false))
+
+	if (!femtoFile_open(editor.file, editor.settings.fileName, false))
 	{
 		femto_printErr(femtoErr_file);
 		return 2;

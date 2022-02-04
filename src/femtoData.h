@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "femtoFile.h"
+#include "femtoSettings.h"
 
 
 typedef struct femtoData_t
@@ -23,6 +24,8 @@ typedef struct femtoData_t
 	femtoFile_t ** files;
 
 	femtoFile_t * file;
+
+	femtoSettings_t settings;
 } femtoData_t;
 
 /**

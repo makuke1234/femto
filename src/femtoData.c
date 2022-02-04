@@ -34,6 +34,8 @@ bool femtoData_reset(femtoData_t * restrict self)
 	};
 	self->file = self->files[0];
 
+	femtoSettings_reset(&self->settings);
+
 	return true;
 }
 bool femtoData_init(femtoData_t * restrict self)
@@ -223,4 +225,6 @@ void femtoData_destroy(femtoData_t * restrict self)
 	self->files     = NULL;
 	self->filesSize = 0;
 	self->filesMax  = 0;
+
+	femtoSettings_destroy(&self->settings);
 }
