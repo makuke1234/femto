@@ -71,7 +71,7 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 				++rawIt;
 				continue;
 			}
-			else if ((*rawIt == L',') || (*rawIt == L';') || (*rawIt == L'?'))
+			else if ((*rawIt == L',') || (*rawIt == L';') || (*rawIt == L'?') || ((rawIt + 1) == endp))
 			{
 				if (numArgs < maxParams)
 				{
