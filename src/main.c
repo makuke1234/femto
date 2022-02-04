@@ -72,9 +72,10 @@ int wmain(int argc, const wchar_t * argv[])
 			swprintf_s(
 				tempstr,
 				MAX_STATUS,
-				L"File loaded successfully! %s%s EOL sequences",
+				L"File loaded successfully! %s%s EOL sequences; Settings file: %s",
 				(editor.file->eolSeq & EOL_CR) ? L"CR" : L"",
-				(editor.file->eolSeq & EOL_LF) ? L"LF" : L""
+				(editor.file->eolSeq & EOL_LF) ? L"LF" : L"",
+				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-"
 			);
 		}
 		femtoData_statusDraw(&editor, tempstr, NULL);

@@ -75,12 +75,12 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 			{
 				if (numArgs < maxParams)
 				{
-					femtoArgument_t * arg = va_arg(ap, femtoArgument_t *);
+					femtoArg_t * arg = va_arg(ap, femtoArg_t *);
 					++numArgs;
 
 					// Set argument settings
 					arg->begin = argStart;
-					arg->end   = rawIt;
+					arg->end   = rawIt + ((rawIt + 1) == endp);
 
 					// Set new argument start position
 					if ((rawIt + 1) != endp)

@@ -5,11 +5,17 @@
 
 #define FEMTO_SETTINGS_ERR_MAX 256
 
+#define FEMTO_SETTINGS_FILE1 L"femto.json"
+#define FEMTO_SETTINGS_FILE2 L"femto-settings.json"
+#define FEMTO_SETTINGS_FILE3 L"femto_settings.json"
+#define FEMTO_SETTINGS_FILE4 L"settings.json"
+
 
 typedef struct femtoSettings
 {
 	bool helpRequested;
 	wchar_t * fileName;
+	wchar_t * settingsFileName;
 
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
@@ -43,6 +49,15 @@ bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restr
  * information is necessary, get it via femtoSettings_getLastError()
  */
 femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv);
+
+/**
+ * @brief Try to load settings from configured file
+ * 
+ * @param self Pointer to femtoSettings_t structure
+ * @return femtoErr_t femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
+ * information is necessary, get it via femtoSettings_getLastError()
+ */
+femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self);
 
 /**
  * @brief Destroy femtoSettings_t structure

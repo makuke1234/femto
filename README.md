@@ -29,10 +29,10 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 - [ ] Syntax highlighting
 - [x] Mouse scrolling, also horizontal scrolling
 - [x] Mouse operated text cursor
-- [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces
-- [ ] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
+- [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces wide
+- [x] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
     * *If multiple files exist with any of the names above, the settings file will be selected following the order above*
-- [ ] All settings can be given by command line arguments
+- [x] All settings can be given by command line arguments
 - [ ] Multi-file support
 - [x] Keyboard shortcuts:
     | Key                            | Action                                        |
@@ -63,9 +63,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
     | `femto` \[options\]                 | Starts editor with empty file                                                                           |
     | `femto` \[options\] \[file\]        | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
-    | <ul><li>- [ ] `femto` \[options\] --file=\[file\]</li></ul> | Same as above, just a different syntax                                                                  |
+    | `femto` \[options\] --file=\[file\] | Same as above, just a different syntax                                                                  |
     | `femto` --help                      | Shows help<br>![help image](./images/help.png)                                                          |
-- [ ] About options:
+- [x] About options:
     * Basic option syntax:
         *   | Syntax         | Description           |
             | -------------- | --------------------- |
@@ -79,12 +79,14 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * `--`\[option\]`=`\[argument 1\]`;`\[argument 2\]`;`\[argument 3\]
     * A question mark can also be used as a separator:
         * `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
-- [ ] List of options:
-    | Option          | Effect                                            |
-    | --------------- | ------------------------------------------------- |
-    | --help          | Shows help                                        |
-    | --file=\[file\] | Specifies file name to open                       |
-    | \[file\]        | Same as above, must be given as the last argument |
+- [x] List of options:
+    | Option              | Effect                                            |
+    | ------------------- | ------------------------------------------------- |
+    | --help              | Shows help                                        |
+    | --file=\[file\]     | Specifies file name to open                       |
+    | \[file\]            | Same as above, must be given as the last argument |
+	| --settings=\[file\] | Specify custom settings file explicitly           |
+	| --setting=\[file\]  | Same as above                                     |
 
 
 # Screenshots
@@ -113,8 +115,8 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [x] Command line argument parsing support
-    * [ ] Proper command line argument handling
-    * [ ] Optional settings file
+    * [x] Proper command line argument handling
+    * [x] Optional settings file
     * [ ] Optional tabs-to-spaces, tab width adjustment
     * [ ] 'Raw editing'/'saving later to a file' support
     * [x] Tweak keypress status messages

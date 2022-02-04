@@ -67,7 +67,31 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 
 	/* **************** Other settings ******************* */
 
+	femtoArg_t sfname;
+	femtoArg_fetchArgv(argc, argv, L"settings", &mi, 1, &sfname);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"setting", &mi, 1, &sfname);
+	}
+	if (mi != 0)
+	{
+		wchar_t * mem = wcsdup_s(sfname.begin, (size_t)(sfname.end - sfname.begin));
+		if (mem == NULL)
+		{
+			free(argumentsUsed);
+			return femtoErr_memory;
+		}
+		argumentsUsed[mi - 1] = true;
 
+		if (femto_testFile(mem))
+		{
+			self->settingsFileName = mem;
+		}
+		else
+		{
+			free(mem);
+		}
+	}
 
 
 
@@ -86,11 +110,42 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		// Just in case, redundant otherwise
 		argumentsUsed[argc - 2] = true;
 	}
+	if (self->settingsFileName == NULL)
+	{
+		if (femto_testFile(FEMTO_SETTINGS_FILE1))
+		{
+			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE1);
+		}
+		else if (femto_testFile(FEMTO_SETTINGS_FILE2))
+		{
+			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE2);
+		}
+		else if (femto_testFile(FEMTO_SETTINGS_FILE3))
+		{
+			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE3);
+		}
+		else if (femto_testFile(FEMTO_SETTINGS_FILE4))
+		{
+			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE4);
+		}
+	}
+
+	// try to load settings from file
+	femtoSettings_loadFromFile(self);
 
 	// Everything is OK
 	free(argumentsUsed);
 	return femtoErr_ok;
 }
+
+femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self)
+{
+	// Try to load file
+	
+
+	return femtoErr_ok;
+}
+
 
 void femtoSettings_destroy(femtoSettings_t * restrict self)
 {

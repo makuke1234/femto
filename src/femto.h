@@ -127,4 +127,13 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
  */
 uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len);
 
+/**
+ * @brief Tests if file with designated filename exists
+ * 
+ * @param filename Pointer to filename widestring
+ * @return true File exists
+ * @return false File doesn't exist/is inaccessible
+ */
+bool femto_testFile(const wchar_t * filename);
+
 #endif

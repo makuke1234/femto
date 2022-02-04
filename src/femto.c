@@ -765,3 +765,26 @@ uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len)
 	}
 	return realLen;
 }
+
+bool femto_testFile(const wchar_t * filename)
+{
+	assert(filename != NULL);
+	HANDLE h = CreateFileW(
+		filename,
+		GENERIC_READ,
+		FILE_SHARE_READ,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
+	if (h == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+	else
+	{
+		CloseHandle(h);
+		return true;
+	}
+}

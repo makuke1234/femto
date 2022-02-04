@@ -9,6 +9,7 @@ char * strdup_s(const char * str, size_t len)
 		return NULL;
 	}
 	memcpy(mem, str, sizeof(char) * len);
+	mem[len - 1] = '\0';
 	return mem;
 }
 wchar_t * wcsdup_s(const wchar_t * wstr, size_t len)
@@ -20,5 +21,6 @@ wchar_t * wcsdup_s(const wchar_t * wstr, size_t len)
 		return NULL;
 	}
 	memcpy(mem, wstr, sizeof(wchar_t) * len);
+	mem[len - 1] = L'\0';
 	return mem;
 }
