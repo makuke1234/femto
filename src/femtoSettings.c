@@ -11,6 +11,8 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.fileName         = NULL,
 		.settingsFileName = NULL,
 
+		.tabsToSpaces = false,
+		.tabWidth     = 4,
 
 
 		.lastErr = { 0 }
@@ -94,6 +96,37 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		}
 	}
 
+	femtoArg_t tabs;
+	femtoArg_fetchArgv(argc, argv, L"tabsSpaces", &mi, 1, &tabs);
+	if (mi != 0)
+	{
+		if (((tabs.end - tabs.begin) >= 4) && (wcsncmp(tabs.begin, L"true", 4) == 0))
+		{
+			self->tabsToSpaces = true;
+		}
+		else if (((tabs.end - tabs.begin) >= 5) && (wcsncmp(tabs.begin, L"false", 5) == 0))
+		{
+			self->tabsToSpaces = false;
+		}
+		else
+		{
+			// String to int conversion
+			self->tabsToSpaces = wcstol(tabs.begin, NULL, 10) != 0;
+		}
+		argumentsUsed[mi - 1] = true;
+	}
+
+	femtoArg_fetchArgv(argc, argv, L"tabWidth", &mi, 1, &tabs);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"tabw", &mi, 1, &tabs);
+	}
+	if (mi != 0)
+	{
+		self->tabWidth = (uint8_t)u32Clamp((uint32_t)wcstol(tabs.begin, NULL, 10), 1, 32);
+		argumentsUsed[mi - 1] = true;
+	}
+
 
 
 	/* *************************************************** */
@@ -141,7 +174,11 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 
 femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 {
-	// Try to load file
+	// Generate default values
+	femtoSettings_t def;
+	femtoSettings_reset(&def);
+
+	// Try to load file, for every value, change value only if it's default value
 
 
 	return femtoErr_ok;

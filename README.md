@@ -80,13 +80,16 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * A question mark can also be used as a separator:
         * `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [x] List of options:
-    | Option              | Effect                                            |
-    | ------------------- | ------------------------------------------------- |
-    | --help              | Shows help                                        |
-    | --file=\[file\]     | Specifies file name to open                       |
-    | \[file\]            | Same as above, must be given as the last argument |
-    | --settings=\[file\] | Specify custom settings file explicitly           |
-    | --setting=\[file\]  | Same as above                                     |
+    | Option                 | Effect                                            |
+    | ---------------------- | ------------------------------------------------- |
+    | --help                 | Shows help                                        |
+    | --file=\[file\]        | Specifies file name to open                       |
+    | \[file\]               | Same as above, must be given as the last argument |
+    | --settings=\[file\]    | Specify custom settings file explicitly           |
+    | --setting=\[file\]     | Same as above                                     |
+    | --tabsSpaces=\[value\] | Value can be either true/false or 1/0             |
+    | --tabWidth=\[value\]   | Value can be any number from 1-32                 |
+    | --tabw=\[value\]       | Same as above                                     |
 
 
 # Screenshots

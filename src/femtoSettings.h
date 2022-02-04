@@ -17,6 +17,9 @@ typedef struct femtoSettings
 	wchar_t * fileName;
 	wchar_t * settingsFileName;
 
+	bool tabsToSpaces;
+	uint8_t tabWidth;
+
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
 } femtoSettings_t;
