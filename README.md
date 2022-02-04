@@ -122,6 +122,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+	* [ ] Proper setting loading from file
 * 1.1
     * [x] Automatic indentation, turned on by default, new settings
     * [x] Command line argument parsing support
