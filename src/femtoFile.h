@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "femtoLine.h"
+#include "femtoSettings.h"
 
 enum femtoEOLsequence
 {
@@ -83,9 +84,10 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** bytes, 
  * structure, ready to be shown on screen
  * 
  * @param self Pointer to femtoFile_t structure
+ * @param tabWidth Tab character width in monospace characters
  * @return const wchar_t* Error message, NULL on success
  */
-const wchar_t * femtoFile_read(femtoFile_t * restrict self);
+const wchar_t * femtoFile_read(femtoFile_t * restrict self, uint8_t tabWidth);
 
 enum femtoFile_writeRes
 {
@@ -100,10 +102,11 @@ enum femtoFile_writeRes
  * file if anything has been changed
  * 
  * @param self Pointer to femtoFile_t structure
+ * @param tabWidth Tab character width in monospace characters
  * @return int32_t Negative values represent error code, positive values (0 inclusive)
  * represent number of bytes written to disc
  */
-int32_t femtoFile_write(femtoFile_t * restrict self);
+int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth);
 /**
  * @brief Set console title according to last given filename, also shows
  * editor name on the titlebar
@@ -127,10 +130,11 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch);
  * @param self Pointer to femtoFile_t structure
  * @param height Screenbuffer height in lines
  * @param ch Character to insert
+ * @param pset Pointer to femtoSettings_t structure
  * @return true Success
  * @return false Failure
  */
-bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch);
+bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch, const femtoSettings_t * pset);
 
 /**
  * @brief Checks current line contents for matching string

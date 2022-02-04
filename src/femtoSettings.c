@@ -13,7 +13,8 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 
 		.tabsToSpaces = false,
 		.tabWidth     = 4,
-		.tabSpaceStr  = NULL,
+		.tabSpaceStr1 = NULL,
+		.tabSpaceStr2 = NULL,
 
 
 		.lastErr = { 0 }
@@ -42,17 +43,30 @@ bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restr
 
 bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self)
 {
-	wchar_t * mem = realloc(self->tabSpaceStr, sizeof(wchar_t) * (self->tabWidth + 1));
+	wchar_t * mem = realloc(self->tabSpaceStr1, sizeof(wchar_t) * (self->tabWidth + 1));
 	if (mem == NULL)
 	{
 		return false;
 	}
-	self->tabSpaceStr[self->tabWidth] = L'\0';
+	mem[self->tabWidth] = L'\0';
 	for (uint8_t i = 0; i < self->tabWidth; ++i)
 	{
-		self->tabSpaceStr[i] = L' ';
+		mem[i] = L' ';
 	}
-	self->tabSpaceStr = mem;
+	self->tabSpaceStr1 = mem;
+
+	mem = realloc(self->tabSpaceStr2, sizeof(wchar_t) * (self->tabWidth + 1));
+	if (mem == NULL)
+	{
+		return false;
+	}
+	mem[self->tabWidth] = L'\0';
+	for (uint8_t i = 0; i < self->tabWidth; ++i)
+	{
+		mem[i] = L'\t';
+	}
+	self->tabSpaceStr2 = mem;
+
 	return true;
 }
 
@@ -223,10 +237,15 @@ void femtoSettings_destroy(femtoSettings_t * restrict self)
 		free(self->settingsFileName);
 		self->settingsFileName = NULL;
 	}
-	if (self->tabSpaceStr != NULL)
+	if (self->tabSpaceStr1 != NULL)
 	{
-		free(self->tabSpaceStr);
-		self->tabSpaceStr = NULL;
+		free(self->tabSpaceStr1);
+		self->tabSpaceStr1 = NULL;
+	}
+	if (self->tabSpaceStr2 != NULL)
+	{
+		free(self->tabSpaceStr2);
+		self->tabSpaceStr2 = NULL;
 	}
 	// Clear last error, just in case
 	self->lastErr[0] = L'\0';

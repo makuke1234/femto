@@ -123,7 +123,7 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** bytes, 
 
 	return NULL;
 }
-const wchar_t * femtoFile_read(femtoFile_t * restrict self)
+const wchar_t * femtoFile_read(femtoFile_t * restrict self, uint8_t tabWidth)
 {
 	assert(self != NULL);
 	char * bytes = NULL;
@@ -146,8 +146,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	writeProfiler("femtoFile_read", "Converted %u bytes of character to %u UTF-16 characters.", size, chars);
 	writeProfiler("femtoFile_read", "File UTF-16 contents \"%S\"", utf16);
 
-	// Disabled the tabs to spaces conversion, let's not ruin the original file!
-	//femto_tabsToSpaces(&utf16, &chars, tabWidth);
+	femto_tabsToSpaces(&utf16, &chars, tabWidth);
 
 	// Save lines to structure
 	wchar_t ** lines = NULL;
@@ -201,7 +200,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 
 	return NULL;
 }
-int32_t femtoFile_write(femtoFile_t * restrict self)
+int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 {
 	assert(self != NULL);
 	// Generate lines
@@ -291,6 +290,9 @@ int32_t femtoFile_write(femtoFile_t * restrict self)
 	free(line);
 
 	writeProfiler("femtoFile_write", "All file contents (%u): \"%S\"", linesLen, lines);
+
+	// Convert spaces to tabs
+	femto_spacesToTabs(&lines, &linesLen, tabWidth);
 
 	// Try to convert lines string to UTF-8
 	char * utf8 = NULL;
@@ -405,35 +407,46 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch)
 	self->data.lastx = self->data.currentNode->curx;
 	return true;
 }
-bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch)
+bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch, const femtoSettings_t * pset)
 {
 	assert(self != NULL);
 	self->data.typed = true;
 	switch (ch)
 	{
 	case VK_TAB:
-		for (int i = 0; i < 4; ++i)
+	{
+		wchar_t tch = pset->tabsToSpaces ? L' ' : L'\t';
+		if (!femtoFile_addNormalCh(self, tch))
 		{
-			if (femtoFile_addNormalCh(self, ' ') == false)
+			return false;
+		}
+		for (int i = 1; (i < pset->tabWidth) && (self->data.currentNode->curx % pset->tabWidth); ++i)
+		{
+			if (femtoFile_addNormalCh(self, tch) == false)
 			{
 				return false;
 			}
 		}
 		self->data.lastx = self->data.currentNode->curx;
 		break;
+	}
 	case VK_OEM_BACKTAB:
 		// Check if there's 4 spaces before the caret
-		if (femtoFile_checkLineAt(self, -4, L"    ", 4))
+		if (femtoFile_checkLineAt(self, -pset->tabWidth, pset->tabSpaceStr1, pset->tabWidth) ||
+		    femtoFile_checkLineAt(self, -pset->tabWidth, pset->tabSpaceStr2, pset->tabWidth)
+		)
 		{
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < pset->tabWidth; ++i)
 			{
 				femtoFile_deleteBackward(self);
 			}
 		}
 		// If there isn't, check if there's 4 spaces after the caret
-		else if (femtoFile_checkLineAt(self, 0, L"    ", 4))
+		else if (femtoFile_checkLineAt(self, 0, pset->tabSpaceStr1, pset->tabWidth) ||
+		         femtoFile_checkLineAt(self, 0, pset->tabSpaceStr2, pset->tabWidth)
+		)
 		{
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < pset->tabWidth; ++i)
 			{
 				femtoFile_deleteForward(self);
 			}

@@ -129,6 +129,15 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
  * @return uint32_t New length of converted string (including null-terminator), same as *len, if len != NULL
  */
 uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len, uint8_t tabWidth);
+/**
+ * @brief Converts all spaces in string to tabs, modifies original string
+ * 
+ * @param str Address of a pointer to UTF-16 character array
+ * @param len Address of string length (including null-terminator), can be NULL
+ * @param tabWidth Physical width of the tab character in space characters
+ * @return uint32_t New length of converted string (including null-terminator), same as *len, if len != NULL
+ */
+uint32_t femto_spacesToTabs(wchar_t ** restrict str, uint32_t * restrict len, uint8_t tabWidth);
 
 /**
  * @brief Tests if file with designated filename exists
