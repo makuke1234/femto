@@ -66,7 +66,7 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 
 		for (; rawIt != endp; ++rawIt)
 		{
-			if (*rawIt == '\\')
+			if ((*rawIt == '\\') && ((rawIt + 1) != endp))
 			{
 				++rawIt;
 				continue;
@@ -83,8 +83,11 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 					arg->end   = rawIt;
 
 					// Set new argument start position
-					++rawIt;
-					argStart = rawIt;
+					if ((rawIt + 1) != endp)
+					{
+						++rawIt;
+						argStart = rawIt;
+					}
 				}
 				else
 				{
