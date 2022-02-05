@@ -123,11 +123,11 @@ bool femto_loop(femtoData_t * restrict peditor)
 			wchar_t tempstr[MAX_STATUS];
 			bool draw = true;
 
-			if (wVirtKey == VK_ESCAPE || key == sac_Ctrl_Q)	// Exit on Escape or Ctrl+Q
+			if ((wVirtKey == VK_ESCAPE) || (key == sac_Ctrl_Q))	// Exit on Escape or Ctrl+Q
 			{
 				return false;
 			}
-			else if (waitingEnc && key != sac_Ctrl_E)
+			else if (waitingEnc && (key != sac_Ctrl_E))
 			{
 				bool done = true;
 				switch (wVirtKey)
