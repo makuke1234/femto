@@ -40,13 +40,13 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | ------------------------------ | --------------------------------------------- |
     | <kbd>ESC</kbd>                 | Exit editor                                   |
     | <kbd>Ctrl+Q</kbd>              | Exit editor                                   |
-    | <ul><li>- [ ] <kbd>Ctrl+N</kbd></li></ul>        | Create new blank file                         |
-    | <ul><li>- [ ] <kbd>Ctrl+O</kbd></li></ul>        | Open file                                     |
+    | <kbd>Ctrl+N</kbd>              | Create new blank file                         |
+    | <kbd>Ctrl+O</kbd>              | Open file                                     |
     | <kbd>Ctrl+S</kbd>              | Save file                                     |
-    | <ul><li>- [ ] <kbd>Ctrl+Shift+S</kbd></li></ul>  | Save file as...                               |
-    | <ul><li>- [ ] <kbd>Ctrl+Tab</kbd></li></ul>      | Switch forwards between open files            |
-    | <ul><li>- [ ] <kbd>Ctrl+Shift+Tab</kbd></li></ul> | Switch backwards between open files           |
-    | <ul><li>- [ ] <kbd>Ctrl+W</kbd></li></ul>        | Close current tab                             |
+    | <kbd>Ctrl+Shift+S</kbd>        | Save file as...                               |
+    | <kbd>Ctrl+Tab</kbd>            | Switch forwards between open files            |
+    | <kbd>Ctrl+Shift+Tab</kbd>      | Switch backwards between open files           |
+    | <kbd>Ctrl+W</kbd>              | Close current tab                             |
     | <kbd>Ctrl+R</kbd>              | Reload current file contents                  |
     | <kbd>Ctrl+E</kbd> <kbd>F</kbd> | Switch to CRLF EOL sequence                   |
     | <kbd>Ctrl+E</kbd> <kbd>L</kbd> | Switch to LF EOL sequence                     |
