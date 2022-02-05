@@ -75,7 +75,7 @@ size_t hashMap_hash(const char * key, size_t mapSize)
 	size_t hash = 0;
 	for (; *key != '\0'; ++key)
 	{
-		hash = hash * 37 + (size_t)*key;
+		hash = (size_t)(hash * (size_t)37) + (size_t)*key;
 	}
 	return hash % mapSize;
 }
