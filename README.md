@@ -126,6 +126,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper setting loading from file
     * [x] Built-in hashmap support
     * [ ] Built-in JSON support
+	* [x] Tweak key behaviour, Ctrl+E doesn't have to be immediately released anymore
 * 1.1
     * [x] Automatic indentation, turned on by default, new settings
     * [x] Command line argument parsing support
