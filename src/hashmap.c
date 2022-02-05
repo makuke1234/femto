@@ -153,7 +153,7 @@ bool hashMap_insert(hashMap_t * restrict self, const char * key, void * value)
 	*pnode = node;
 	return true;
 }
-hashNode_t * hashMap_get(hashMap_t * restrict self, const char * key)
+hashNode_t * hashMap_get(const hashMap_t * restrict self, const char * key)
 {
 	assert(self != NULL);
 	assert(key  != NULL);

@@ -9,7 +9,7 @@ void jsonArray_init(jsonArray_t * restrict self)
 		.values    = NULL
 	};
 }
-jsonArray_t * jsonArray_make()
+jsonArray_t * jsonArray_make(void)
 {
 	jsonArray_t * self = malloc(sizeof(jsonArray_t));
 	if (self == NULL)
@@ -68,6 +68,9 @@ void jsonValue_destroy(jsonValue_t * restrict self)
 			free(self->d.object);
 			self->d.object = NULL;
 		}
+		break;
+	default:
+		// Do nothing
 		break;
 	}
 }
@@ -165,7 +168,7 @@ bool jsonObject_init(jsonObject_t * restrict self)
 	};
 	return hashMap_init(&self->map, 1);
 }
-jsonObject_t * jsonObject_make()
+jsonObject_t * jsonObject_make(void)
 {
 	jsonObject_t * self = malloc(sizeof(jsonObject_t));
 	if (self == NULL)
@@ -244,7 +247,7 @@ bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, 
 }
 jsonValue_t * jsonObject_get(const jsonObject_t * restrict self, const char * restrict key)
 {
-	return hashMap_get(&self->map, key);
+	return hashMap_get(&self->map, key)->value;
 }
 bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key)
 {

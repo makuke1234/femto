@@ -28,7 +28,7 @@ bool hashMap_init(hashMap_t * restrict self, size_t minSize);
 bool hashMap_resize(hashMap_t * restrict self, size_t minSize);
 
 bool hashMap_insert(hashMap_t * restrict self, const char * key, void * value);
-hashNode_t * hashMap_get(hashMap_t * restrict self, const char * key);
+hashNode_t * hashMap_get(const hashMap_t * restrict self, const char * key);
 void * hashMap_remove(hashMap_t * restrict self, const char * key);
 
 void hashMap_destroy(hashMap_t * restrict self);

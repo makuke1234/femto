@@ -32,7 +32,7 @@ typedef struct jsonArray
 } jsonArray_t;
 
 void jsonArray_init(jsonArray_t * restrict self);
-jsonArray_t * jsonArray_make();
+jsonArray_t * jsonArray_make(void);
 void jsonArray_destroy(jsonArray_t * restrict self);
 
 // Forward-declare jsonObject_t
@@ -81,7 +81,7 @@ struct jsonObject
 };
 
 bool jsonObject_init(jsonObject_t * restrict self);
-jsonObject_t * jsonObject_make();
+jsonObject_t * jsonObject_make(void);
 void jsonObject_destroy(jsonObject_t * restrict self);
 
 bool jsonObject_exist(const jsonObject_t * restrict self, const char * restrict key);
