@@ -71,10 +71,13 @@ bool femto_loop(femtoData_t * restrict peditor)
 	assert(pfile != NULL);
 	enum SpecialAsciiCodes
 	{
+		sac_Ctrl_E = 5,
+		sac_Ctrl_N = 14,
+		sac_Ctrl_O = 15,
 		sac_Ctrl_Q = 17,
 		sac_Ctrl_R = 18,
 		sac_Ctrl_S = 19,
-		sac_Ctrl_E = 5,
+		sac_Ctrl_W = 23,
 
 		sac_last_code = 31
 	};
@@ -124,7 +127,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			{
 				return false;
 			}
-			else if (waitingEnc)
+			else if (waitingEnc && key != sac_Ctrl_E)
 			{
 				bool done = true;
 				switch (wVirtKey)
@@ -158,7 +161,19 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 				waitingEnc = false;
 			}
-			else if (boolGet(keybuffer, sac_Ctrl_R) && !boolGet(prevkeybuffer, sac_Ctrl_R))	// Reload file
+			else if ((key == sac_Ctrl_N) && !boolGet(prevkeybuffer, sac_Ctrl_N))
+			{
+				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+N");
+			}
+			else if ((key == sac_Ctrl_O) && !boolGet(prevkeybuffer, sac_Ctrl_O))
+			{
+				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+O");
+			}
+			else if ((key == sac_Ctrl_W) && !boolGet(prevkeybuffer, sac_Ctrl_W))
+			{
+				swprintf_s(tempstr, MAX_STATUS, L"Closed tab #%u", keyCount);
+			}
+			else if ((key == sac_Ctrl_R) && !boolGet(prevkeybuffer, sac_Ctrl_R))	// Reload file
 			{
 				const wchar_t * res;
 				if ((res = femtoFile_read(pfile, peditor->settings.tabWidth)) != NULL)
@@ -177,7 +192,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				}
 				femtoData_refresh(peditor);
 			}
-			else if (boolGet(keybuffer, sac_Ctrl_S) && !boolGet(prevkeybuffer, sac_Ctrl_S))	// Save file
+			else if ((key == sac_Ctrl_S) && !boolGet(prevkeybuffer, sac_Ctrl_S))	// Save file
 			{
 				int32_t saved = femtoFile_write(pfile, peditor->settings.tabWidth);
 				switch (saved)
@@ -198,7 +213,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
 				}
 			}
-			else if (boolGet(keybuffer, sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
+			else if ((key == sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
 			{
 				waitingEnc = true;
 				swprintf_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
@@ -215,10 +230,34 @@ bool femto_loop(femtoData_t * restrict peditor)
 			// Special keys
 			else
 			{
+				bool send = true;
 				switch (wVirtKey)
 				{
+				// Save as...
+				case L'S':
+					if ((GetAsyncKeyState(VK_LCONTROL) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
+					{
+						swprintf_s(tempstr, MAX_STATUS, L"Save as...");
+					}
+					break;
 				case VK_TAB:
-					if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+				{
+					bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+					
+					// Shuffle between tabs
+					if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
+					{
+						send = false;
+						if (shift)
+						{
+							swprintf_s(tempstr, MAX_STATUS, L"Previous tab #%u", keyCount);
+						}
+						else
+						{
+							swprintf_s(tempstr, MAX_STATUS, L"Next tab #%u", keyCount);
+						}
+					}
+					else if (shift)
 					{
 						swprintf_s(tempstr, MAX_STATUS, L"\u2191 + 'TAB' #%u", keyCount);
 						wVirtKey = VK_OEM_BACKTAB;
@@ -228,6 +267,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						swprintf_s(tempstr, MAX_STATUS, L"'TAB' #%u", keyCount);
 					}
 					break;
+				}
 				case VK_DELETE:
 				{
 					bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
@@ -302,7 +342,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					draw = false;
 				}
 
-				if (femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey, &peditor->settings))
+				if (send && femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey, &peditor->settings))
 				{
 					femtoData_refresh(peditor);
 				}
