@@ -10,7 +10,7 @@ It is a bigger more feature-rich version of my other console text editor [atto](
 It is also written in vanilla C + Win32 Console API - it's designed to be used solely on Microsoft Windows.
 It has been compiled with MinGW GCC.
 
-Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports ~2700 source code lines (excluding whitespace & comments):
+Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports ~3000 source code lines (excluding whitespace & comments):
 
 ![SLOC](./images/sloc.png)
 
@@ -124,6 +124,8 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
     * [ ] Proper setting loading from file
+    * [x] Built-in hashmap support
+    * [ ] Built-in JSON support
 * 1.1
     * [x] Automatic indentation, turned on by default, new settings
     * [x] Command line argument parsing support
