@@ -200,10 +200,14 @@ void jsonObject_destroy(jsonObject_t * restrict self)
 
 bool jsonObject_exist(const jsonObject_t * restrict self, const char * restrict key)
 {
+	assert(self != NULL);
+	assert(key  != NULL);
 	return hashMap_get(&self->map, key) != NULL;
 }
 bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, jsonValue_t value)
 {
+	assert(self != NULL);
+	assert(key  != NULL);
 	if (jsonObject_exist(self, key))
 	{
 		return false;
@@ -247,10 +251,14 @@ bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, 
 }
 jsonValue_t * jsonObject_get(const jsonObject_t * restrict self, const char * restrict key)
 {
+	assert(self != NULL);
+	assert(key  != NULL);
 	return hashMap_get(&self->map, key)->value;
 }
 bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key)
 {
+	assert(self != NULL);
+	assert(key  != NULL);
 	if (!hashMap_remove(&self->map, key) || (self->numKeys < 1))
 	{
 		return false;
