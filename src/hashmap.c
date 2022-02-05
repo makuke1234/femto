@@ -1,5 +1,7 @@
 #include "hashmap.h"
 
+#include <math.h>
+
 hashNode_t * hashNode_make(const char * key, void * value)
 {
 	assert(key != NULL);
@@ -131,7 +133,7 @@ bool hashMap_insert(hashMap_t * restrict self, const char * key, void * value)
 		{
 			return false;
 		}
-		*pnode = &(*pnode)->next;
+		pnode = &(*pnode)->next;
 	}
 
 	hashNode_t * node = hashNode_make(key, value);
@@ -180,7 +182,7 @@ void * hashMap_remove(hashMap_t * restrict self, const char * key)
 			hashNode_destroy(node);
 			return value;
 		}
-		*pnode = &(*pnode)->next;
+		pnode = &(*pnode)->next;
 	}
 	return NULL;
 }

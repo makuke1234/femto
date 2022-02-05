@@ -16,13 +16,19 @@ enum jsonValueType
 	jsonValue_object
 };
 
+// Forward-declare jsonValue_t
+typedef struct jsonValue jsonValue_t;
+
 typedef struct jsonArray
 {
 	size_t numValues, maxValues;
 	jsonValue_t * values;
 } jsonArray_t;
 
-typedef struct jsonValue
+// Forward-declare jsonObject_t
+typedef struct jsonObject jsonObject_t;
+
+struct jsonValue
 {
 	enum jsonValueType type;
 	union
@@ -33,7 +39,7 @@ typedef struct jsonValue
 		jsonArray_t * array;
 		jsonObject_t * object;
 	} d;
-} jsonValue_t;
+};
 
 void   jsonValue_getNull   (const jsonValue_t * restrict self, bool * restrict success);
 char * jsonValue_getString (const jsonValue_t * restrict self, bool * restrict success);
@@ -51,13 +57,13 @@ typedef struct jsonKeyValue
 
 
 
-typedef struct jsonObject
+struct jsonObject
 {
 	size_t numKeys, maxKeys;
 	jsonKeyValue_t * keyvalues;
 	jsonKeyMap_t map;
 
-} jsonObject_t;
+};
 
 
 typedef struct json
