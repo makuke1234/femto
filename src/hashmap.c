@@ -15,7 +15,7 @@ hashNode_t * hashNode_make(const char * key, void * value)
 	node->value = value;
 	return node;
 }
-void hashNode_destroy(hashNode_t * restrict self)
+void hashNode_free(hashNode_t * restrict self)
 {
 	assert(self != NULL);
 	if (self->key != NULL)
@@ -26,12 +26,12 @@ void hashNode_destroy(hashNode_t * restrict self)
 	free(self);
 }
 
-void hashNode_recursiveDestroy(hashNode_t * restrict self)
+void hashNode_recursiveFree(hashNode_t * restrict self)
 {
 	while (self != NULL)
 	{
 		hashNode_t * restrict next = self->next;
-		hashNode_destroy(self);
+		hashNode_free(self);
 		self = next;
 	}
 }
@@ -187,7 +187,7 @@ void * hashMap_remove(hashMap_t * restrict self, const char * key)
 			void * value = node->value;
 			*pnode = node->next;
 
-			hashNode_destroy(node);
+			hashNode_free(node);
 			return value;
 		}
 		pnode = &(*pnode)->next;
@@ -206,7 +206,7 @@ void hashMap_destroy(hashMap_t * restrict self)
 
 	for (size_t i = 0; i < self->numNodes; ++i)
 	{
-		hashNode_recursiveDestroy(self->nodes[i]);
+		hashNode_recursiveFree(self->nodes[i]);
 	}
 	free(self->nodes);
 }

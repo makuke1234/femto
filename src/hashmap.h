@@ -12,9 +12,9 @@ typedef struct hashNode
 } hashNode_t;
 
 hashNode_t * hashNode_make(const char * key, void * value);
-void hashNode_destroy(hashNode_t * restrict self);
+void hashNode_free(hashNode_t * restrict self);
 
-void hashNode_recursiveDestroy(hashNode_t * restrict self);
+void hashNode_recursiveFree(hashNode_t * restrict self);
 
 typedef struct hashMap
 {
