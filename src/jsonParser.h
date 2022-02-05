@@ -35,6 +35,14 @@ typedef struct jsonValue
 	} d;
 } jsonValue_t;
 
+void   jsonValue_getNull   (const jsonValue_t * restrict self, bool * restrict success);
+char * jsonValue_getString (const jsonValue_t * restrict self, bool * restrict success);
+bool   jsonValue_getBoolean(const jsonValue_t * restrict self, bool * restrict success);
+double jsonValue_getNumber (const jsonValue_t * restrict self, bool * restrict success);
+jsonArray_t  * jsonValue_getArray (const jsonValue_t * restrict self, bool * restrict success);
+jsonObject_t * jsonValue_getObject(const jsonValue_t * restrict self, bool * restrict success);
+
+
 typedef struct jsonKeyValue
 {
 	char * key;
