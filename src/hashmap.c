@@ -85,8 +85,16 @@ bool hashMap_init(hashMap_t * restrict self, size_t minSize)
 	assert(self != NULL);
 	assert(minSize > 0);
 	self->numNodes = hashMap_findNextPrime(minSize);
-	self->nodes    = calloc(self->numNodes, sizeof(hashNode_t *));
-	return self->nodes == NULL ? false : true;
+	self->nodes    = malloc(self->numNodes * sizeof(hashNode_t *));
+	if (self->nodes == NULL)
+	{
+		return false;
+	}
+	for (size_t i = 0; i < self->numNodes; ++i)
+	{
+		self->nodes[i] = NULL;
+	}
+	return true;
 }
 bool hashMap_resize(hashMap_t * restrict self, size_t minSize)
 {
