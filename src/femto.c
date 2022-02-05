@@ -237,6 +237,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				case L'S':
 					if ((GetAsyncKeyState(VK_LCONTROL) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
 					{
+						send = false;
 						swprintf_s(tempstr, MAX_STATUS, L"Save as...");
 					}
 					break;
