@@ -136,6 +136,10 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 
 	femtoArg_t tabs;
 	femtoArg_fetchArgv(argc, argv, L"tabsSpaces", &mi, 1, &tabs);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"tabsToSpaces", &mi, 1, &tabs);
+	}
 	if (mi != 0)
 	{
 		self->tabsToSpaces = femtoArg_strToBool(tabs);

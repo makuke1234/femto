@@ -81,19 +81,20 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * A question mark can also be used as a separator:
         * `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [x] List of options:
-    | Option                 | Effect                                            |
-    | ---------------------- | ------------------------------------------------- |
-    | --help                 | Shows help                                        |
-    | --file=\[file\]        | Specifies file name to open                       |
-    | \[file\]               | Same as above, must be given as the last argument |
-    | --settings=\[file\]    | Specify custom settings file explicitly           |
-    | --setting=\[file\]     | Same as above                                     |
-    | --tabsSpaces=\[value\] | Value can be either true/false or 1/0             |
-    | --tabWidth=\[value\]   | Value can be any number from 1-32                 |
-    | --tabw=\[value\]       | Same as above                                     |
-    | --autoindent=\[value\] | Value can be either true/false or 1/0             |
-    | --autoi=\[value\]      | Same as above                                     |
-    | --aindent=\[value\]    | Same as above                                     |
+    | Option                   | Effect                                            |
+    | ------------------------ | ------------------------------------------------- |
+    | --help                   | Shows help                                        |
+    | --file=\[file\]          | Specifies file name to open                       |
+    | \[file\]                 | Same as above, must be given as the last argument |
+    | --settings=\[file\]      | Specify custom settings file explicitly           |
+    | --setting=\[file\]       | Same as above                                     |
+    | --tabsSpaces=\[value\]   | Value can be either true/false or 1/0             |
+    | --tabsToSpaces=\[value\] | Same as above                                     |
+    | --tabWidth=\[value\]     | Value can be any number from 1-32                 |
+    | --tabw=\[value\]         | Same as above                                     |
+    | --autoindent=\[value\]   | Value can be either true/false or 1/0             |
+    | --autoi=\[value\]        | Same as above                                     |
+    | --aindent=\[value\]      | Same as above                                     |
 
 
 # Screenshots
@@ -122,7 +123,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
-	* [ ] Proper setting loading from file
+    * [ ] Proper setting loading from file
 * 1.1
     * [x] Automatic indentation, turned on by default, new settings
     * [x] Command line argument parsing support
