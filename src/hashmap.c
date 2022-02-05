@@ -1,5 +1,18 @@
 #include "hashmap.h"
 
+hashNode_t * hashNode_make(const char * key, void * value)
+{
+	assert(key != NULL);
+	
+	hashNode_t * node = malloc(sizeof(hashNode_t));
+	if (node == NULL)
+	{
+		return NULL;
+	}
+	node->key   = strdup(key);
+	node->value = value;
+	return node;
+}
 void hashNode_destroy(hashNode_t * restrict self)
 {
 	assert(self != NULL);
