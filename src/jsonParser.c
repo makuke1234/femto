@@ -32,6 +32,36 @@ void jsonArray_destroy(jsonArray_t * restrict self)
 		self->values = NULL;
 	}
 }
+void jsonArray_free(jsonArray_t * restrict self)
+{
+	assert(self != NULL);
+	jsonArray_destroy(self);
+	free(self);
+}
+
+jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
+{
+	assert(self != NULL);
+	assert(cont != NULL);
+	char * str = *cont;
+	size_t realSize = (contSize != NULL) ? *contSize : 0;
+
+	// Array start
+
+	for (size_t i = 0; i < self->numValues; ++i)
+	{
+		// Elements
+	}
+
+	// Array end
+
+	*cont = str;
+	if (contSize != NULL)
+	{
+		*contSize = realSize;
+	}
+	return jsonErr_ok;
+}
 
 void jsonValue_init(jsonValue_t * restrict self)
 {
@@ -117,6 +147,108 @@ jsonObject_t * jsonValue_getObject(const jsonValue_t * restrict self, bool * res
 	return self->d.object;
 }
 
+jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
+{
+	assert(self != NULL);
+	assert(cont != NULL);
+	size_t realSize = (contSize != NULL) ? *contSize : 0;
+
+	char temp[MAX_NUMBERLEN];
+	char * string    = NULL;
+	size_t stringLen = 0;
+	bool needsDealloc = false;
+
+	switch (self->type)
+	{
+	case jsonValue_null:
+		string    = "null";
+		stringLen = 5;
+		break;
+	case jsonValue_string:
+	{
+		size_t size = strlen(self->d.string);
+		size_t totalSize = 1 + size + 1 + 1;
+		string = malloc(sizeof(char) * totalSize);
+		if (string == NULL)
+		{
+			return jsonErr_mem;
+		}
+
+		string[0] = '"';
+		memcpy(&string[1], self->d.string, sizeof(char) * size);
+		string[totalSize - 2] = '"';
+		string[totalSize - 1] = '\0';
+
+		stringLen = totalSize;
+
+		needsDealloc = true;
+		break;
+	}
+	case jsonValue_boolean:
+		string    = self->d.boolean ? "true" : "false";
+		stringLen = self->d.boolean ? 5      : 6;
+		break;
+	case jsonValue_number:
+		string    = temp;
+		stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g", self->d.number) + 1;
+		break;
+	case jsonValue_array:
+	{
+		jsonErr_t ret = jsonArray_dump(self->d.array, &string, &stringLen, depth + 1);
+		if (ret != jsonErr_ok)
+		{
+			return ret;
+		}
+		needsDealloc = true;
+		break;
+	}
+	case jsonValue_object:
+	{
+		jsonErr_t ret = jsonObject_dump(self->d.object, &string, &stringLen, depth + 1);
+		if (ret != jsonErr_ok)
+		{
+			return ret;
+		}
+		needsDealloc = true;
+		break;
+	}
+	}
+
+	if (string == NULL)
+	{
+		return jsonErr_unknown;
+	}
+
+	// Copy string contents
+
+	if (realSize < stringLen)
+	{
+		char * str = realloc(*cont, sizeof(char) * stringLen);
+		if (str == NULL)
+		{
+			if (needsDealloc)
+			{
+				free(string);
+			}
+			return jsonErr_mem;
+		}
+		realSize = stringLen;
+	}
+	memcpy(*cont, string, sizeof(char) * stringLen);
+
+
+	if (needsDealloc)
+	{
+		free(string);
+	}
+
+	if (contSize != NULL)
+	{
+		*contSize = realSize;
+	}
+	return jsonErr_ok;
+}
+
 
 bool jsonKeyValue_init(jsonKeyValue_t * restrict self, const char * restrict key, jsonValue_t value)
 {
@@ -157,6 +289,29 @@ void jsonKeyValue_destroy(jsonKeyValue_t * restrict self)
 	}
 	jsonValue_destroy(&self->value);
 }
+void jsonKeyValue_free(jsonKeyValue_t * restrict self)
+{
+	assert(self != NULL);
+	jsonKeyValue_destroy(self);
+	free(self);
+}
+
+jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
+{
+	assert(self != NULL);
+	assert(cont != NULL);
+	char * str = *cont;
+	size_t realSize = (contSize != NULL) ? *contSize : 0;
+
+
+
+	*cont = str;
+	if (contSize != NULL)
+	{
+		*contSize = realSize;
+	}
+	return jsonErr_ok;
+}
 
 bool jsonObject_init(jsonObject_t * restrict self)
 {
@@ -196,6 +351,12 @@ void jsonObject_destroy(jsonObject_t * restrict self)
 		self->keyvalues = NULL;
 	}
 	hashMap_destroy(&self->map);
+}
+void jsonObject_free(jsonObject_t * restrict self)
+{
+	assert(self != NULL);
+	jsonObject_destroy(self);
+	free(self);
 }
 
 bool jsonObject_exist(const jsonObject_t * restrict self, const char * restrict key)
@@ -273,6 +434,53 @@ bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key)
 	return true;
 }
 
+jsonErr_t jsonObject_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
+{
+	assert(self != NULL);
+	assert(cont != NULL);
+	char * str = *cont;
+	size_t realSize = (contSize != NULL) ? *contSize : 0;
+
+
+
+	*cont = str;
+	if (contSize != NULL)
+	{
+		*contSize = realSize;
+	}
+	return jsonErr_ok;
+}
+
+bool json_init(json_t * restrict self)
+{
+	assert(self != NULL);
+	return jsonObject_init(&self->object);
+}
+json_t * json_make(void)
+{
+	json_t * json = malloc(sizeof(json_t));
+	if (json == NULL)
+	{
+		return NULL;
+	}
+	if (!json_init(json))
+	{
+		free(json);
+		return NULL;
+	}
+	return json;
+}
+void json_destroy(json_t * restrict self)
+{
+	assert(self != NULL);
+	jsonObject_destroy(&self->object);
+}
+void json_free(json_t * restrict self)
+{
+	assert(self != NULL);
+	json_destroy(self);
+	free(self);
+}
 
 jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen)
 {
@@ -282,4 +490,12 @@ jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contL
 	size_t realLen = strnlen_s(contents, contLen);
 
 	return jsonErr_ok;
+}
+
+
+jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize)
+{
+	assert(self != NULL);
+	assert(cont != NULL);
+	return jsonObject_dump(&self->object, cont, contSize, 0);
 }

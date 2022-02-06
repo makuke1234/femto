@@ -4,6 +4,8 @@
 #include "common.h"
 #include "hashmap.h"
 
+#define MAX_NUMBERLEN 32
+
 typedef hashMap_t jsonKeyMap_t;
 
 enum jsonValueType
@@ -20,6 +22,7 @@ typedef enum jsonErr
 {
 	jsonErr_ok,
 	jsonErr_unknown,
+	jsonErr_mem,
 } jsonErr_t;
 
 // Forward-declare jsonValue_t
@@ -34,6 +37,9 @@ typedef struct jsonArray
 void jsonArray_init(jsonArray_t * restrict self);
 jsonArray_t * jsonArray_make(void);
 void jsonArray_destroy(jsonArray_t * restrict self);
+void jsonArray_free(jsonArray_t * restrict self);
+
+jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth);
 
 // Forward-declare jsonObject_t
 typedef struct jsonObject jsonObject_t;
@@ -61,6 +67,7 @@ double jsonValue_getNumber (const jsonValue_t * restrict self, bool * restrict s
 jsonArray_t  * jsonValue_getArray (const jsonValue_t * restrict self, bool * restrict success);
 jsonObject_t * jsonValue_getObject(const jsonValue_t * restrict self, bool * restrict success);
 
+jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth);
 
 typedef struct jsonKeyValue
 {
@@ -71,7 +78,9 @@ typedef struct jsonKeyValue
 bool jsonKeyValue_init(jsonKeyValue_t * restrict self, const char * restrict key, jsonValue_t value);
 jsonKeyValue_t * jsonKeyValue_make(const char * restrict key, jsonValue_t value);
 void jsonKeyValue_destroy(jsonKeyValue_t * restrict self);
+void jsonKeyValue_free(jsonKeyValue_t * restrict self);
 
+jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth);
 
 struct jsonObject
 {
@@ -83,19 +92,26 @@ struct jsonObject
 bool jsonObject_init(jsonObject_t * restrict self);
 jsonObject_t * jsonObject_make(void);
 void jsonObject_destroy(jsonObject_t * restrict self);
+void jsonObject_free(jsonObject_t * restrict self);
 
 bool jsonObject_exist(const jsonObject_t * restrict self, const char * restrict key);
 bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, jsonValue_t value);
 jsonValue_t * jsonObject_get(const jsonObject_t * restrict self, const char * restrict key);
 bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key);
 
+jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth);
+
 
 typedef struct json
 {
 	jsonObject_t object;
-
-
 } json_t;
+
+bool json_init(json_t * restrict self);
+json_t * json_make(void);
+void json_destroy(json_t * restrict self);
+void json_free(json_t * restrict self);
+
 
 /**
  * @brief Parse an UTF-8 encoded JSON file to an DOM tree
@@ -106,5 +122,7 @@ typedef struct json
  * @return jsonErr_t Error code, jsonErr_ok -> everything is ok
  */
 jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen);
+
+jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize);
 
 #endif
