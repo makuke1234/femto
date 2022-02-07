@@ -43,23 +43,70 @@ jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict con
 {
 	assert(self != NULL);
 	assert(cont != NULL);
-	char * str = *cont;
-	size_t realSize = (contSize != NULL) ? *contSize : 0;
+	size_t contLen = 0;
+	size_t contCap = 0;
+	size_t * prealCap = (contSize != NULL) ? contSize : &contCap;
 
 	// Array start
+	for (size_t i = 0; i < depth; ++i)
+	{
+		if (dynstrncat_s(cont, prealCap, contLen, "\t", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		++contLen;
+	}
+	if (dynstrncat_s(cont, prealCap, contLen, "[\n", 2) == NULL)
+	{
+		return jsonErr_mem;
+	}
+	contLen += 2;
 
+	char * line = NULL;
+	size_t lineCap = 0;
 	for (size_t i = 0; i < self->numValues; ++i)
 	{
 		// Elements
+		jsonErr_t result = jsonValue_dump(&self->values[i], &line, &lineCap, depth + 1);
+		if (result != jsonErr_ok)
+		{
+			if (line != NULL)
+			{
+				free(line);
+			}
+			return result;
+		}
+
+		size_t lineLen = strlen(line);
+		if (dynstrncat_s(cont, prealCap, contLen, line, lineLen) == NULL)
+		{
+			if (line != NULL)
+			{
+				free(line);
+			}
+			return jsonErr_mem;
+		}
+		contLen += lineLen;
+	}
+	if (line != NULL)
+	{
+		free(line);
 	}
 
 	// Array end
-
-	*cont = str;
-	if (contSize != NULL)
+	for (size_t i = 0; i < depth; ++i)
 	{
-		*contSize = realSize;
+		if (dynstrncat_s(cont, prealCap, contLen, "\t", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		++contLen;
 	}
+	if (dynstrncat_s(cont, prealCap, contLen, "]\n", 2) == NULL)
+	{
+		return jsonErr_mem;
+	}
+
 	return jsonErr_ok;
 }
 
@@ -151,101 +198,81 @@ jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict con
 {
 	assert(self != NULL);
 	assert(cont != NULL);
-	size_t realSize = (contSize != NULL) ? *contSize : 0;
+	size_t contCap = 0;
+	size_t * prealCap = (contSize != NULL) ? contSize : &contCap;
 
-	char temp[MAX_NUMBERLEN];
-	char * string    = NULL;
-	size_t stringLen = 0;
-	bool needsDealloc = false;
+	for (size_t i = 0; i < depth; ++i)
+	{
+		if (dynwcsncat_s(cont, prealCap, i, "\t", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+	}
 
 	switch (self->type)
 	{
 	case jsonValue_null:
-		string    = "null";
-		stringLen = 5;
-		break;
-	case jsonValue_string:
-	{
-		size_t size = strlen(self->d.string);
-		size_t totalSize = 1 + size + 1 + 1;
-		string = malloc(sizeof(char) * totalSize);
-		if (string == NULL)
+		if (dynwcsncat_s(cont, prealCap, depth, "null\n", 5) == NULL)
 		{
 			return jsonErr_mem;
 		}
-
-		string[0] = '"';
-		memcpy(&string[1], self->d.string, sizeof(char) * size);
-		string[totalSize - 2] = '"';
-		string[totalSize - 1] = '\0';
-
-		stringLen = totalSize;
-
-		needsDealloc = true;
+		break;
+	case jsonValue_string:
+	{
+		if (dynwcsncat_s(cont, prealCap, depth, "\"", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		size_t len = strlen(self->d.string);
+		if (dynwcsncat_s(cont, prealCap, depth + 1, self->d.string, len) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		if (dynwcsncat_s(cont, prealCap, depth + 1 + len, "\"\n", 2) == NULL)
+		{
+			return jsonErr_mem;
+		}
 		break;
 	}
 	case jsonValue_boolean:
-		string    = self->d.boolean ? "true" : "false";
-		stringLen = self->d.boolean ? 5      : 6;
+		if (dynwcsncat_s(cont, prealCap, depth, self->d.boolean ? "true\n" : "false\n", self->d.boolean ? 5 : 6) == NULL)
+		{
+			return jsonErr_mem;
+		}
 		break;
 	case jsonValue_number:
-		string    = temp;
-		stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g", self->d.number) + 1;
+	{
+		char temp[MAX_NUMBERLEN];
+		size_t stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g\n", self->d.number);
+
+		if (dynwcsncat_s(cont, prealCap, depth, temp, stringLen) == NULL)
+		{
+			return jsonErr_mem;
+		}
 		break;
+	}
 	case jsonValue_array:
 	{
-		jsonErr_t ret = jsonArray_dump(self->d.array, &string, &stringLen, depth + 1);
+		jsonErr_t ret = jsonArray_dump(self->d.array, cont, prealCap, depth + 1);
 		if (ret != jsonErr_ok)
 		{
 			return ret;
 		}
-		needsDealloc = true;
 		break;
 	}
 	case jsonValue_object:
 	{
-		jsonErr_t ret = jsonObject_dump(self->d.object, &string, &stringLen, depth + 1);
+		jsonErr_t ret = jsonObject_dump(self->d.object, cont, prealCap, depth + 1);
 		if (ret != jsonErr_ok)
 		{
 			return ret;
 		}
-		needsDealloc = true;
 		break;
 	}
-	}
-
-	if (string == NULL)
-	{
+	default:
 		return jsonErr_unknown;
 	}
 
-	// Copy string contents
-
-	if (realSize < stringLen)
-	{
-		char * str = realloc(*cont, sizeof(char) * stringLen);
-		if (str == NULL)
-		{
-			if (needsDealloc)
-			{
-				free(string);
-			}
-			return jsonErr_mem;
-		}
-		realSize = stringLen;
-	}
-	memcpy(*cont, string, sizeof(char) * stringLen);
-
-
-	if (needsDealloc)
-	{
-		free(string);
-	}
-
-	if (contSize != NULL)
-	{
-		*contSize = realSize;
-	}
 	return jsonErr_ok;
 }
 
@@ -300,16 +327,52 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 {
 	assert(self != NULL);
 	assert(cont != NULL);
-	char * str = *cont;
-	size_t realSize = (contSize != NULL) ? *contSize : 0;
+	size_t contLen = 0;
+	size_t contCap = 0;
+	size_t prealCap = (contSize != NULL) ? contSize : &contCap;
 
-
-
-	*cont = str;
-	if (contSize != NULL)
+	for (size_t i = 0; i < depth; ++i)
 	{
-		*contSize = realSize;
+		if (dynstrncat_s(cont, prealCap, contLen, "\t", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		++contLen;
 	}
+	if (dynstrncat_s(cont, prealCap, contLen, ":\n", 2) == NULL)
+	{
+		return jsonErr_mem;
+	}
+	contLen += 2;
+
+	size_t keyLen = strlen(self->key);
+	if (dynwcsncat_s(cont, prealCap, contLen, self->key, keyLen) == NULL)
+	{
+		return jsonErr_mem;
+	}
+
+	char * line = NULL;
+	jsonErr_t result = jsonValue_dump(&self->value, &line, NULL, depth);
+	if (result != jsonErr_ok)
+	{
+		if (line != NULL)
+		{
+			free(line);
+		}
+		return jsonErr_mem;
+	}
+
+	if (dynwcscat_s(cont, prealCap, contLen, line) == NULL)
+	{
+		if (line != NULL)
+		{
+			free(line);
+		}
+		return jsonErr_mem;
+	}
+
+	free(line);
+	
 	return jsonErr_ok;
 }
 
@@ -434,20 +497,73 @@ bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key)
 	return true;
 }
 
-jsonErr_t jsonObject_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
+jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
 {
 	assert(self != NULL);
 	assert(cont != NULL);
-	char * str = *cont;
-	size_t realSize = (contSize != NULL) ? *contSize : 0;
+	size_t contLen = 0;
+	size_t contCap = 0;
+	size_t * prealCap = (contSize != NULL) ? contSize : &contCap;
 
-
-
-	*cont = str;
-	if (contSize != NULL)
+	// Object start
+	for (size_t i = 0; i < depth; ++i)
 	{
-		*contSize = realSize;
+		if (dynstrncat_s(cont, prealCap, contLen, "\t", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		++contLen;
 	}
+	if (dynstrncat_s(cont, prealCap, contLen, "{\n", 2) == NULL)
+	{
+		return jsonErr_mem;
+	}
+	contLen += 2;
+
+	char * line = NULL;
+	size_t lineCap = 0;
+	for (size_t i = 0; i < self->numKeys; ++i)
+	{
+		jsonErr_t result = jsonKeyValue_dump(&self->keyvalues[i], &line, &lineCap, depth + 1);
+		if (result != jsonErr_ok)
+		{
+			if (line != NULL)
+			{
+				free(line);
+			}
+			return result;
+		}
+
+		size_t lineLen = strlen(line);
+		if (dynstrncat_s(cont, prealCap, contLen, line, lineLen) == NULL)
+		{
+			if (line != NULL)
+			{
+				free(line);
+			}
+			return jsonErr_mem;
+		}
+		contLen += lineLen;
+	}
+	if (line != NULL)
+	{
+		free(line);
+	}
+
+	// Object end
+	for (size_t i = 0; i < depth; ++i)
+	{
+		if (dynstrncat_s(cont, prealCap, contLen, "\t", 1) == NULL)
+		{
+			return jsonErr_mem;
+		}
+		++contLen;
+	}
+	if (dynstrncat_s(cont, prealCap, contLen, "}\n", 2) == NULL)
+	{
+		return jsonErr_mem;
+	}
+
 	return jsonErr_ok;
 }
 
@@ -487,7 +603,7 @@ jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contL
 	assert(self     != NULL);
 	assert(contents != NULL);
 
-	size_t realLen = strnlen_s(contents, contLen);
+	size_t contLen = strnlen_s(contents, contLen);
 
 	return jsonErr_ok;
 }

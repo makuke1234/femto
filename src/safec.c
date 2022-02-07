@@ -1,6 +1,6 @@
 #include "safec.h"
 
-char * strdup_s(const char * str, size_t len)
+char * strdup_s(const char * restrict str, size_t len)
 {
 	len = strnlen_s(str, len) + 1;
 	char * mem = malloc(sizeof(char) * len);
@@ -12,7 +12,7 @@ char * strdup_s(const char * str, size_t len)
 	mem[len - 1] = '\0';
 	return mem;
 }
-wchar_t * wcsdup_s(const wchar_t * wstr, size_t len)
+wchar_t * wcsdup_s(const wchar_t * restrict wstr, size_t len)
 {
 	len = wcsnlen_s(wstr, len) + 1;
 	wchar_t * mem = malloc(sizeof(wchar_t) * len);
@@ -23,4 +23,105 @@ wchar_t * wcsdup_s(const wchar_t * wstr, size_t len)
 	memcpy(mem, wstr, sizeof(wchar_t) * len);
 	mem[len - 1] = L'\0';
 	return mem;
+}
+
+
+char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr)
+{
+	assert(pstr   != NULL);
+	assert(addStr != NULL);
+	size_t strCap = 0;
+	size_t * pstrCap = (psize != NULL) ? psize : &strCap;
+
+	size_t addStrLen = strlen(addStr);
+	size_t newLen = strLen + addStrLen + 1;
+	if (newLen > *pstrCap)
+	{
+		size_t newCap = newLen * 2;
+		wchar_t * mem = realloc(*pstr, sizeof(char) * newCap);
+		if (mem == NULL)
+		{
+			return NULL;
+		}
+		*pstr    = mem;
+		*pstrCap = newCap;
+	}
+	memcpy((*pstr)[strLen], addStr, sizeof(char) * addStrLen);
+	(*pstr)[newLen - 1] = '\0';
+
+	return *pstr;
+}
+char * dynstrncat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr, size_t addStrLen)
+{
+	assert(pstr   != NULL);
+	assert(addStr != NULL);
+	size_t strCap = 0;
+	size_t * pstrCap = (psize != NULL) ? psize : &strCap;
+
+	size_t newLen = strLen + addStrLen + 1;
+	if (newLen > *pstrCap)
+	{
+		size_t newCap = newLen * 2;
+		wchar_t * mem = realloc(*pstr, sizeof(char) * newCap);
+		if (mem == NULL)
+		{
+			return NULL;
+		}
+		*pstr    = mem;
+		*pstrCap = newCap;
+	}
+	memcpy((*pstr)[strLen], addStr, sizeof(char) * addStrLen);
+	(*pstr)[newLen - 1] = '\0';
+
+	return *pstr;
+}
+
+wchar_t * dynwcscat_s(wchar_t ** restrict pstr, size_t * restrict psize, size_t strLen, const wchar_t * restrict addStr)
+{
+	assert(pstr   != NULL);
+	assert(addStr != NULL);
+	size_t strCap = 0;
+	size_t * pstrCap = (psize != NULL) ? psize : &strCap;
+
+	size_t addStrLen = wcslen(addStr);
+	size_t newLen = strLen + addStrLen + 1;
+	if (newLen > *pstrCap)
+	{
+		size_t newCap = newLen * 2;
+		wchar_t * mem = realloc(*pstr, sizeof(wchar_t) * newCap);
+		if (mem == NULL)
+		{
+			return NULL;
+		}
+		*pstr    = mem;
+		*pstrCap = newCap;
+	}
+	memcpy((*pstr)[strLen], addStr, sizeof(wchar_t) * addStrLen);
+	(*pstr)[newLen - 1] = L'\0';
+
+	return *pstr;
+}
+wchar_t * dynwcsncat_s(wchar_t ** restrict pstr, size_t * restrict psize, size_t strLen, const wchar_t * restrict addStr, size_t addStrLen)
+{
+	assert(pstr   != NULL);
+	assert(addStr != NULL);
+	size_t strCap = 0;
+	size_t * pstrCap = (psize != NULL) ? psize : &strCap;
+
+	size_t newLen = strLen + addStrLen + 1;
+	if (newLen > *pstrCap)
+	{
+		size_t newCap = newLen * 2;
+		wchar_t * mem = realloc(*pstr, sizeof(wchar_t) * newCap);
+		if (mem == NULL)
+		{
+			return NULL;
+		}
+		*pstr    = mem;
+		*pstrCap = newCap;
+	}
+	memcpy((*pstr)[strLen], addStr, sizeof(wchar_t) * addStrLen);
+	(*pstr)[newLen - 1] = L'\0';
+
+	return *pstr;
 }
