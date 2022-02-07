@@ -598,6 +598,13 @@ void json_free(json_t * restrict self)
 	free(self);
 }
 
+jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize)
+{
+	assert(self != NULL);
+	assert(cont != NULL);
+	return jsonObject_dump(&self->object, cont, contSize, 0);
+}
+
 jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen)
 {
 	assert(self     != NULL);
@@ -607,12 +614,4 @@ jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contL
 
 
 	return jsonErr_ok;
-}
-
-
-jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize)
-{
-	assert(self != NULL);
-	assert(cont != NULL);
-	return jsonObject_dump(&self->object, cont, contSize, 0);
 }

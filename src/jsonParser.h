@@ -112,6 +112,7 @@ json_t * json_make(void);
 void json_destroy(json_t * restrict self);
 void json_free(json_t * restrict self);
 
+jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize);
 
 /**
  * @brief Parse an UTF-8 encoded JSON file to an DOM tree
@@ -123,6 +124,5 @@ void json_free(json_t * restrict self);
  */
 jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen);
 
-jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize);
 
 #endif
