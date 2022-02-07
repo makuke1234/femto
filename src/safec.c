@@ -38,7 +38,7 @@ char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen
 	if (newLen > *pstrCap)
 	{
 		size_t newCap = newLen * 2;
-		wchar_t * mem = realloc(*pstr, sizeof(char) * newCap);
+		char * mem = realloc(*pstr, sizeof(char) * newCap);
 		if (mem == NULL)
 		{
 			return NULL;
@@ -46,7 +46,7 @@ char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen
 		*pstr    = mem;
 		*pstrCap = newCap;
 	}
-	memcpy((*pstr)[strLen], addStr, sizeof(char) * addStrLen);
+	memcpy(&(*pstr)[strLen], addStr, sizeof(char) * addStrLen);
 	(*pstr)[newLen - 1] = '\0';
 
 	return *pstr;
@@ -62,7 +62,7 @@ char * dynstrncat_s(char ** restrict pstr, size_t * restrict psize, size_t strLe
 	if (newLen > *pstrCap)
 	{
 		size_t newCap = newLen * 2;
-		wchar_t * mem = realloc(*pstr, sizeof(char) * newCap);
+		char * mem = realloc(*pstr, sizeof(char) * newCap);
 		if (mem == NULL)
 		{
 			return NULL;
@@ -70,7 +70,7 @@ char * dynstrncat_s(char ** restrict pstr, size_t * restrict psize, size_t strLe
 		*pstr    = mem;
 		*pstrCap = newCap;
 	}
-	memcpy((*pstr)[strLen], addStr, sizeof(char) * addStrLen);
+	memcpy(&(*pstr)[strLen], addStr, sizeof(char) * addStrLen);
 	(*pstr)[newLen - 1] = '\0';
 
 	return *pstr;
@@ -96,7 +96,7 @@ wchar_t * dynwcscat_s(wchar_t ** restrict pstr, size_t * restrict psize, size_t 
 		*pstr    = mem;
 		*pstrCap = newCap;
 	}
-	memcpy((*pstr)[strLen], addStr, sizeof(wchar_t) * addStrLen);
+	memcpy(&(*pstr)[strLen], addStr, sizeof(wchar_t) * addStrLen);
 	(*pstr)[newLen - 1] = L'\0';
 
 	return *pstr;
@@ -120,7 +120,7 @@ wchar_t * dynwcsncat_s(wchar_t ** restrict pstr, size_t * restrict psize, size_t
 		*pstr    = mem;
 		*pstrCap = newCap;
 	}
-	memcpy((*pstr)[strLen], addStr, sizeof(wchar_t) * addStrLen);
+	memcpy(&(*pstr)[strLen], addStr, sizeof(wchar_t) * addStrLen);
 	(*pstr)[newLen - 1] = L'\0';
 
 	return *pstr;

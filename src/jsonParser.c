@@ -203,7 +203,7 @@ jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict con
 
 	for (size_t i = 0; i < depth; ++i)
 	{
-		if (dynwcsncat_s(cont, prealCap, i, "\t", 1) == NULL)
+		if (dynstrncat_s(cont, prealCap, i, "\t", 1) == NULL)
 		{
 			return jsonErr_mem;
 		}
@@ -212,30 +212,30 @@ jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict con
 	switch (self->type)
 	{
 	case jsonValue_null:
-		if (dynwcsncat_s(cont, prealCap, depth, "null\n", 5) == NULL)
+		if (dynstrncat_s(cont, prealCap, depth, "null\n", 5) == NULL)
 		{
 			return jsonErr_mem;
 		}
 		break;
 	case jsonValue_string:
 	{
-		if (dynwcsncat_s(cont, prealCap, depth, "\"", 1) == NULL)
+		if (dynstrncat_s(cont, prealCap, depth, "\"", 1) == NULL)
 		{
 			return jsonErr_mem;
 		}
 		size_t len = strlen(self->d.string);
-		if (dynwcsncat_s(cont, prealCap, depth + 1, self->d.string, len) == NULL)
+		if (dynstrncat_s(cont, prealCap, depth + 1, self->d.string, len) == NULL)
 		{
 			return jsonErr_mem;
 		}
-		if (dynwcsncat_s(cont, prealCap, depth + 1 + len, "\"\n", 2) == NULL)
+		if (dynstrncat_s(cont, prealCap, depth + 1 + len, "\"\n", 2) == NULL)
 		{
 			return jsonErr_mem;
 		}
 		break;
 	}
 	case jsonValue_boolean:
-		if (dynwcsncat_s(cont, prealCap, depth, self->d.boolean ? "true\n" : "false\n", self->d.boolean ? 5 : 6) == NULL)
+		if (dynstrncat_s(cont, prealCap, depth, self->d.boolean ? "true\n" : "false\n", self->d.boolean ? 5 : 6) == NULL)
 		{
 			return jsonErr_mem;
 		}
@@ -243,9 +243,9 @@ jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict con
 	case jsonValue_number:
 	{
 		char temp[MAX_NUMBERLEN];
-		size_t stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g\n", self->d.number);
+		int stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g\n", self->d.number);
 
-		if (dynwcsncat_s(cont, prealCap, depth, temp, stringLen) == NULL)
+		if ((stringLen <= 0) || dynstrncat_s(cont, prealCap, depth, temp, (size_t)stringLen) == NULL)
 		{
 			return jsonErr_mem;
 		}
@@ -329,7 +329,7 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 	assert(cont != NULL);
 	size_t contLen = 0;
 	size_t contCap = 0;
-	size_t prealCap = (contSize != NULL) ? contSize : &contCap;
+	size_t * prealCap = (contSize != NULL) ? contSize : &contCap;
 
 	for (size_t i = 0; i < depth; ++i)
 	{
@@ -346,7 +346,7 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 	contLen += 2;
 
 	size_t keyLen = strlen(self->key);
-	if (dynwcsncat_s(cont, prealCap, contLen, self->key, keyLen) == NULL)
+	if (dynstrncat_s(cont, prealCap, contLen, self->key, keyLen) == NULL)
 	{
 		return jsonErr_mem;
 	}
@@ -362,7 +362,7 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 		return jsonErr_mem;
 	}
 
-	if (dynwcscat_s(cont, prealCap, contLen, line) == NULL)
+	if (dynstrcat_s(cont, prealCap, contLen, line) == NULL)
 	{
 		if (line != NULL)
 		{
@@ -372,7 +372,7 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 	}
 
 	free(line);
-	
+
 	return jsonErr_ok;
 }
 
@@ -524,7 +524,7 @@ jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict c
 	size_t lineCap = 0;
 	for (size_t i = 0; i < self->numKeys; ++i)
 	{
-		jsonErr_t result = jsonKeyValue_dump(&self->keyvalues[i], &line, &lineCap, depth + 1);
+		jsonErr_t result = jsonKeyValue_dump(self->keyvalues[i], &line, &lineCap, depth + 1);
 		if (result != jsonErr_ok)
 		{
 			if (line != NULL)
@@ -603,7 +603,8 @@ jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contL
 	assert(self     != NULL);
 	assert(contents != NULL);
 
-	size_t contLen = strnlen_s(contents, contLen);
+	contLen = strnlen_s(contents, contLen);
+
 
 	return jsonErr_ok;
 }
