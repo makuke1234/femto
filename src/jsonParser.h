@@ -115,7 +115,17 @@ void json_free(json_t * restrict self);
 jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t * restrict contSize);
 
 /**
- * @brief Parse an UTF-8 encoded JSON file to an DOM tree
+ * @brief Check an UTF-8 encoded JSON file for any syntax errors
+ *
+ * @param contents UTF-8 encoded byte array of JSON file contents
+ * @param contLen Contents length, given to strnlen_s to calculate actual length
+ * @return jsonErr_t Error code, jsonErr_ok -> everything is ok
+ */
+jsonErr_t json_check(const char * contents, size_t contLen);
+
+/**
+ * @brief Parse an UTF-8 encoded JSON file to an DOM tree, JSON will be checked first
+ * by calling json_check()
  * 
  * @param self Pointer to json_t structure receiving the parsed tree
  * @param contents UTF-8 encoded byte array of JSON file contents

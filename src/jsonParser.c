@@ -605,10 +605,26 @@ jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t 
 	return jsonObject_dump(&self->object, cont, contSize, 0);
 }
 
+jsonErr_t json_check(const char * contents, size_t contLen)
+{
+	assert(contents != NULL);
+
+	contLen = strnlen_s(contents, contLen);
+
+
+	return jsonErr_ok;
+}
+
 jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen)
 {
 	assert(self     != NULL);
 	assert(contents != NULL);
+
+	jsonErr_t err = json_check(contents, contLen);
+	if (err != jsonErr_ok)
+	{
+		return err;
+	}
 
 	contLen = strnlen_s(contents, contLen);
 
