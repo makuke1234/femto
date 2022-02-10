@@ -1,6 +1,27 @@
 #include "jsonParser.h"
 #include "stack.h"
 
+const char * g_jsonErrors[] = {
+	[jsonErr_ok]                        = "All OK",
+	[jsonErr_unknown]                   = "Unknown error!",
+	[jsonErr_mem]                       = "Memory allocation error!",
+	[jsonErr_invalidChar]               = "Invalid character!",
+	[jsonErr_invalidState]              = "Invalid state!",
+	[jsonErr_moreThan1Object]           = "More than 1 object in file!",
+	[jsonErr_noKey]                     = "No key in object!",
+	[jsonErr_noTerminatingQuote]        = "No terminating quote for string!",
+	[jsonErr_invalidValueSeparator]     = "Invalid value separator in object!",
+	[jsonErr_noValueSeparator]          = "No value separator in object!",
+	[jsonErr_noValue]                   = "No value in object's key-value pair!",
+	[jsonErr_noSeparator]               = "No spearator between values!",
+	[jsonErr_excessiveArrayTerminator]  = "Excessive array terminator!",
+	[jsonErr_excessiveObjectTerminator] = "Excessive object terminator!",
+	[jsonErr_noArrayTerminator]         = "No terminating ']'!",
+	[jsonErr_noObjectTerminator]        = "No terminating '}'!",
+	[jsonErr_invalidTerminator]         = "Invalid terminator!",
+	[jsonErr_multipleDecimalPoints]     = "Multiple decimal points '.' in number!"
+};
+
 static inline bool stack_pushCh(stack_t * restrict self, char ch)
 {
 	return stack_push(self, &ch);
@@ -623,7 +644,172 @@ jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t 
 	return jsonObject_dump(&self->object, cont, contSize, 0);
 }
 
-jsonErr_t json_check(const char * contents, size_t contLen)
+
+static inline jsonErr_t json_inner_checkValue(const char ** restrict pp, const char * restrict endp, stack_t * restrict states)
+{
+	assert(pp     != NULL);
+	assert(*pp    != NULL);
+	assert(endp   != NULL);
+	assert(states != NULL);
+	char objStart = stack_topCh(states);
+	assert(objStart != 0);
+
+	jsonErr_t err = jsonErr_ok;
+
+	const char * p = *pp;
+	
+	bool value = false;
+	// Scan 1 value, then scan for comma or object/array end depending on mode
+	for (; p != endp; ++p)
+	{
+		bool done = false;
+		switch (*p)
+		{
+		// Skips whitespace
+		case ' ':
+		case '\t':
+		case '\n':
+		case '\r':
+			break;
+		case '{':
+		case '[':
+			--p;
+			done = true;
+			break;
+		case '"':
+			done = true;
+			++p;
+			for (; p != endp; ++p)
+			{
+				if ((*p == '\\') && ((p + 1) != endp))
+				{
+					++p;
+					continue;
+				}
+				else if (*p == '"')
+				{
+					break;
+				}
+			}
+			if (p == endp)
+			{
+				err = jsonErr_noTerminatingQuote;
+				break;
+			}
+			// If value found
+			value = true;
+			break;
+		default:
+			// Check for true, false, null
+			done = true;
+			value = true;
+			if (((endp - p) >= 5) && (strncmp(p, "false", 5) == 0))
+			{
+				p += 4;
+			}
+			else if (((endp - p) >= 4) && (strncmp(p, "true", 4) == 0))
+			{
+				p += 3;
+			}
+			else if (((endp - p) >= 4) && (strncmp(p, "null", 4) == 0))
+			{
+				p += 3;
+			}
+			else if ((*p >= '0') && (*p <= '9'))
+			{
+				// Iterate to number end
+				bool dot = false;
+				
+				++p;
+				for (; p != endp; ++p)
+				{
+					if ((*p >= '0') && (*p <= '9'))
+					{
+						continue;
+					}
+					else if (*p == '.')
+					{
+						if (dot)
+						{
+							err   = jsonErr_multipleDecimalPoints;
+							value = false;
+							break;
+						}
+						else
+						{
+							dot = true;
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			else
+			{
+				value = false;
+			}
+		}
+		if (done || (err != jsonErr_ok))
+		{
+			break;
+		}
+	}
+
+	if (value)
+	{
+		// try to find for end or comma
+		for (; p != endp; ++p)
+		{
+			bool done = false;
+			switch (*p)
+			{
+			// Skip whitespace
+			case ' ':
+			case '\t':
+			case '\n':
+			case '\r':
+				break;
+			case ']':
+				--p;
+				done = true;
+				if (objStart != '[')
+				{
+					err = jsonErr_invalidTerminator;
+				}
+				break;
+			case '}':
+				--p;
+				done = true;
+				if (objStart != '{')
+				{
+					err = jsonErr_invalidTerminator;
+				}
+				break;
+			case ',':
+				done = true;
+				break;
+			}
+
+			if (done)
+			{
+				break;
+			}
+		}
+	}
+	else if (err == jsonErr_ok)
+	{
+		err = jsonErr_noValue;
+	}
+
+	*pp = p;
+
+	return err;
+}
+
+
+jsonErr_t json_check(const char * restrict contents, size_t contLen)
 {
 	assert(contents != NULL);
 
@@ -634,47 +820,176 @@ jsonErr_t json_check(const char * contents, size_t contLen)
 	stack_t states;
 	stack_init(&states, sizeof(char));
 
-	size_t * statesNum = &states.len;
-
 	size_t firstLevelObjects = 0;
 
-	jsonErr_t err = jsonErr_invalidChar;
+	jsonErr_t err = jsonErr_ok;
 
 	const char * endp = contents + contLen;
 	for (const char * p = contents; p != endp; ++p)
 	{
-		if (*statesNum > 0)
+		if (states.len > 0)
 		{
-			char state = *(char *)stack_top(&states);
+			switch (stack_topCh(&states))
+			{
+			case '{':
+				switch (*p)
+				{
+				// Skips whitespace
+				case ' ':
+				case '\t':
+				case '\n':
+				case '\r':
+					break;
+				case '}':
+					if (!stack_pop(&states))
+					{
+						err = jsonErr_excessiveObjectTerminator;
+					}
+					break;
+				case '"':
+					// Parse key until end
+					++p;
+					for (; p != endp; ++p)
+					{
+						if ((*p == '\\') && ((p + 1) != endp))
+						{
+							++p;
+							continue;
+						}
+						else if (*p == '"')
+						{
+							break;
+						}
+					}
+					if (p == endp)
+					{
+						err = jsonErr_noTerminatingQuote;
+						break;
+					}
+					++p;
+					for (; p != endp; ++p)
+					{
+						// skip whitespace
+						if ((*p == ' ') || (*p == '\t') || (*p == '\n') || (*p == '\r'))
+						{
+							continue;
+						}
+						else if (*p == ':')
+						{
+							break;
+						}
+						else
+						{
+							err = jsonErr_invalidValueSeparator;
+							break;
+						}
+					}
+					if (err != jsonErr_ok)
+					{
+						break;
+					}
+					else if (p == endp)
+					{
+						err = jsonErr_noValueSeparator;
+						break;
+					}
+					++p;
+					
+					err = json_inner_checkValue(&p, endp, &states);
+					if (err != jsonErr_ok)
+					{
+						break;
+					}
+
+					break;
+				default:
+					err = jsonErr_noKey;
+				}
+				break;
+			case '[':
+				switch (*p)
+				{
+				// Skips whitespace
+				case ' ':
+				case '\t':
+				case '\n':
+				case '\r':
+					break;
+				case ']':
+					if (!stack_pop(&states))
+					{
+						err = jsonErr_excessiveArrayTerminator;
+					}
+					break;
+				default:
+					err = json_inner_checkValue(&p, endp, &states);
+				}
+			default:
+				err = jsonErr_invalidState;
+			}
+			if (err != jsonErr_ok)
+			{
+				break;
+			}
 		}
 		else
 		{
+			switch (*p)
+			{
 			// Skips whitespace
-			if (*p == ' ' || *p == '\r' || *p == '\n' || *p == '\t')
-			{
-				continue;
-			}
-			else if (*p == '{')
-			{
+			case ' ':
+			case '\t':
+			case '\n':
+			case '\r':
+				break;
+			case '{':
 				++firstLevelObjects;
 				if (!stack_pushCh(&states, '{'))
 				{
 					err = jsonErr_mem;
-					break;
 				}
-			}
-			else
-			{
+				break;
+			default:
 				err = jsonErr_invalidChar;
+			}
+
+			if (err != jsonErr_ok)
+			{
 				break;
 			}
 		}
 	}
 
+	if ((states.len > 0) && (err == jsonErr_ok))
+	{
+		char ch = stack_topCh(&states);
+		if (ch == '{')
+		{
+			err = jsonErr_noObjectTerminator;
+		}
+		else if (ch == '[')
+		{
+			err = jsonErr_noArrayTerminator;
+		}
+		else
+		{
+			err = jsonErr_unknown;
+		}
+	}
+
+	// free stack
+	stack_destroy(&states);
+
+	if ((firstLevelObjects > 1) && (err == jsonErr_ok))
+	{
+		// Too much objects
+		err = jsonErr_moreThan1Object;
+	}
+
 	return err;
 }
 
-jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen)
+jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, size_t contLen)
 {
 	assert(self     != NULL);
 	assert(contents != NULL);

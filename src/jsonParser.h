@@ -24,8 +24,24 @@ typedef enum jsonErr
 	jsonErr_ok,
 	jsonErr_unknown,
 	jsonErr_mem,
-	jsonErr_invalidChar
+	jsonErr_invalidChar,
+	jsonErr_invalidState,
+	jsonErr_moreThan1Object,
+	jsonErr_noKey,
+	jsonErr_noTerminatingQuote,
+	jsonErr_invalidValueSeparator,
+	jsonErr_noValueSeparator,
+	jsonErr_noValue,
+	jsonErr_noSeparator,
+	jsonErr_excessiveArrayTerminator,
+	jsonErr_excessiveObjectTerminator,
+	jsonErr_noArrayTerminator,
+	jsonErr_noObjectTerminator,
+	jsonErr_invalidTerminator,
+	jsonErr_multipleDecimalPoints,
 } jsonErr_t;
+
+extern const char * g_jsonErrors[];
 
 // Forward-declare jsonValue_t
 typedef struct jsonValue jsonValue_t;
@@ -123,7 +139,7 @@ jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t 
  * @param contLen Contents length, given to strnlen_s to calculate actual length
  * @return jsonErr_t Error code, jsonErr_ok -> everything is ok
  */
-jsonErr_t json_check(const char * contents, size_t contLen);
+jsonErr_t json_check(const char * restrict contents, size_t contLen);
 
 /**
  * @brief Parse an UTF-8 encoded JSON file to an DOM tree, JSON will be checked first
@@ -134,7 +150,7 @@ jsonErr_t json_check(const char * contents, size_t contLen);
  * @param contLen Contents length, given to strnlen_s to calculate actual length
  * @return jsonErr_t Error code, jsonErr_ok -> everything is ok
  */
-jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen);
+jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, size_t contLen);
 
 
 #endif
