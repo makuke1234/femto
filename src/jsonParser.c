@@ -1,4 +1,22 @@
 #include "jsonParser.h"
+#include "stack.h"
+
+static inline bool stack_pushCh(stack_t * restrict self, char ch)
+{
+	return stack_push(self, &ch);
+}
+static inline char stack_topCh(const stack_t * restrict self)
+{
+	char * c = stack_top(self);
+	if (c == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		return *c;
+	}
+}
 
 void jsonArray_init(jsonArray_t * restrict self)
 {
@@ -611,8 +629,49 @@ jsonErr_t json_check(const char * contents, size_t contLen)
 
 	contLen = strnlen_s(contents, contLen);
 
+	// Basically it's a state machine, stores a stack of states
 
-	return jsonErr_ok;
+	stack_t states;
+	stack_init(&states, sizeof(char));
+
+	size_t * statesNum = &states.len;
+
+	size_t firstLevelObjects = 0;
+
+	jsonErr_t err = jsonErr_invalidChar;
+
+	const char * endp = contents + contLen;
+	for (const char * p = contents; p != endp; ++p)
+	{
+		if (*statesNum > 0)
+		{
+			char state = *(char *)stack_top(&states);
+		}
+		else
+		{
+			// Skips whitespace
+			if (*p == ' ' || *p == '\r' || *p == '\n' || *p == '\t')
+			{
+				continue;
+			}
+			else if (*p == '{')
+			{
+				++firstLevelObjects;
+				if (!stack_pushCh(&states, '{'))
+				{
+					err = jsonErr_mem;
+					break;
+				}
+			}
+			else
+			{
+				err = jsonErr_invalidChar;
+				break;
+			}
+		}
+	}
+
+	return err;
 }
 
 jsonErr_t json_parse(json_t * restrict self, const char * contents, size_t contLen)
