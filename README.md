@@ -32,7 +32,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 - [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces wide
 - [x] Automatic indentation, on by default
 - [x] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
-    * *If multiple files exist with any of the names above, the settings file will be selected following this exact order*
+    * *If multiple files exist with any of the names above, the settings file will be selected following this exact priority*
 - [x] All settings can be given by command line arguments
 - [ ] Multi-file support
 - [x] Keyboard shortcuts:
