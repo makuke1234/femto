@@ -831,8 +831,7 @@ jsonErr_t json_check(const char * restrict contents, size_t contLen)
 
 	jsonErr_t err = jsonErr_ok;
 
-	const char * endp = contents + contLen;
-	for (const char * p = contents; p != endp; ++p)
+	for (const char * p = contents, * endp = p + contLen; p != endp; ++p)
 	{
 		if (states.len > 0)
 		{
@@ -1010,6 +1009,10 @@ jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, siz
 
 	contLen = strnlen_s(contents, contLen);
 
+	for (const char * p = contents, * endp = p + contLen; p != endp; ++p)
+	{
+		
+	}
 
 	return jsonErr_ok;
 }

@@ -41,6 +41,10 @@ typedef enum jsonErr
 	jsonErr_multipleDecimalPoints,
 } jsonErr_t;
 
+/**
+ * @brief Array for error codes
+ * 
+ */
 extern const char * g_jsonErrors[];
 
 // Forward-declare jsonValue_t
