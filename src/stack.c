@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 void stack_init(stack_t * restrict self, size_t elemSize)
 {

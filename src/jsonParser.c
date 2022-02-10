@@ -1,5 +1,12 @@
+#define __STDC_WANT_LIB_EXT1__ 1
+#include <string.h>
+
 #include "jsonParser.h"
 #include "stack.h"
+#include "safec.h"
+
+#include <stdlib.h>
+#include <assert.h>
 
 const char * g_jsonErrors[] = {
 	[jsonErr_ok]                        = "All OK",
@@ -924,6 +931,7 @@ jsonErr_t json_check(const char * restrict contents, size_t contLen)
 				default:
 					err = json_inner_checkValue(&p, endp, &states);
 				}
+				break;
 			default:
 				err = jsonErr_invalidState;
 			}
