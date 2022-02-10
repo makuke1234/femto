@@ -1,7 +1,8 @@
 #ifndef JSONPARSER_H
 #define JSONPARSER_H
 
-#include "common.h"
+#include <stdint.h>
+#include <stdbool.h>
 #include "hashmap.h"
 
 #define MAX_NUMBERLEN 32
@@ -23,6 +24,7 @@ typedef enum jsonErr
 	jsonErr_ok,
 	jsonErr_unknown,
 	jsonErr_mem,
+	jsonErr_invalidChar
 } jsonErr_t;
 
 // Forward-declare jsonValue_t

@@ -1,7 +1,8 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
-#include "common.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct hashNode
 {

@@ -1,5 +1,7 @@
 #include "hashmap.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 hashNode_t * hashNode_make(const char * key, void * value)
