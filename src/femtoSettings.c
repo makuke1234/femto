@@ -1,6 +1,7 @@
 #include "femtoSettings.h"
 #include "femtoArg.h"
 #include "femto.h"
+#include "jsonParser.h"
 
 
 void femtoSettings_reset(femtoSettings_t * restrict self)
@@ -215,23 +216,61 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 
 	// try to load settings from file
-	femtoSettings_loadFromFile(self);
+	const wchar_t * result = femtoSettings_loadFromFile(self);
+	if (result != NULL)
+	{
+		wcsncpy_s(self->lastErr, FEMTO_SETTINGS_ERR_MAX, result, FEMTO_SETTINGS_ERR_MAX);
+	}
 
 	// Everything is OK
 	free(argumentsUsed);
-	return femtoErr_ok;
+
+	return result == NULL ? femtoErr_ok : femtoErr_unknown;
 }
 
-femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self)
+const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 {
+	assert(self != NULL);
+	if (self->settingsFileName == NULL)
+	{
+		return NULL;
+	}
 	// Generate default values
 	femtoSettings_t def;
 	femtoSettings_reset(&def);
 
 	// Try to load file, for every value, change it only if it's default value
+	HANDLE hset = femtoFile_sopen(self->settingsFileName, false);
+	if (hset == INVALID_HANDLE_VALUE)
+	{
+		return L"Error opening file!";
+	}
 
+	char * bytes = NULL;
+	uint32_t bytesLen = 0;
+	// Read bytes
+	const wchar_t * result = femtoFile_sreadBytes(hset, &bytes, &bytesLen);
+	// Close file
+	CloseHandle(hset);
+	if (result != NULL)
+	{
+		if (bytes != NULL)
+		{
+			free(bytes);
+		}
+		return result;
+	}
 
-	return femtoErr_ok;
+	jsonErr_t jresult = json_check(bytes, bytesLen);
+	if (jresult != jsonErr_ok)
+	{
+		free(bytes);
+		return g_jsonErrors[jresult];
+	}
+
+	free(bytes);
+
+	return NULL;
 }
 
 

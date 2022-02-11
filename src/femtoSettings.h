@@ -70,10 +70,9 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
  * @brief Try to load settings from configured file
  * 
  * @param self Pointer to femtoSettings_t structure
- * @return femtoErr_t femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
- * information is necessary, get it via femtoSettings_getLastError()
+ * @return const wchar_t* Error message, NULL if everything is OK
  */
-femtoErr_t femtoSettings_loadFromFile(femtoSettings_t * restrict self);
+const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self);
 
 /**
  * @brief Destroy femtoSettings_t structure

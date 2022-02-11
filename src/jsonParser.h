@@ -25,8 +25,7 @@ typedef enum jsonErr
 	jsonErr_unknown,
 	jsonErr_mem,
 	jsonErr_invalidChar,
-	jsonErr_invalidState,
-	jsonErr_moreThan1Object,
+	jsonErr_moreThan1Main,
 	jsonErr_noKey,
 	jsonErr_noTerminatingQuote,
 	jsonErr_invalidValueSeparator,
@@ -39,13 +38,14 @@ typedef enum jsonErr
 	jsonErr_noObjectTerminator,
 	jsonErr_invalidTerminator,
 	jsonErr_multipleDecimalPoints,
+	jsonErr_noDigitAfterDecimal,
 } jsonErr_t;
 
 /**
  * @brief Array for error codes
  * 
  */
-extern const char * g_jsonErrors[];
+extern const wchar_t * g_jsonErrors[];
 
 // Forward-declare jsonValue_t
 typedef struct jsonValue jsonValue_t;

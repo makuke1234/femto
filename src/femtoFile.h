@@ -49,10 +49,19 @@ femtoFile_t * femtoFile_resetDyn(void);
 /**
  * @brief Opens new file with desired name and write access
  * 
+ * @param fileName Desired file name, CANNOT be NULL
+ * @param writemode Desired write access, true for write mode, false for read mode
+ * @return HANDLE Opened file handle, INVALID_HANDLE_VALUE on failure; Use
+ * CloseHandle() to close the file afterwards
+ */
+HANDLE femtoFile_sopen(const wchar_t * restrict fileName, bool writemode);
+/**
+ * @brief Opens new file with desired name and write access
+ * 
  * @param self Pointer to femtoFile_t structure
  * @param selfName Desired file name, can be NULL; If is NULL, previously given file
  * name will be used
- * @param writemode Desires write access, true for write mode, false for read mode
+ * @param writemode Desired write access, true for write mode, false for read mode
  * @return true Success
  * @return false Failure
  */
@@ -70,6 +79,16 @@ void femtoFile_close(femtoFile_t * restrict self);
  */
 void femtoFile_clearLines(femtoFile_t * restrict self);
 /**
+ * @brief Reads bytes to an array from open file, allocates memory only if *bytes
+ * is too small
+ * 
+ * @param hfile Handle to open file 
+ * @param bytes Address of pointer to character array
+ * @param bytesLen Address of array length in bytes
+ * @return const wchar_t* Error messafe, NULL on success
+ */
+const wchar_t * femtoFile_sreadBytes(HANDLE hfile, char ** restrict bytes, uint32_t * restrict bytesLen);
+/**
  * @brief Opens file with last given filename, reads bytes to an array, allocates
  * memory only if *bytes is too small
  * 
@@ -78,7 +97,7 @@ void femtoFile_clearLines(femtoFile_t * restrict self);
  * @param bytesLen Address of array length in bytes
  * @return const wchar_t* Error message, NULL on success
  */
-const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** bytes, uint32_t * bytesLen);
+const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restrict bytes, uint32_t * restrict bytesLen);
 /**
  * @brief Opens file with last given filename, reads file contents to internal
  * structure, ready to be shown on screen

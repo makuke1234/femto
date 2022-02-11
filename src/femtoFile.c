@@ -32,6 +32,20 @@ femtoFile_t * femtoFile_resetDyn(void)
 	femtoFile_reset(file);
 	return file;
 }
+HANDLE femtoFile_sopen(const wchar_t * restrict fileName, bool writemode)
+{
+	assert(fileName != NULL);
+	HANDLE hfile = CreateFileW(
+		fileName,
+		writemode ? GENERIC_WRITE : GENERIC_READ,
+		FILE_SHARE_READ,
+		NULL,
+		writemode ? CREATE_ALWAYS : OPEN_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
+	return hfile;
+}
 bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileName, bool writemode)
 {
 	assert(self != NULL);
@@ -41,15 +55,7 @@ bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileNa
 	}
 
 	// try to open file
-	self->hFile = CreateFileW(
-		fileName,
-		writemode ? GENERIC_WRITE : GENERIC_READ,
-		FILE_SHARE_READ,
-		NULL,
-		writemode ? CREATE_ALWAYS : OPEN_ALWAYS,
-		FILE_ATTRIBUTE_NORMAL,
-		NULL
-	);
+	self->hFile = femtoFile_sopen(fileName, writemode);
 	if (self->hFile == INVALID_HANDLE_VALUE)
 	{
 		self->canWrite = false;
@@ -85,16 +91,16 @@ void femtoFile_clearLines(femtoFile_t * restrict self)
 		node = next;
 	}
 }
-const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** bytes, uint32_t * bytesLen)
+const wchar_t * femtoFile_sreadBytes(HANDLE hfile, char ** restrict bytes, uint32_t * restrict bytesLen)
 {
-	assert(self != NULL);
-	assert(bytes != NULL);
-	assert(bytesLen != NULL && "Pointer to length variable is mandatory!");
-	if (femtoFile_open(self, NULL, false) == false)
+	assert(bytes    != NULL);
+	assert(bytesLen != NULL);
+
+	if (hfile == INVALID_HANDLE_VALUE)
 	{
 		return L"File opening error!";
 	}
-	DWORD fileSize = GetFileSize(self->hFile, NULL);
+	DWORD fileSize = GetFileSize(hfile, NULL);
 	if ((fileSize >= *bytesLen) || (*bytes == NULL))
 	{
 		void * mem = realloc(*bytes, fileSize + 1);
@@ -107,13 +113,12 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** bytes, 
 	}
 
 	BOOL readFileRes = ReadFile(
-		self->hFile,
+		hfile,
 		*bytes,
 		fileSize,
 		NULL,
 		NULL
 	);
-	femtoFile_close(self);
 	if (!readFileRes)
 	{
 		return L"File read error!";
@@ -122,6 +127,20 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** bytes, 
 	(*bytes)[fileSize] = '\0';
 
 	return NULL;
+}
+const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restrict bytes, uint32_t * restrict bytesLen)
+{
+	assert(self != NULL);
+	assert(bytes != NULL);
+	assert(bytesLen != NULL && "Pointer to length variable is mandatory!");
+	if (femtoFile_open(self, NULL, false) == false)
+	{
+		return L"File opening error!";
+	}
+	const wchar_t * result = femtoFile_sreadBytes(self->hFile, bytes, bytesLen);
+	femtoFile_close(self);
+	
+	return result;
 }
 const wchar_t * femtoFile_read(femtoFile_t * restrict self, uint8_t tabWidth)
 {

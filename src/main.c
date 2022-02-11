@@ -26,7 +26,7 @@ int wmain(int argc, const wchar_t * argv[])
 				// Get last error
 				wchar_t errMsg[FEMTO_SETTINGS_ERR_MAX];
 				femtoSettings_getLastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
-				fputws(errMsg, stdout);
+				wprintf(L"[Settings]: %S\n", errMsg);
 				femto_printHelpClue(argv[0]);
 				return 2;
 			}
