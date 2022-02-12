@@ -67,6 +67,35 @@ void jsonArray_free(jsonArray_t * restrict self)
 	free(self);
 }
 
+jsonValue_t * jsonArray_push(jsonArray_t * restrict self)
+{
+	if (self->numValues >= self->maxValues)
+	{
+		size_t newcap = (self->numValues + 1) * 2;
+		jsonValue_t * mem = realloc(self->values, sizeof(jsonValue_t) * newcap);
+		if (mem == NULL)
+		{
+			return NULL;
+		}
+		self->maxValues = newcap;
+		self->values    = mem;
+	}
+	jsonValue_init(&self->values[self->numValues]);
+	++self->numValues;
+	return &self->values[self->numValues - 1];
+}
+bool jsonArray_pop(jsonArray_t * restrict self)
+{
+	if (self->numValues == 0)
+	{
+		return false;
+	}
+	--self->numValues;
+
+	jsonValue_destroy(&self->values[self->numValues]);
+	return true;
+}
+
 jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
 {
 	assert(self != NULL);
@@ -309,8 +338,14 @@ bool jsonKeyValue_init(jsonKeyValue_t * restrict self, const char * restrict key
 {
 	assert(self != NULL);
 	assert(key  != NULL);
-	
-	self->key = strdup(key);
+	return jsonKeyValue_initRaw(self, strdup(key), value);
+}
+bool jsonKeyValue_initRaw(jsonKeyValue_t * restrict self, char * restrict key, jsonValue_t value)
+{
+	assert(self != NULL);
+	assert(key  != NULL);
+
+	self->key = key;
 	if (self->key == NULL)
 	{
 		return false;
@@ -328,6 +363,22 @@ jsonKeyValue_t * jsonKeyValue_make(const char * restrict key, jsonValue_t value)
 		return NULL;
 	}
 	if (!jsonKeyValue_init(self, key, value))
+	{
+		free(self);
+		return NULL;
+	}
+	return self;
+}
+jsonKeyValue_t * jsonKeyValue_makeRaw(char * restrict key, jsonValue_t value)
+{
+	assert(key != NULL);
+
+	jsonKeyValue_t * self = malloc(sizeof(jsonKeyValue_t));
+	if (self == NULL)
+	{
+		return NULL;
+	}
+	if (!jsonKeyValue_initRaw(self, key, value))
 	{
 		free(self);
 		return NULL;
@@ -460,7 +511,14 @@ bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, 
 {
 	assert(self != NULL);
 	assert(key  != NULL);
-	if (jsonObject_exist(self, key))
+	return jsonObject_insertRaw(self, &(jsonKeyValue_t){ .key = strdup(key), .value = value });
+}
+bool jsonObject_insertRaw(jsonObject_t * restrict self, jsonKeyValue_t * restrict kv)
+{
+	assert(self != NULL);
+	assert(kv   != NULL);
+	assert(kv->key != NULL);
+	if (jsonObject_exist(self, kv->key))
 	{
 		return false;
 	}
@@ -487,12 +545,12 @@ bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, 
 		hashMap_resize(&self->map, (self->map.numNodes + 1) * 3);
 	}
 
-	self->keyvalues[self->numKeys] = jsonKeyValue_make(key, value);
+	self->keyvalues[self->numKeys] = jsonKeyValue_makeRaw(kv->key, kv->value);
 	if (self->keyvalues[self->numKeys] == NULL)
 	{
 		return false;
 	}
-	else if (!hashMap_insert(&self->map, key, &self->keyvalues[self->numKeys]->value))
+	else if (!hashMap_insert(&self->map, kv->key, &self->keyvalues[self->numKeys]->value))
 	{
 		free(self->keyvalues[self->numKeys]);
 		return false;
@@ -595,10 +653,10 @@ jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict c
 	return jsonErr_ok;
 }
 
-bool json_init(json_t * restrict self)
+void json_init(json_t * restrict self)
 {
 	assert(self != NULL);
-	return jsonObject_init(&self->object);
+	jsonValue_init(&self->value);
 }
 json_t * json_make(void)
 {
@@ -607,17 +665,13 @@ json_t * json_make(void)
 	{
 		return NULL;
 	}
-	if (!json_init(json))
-	{
-		free(json);
-		return NULL;
-	}
+	json_init(json);
 	return json;
 }
 void json_destroy(json_t * restrict self)
 {
 	assert(self != NULL);
-	jsonObject_destroy(&self->object);
+	jsonValue_destroy(&self->value);
 }
 void json_free(json_t * restrict self)
 {
@@ -630,7 +684,7 @@ jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t 
 {
 	assert(self != NULL);
 	assert(cont != NULL);
-	return jsonObject_dump(&self->object, cont, contSize, 0);
+	return jsonValue_dump(&self->value, cont, contSize, 0);
 }
 
 static inline void json_inner_checkValue(const char * restrict * restrict it, const char * restrict end, jsonErr_t * restrict perr);
@@ -851,6 +905,17 @@ static inline void json_inner_checkKeyValue(const char * restrict * restrict it,
 		{
 			break;
 		}
+		switch (**it)
+		{
+		case ' ':
+		case '\t':
+		case '\n':
+		case '\r':
+			break;
+		default:
+			*perr = jsonErr_invalidChar;
+			return;
+		}
 	}
 
 	if (*it == end)
@@ -883,6 +948,8 @@ static inline size_t json_inner_checkValues(const char * restrict * restrict it,
 			++*it;
 			break;
 		case '}':
+			*perr = jsonErr_invalidTerminator;
+			break;
 		case ']':
 			done = true;
 			break;
@@ -1036,6 +1103,332 @@ jsonErr_t json_check(const char * restrict contents, size_t contLen)
 	return err;
 }
 
+static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const char * restrict * restrict it, const char * restrict end);
+static inline jsonErr_t json_inner_parseKeyValue(jsonObject_t * restrict self, const char * restrict * restrict it, const char * restrict end);
+static inline jsonErr_t json_inner_parseObject(jsonObject_t * restrict self, const char * restrict * restrict it, const char * restrict end);
+static inline jsonErr_t json_inner_parseArray(jsonArray_t * restrict self, const char * restrict * restrict it, const char * restrict end);
+
+static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const char * restrict * restrict it, const char * restrict end)
+{
+	assert(self != NULL);
+	assert(it   != NULL);
+	assert(*it  != NULL);
+	assert(end  != NULL);
+	
+	bool done = false;
+	jsonErr_t err = jsonErr_ok;
+	for (; *it != end; ++*it)
+	{
+		switch (**it)
+		{
+		case ' ':
+		case '\t':
+		case '\n':
+		case '\r':
+			break;
+		case '{':
+			self->type = jsonValue_object;
+			self->d.object = jsonObject_make();
+			if (self->d.object == NULL)
+			{
+				return jsonErr_mem;
+			}
+			err = json_inner_parseObject(self->d.object, it, end);
+			done = true;
+			break;
+		case '[':
+			self->type = jsonValue_array;
+			self->d.array = jsonArray_make();
+			if (self->d.array == NULL)
+			{
+				return jsonErr_mem;
+			}
+			err = json_inner_parseArray(self->d.array, it, end);
+			done = true;
+			break;
+		case '"':
+			++*it;
+			for (const char * begin = *it; *it != end; ++*it)
+			{
+				if ((**it == '\\') && ((*it + 1) != end))
+				{
+					++*it;
+					continue;
+				}
+				else if (**it == '"')
+				{
+					++*it;
+
+					char * str = strdup_s(begin, (size_t)(*it - begin));
+					if (str == NULL)
+					{
+						return jsonErr_mem;
+					}
+					self->type = jsonValue_string;
+					self->d.string = str;
+					done = true;
+					break;
+				}
+			}
+			if (!done)
+			{
+				return jsonErr_unknown;
+			}
+			break;
+		case 'f':
+			if (((end - *it) >= 5) && (strncmp(*it, "false", 5) == 0))
+			{
+				*it += 5;
+				self->type = jsonValue_boolean;
+				self->d.boolean = false;
+				done = true;
+			}
+			else
+			{
+				return jsonErr_unknown;
+			}
+		case 't':
+			if (((end - *it) >= 4) && (strncmp(*it, "true", 4) == 0))
+			{
+				*it += 5;
+				self->type = jsonValue_boolean;
+				self->d.boolean = true;
+				done = true;
+			}
+			else
+			{
+				return jsonErr_unknown;
+			}
+		case 'n':
+			if (((end - *it) >= 4) && (strncmp(*it, "null", 4) == 0))
+			{
+				*it += 5;
+				self->type = jsonValue_null;
+				done = true;
+			}
+			else
+			{
+				return jsonErr_unknown;
+			}
+		default:
+			if ((**it >= '0') && (**it <= '9'))
+			{
+				const char * begin = *it;
+
+				for (; *it != end; ++*it)
+				{
+					if (((**it >= '0') && (**it <= '9')) || (**it == '.'))
+					{
+						continue;
+					}
+					else
+					{
+						break;
+					}
+				}
+				self->type = jsonValue_number;
+				self->d.number = strtod(begin, NULL);
+				done = true;
+			}
+			else
+			{
+				return jsonErr_unknown;
+			}
+		}
+
+		if (done || (err != jsonErr_ok))
+		{
+			break;
+		}
+	}
+	if (err != jsonErr_ok)
+	{
+		return err;
+	}
+
+	// Find comma, ] or }
+	for (; *it != end; ++*it)
+	{
+		if ((**it == ' ') || (**it == '\t') || (**it == '\n') || (**it == '\r'))
+		{
+			continue;
+		}
+		else if ((**it == ']') || (**it == '}'))
+		{
+			return jsonErr_ok;
+		}
+		else if (**it == ',')
+		{
+			++*it;
+			return jsonErr_ok;
+		}
+		else
+		{
+			return jsonErr_unknown;
+		}
+	}
+	return jsonErr_unknown;
+}
+static inline jsonErr_t json_inner_parseKeyValue(jsonObject_t * restrict self, const char * restrict * restrict it, const char * restrict end)
+{
+	assert(self != NULL);
+	assert(it   != NULL);
+	assert(*it  != NULL);
+	assert(end  != NULL);
+	assert(**it == '"');
+
+	jsonKeyValue_t kv;
+
+	++*it;
+	for (const char * begin = *it; *it != end; ++*it)
+	{
+		if ((**it == '\\') && ((*it + 1) != end))
+		{
+			++*it;
+			continue;
+		}
+		else if (**it == '"')
+		{
+			char * key = strdup_s(begin, (size_t)(*it - begin));
+			if (key == NULL)
+			{
+				return jsonErr_mem;
+			}
+			kv.key = key;
+			break;
+		}
+	}
+
+	++*it;
+	for (; *it != end; ++*it)
+	{
+		if (**it == ':')
+		{
+			break;
+		}
+	}
+
+	++*it;
+	jsonErr_t err = json_inner_parseValue(&kv.value, it, end);
+	if (err != jsonErr_ok)
+	{
+		return err;
+	}
+	if (!jsonObject_insertRaw(self, &kv))
+	{
+		return jsonErr_mem;
+	}
+
+	return jsonErr_ok;
+}
+static inline jsonErr_t json_inner_parseObject(jsonObject_t * restrict self, const char * restrict * restrict it, const char * restrict end)
+{
+	assert(self != NULL);
+	assert(it   != NULL);
+	assert(*it  != NULL);
+	assert(end  != NULL);
+
+	for (; *it != end; ++*it)
+	{
+		if (**it == '{')
+		{
+			break;
+		}
+	}
+	++*it;
+
+	bool ended = false;
+	jsonErr_t err = jsonErr_ok;
+	
+	while (*it != end)
+	{
+		switch (**it)
+		{
+		case '"':
+			err = json_inner_parseKeyValue(self, it, end);
+			if (err != jsonErr_ok)
+			{
+				return err;
+			}
+			break;
+		case '}':
+			ended = true;
+			/* fall through */
+		case ' ':
+		case '\t':
+		case '\n':
+		case '\r':
+			++*it;
+			break;
+		default:
+			return jsonErr_unknown;
+		}
+		if (ended)
+		{
+			break;
+		}
+	}
+	if (!ended)
+	{
+		return jsonErr_unknown;
+	}
+	return jsonErr_ok;
+}
+static inline jsonErr_t json_inner_parseArray(jsonArray_t * restrict self, const char * restrict * restrict it, const char * restrict end)
+{
+	assert(self != NULL);
+	assert(it   != NULL);
+	assert(*it  != NULL);
+	assert(end  != NULL);
+
+	for (; *it != end; ++*it)
+	{
+		if (**it == '[')
+		{
+			break;
+		}
+	}
+	++*it;
+
+	jsonErr_t err = jsonErr_ok;
+	jsonValue_t * val = NULL;
+
+	bool ended = false;
+	while (*it != end)
+	{
+		switch (**it)
+		{
+		case ']':
+			ended = true;
+			/* fall through */
+		case ' ':
+		case '\t':
+		case '\n':
+		case '\r':
+			++*it;
+			break;
+		default:
+			// Try to make value
+			val = jsonArray_push(self);
+			if (val == NULL)
+			{
+				return jsonErr_mem;
+			}
+			err = json_inner_parseValue(val, it, end);
+			if (err != jsonErr_ok)
+			{
+				return err;
+			}
+		}
+	}
+	if (!ended)
+	{
+		return jsonErr_unknown;
+	}
+	return jsonErr_ok;
+}
+
+
 jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, size_t contLen)
 {
 	assert(self     != NULL);
@@ -1047,15 +1440,6 @@ jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, siz
 		return err;
 	}
 	// err == jsonErr_ok, if code has reached here
-
-	contLen = strnlen_s(contents, contLen);
-
-	for (const char * p = contents, * endp = p + contLen; p != endp; ++p)
-	{
-		// Parse JSON contents here
-
-	}
-
-	return err;
+	return json_inner_parseValue(&self->value, &contents, contents + strnlen_s(contents, contLen));
 }
 

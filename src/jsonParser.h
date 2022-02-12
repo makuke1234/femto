@@ -61,6 +61,9 @@ jsonArray_t * jsonArray_make(void);
 void jsonArray_destroy(jsonArray_t * restrict self);
 void jsonArray_free(jsonArray_t * restrict self);
 
+jsonValue_t * jsonArray_push(jsonArray_t * restrict self);
+bool jsonArray_pop(jsonArray_t * restrict self);
+
 jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth);
 
 // Forward-declare jsonObject_t
@@ -98,7 +101,9 @@ typedef struct jsonKeyValue
 } jsonKeyValue_t;
 
 bool jsonKeyValue_init(jsonKeyValue_t * restrict self, const char * restrict key, jsonValue_t value);
+bool jsonKeyValue_initRaw(jsonKeyValue_t * restrict self, char * restrict key, jsonValue_t value);
 jsonKeyValue_t * jsonKeyValue_make(const char * restrict key, jsonValue_t value);
+jsonKeyValue_t * jsonKeyValue_makeRaw(char * restrict key, jsonValue_t value);
 void jsonKeyValue_destroy(jsonKeyValue_t * restrict self);
 void jsonKeyValue_free(jsonKeyValue_t * restrict self);
 
@@ -118,6 +123,7 @@ void jsonObject_free(jsonObject_t * restrict self);
 
 bool jsonObject_exist(const jsonObject_t * restrict self, const char * restrict key);
 bool jsonObject_insert(jsonObject_t * restrict self, const char * restrict key, jsonValue_t value);
+bool jsonObject_insertRaw(jsonObject_t * restrict self, jsonKeyValue_t * restrict kv);
 jsonValue_t * jsonObject_get(const jsonObject_t * restrict self, const char * restrict key);
 bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key);
 
@@ -126,10 +132,10 @@ jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict c
 
 typedef struct json
 {
-	jsonObject_t object;
+	jsonValue_t value;
 } json_t;
 
-bool json_init(json_t * restrict self);
+void json_init(json_t * restrict self);
 json_t * json_make(void);
 void json_destroy(json_t * restrict self);
 void json_free(json_t * restrict self);
