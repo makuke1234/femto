@@ -144,6 +144,19 @@ jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict con
 			return jsonErr_mem;
 		}
 		contLen += lineLen;
+
+		if (i < (self->numValues - 1))
+		{
+			if (dynstrncat_s(cont, prealCap, contLen - 1, ",\n", 2) == NULL)
+			{
+				if (line != NULL)
+				{
+					free(line);
+				}
+				return jsonErr_mem;
+			}
+			++contLen;
+		}
 	}
 	if (line != NULL)
 	{
@@ -310,7 +323,7 @@ jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict con
 	}
 	case jsonValue_array:
 	{
-		jsonErr_t ret = jsonArray_dump(self->d.array, cont, prealCap, depth + 1);
+		jsonErr_t ret = jsonArray_dump(self->d.array, cont, prealCap, depth);
 		if (ret != jsonErr_ok)
 		{
 			return ret;
@@ -319,7 +332,7 @@ jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict con
 	}
 	case jsonValue_object:
 	{
-		jsonErr_t ret = jsonObject_dump(self->d.object, cont, prealCap, depth + 1);
+		jsonErr_t ret = jsonObject_dump(self->d.object, cont, prealCap, depth);
 		if (ret != jsonErr_ok)
 		{
 			return ret;
@@ -418,17 +431,25 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 		}
 		++contLen;
 	}
-	if (dynstrncat_s(cont, prealCap, contLen, ":\n", 2) == NULL)
+	if (dynstrncat_s(cont, prealCap, contLen, "\"", 1) == NULL)
 	{
 		return jsonErr_mem;
 	}
-	contLen += 2;
+	++contLen;
 
 	size_t keyLen = strlen(self->key);
 	if (dynstrncat_s(cont, prealCap, contLen, self->key, keyLen) == NULL)
 	{
 		return jsonErr_mem;
 	}
+	contLen += keyLen;
+
+	if (dynstrncat_s(cont, prealCap, contLen, "\":\n", 3) == NULL)
+	{
+		return jsonErr_mem;
+	}
+	contLen += 3;
+
 
 	char * line = NULL;
 	jsonErr_t result = jsonValue_dump(&self->value, &line, NULL, depth);
@@ -632,6 +653,19 @@ jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict c
 			return jsonErr_mem;
 		}
 		contLen += lineLen;
+
+		if (i < (self->numKeys - 1))
+		{
+			if (dynstrncat_s(cont, prealCap, contLen - 1, ",\n", 2) == NULL)
+			{
+				if (line != NULL)
+				{
+					free(line);
+				}
+				return jsonErr_mem;
+			}
+			++contLen;
+		}
 	}
 	if (line != NULL)
 	{
@@ -1188,6 +1222,7 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 			{
 				return jsonErr_unknown;
 			}
+			break;
 		case 't':
 			if (((end - *it) >= 4) && (strncmp(*it, "true", 4) == 0))
 			{
@@ -1200,10 +1235,11 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 			{
 				return jsonErr_unknown;
 			}
+			break;
 		case 'n':
 			if (((end - *it) >= 4) && (strncmp(*it, "null", 4) == 0))
 			{
-				*it += 5;
+				*it += 4;
 				self->type = jsonValue_null;
 				done = true;
 			}
@@ -1211,6 +1247,7 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 			{
 				return jsonErr_unknown;
 			}
+			break;
 		default:
 			if ((**it >= '0') && (**it <= '9'))
 			{

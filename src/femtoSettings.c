@@ -273,9 +273,14 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 
 	free(bytes);
 
-	
+	// Browse JSON object
 
-	// Free json object
+	char * d = NULL;
+	json_dump(&obj, &d, NULL);
+	writeProfiler("femtoSettings_loadFromFile", "Dump of JSON object \n%s", d);
+
+
+	// Free JSON object
 	json_destroy(&obj);
 
 	return NULL;
