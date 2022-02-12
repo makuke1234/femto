@@ -16,6 +16,7 @@ hashNode_t * hashNode_make(const char * key, void * value)
 	}
 	node->key   = strdup(key);
 	node->value = value;
+	node->next  = NULL;
 	return node;
 }
 void hashNode_free(hashNode_t * restrict self)
