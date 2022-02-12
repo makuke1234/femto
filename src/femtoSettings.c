@@ -261,7 +261,10 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		return result;
 	}
 
-	jsonErr_t jresult = json_check(bytes, bytesLen);
+	json_t obj;
+	json_init(&obj);
+
+	jsonErr_t jresult = json_parse(&obj, bytes, bytesLen);
 	if (jresult != jsonErr_ok)
 	{
 		free(bytes);
@@ -269,6 +272,11 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 	}
 
 	free(bytes);
+
+	
+
+	// Free json object
+	json_destroy(&obj);
 
 	return NULL;
 }

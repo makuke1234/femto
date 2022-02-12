@@ -523,6 +523,8 @@ bool jsonObject_insertRaw(jsonObject_t * restrict self, jsonKeyValue_t * restric
 		return false;
 	}
 
+	writeProfiler("jsonObject_insertRaw", "key value: \"%s\"", kv->key);
+
 	// Add to the end of array
 	if (self->numKeys >= self->maxKeys)
 	{
@@ -1157,8 +1159,6 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 				}
 				else if (**it == '"')
 				{
-					++*it;
-
 					char * str = strdup_s(begin, (size_t)(*it - begin));
 					if (str == NULL)
 					{
@@ -1167,6 +1167,7 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 					self->type = jsonValue_string;
 					self->d.string = str;
 					done = true;
+					++*it;
 					break;
 				}
 			}
@@ -1267,7 +1268,7 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 			return jsonErr_unknown;
 		}
 	}
-	return jsonErr_unknown;
+	return jsonErr_ok;
 }
 static inline jsonErr_t json_inner_parseKeyValue(jsonObject_t * restrict self, const char * restrict * restrict it, const char * restrict end)
 {
@@ -1295,20 +1296,20 @@ static inline jsonErr_t json_inner_parseKeyValue(jsonObject_t * restrict self, c
 				return jsonErr_mem;
 			}
 			kv.key = key;
+			++*it;
 			break;
 		}
 	}
 
-	++*it;
 	for (; *it != end; ++*it)
 	{
 		if (**it == ':')
 		{
+			++*it;
 			break;
 		}
 	}
 
-	++*it;
 	jsonErr_t err = json_inner_parseValue(&kv.value, it, end);
 	if (err != jsonErr_ok)
 	{
@@ -1354,6 +1355,7 @@ static inline jsonErr_t json_inner_parseObject(jsonObject_t * restrict self, con
 		case '}':
 			ended = true;
 			/* fall through */
+		case ']':
 		case ' ':
 		case '\t':
 		case '\n':
@@ -1365,14 +1367,10 @@ static inline jsonErr_t json_inner_parseObject(jsonObject_t * restrict self, con
 		}
 		if (ended)
 		{
-			break;
+			return jsonErr_ok;
 		}
 	}
-	if (!ended)
-	{
-		return jsonErr_unknown;
-	}
-	return jsonErr_ok;
+	return jsonErr_unknown;
 }
 static inline jsonErr_t json_inner_parseArray(jsonArray_t * restrict self, const char * restrict * restrict it, const char * restrict end)
 {
@@ -1385,10 +1383,10 @@ static inline jsonErr_t json_inner_parseArray(jsonArray_t * restrict self, const
 	{
 		if (**it == '[')
 		{
+			++*it;
 			break;
 		}
 	}
-	++*it;
 
 	jsonErr_t err = jsonErr_ok;
 	jsonValue_t * val = NULL;
@@ -1401,6 +1399,7 @@ static inline jsonErr_t json_inner_parseArray(jsonArray_t * restrict self, const
 		case ']':
 			ended = true;
 			/* fall through */
+		case '}':
 		case ' ':
 		case '\t':
 		case '\n':
@@ -1420,12 +1419,12 @@ static inline jsonErr_t json_inner_parseArray(jsonArray_t * restrict self, const
 				return err;
 			}
 		}
+		if (ended)
+		{
+			return jsonErr_ok;
+		}
 	}
-	if (!ended)
-	{
-		return jsonErr_unknown;
-	}
-	return jsonErr_ok;
+	return jsonErr_unknown;
 }
 
 
@@ -1434,12 +1433,15 @@ jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, siz
 	assert(self     != NULL);
 	assert(contents != NULL);
 
+	writeProfiler("json_parse", "checking JSON contents");
 	jsonErr_t err = json_check(contents, contLen);
 	if (err != jsonErr_ok)
 	{
 		return err;
 	}
 	// err == jsonErr_ok, if code has reached here
+	
+	writeProfiler("json_parse", "parsing JSON contents");
 	return json_inner_parseValue(&self->value, &contents, contents + strnlen_s(contents, contLen));
 }
 
