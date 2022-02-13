@@ -45,7 +45,7 @@ typedef enum jsonErr
  * @brief Array for error codes
  * 
  */
-extern const wchar_t * g_jsonErrors[];
+extern const char * g_jsonErrors[];
 
 // Forward-declare jsonValue_t
 typedef struct jsonValue jsonValue_t;

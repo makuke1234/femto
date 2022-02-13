@@ -7,25 +7,25 @@
 #include <stdlib.h>
 #include <assert.h>
 
-const wchar_t * g_jsonErrors[] = {
-	[jsonErr_ok]                        = L"All OK",
-	[jsonErr_unknown]                   = L"Unknown error!",
-	[jsonErr_mem]                       = L"Memory allocation error!",
-	[jsonErr_invalidChar]               = L"Invalid character!",
-	[jsonErr_moreThan1Main]             = L"More than 1 main value in file!",
-	[jsonErr_noKey]                     = L"No key in object!",
-	[jsonErr_noTerminatingQuote]        = L"No terminating quote for string!",
-	[jsonErr_invalidValueSeparator]     = L"Invalid value separator in object!",
-	[jsonErr_noValueSeparator]          = L"No value separator in object!",
-	[jsonErr_noValue]                   = L"No value in object's key-value pair!",
-	[jsonErr_noSeparator]               = L"No spearator between values!",
-	[jsonErr_excessiveArrayTerminator]  = L"Excessive array terminator!",
-	[jsonErr_excessiveObjectTerminator] = L"Excessive object terminator!",
-	[jsonErr_noArrayTerminator]         = L"No terminating ']'!",
-	[jsonErr_noObjectTerminator]        = L"No terminating '}'!",
-	[jsonErr_invalidTerminator]         = L"Invalid terminator!",
-	[jsonErr_multipleDecimalPoints]     = L"Multiple decimal points '.' in number!",
-	[jsonErr_noDigitAfterDecimal]       = L"No digits after decimal point!",
+const char * g_jsonErrors[] = {
+	[jsonErr_ok]                        = "All OK",
+	[jsonErr_unknown]                   = "Unknown error!",
+	[jsonErr_mem]                       = "Memory allocation error!",
+	[jsonErr_invalidChar]               = "Invalid character!",
+	[jsonErr_moreThan1Main]             = "More than 1 main value in file!",
+	[jsonErr_noKey]                     = "No key in object!",
+	[jsonErr_noTerminatingQuote]        = "No terminating quote for string!",
+	[jsonErr_invalidValueSeparator]     = "Invalid value separator in object!",
+	[jsonErr_noValueSeparator]          = "No value separator in object!",
+	[jsonErr_noValue]                   = "No value in object's key-value pair!",
+	[jsonErr_noSeparator]               = "No spearator between values!",
+	[jsonErr_excessiveArrayTerminator]  = "Excessive array terminator!",
+	[jsonErr_excessiveObjectTerminator] = "Excessive object terminator!",
+	[jsonErr_noArrayTerminator]         = "No terminating ']'!",
+	[jsonErr_noObjectTerminator]        = "No terminating '}'!",
+	[jsonErr_invalidTerminator]         = "Invalid terminator!",
+	[jsonErr_multipleDecimalPoints]     = "Multiple decimal points '.' in number!",
+	[jsonErr_noDigitAfterDecimal]       = "No digits after decimal point!",
 };
 
 void jsonArray_init(jsonArray_t * restrict self)
