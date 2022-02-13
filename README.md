@@ -123,9 +123,9 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
-    * [ ] Proper setting loading from file
+    * [x] Proper setting loading from file
     * [x] Built-in hashmap support
-    * [ ] Built-in JSON support
+    * [x] Built-in JSON support
     * [x] Tweak key behaviour, Ctrl+E doesn't have to be immediately released anymore
     * [x] Add placeholders for planned keyboard shortcuts
 * 1.1
