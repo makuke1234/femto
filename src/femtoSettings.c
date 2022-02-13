@@ -268,7 +268,9 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 	if (jresult != jsonErr_ok)
 	{
 		free(bytes);
-		return g_jsonErrors[jresult];
+		static wchar_t str[MAX_STATUS];
+		swprintf_s(str, MAX_STATUS, L"%S", g_jsonErrors[jresult]);
+		return str;
 	}
 
 	free(bytes);
