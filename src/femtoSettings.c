@@ -261,10 +261,10 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		return result;
 	}
 
-	json_t obj;
-	json_init(&obj);
+	json_t json;
+	json_init(&json);
 
-	jsonErr_t jresult = json_parse(&obj, bytes, bytesLen);
+	jsonErr_t jresult = json_parse(&json, bytes, bytesLen);
 	if (jresult != jsonErr_ok)
 	{
 		free(bytes);
@@ -274,11 +274,45 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 	free(bytes);
 
 	// Browse JSON object
+	bool suc;
+	jsonObject_t * obj = jsonValue_getObject(&json.value, &suc);
 
+	if (suc)
+	{
+		jsonValue_t * attr = jsonObject_get(obj, "tabsToSpaces");
+		if (attr != NULL)
+		{
+			bool value = jsonValue_getBoolean(attr, &suc);
+			if (suc && (def.tabsToSpaces != value))
+			{
+				self->tabsToSpaces = value;
+			}
+		}
 
+		attr = jsonObject_get(obj, "tabWidth");
+		if (attr != NULL)
+		{
+			double value = jsonValue_getNumber(attr, &suc);
+			uint8_t val8 = (uint8_t)value;
+			if (suc && (value > 0.0) && (value < 256.0) && (def.tabWidth != val8))
+			{
+				self->tabWidth = val8;
+			}
+		}
+
+		attr = jsonObject_get(obj, "autoindent");
+		if (attr != NULL)
+		{
+			bool value = jsonValue_getBoolean(attr, &suc);
+			if (suc && (def.autoIndent != value))
+			{
+				self->autoIndent = value;
+			}
+		}
+	}
 
 	// Free JSON object
-	json_destroy(&obj);
+	json_destroy(&json);
 
 	return NULL;
 }
