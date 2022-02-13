@@ -71,7 +71,7 @@ typedef struct jsonObject jsonObject_t;
 
 struct jsonValue
 {
-	enum jsonValueType type;
+	uint8_t type;
 	union
 	{
 		char * string;
