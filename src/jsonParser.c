@@ -633,6 +633,10 @@ jsonErr_t jsonObject_dump(const jsonObject_t * restrict self, char ** restrict c
 	size_t lineCap = 0;
 	for (size_t i = 0; i < self->numKeys; ++i)
 	{
+		if (self->keyvalues[i] == NULL)
+		{
+			continue;
+		}
 		jsonErr_t result = jsonKeyValue_dump(self->keyvalues[i], &line, &lineCap, depth + 1);
 		if (result != jsonErr_ok)
 		{
