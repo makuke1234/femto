@@ -1226,7 +1226,7 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 		case 't':
 			if (((end - *it) >= 4) && (strncmp(*it, "true", 4) == 0))
 			{
-				*it += 5;
+				*it += 4;
 				self->type = jsonValue_boolean;
 				self->d.boolean = true;
 				done = true;
