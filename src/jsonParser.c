@@ -4,6 +4,7 @@
 #include "jsonParser.h"
 #include "safec.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -124,7 +125,7 @@ jsonErr_t jsonArray_dump(const jsonArray_t * restrict self, char ** restrict con
 	for (size_t i = 0; i < self->numValues; ++i)
 	{
 		// Elements
-		jsonErr_t result = jsonValue_dump(&self->values[i], &line, &lineCap, depth + 1);
+		jsonErr_t result = jsonValue_dump(&self->values[i], &line, &lineCap, depth + 1, false);
 		if (result != jsonErr_ok)
 		{
 			if (line != NULL)
@@ -264,83 +265,79 @@ jsonObject_t * jsonValue_getObject(const jsonValue_t * restrict self, bool * res
 	return self->d.object;
 }
 
-jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth)
+jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth, bool nonobj)
 {
 	assert(self != NULL);
 	assert(cont != NULL);
 	size_t contCap = 0;
 	size_t * prealCap = (contSize != NULL) ? contSize : &contCap;
 
-	for (size_t i = 0; i < depth; ++i)
-	{
-		if (dynstrncat_s(cont, prealCap, i, "\t", 1) == NULL)
-		{
-			return jsonErr_mem;
-		}
-	}
-
 	switch (self->type)
 	{
-	case jsonValue_null:
-		if (dynstrncat_s(cont, prealCap, depth, "null\n", 5) == NULL)
-		{
-			return jsonErr_mem;
-		}
-		break;
-	case jsonValue_string:
-	{
-		if (dynstrncat_s(cont, prealCap, depth, "\"", 1) == NULL)
-		{
-			return jsonErr_mem;
-		}
-		size_t len = strlen(self->d.string);
-		if (dynstrncat_s(cont, prealCap, depth + 1, self->d.string, len) == NULL)
-		{
-			return jsonErr_mem;
-		}
-		if (dynstrncat_s(cont, prealCap, depth + 1 + len, "\"\n", 2) == NULL)
-		{
-			return jsonErr_mem;
-		}
-		break;
-	}
-	case jsonValue_boolean:
-		if (dynstrncat_s(cont, prealCap, depth, self->d.boolean ? "true\n" : "false\n", self->d.boolean ? 5 : 6) == NULL)
-		{
-			return jsonErr_mem;
-		}
-		break;
-	case jsonValue_number:
-	{
-		char temp[MAX_NUMBERLEN];
-		int stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g\n", self->d.number);
-
-		if ((stringLen <= 0) || dynstrncat_s(cont, prealCap, depth, temp, (size_t)stringLen) == NULL)
-		{
-			return jsonErr_mem;
-		}
-		break;
-	}
 	case jsonValue_array:
-	{
-		jsonErr_t ret = jsonArray_dump(self->d.array, cont, prealCap, depth);
-		if (ret != jsonErr_ok)
-		{
-			return ret;
-		}
-		break;
-	}
+		return jsonArray_dump(self->d.array, cont, prealCap, depth);
 	case jsonValue_object:
-	{
-		jsonErr_t ret = jsonObject_dump(self->d.object, cont, prealCap, depth);
-		if (ret != jsonErr_ok)
-		{
-			return ret;
-		}
-		break;
-	}
+		return jsonObject_dump(self->d.object, cont, prealCap, depth);
 	default:
-		return jsonErr_unknown;
+	{
+		size_t len = 0;
+		if (!nonobj)
+		{
+			for (size_t i = 0; i < depth; ++i)
+			{
+				if (dynstrncat_s(cont, prealCap, i, "\t", 1) == NULL)
+				{
+					return jsonErr_mem;
+				}
+			}
+			len = depth;
+		}
+		switch (self->type)
+		{
+		case jsonValue_null:
+			if (dynstrncat_s(cont, prealCap, len, "null\n", 5) == NULL)
+			{
+				return jsonErr_mem;
+			}
+			break;
+		case jsonValue_string:
+		{
+			if (dynstrncat_s(cont, prealCap, len, "\"", 1) == NULL)
+			{
+				return jsonErr_mem;
+			}
+			size_t len1 = strlen(self->d.string);
+			if (dynstrncat_s(cont, prealCap, len + 1, self->d.string, len1) == NULL)
+			{
+				return jsonErr_mem;
+			}
+			if (dynstrncat_s(cont, prealCap, len + 1 + len1, "\"\n", 2) == NULL)
+			{
+				return jsonErr_mem;
+			}
+			break;
+		}
+		case jsonValue_boolean:
+			if (dynstrncat_s(cont, prealCap, len, self->d.boolean ? "true\n" : "false\n", self->d.boolean ? 5 : 6) == NULL)
+			{
+				return jsonErr_mem;
+			}
+			break;
+		case jsonValue_number:
+		{
+			char temp[MAX_NUMBERLEN];
+			int stringLen = sprintf_s(temp, MAX_NUMBERLEN, "%.15g\n", self->d.number);
+
+			if ((stringLen <= 0) || dynstrncat_s(cont, prealCap, len, temp, (size_t)stringLen) == NULL)
+			{
+				return jsonErr_mem;
+			}
+			break;
+		}
+		default:
+			return jsonErr_unknown;
+		}
+	}
 	}
 
 	return jsonErr_ok;
@@ -444,7 +441,17 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 	}
 	contLen += keyLen;
 
-	if (dynstrncat_s(cont, prealCap, contLen, "\":\n", 3) == NULL)
+	bool nonObj = false;
+	switch (self->value.type)
+	{
+	case jsonValue_array:
+	case jsonValue_object:
+		break;
+	default:
+		nonObj = true;
+	}
+
+	if (dynstrncat_s(cont, prealCap, contLen, nonObj ? "\": " : "\":\n", 3) == NULL)
 	{
 		return jsonErr_mem;
 	}
@@ -452,7 +459,7 @@ jsonErr_t jsonKeyValue_dump(const jsonKeyValue_t * restrict self, char ** restri
 
 
 	char * line = NULL;
-	jsonErr_t result = jsonValue_dump(&self->value, &line, NULL, depth);
+	jsonErr_t result = jsonValue_dump(&self->value, &line, NULL, depth, nonObj);
 	if (result != jsonErr_ok)
 	{
 		if (line != NULL)
@@ -543,8 +550,6 @@ bool jsonObject_insertRaw(jsonObject_t * restrict self, jsonKeyValue_t * restric
 	{
 		return false;
 	}
-
-	writeProfiler("jsonObject_insertRaw", "key value: \"%s\"", kv->key);
 
 	// Add to the end of array
 	if (self->numKeys >= self->maxKeys)
@@ -724,7 +729,7 @@ jsonErr_t json_dump(const json_t * restrict self, char ** restrict cont, size_t 
 {
 	assert(self != NULL);
 	assert(cont != NULL);
-	return jsonValue_dump(&self->value, cont, contSize, 0);
+	return jsonValue_dump(&self->value, cont, contSize, 0, false);
 }
 
 static inline void json_inner_checkValue(const char * restrict * restrict it, const char * restrict end, jsonErr_t * restrict perr);
@@ -1473,15 +1478,12 @@ jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, siz
 	assert(self     != NULL);
 	assert(contents != NULL);
 
-	writeProfiler("json_parse", "checking JSON contents");
 	jsonErr_t err = json_check(contents, contLen);
 	if (err != jsonErr_ok)
 	{
 		return err;
 	}
 	// err == jsonErr_ok, if code has reached here
-	
-	writeProfiler("json_parse", "parsing JSON contents");
 	return json_inner_parseValue(&self->value, &contents, contents + strnlen_s(contents, contLen));
 }
 

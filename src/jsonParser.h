@@ -1,6 +1,11 @@
 #ifndef JSONPARSER_H
 #define JSONPARSER_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "hashmap.h"
@@ -92,7 +97,7 @@ double jsonValue_getNumber (const jsonValue_t * restrict self, bool * restrict s
 jsonArray_t  * jsonValue_getArray (const jsonValue_t * restrict self, bool * restrict success);
 jsonObject_t * jsonValue_getObject(const jsonValue_t * restrict self, bool * restrict success);
 
-jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth);
+jsonErr_t jsonValue_dump(const jsonValue_t * restrict self, char ** restrict cont, size_t * restrict contSize, size_t depth, bool nonobj);
 
 typedef struct jsonKeyValue
 {
@@ -162,5 +167,9 @@ jsonErr_t json_check(const char * restrict contents, size_t contLen);
  */
 jsonErr_t json_parse(json_t * restrict self, const char * restrict contents, size_t contLen);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
