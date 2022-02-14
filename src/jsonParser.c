@@ -591,7 +591,12 @@ jsonValue_t * jsonObject_get(const jsonObject_t * restrict self, const char * re
 {
 	assert(self != NULL);
 	assert(key  != NULL);
-	return hashMap_get(&self->map, key)->value;
+	hashNode_t * node = hashMap_get(&self->map, key);
+	if (node == NULL)
+	{
+		return NULL;
+	}
+	return node->value;
 }
 bool jsonObject_remove(jsonObject_t * restrict self, const char * restrict key)
 {
