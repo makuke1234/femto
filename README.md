@@ -105,7 +105,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 
 # Screenshots
 
-## Demonstrating unicode support, file test5.txt is open with LF EOL sequences
+## Demonstrating unicode support, file test.txt is open with CRLF EOL sequences
 ![Unicode Support](./images/unicodeSupport.png)
 
 ## Last key shown on status bar with respective repeat count
