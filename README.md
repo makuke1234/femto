@@ -81,7 +81,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * A question mark can also be used as a separator:
         * `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [x] List of options:
-    | Option                   | Effect                                            |
+    | Option                   | Description                                       |
     | ------------------------ | ------------------------------------------------- |
     | --help                   | Shows help                                        |
     | --file=\[file\]          | Specifies file name to open                       |
@@ -95,6 +95,12 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     | --autoindent=\[value\]   | Value can be either true/false or 1/0             |
     | --autoi=\[value\]        | Same as above                                     |
     | --aindent=\[value\]      | Same as above                                     |
+- [x] List of settings:
+	| Setting      | Type    |
+	| ------------ | ------- |
+	| tabsToSpaces | boolean |
+	| tabWidth     | number  |
+	| autoindent   | boolean |
 
 
 # Screenshots
