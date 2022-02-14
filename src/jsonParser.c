@@ -1291,21 +1291,20 @@ static inline jsonErr_t json_inner_parseValue(jsonValue_t * restrict self, const
 	// Find comma, ] or }
 	for (; *it != end; ++*it)
 	{
-		if ((**it == ' ') || (**it == '\t') || (**it == '\n') || (**it == '\r'))
+		switch (**it)
 		{
-			continue;
-		}
-		else if ((**it == ']') || (**it == '}'))
-		{
-			return jsonErr_ok;
-		}
-		else if (**it == ',')
-		{
+		case ' ':
+		case '\t':
+		case '\n':
+		case '\r':
+			break;
+		case ',':
 			++*it;
+			/* fall through */
+		case ']':
+		case '}':
 			return jsonErr_ok;
-		}
-		else
-		{
+		default:
 			return jsonErr_unknown;
 		}
 	}
