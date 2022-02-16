@@ -15,7 +15,6 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.tabsToSpaces = false,
 		.tabWidth     = 4,
 		.tabSpaceStr1 = NULL,
-		.tabSpaceStr2 = NULL,
 
 		.autoIndent = true,
 
@@ -57,18 +56,6 @@ bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self)
 		mem[i] = L' ';
 	}
 	self->tabSpaceStr1 = mem;
-
-	mem = realloc(self->tabSpaceStr2, sizeof(wchar_t) * (self->tabWidth + 1));
-	if (mem == NULL)
-	{
-		return false;
-	}
-	mem[self->tabWidth] = L'\0';
-	for (uint8_t i = 0; i < self->tabWidth; ++i)
-	{
-		mem[i] = L'\t';
-	}
-	self->tabSpaceStr2 = mem;
 
 	return true;
 }
@@ -336,11 +323,6 @@ void femtoSettings_destroy(femtoSettings_t * restrict self)
 	{
 		free(self->tabSpaceStr1);
 		self->tabSpaceStr1 = NULL;
-	}
-	if (self->tabSpaceStr2 != NULL)
-	{
-		free(self->tabSpaceStr2);
-		self->tabSpaceStr2 = NULL;
 	}
 	// Clear last error, just in case
 	self->lastErr[0] = L'\0';

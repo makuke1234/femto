@@ -63,7 +63,7 @@ int wmain(int argc, const wchar_t * argv[])
 	{
 		wchar_t tempstr[MAX_STATUS];
 		const wchar_t * res;
-		if ((res = femtoFile_read(editor.file, editor.settings.tabWidth)) != NULL)
+		if ((res = femtoFile_read(editor.file)) != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);
 		}

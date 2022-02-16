@@ -20,7 +20,6 @@ typedef struct femtoSettings
 	bool tabsToSpaces;
 	uint8_t tabWidth;
 	wchar_t * tabSpaceStr1;	// Contains space characters
-	wchar_t * tabSpaceStr2;	// Contains tab characters
 
 	bool autoIndent;
 

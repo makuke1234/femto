@@ -103,10 +103,9 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restric
  * structure, ready to be shown on screen
  * 
  * @param self Pointer to femtoFile_t structure
- * @param tabWidth Tab character width in monospace characters
  * @return const wchar_t* Error message, NULL on success
  */
-const wchar_t * femtoFile_read(femtoFile_t * restrict self, uint8_t tabWidth);
+const wchar_t * femtoFile_read(femtoFile_t * restrict self);
 
 enum femtoFile_writeRes
 {

@@ -176,7 +176,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			else if ((key == sac_Ctrl_R) && !boolGet(prevkeybuffer, sac_Ctrl_R))	// Reload file
 			{
 				const wchar_t * res;
-				if ((res = femtoFile_read(pfile, peditor->settings.tabWidth)) != NULL)
+				if ((res = femtoFile_read(pfile)) != NULL)
 				{
 					swprintf_s(tempstr, MAX_STATUS, res);
 				}

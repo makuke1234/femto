@@ -142,7 +142,7 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restric
 	
 	return result;
 }
-const wchar_t * femtoFile_read(femtoFile_t * restrict self, uint8_t tabWidth)
+const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 {
 	assert(self != NULL);
 	char * bytes = NULL;
@@ -164,8 +164,6 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self, uint8_t tabWidth)
 	}
 	writeProfiler("femtoFile_read", "Converted %u bytes of character to %u UTF-16 characters.", size, chars);
 	writeProfiler("femtoFile_read", "File UTF-16 contents \"%S\"", utf16);
-
-	femto_tabsToSpaces(&utf16, &chars, tabWidth);
 
 	// Save lines to structure
 	wchar_t ** lines = NULL;
@@ -439,11 +437,14 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		{
 			return false;
 		}
-		for (int i = 1; (i < pset->tabWidth) && (self->data.currentNode->curx % pset->tabWidth); ++i)
+		if (pset->tabsToSpaces)
 		{
-			if (femtoFile_addNormalCh(self, tch) == false)
+			for (int i = 1; (i < pset->tabWidth) && (self->data.currentNode->curx % pset->tabWidth); ++i)
 			{
-				return false;
+				if (femtoFile_addNormalCh(self, tch) == false)
+				{
+					return false;
+				}
 			}
 		}
 		self->data.lastx = self->data.currentNode->curx;
@@ -451,24 +452,28 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	}
 	case VK_OEM_BACKTAB:
 		// Check if there's 4 spaces before the caret
-		if (femtoFile_checkLineAt(self, -pset->tabWidth, pset->tabSpaceStr1, pset->tabWidth) ||
-		    femtoFile_checkLineAt(self, -pset->tabWidth, pset->tabSpaceStr2, pset->tabWidth)
-		)
+		if (femtoFile_checkLineAt(self, -pset->tabWidth, pset->tabSpaceStr1, pset->tabWidth))
 		{
 			for (int i = 0; i < pset->tabWidth; ++i)
 			{
 				femtoFile_deleteBackward(self);
 			}
 		}
+		else if (femtoFile_checkLineAt(self, -pset->tabWidth, L"\t", 1))
+		{
+			femtoFile_deleteBackward(self);
+		}
 		// If there isn't, check if there's 4 spaces after the caret
-		else if (femtoFile_checkLineAt(self, 0, pset->tabSpaceStr1, pset->tabWidth) ||
-		         femtoFile_checkLineAt(self, 0, pset->tabSpaceStr2, pset->tabWidth)
-		)
+		else if (femtoFile_checkLineAt(self, 0, pset->tabSpaceStr1, pset->tabWidth))
 		{
 			for (int i = 0; i < pset->tabWidth; ++i)
 			{
 				femtoFile_deleteForward(self);
 			}
+		}
+		else if (femtoFile_checkLineAt(self, 0, L"\t", 1))
+		{
+			femtoFile_deleteForward(self);
 		}
 		self->data.lastx = self->data.currentNode->curx;
 		break;
