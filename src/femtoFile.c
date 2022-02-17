@@ -515,7 +515,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		{
 			femtoLine_swap(self->data.currentNode, self->data.currentNode->prevNode);
 			self->data.currentNode = self->data.currentNode->prevNode;
-			self->data.lastx       = self->data.currentNode->curx;
+			self->data.lastx       = self->data.currentNode->virtcurx ? self->data.currentNode->virtcurx : self->data.currentNode->curx;
 			self->data.updateAll   = true;
 		}
 		break;
@@ -525,7 +525,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		{
 			femtoLine_swap(self->data.currentNode, self->data.currentNode->nextNode);
 			self->data.currentNode = self->data.currentNode->nextNode;
-			self->data.lastx       = self->data.currentNode->curx;
+			self->data.lastx       = self->data.currentNode->virtcurx ? self->data.currentNode->virtcurx : self->data.currentNode->curx;
 			self->data.updateAll   = true;
 		}
 		break;

@@ -81,6 +81,7 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
 	{
 		nextnode->prevNode = node;
 	}
+	node->virtcurx = 0;
 
 	return node;
 }
@@ -123,6 +124,7 @@ femtoLineNode_t * femtoLine_createText(
 	{
 		nextnode->prevNode = node;
 	}
+	node->virtcurx = 0;
 	return node;
 }
 
@@ -313,6 +315,20 @@ void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta)
 		}
 	}
 	*self = node;
+}
+void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth)
+{
+	assert(self != NULL);
+	assert(tabWidth > 0);
+	self->virtcurx = 0;
+	for (uint32_t i = 0; i < self->curx; ++i)
+	{
+		++self->virtcurx;
+		if (self->line[i] == '\t')
+		{
+			self->virtcurx += tabWidth - (self->virtcurx % tabWidth);
+		}
+	}
 }
 
 void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2)

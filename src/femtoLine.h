@@ -17,6 +17,7 @@ typedef struct femtoLineNode
 	wchar_t * line;
 	uint32_t lineEndx, curx, freeSpaceLen;
 	struct femtoLineNode * prevNode, * nextNode;
+	uint32_t virtcurx;
 } femtoLineNode_t;
 
 /**
@@ -102,6 +103,13 @@ void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx);
  * @param delta Amount of lines to move, positive values move down, negative values move up
  */
 void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta);
+/**
+ * @brief Calculates virtual cursor location
+ * 
+ * @param self Pointer to current line node
+ * @param tabWidth Tab character width in spaces equivalent
+ */
+void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth);
 
 /**
  * @brief Swaps internally data between 2 nodes

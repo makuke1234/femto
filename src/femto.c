@@ -515,12 +515,13 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 		pfile->data.typed = false;
 		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
-		int32_t delta = (int32_t)curnode->curx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
+		femtoLine_calcVirtCursor(curnode, peditor->settings.tabWidth);
+		int32_t delta = (int32_t)curnode->virtcurx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
 		if (delta >= 0)
 		{
 			pfile->data.curx += (uint32_t)(delta + 1);
 		}
-		else if (pfile->data.curx > curnode->curx)
+		else if (pfile->data.curx > curnode->virtcurx)
 		{
 			pfile->data.curx = u32Max(1, curnode->curx) - 1;
 		}
@@ -555,7 +556,8 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 	CONSOLE_CURSOR_INFO cci = { 0 };
 	
 	// if line is active line and cursor fits
-	uint32_t curx = node->curx - pfile->data.curx;
+	femtoLine_calcVirtCursor(node, peditor->settings.tabWidth);
+	uint32_t curx = node->virtcurx - pfile->data.curx;
 	if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
 	{
 		// Get cursor information
@@ -595,13 +597,24 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			idx += node->freeSpaceLen;
 			continue;
 		}
-		destination[j] = (CHAR_INFO){
-			.Char       = { .UnicodeChar = node->line[idx] },
-			.Attributes = FEMTO_DEFAULT_COLOR
-		};
-			
+		destination[j].Attributes = FEMTO_DEFAULT_COLOR;
+		if (node->line[idx] == L'\t')
+		{
+			uint32_t realIdx = j + pfile->data.curx;
+			destination[j].Char.UnicodeChar = L' ';
+			++j;
+			for (uint32_t end = j + peditor->settings.tabWidth - ((realIdx + 1) % peditor->settings.tabWidth); (j < end) && (j < peditor->scrbuf.w); ++j)
+			{
+				destination[j].Char.UnicodeChar = L' ';
+			} 
+		}
+		else
+		{
+			destination[j].Char.UnicodeChar = node->line[idx];
+			++j;
+		}
+		
 		++idx;
-		++j;
 	}
 
 	// Hide cursor, if necessary
