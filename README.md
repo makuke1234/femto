@@ -30,7 +30,7 @@ reports ~2900 source code lines (excluding whitespace, comments & [jsonlite2](ht
 - [ ] Syntax highlighting
 - [x] Mouse scrolling, also horizontal scrolling
 - [x] Mouse operated text cursor
-- [ ] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces wide
+- [x] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces wide
 - [x] Automatic indentation, on by default
 - [x] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
     * *If multiple files exist with any of the names above, the settings file will be selected following this exact priority*
