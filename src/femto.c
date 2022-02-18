@@ -222,7 +222,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			else if (key > sac_last_code)
 			{
 				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
-				if (femtoFile_addNormalCh(pfile, key))
+				if (femtoFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 				{
 					femtoData_refresh(peditor);
 				}
@@ -430,7 +430,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 					femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
 					// Now move the cursor to correct X position
 					femtoLine_moveCursorAbs(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx);
-					pfile->data.lastx = pfile->data.currentNode->curx;
+					femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
+					pfile->data.lastx = pfile->data.currentNode->virtcurx;
 					femtoData_refresh(peditor);
 				}
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
@@ -515,7 +516,6 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 		pfile->data.typed = false;
 		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
-		femtoLine_calcVirtCursor(curnode, peditor->settings.tabWidth);
 		int32_t delta = (int32_t)curnode->virtcurx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
 		if (delta >= 0)
 		{

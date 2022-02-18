@@ -110,6 +110,15 @@ void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta);
  * @param tabWidth Tab character width in spaces equivalent
  */
 void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth);
+/**
+ * @brief Calculates real cursor location from virtual cursor location
+ * 
+ * @param self Pointer to current line node
+ * @param virtcur Virtual cursor position
+ * @param tabWidth Tab character width in spaces equivalent
+ * @return uint32_t Real cursor location
+ */
+uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t virtcur, uint32_t tabWidth);
 
 /**
  * @brief Swaps internally data between 2 nodes

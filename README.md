@@ -130,6 +130,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
 	* [x] Primitive tab support
+	* [x] Proper tab support
 	* [ ] Tab support when scrolling horizontally
 * 1.2
     * [x] Proper setting loading from file

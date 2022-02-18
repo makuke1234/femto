@@ -138,10 +138,11 @@ void femtoFile_setConTitle(const femtoFile_t * restrict self);
  * 
  * @param self Pointer to femtoFile_t structure
  * @param ch Character to insert
+ * @param tabWidth Tab character width in space equivalents
  * @return true Success
  * @return false Failure
  */
-bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch);
+bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch, uint32_t tabWidth);
 /**
  * @brief Inserts a special character to current line
  * 

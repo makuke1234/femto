@@ -330,6 +330,26 @@ void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth
 		}
 	}
 }
+uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t virtcur, uint32_t tabWidth)
+{
+	assert(self != NULL);
+	assert(tabWidth > 0);
+
+
+	uint32_t curx = 0;
+	for (uint32_t i = 0; i < virtcur;)
+	{
+		++i;
+		++curx;
+		if (self->line[i - 1] == '\t')
+		{
+			i += tabWidth - (i % tabWidth);
+		}
+	}
+
+	writeProfiler("femtoLine_calcCursor", "virtual: %d curx: %d", virtcur, curx);
+	return curx;
+}
 
 void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2)
 {
