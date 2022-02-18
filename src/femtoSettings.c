@@ -144,7 +144,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 	if (mi != 0)
 	{
-		self->tabWidth = (uint8_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), 1, 32);
+		self->tabWidth = (uint8_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINTAB, FEMTO_SETTINGS_MAXTAB);
 		if (!femtoSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);
@@ -194,7 +194,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 	if (mi != 0)
 	{
-		self->whitespaceCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), 0, UINT16_MAX);
+		self->whitespaceCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINWSCOL, FEMTO_SETTINGS_MAXWSCOL);
 	}
 
 
@@ -314,7 +314,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		{
 			double value = jsonValue_getNumber(attr, &suc);
 			uint8_t val8 = (uint8_t)value;
-			if (suc && (value > 0.0) && (value < 256.0) && (def.tabWidth != val8))
+			if (suc && (value >= FEMTO_SETTINGS_MINTAB) && (value <= FEMTO_SETTINGS_MAXTAB) && (def.tabWidth != val8))
 			{
 				self->tabWidth = val8;
 			}
@@ -374,7 +374,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		{
 			double value = jsonValue_getNumber(attr, &suc);
 			uint16_t val = (uint16_t)value;
-			if (suc && (value >= 0.0) && (value <= (double)UINT16_MAX) && val != def.whitespaceCol)
+			if (suc && (value >= (double)FEMTO_SETTINGS_MINWSCOL) && (value <= (double)FEMTO_SETTINGS_MAXWSCOL) && val != def.whitespaceCol)
 			{
 				self->whitespaceCol = val;
 			}

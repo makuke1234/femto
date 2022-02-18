@@ -10,6 +10,12 @@
 #define FEMTO_SETTINGS_FILE3 L"femto_settings.json"
 #define FEMTO_SETTINGS_FILE4 L"settings.json"
 
+#define FEMTO_SETTINGS_MINTAB 1
+#define FEMTO_SETTINGS_MAXTAB 32
+
+#define FEMTO_SETTINGS_MINWSCOL 0
+#define FEMTO_SETTINGS_MAXWSCOL UINT16_MAX
+
 
 typedef struct femtoSettings
 {
