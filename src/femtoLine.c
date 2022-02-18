@@ -333,8 +333,13 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 
 
 	uint32_t curx = 0;
-	for (uint32_t i = 0; i < virtcur; ++curx)
+	for (uint32_t i = 0; (i < virtcur) && (curx < self->lineEndx); ++curx)
 	{
+		if ((curx == self->curx) && (self->freeSpaceLen > 0))
+		{
+			curx += self->freeSpaceLen;
+			continue;
+		}
 		i += (self->line[curx] == L'\t') ? tabWidth - (i % tabWidth) : 1;
 	}
 
