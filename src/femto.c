@@ -429,7 +429,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					pfile->data.currentNode = pfile->data.pcury;
 					femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
 					// Now move the cursor to correct X position
-					femtoLine_moveCursorAbs(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx);
+					femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx, peditor->settings.tabWidth));
 					femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
 					pfile->data.lastx = pfile->data.currentNode->virtcurx;
 					femtoData_refresh(peditor);
