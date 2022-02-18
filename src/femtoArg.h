@@ -14,6 +14,12 @@ typedef struct femtoArgument
  * @param arg String wrapper
  */
 bool femtoArg_strToBool(femtoArgument_t arg);
+/**
+ * @brief Convert string to UTF-16 character
+ * 
+ * @param arg String wrapper
+ */
+wchar_t femtoArg_strToCh(femtoArgument_t arg);
 
 
 /**

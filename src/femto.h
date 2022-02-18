@@ -30,6 +30,26 @@ uint32_t u32Min(uint32_t a, uint32_t b);
 uint32_t u32Max(uint32_t a, uint32_t b);
 uint32_t u32Clamp(uint32_t value, uint32_t min, uint32_t max);
 
+char * femto_cpcat_s(char ** restrict pstr, size_t * restrict psize, size_t * plen, wchar_t cp);
+
+/**
+ * @brief Escapes the escape characters in given character array,
+ * produces pointer to the new character array
+ * 
+ * @param inp Input null-terminated character array
+ * @return char* Output character array
+ */
+char * femto_escapeStr(const char * inp);
+/**
+ * @brief Escapes the escape characters in given character array,
+ * produces pointer to the new character array
+ * 
+ * @param inp Input character array
+ * @param len Input character array length in characters
+ * @return char* Output character array
+ */
+char * femto_escapeStr_s(const char * inp, size_t len);
+
 /**
  * @brief Set exit handler data argument pointer
  * 

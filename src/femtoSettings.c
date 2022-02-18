@@ -17,6 +17,10 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.tabSpaceStr1 = NULL,
 
 		.autoIndent = true,
+		
+		.whitespaceVisible = false,
+		.whitespaceCh      = L'→',
+		.whitespaceCol     = FEMTO_DEFAULT_COLOR,
 
 
 		.lastErr = { 0 }
@@ -81,11 +85,12 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		free(argumentsUsed);
 		return femtoErr_ok;
 	}
-	femtoArg_t fname;
-	femtoArg_fetchArgv(argc, argv, L"file", &mi, 1, &fname);
+	femtoArg_t farg;
+
+	femtoArg_fetchArgv(argc, argv, L"file", &mi, 1, &farg);
 	if (mi != 0)
 	{
-		self->fileName = wcsdup_s(fname.begin, (size_t)(fname.end - fname.begin));
+		self->fileName = wcsdup_s(farg.begin, (size_t)(farg.end - farg.begin));
 		if (self->fileName == NULL)
 		{
 			free(argumentsUsed);
@@ -96,15 +101,14 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 
 	/* **************** Other settings ******************* */
 
-	femtoArg_t sfname;
-	femtoArg_fetchArgv(argc, argv, L"settings", &mi, 1, &sfname);
+	femtoArg_fetchArgv(argc, argv, L"settings", &mi, 1, &farg);
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"setting", &mi, 1, &sfname);
+		femtoArg_fetchArgv(argc, argv, L"setting", &mi, 1, &farg);
 	}
 	if (mi != 0)
 	{
-		wchar_t * mem = wcsdup_s(sfname.begin, (size_t)(sfname.end - sfname.begin));
+		wchar_t * mem = wcsdup_s(farg.begin, (size_t)(farg.end - farg.begin));
 		if (mem == NULL)
 		{
 			free(argumentsUsed);
@@ -122,26 +126,25 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		}
 	}
 
-	femtoArg_t tabs;
-	femtoArg_fetchArgv(argc, argv, L"tabsSpaces", &mi, 1, &tabs);
+	femtoArg_fetchArgv(argc, argv, L"tabsSpaces", &mi, 1, &farg);
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"tabsToSpaces", &mi, 1, &tabs);
+		femtoArg_fetchArgv(argc, argv, L"tabsToSpaces", &mi, 1, &farg);
 	}
 	if (mi != 0)
 	{
-		self->tabsToSpaces = femtoArg_strToBool(tabs);
+		self->tabsToSpaces = femtoArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
-	femtoArg_fetchArgv(argc, argv, L"tabWidth", &mi, 1, &tabs);
+	femtoArg_fetchArgv(argc, argv, L"tabWidth", &mi, 1, &farg);
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"tabw", &mi, 1, &tabs);
+		femtoArg_fetchArgv(argc, argv, L"tabw", &mi, 1, &farg);
 	}
 	if (mi != 0)
 	{
-		self->tabWidth = (uint8_t)u32Clamp((uint32_t)wcstol(tabs.begin, NULL, 10), 1, 32);
+		self->tabWidth = (uint8_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), 1, 32);
 		if (!femtoSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);
@@ -151,21 +154,49 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		argumentsUsed[mi - 1] = true;
 	}
 
-	femtoArg_t aindent;
-	femtoArg_fetchArgv(argc, argv, L"autoindent", &mi, 1, &aindent);
+	femtoArg_fetchArgv(argc, argv, L"autoindent", &mi, 1, &farg);
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"autoi", &mi, 1, &aindent);
+		femtoArg_fetchArgv(argc, argv, L"autoi", &mi, 1, &farg);
 	}
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"aindent", &mi, 1, &aindent);
+		femtoArg_fetchArgv(argc, argv, L"aindent", &mi, 1, &farg);
 	}
 	if (mi != 0)
 	{
-		self->autoIndent = femtoArg_strToBool(aindent);
+		self->autoIndent = femtoArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
+
+	femtoArg_fetchArgv(argc, argv, L"whitespaceVisible", &mi, 1, &farg);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"visibleWhitespace", &mi, 1, &farg);
+	}
+	if (mi != 0)
+	{
+		self->whitespaceVisible = femtoArg_strToBool(farg);
+		argumentsUsed[mi - 1] = true;
+	}
+
+	femtoArg_fetchArgv(argc, argv, L"whitespaceCh", &mi, 1, &farg);
+	if (mi != 0)
+	{
+		self->whitespaceCh = femtoArg_strToCh(farg);
+		argumentsUsed[mi - 1] = true;
+	}
+
+	femtoArg_fetchArgv(argc, argv, L"whitespaceColor", &mi, 1, &farg);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"whitespaceCol", &mi, 1, &farg);
+	}
+	if (mi != 0)
+	{
+		self->whitespaceCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), 0, UINT16_MAX);
+	}
+
 
 	/* *************************************************** */
 
@@ -296,6 +327,56 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			if (suc && (def.autoIndent != value))
 			{
 				self->autoIndent = value;
+			}
+		}
+
+		attr = jsonObject_get(obj, "whitespaceVisible");
+		if (attr != NULL)
+		{
+			bool value = jsonValue_getBoolean(attr, &suc);
+			if (suc && (def.whitespaceVisible != value))
+			{
+				self->whitespaceVisible = value;
+			}
+		}
+
+		attr = jsonObject_get(obj, "whitespaceCh");
+		if (attr != NULL)
+		{
+			const char * str = jsonValue_getString(attr, &suc);
+			size_t len = strlen(str);
+			if (suc && (str != NULL) && len)
+			{
+				char * esc = femto_escapeStr_s(str, len);
+				size_t esclen = strlen(esc);
+				if (esc != NULL)
+				{
+					if (esclen)
+					{
+						wchar_t * esc16 = NULL;
+						uint32_t esc16len = femto_convToUnicode(esc, (int)esclen, &esc16, NULL);
+						if (esc16 != NULL)
+						{
+							if (esc16len)
+							{
+								self->whitespaceCh = esc16[0];
+							}
+							free(esc16);
+						}
+					}
+					free(esc);
+				}
+			}
+		}
+
+		attr = jsonObject_get(obj, "whitespaceColor");
+		if (attr != NULL)
+		{
+			double value = jsonValue_getNumber(attr, &suc);
+			uint16_t val = (uint16_t)value;
+			if (suc && (value >= 0.0) && (value <= (double)UINT16_MAX) && val != def.whitespaceCol)
+			{
+				self->whitespaceCol = val;
 			}
 		}
 	}

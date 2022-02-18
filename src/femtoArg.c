@@ -16,6 +16,18 @@ bool femtoArg_strToBool(femtoArgument_t arg)
 		return wcstol(arg.begin, NULL, 10) != 0;
 	}
 }
+wchar_t femtoArg_strToCh(femtoArgument_t arg)
+{
+	if ((arg.end - arg.begin) >= 1)
+	{
+		return arg.begin[0];
+	}
+	else
+	{
+		return L'\0';
+	}	
+}
+
 
 uint32_t femtoArg_fetch(const wchar_t * restrict rawStr, int32_t maxStr, const wchar_t * restrict argMatch, uint32_t maxParams, ...)
 {

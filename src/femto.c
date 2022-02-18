@@ -38,6 +38,184 @@ uint32_t u32Clamp(uint32_t value, uint32_t min, uint32_t max)
 	return (value < min) ? min : (value > max) ? max : value;
 }
 
+char * femto_cpcat_s(char ** restrict pstr, size_t * restrict psize, size_t * plen, wchar_t cp)
+{
+	unsigned char conv[3];
+	size_t len = 0;
+	if (cp <= 0x7F)
+	{
+		len = 1;
+		conv[0] = (unsigned char)cp;
+	}
+	else if (cp <= 0x07FF)
+	{
+		len = 2;
+		conv[0] = (uint8_t)(0xC0 | ((cp >> 6) & 0x1F));
+		conv[1] = (uint8_t)(0x80 | ( cp       & 0x3F));
+	}
+	else
+	{
+		len = 3;
+		conv[0] = (uint8_t)(0xE0 | ((cp >> 12) & 0x0F));
+		conv[1] = (uint8_t)(0x80 | ((cp >>  6) & 0x3F));
+		conv[2] = (uint8_t)(0x80 | ( cp        & 0x3F));
+	}
+
+	// Add converted string to original array
+	char * ret = dynstrncat_s(pstr, psize, *plen, (char *)conv, len);
+	if (ret != NULL)
+	{
+		*plen += len;
+	}
+	return ret;
+}
+
+
+char * femto_escapeStr(const char * inp)
+{
+	assert(inp != NULL);
+	return femto_escapeStr_s(inp, strlen(inp));
+}
+char * femto_escapeStr_s(const char * inp, size_t len)
+{
+	assert(inp != NULL);
+	assert(len > 0);
+
+	char * mem = NULL;
+	size_t mlen = 0, mcap = 0;
+
+	for (size_t i = 0; i < len; ++i)
+	{
+		switch (inp[i])
+		{
+		case '\\':
+			if (i < (len - 1))
+			{
+				++i;
+				char ch = '\0';
+				switch (inp[i])
+				{
+				case 'b':
+					ch = '\b';
+					break;
+				case 'f':
+					ch = '\f';
+					break;
+				case 'r':
+					ch = '\r';
+					break;
+				case 'n':
+					ch = '\n';
+					break;
+				case 't':
+					ch = '\t';
+					break;
+				case 'u':
+					// 4-wide unicode code point
+					if (i < (len - 4))
+					{
+						++i;
+
+						size_t end = i;
+						uint16_t value = 0;
+						for (; ((end - i) <= 4) && (end < len); ++end)
+						{
+							char t = (char)tolower(inp[end]);
+							if (!(((t >= '0') && (t <= '9')) || ((t >= 'a') && (t <= 'f'))))
+							{
+								break;
+							}
+
+							uint8_t digit = (t >= 'A') ? (uint8_t)(t - 'A' + 10) : (uint8_t)(t - '0');
+							value = (uint16_t)(value * 16 + digit);
+						}
+
+						if (femto_cpcat_s(&mem, &mcap, &mlen, value) == NULL)
+						{
+							if (mem != NULL)
+							{
+								free(mem);
+							}
+							return NULL;
+						}
+						i = end - 1;
+					}
+					else
+					{
+						if (mem != NULL)
+						{
+							free(mem);
+						}
+						return NULL;
+					}
+					break;
+				default:
+					if ((inp[i] >= '0') && (inp[i] <= '7'))
+					{
+						// Maximum 3 chars
+						uint16_t value = 0;
+						size_t end = i;
+						for (; ((end - i) <= 3) && (end < len); ++end)
+						{
+							if (!((inp[end] >= '0') && (inp[end] <= '7')))
+							{
+								break;
+							}
+							uint16_t newvalue = (uint16_t)(value * 8 + (inp[end] - '0'));
+							if (newvalue > 127)
+							{
+								break;
+							}
+							value = newvalue;
+						}
+
+						ch = (char)value;
+						i = end - 1;
+					}
+					else
+					{
+						ch = inp[i];
+					}
+				}
+				
+				if (ch != '\0')
+				{
+					if (dynstrncat_s(&mem, &mcap, mlen, &ch, 1) == NULL)
+					{
+						if (mem != NULL)
+						{
+							free(mem);
+						}
+						return NULL;
+					}
+					++mlen;
+				}
+			}
+			else
+			{
+				if (mem != NULL)
+				{
+					free(mem);
+				}
+				return NULL;
+			}
+			break;
+		default:
+			if (dynstrncat_s(&mem, &mcap, mlen, &inp[i], 1) == NULL)
+			{
+				if (mem != NULL)
+				{
+					free(mem);
+				}
+				return NULL;
+			}
+			++mlen;
+		}
+	}
+
+	return mem;
+}
+
 
 static femtoData_t * s_atExitData = NULL;
 
@@ -590,7 +768,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		j += (node->line[idx] == L'\t') ? peditor->settings.tabWidth - (j % peditor->settings.tabWidth) : 1;
 		++idx;
 	}
-	// Check to inlucde tab character
+	// Check to include tab character
 	if ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)))
 	{
 		--idx;
@@ -607,7 +785,8 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		if (node->line[idx] == L'\t')
 		{
 			uint32_t realIdx = j + pfile->data.curx;
-			destination[j].Char.UnicodeChar = L' ';
+			destination[j].Char.UnicodeChar = peditor->settings.whitespaceVisible ? peditor->settings.whitespaceCh  : L' ';
+			destination[j].Attributes       = peditor->settings.whitespaceVisible ? peditor->settings.whitespaceCol : destination[j].Attributes;
 			++j;
 			for (uint32_t end = j + peditor->settings.tabWidth - ((realIdx) % peditor->settings.tabWidth) - 1; (j < end) && (j < peditor->scrbuf.w); ++j)
 			{

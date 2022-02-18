@@ -23,6 +23,10 @@ typedef struct femtoSettings
 
 	bool autoIndent;
 
+	bool whitespaceVisible;
+	wchar_t whitespaceCh;
+	WORD whitespaceCol;
+
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
 } femtoSettings_t;

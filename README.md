@@ -11,7 +11,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~2900 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -36,6 +36,7 @@ reports ~2900 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * *If multiple files exist with any of the names above, the settings file will be selected following this exact priority*
 - [x] All settings can be given by command line arguments
 - [ ] Multi-file support
+- [x] Optionally "visible" whitespace
 - [x] Keyboard shortcuts:
     | Key                            | Action                                        |
     | ------------------------------ | --------------------------------------------- |
@@ -82,26 +83,34 @@ reports ~2900 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * A question mark can also be used as a separator:
         * `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [x] List of options:
-    | Option                   | Description                                       |
-    | ------------------------ | ------------------------------------------------- |
-    | --help                   | Shows help                                        |
-    | --file=\[file\]          | Specifies file name to open                       |
-    | \[file\]                 | Same as above, must be given as the last argument |
-    | --settings=\[file\]      | Specify custom settings file explicitly           |
-    | --setting=\[file\]       | Same as above                                     |
-    | --tabsSpaces=\[value\]   | Value can be either true/false or 1/0             |
-    | --tabsToSpaces=\[value\] | Same as above                                     |
-    | --tabWidth=\[value\]     | Value can be any number from 1-32                 |
-    | --tabw=\[value\]         | Same as above                                     |
-    | --autoindent=\[value\]   | Value can be either true/false or 1/0             |
-    | --autoi=\[value\]        | Same as above                                     |
-    | --aindent=\[value\]      | Same as above                                     |
+    | Option                        | Description                                         |
+    | ----------------------------- | --------------------------------------------------- |
+    | --help                        | Shows help                                          |
+    | --file=\[file\]               | Specifies file name to open                         |
+    | \[file\]                      | Same as above, must be given as the last argument   |
+    | --settings=\[file\]           | Specify custom settings file explicitly             |
+    | --setting=\[file\]            | Same as above                                       |
+    | --tabsSpaces=\[value\]        | Value can be either true/false or 1/0               |
+    | --tabsToSpaces=\[value\]      | Same as above                                       |
+    | --tabWidth=\[value\]          | Value can be any number from 1-32                   |
+    | --tabw=\[value\]              | Same as above                                       |
+    | --autoindent=\[value\]        | Value can be either true/false or 1/0               |
+    | --autoi=\[value\]             | Same as above                                       |
+    | --aindent=\[value\]           | Same as above                                       |
+    | --whitespaceVisible=\[value\] | Value can be either true/false or 1/0               |
+    | --visibleWhitespace=\[value\] | Same as above                                       |
+    | --whitespaceCh=\[value\]      | Specifies "visible" whitespace character to be used |
+    | --whitespaceColor=\[value\]   | Specifies whitespace character colors               |
+    | --whitespaceCol=\[value\]     | Same as above                                       |
 - [x] List of settings:
-    | Setting      | Type    |
-    | ------------ | ------- |
-    | tabsToSpaces | boolean |
-    | tabWidth     | number  |
-    | autoindent   | boolean |
+    | Setting           | Type    |
+    | ----------------- | ------- |
+    | tabsToSpaces      | boolean |
+    | tabWidth          | number  |
+    | autoindent        | boolean |
+    | whitespaceVisible | boolean |
+    | whitespaceCh      | string  |
+	| whitespaceColor   | number  |
 
 
 # Screenshots
@@ -130,6 +139,8 @@ reports ~2900 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+    * [x] Optionally "visible" whitespace
+    * [x] Configurable whitespace colors
 * 1.3
     * [x] Primitive tab support
     * [x] Proper tab support
