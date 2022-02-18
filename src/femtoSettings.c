@@ -1,8 +1,8 @@
 #include "femtoSettings.h"
 #include "femtoArg.h"
 #include "femto.h"
-#include "jsonParser.h"
 
+#include <jsonParser.h>
 
 void femtoSettings_reset(femtoSettings_t * restrict self)
 {
