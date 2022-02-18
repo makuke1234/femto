@@ -117,7 +117,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 
 # Changelog
 
-* 1.3 (planned)
+* 1.4 (planned)
     * [ ] Line numbers, absolute & relative mode
     * [ ] Warning about any unsaved work
     * [ ] Practical multi-file support
@@ -129,6 +129,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+* 1.3 (planned)
     * [x] Primitive tab support
     * [x] Proper tab support
 	* [x] Tab support for cursor selection with mouse
