@@ -104,7 +104,7 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
     | --setting=\[file\]            | Same as above                                       |
     | --tabsSpaces=\[value\]        | Value can be either true/false or 1/0               |
     | --tabsToSpaces=\[value\]      | Same as above                                       |
-    | --tabWidth=\[value\]          | Value can be any number from 1-32                   |
+    | --tabWidth=\[value\]          | Value can be any number from 1-32 (inclusive)       |
     | --tabw=\[value\]              | Same as above                                       |
     | --autoindent=\[value\]        | Value can be either true/false or 1/0               |
     | --autoi=\[value\]             | Same as above                                       |
