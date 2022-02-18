@@ -580,15 +580,31 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 	// Advance idx by file.data.curx
 	uint32_t idx = 0;
-	for (uint32_t j = pfile->data.curx; j > 0 && idx < node->lineEndx;)
+	for (uint32_t j = 0; (j < pfile->data.curx) && (idx < node->lineEndx);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
 		{
 			idx += node->freeSpaceLen;
 			continue;
 		}
+		if (node->line[idx] == L'\t')
+		{
+			j += peditor->settings.tabWidth - (j % peditor->settings.tabWidth);
+		}
+		else
+		{
+			++j;
+		}
 		++idx;
-		--j;
+	}
+	// Check to inlucde tab character
+	if
+	(
+		(idx > 0) && (node->line[idx - 1] == L'\t') &&
+		((pfile->data.curx % peditor->settings.tabWidth))
+	)
+	{
+		--idx;
 	}
 	for (uint32_t j = 0; idx < node->lineEndx && j < peditor->scrbuf.w;)
 	{
@@ -603,7 +619,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			uint32_t realIdx = j + pfile->data.curx;
 			destination[j].Char.UnicodeChar = L' ';
 			++j;
-			for (uint32_t end = j + peditor->settings.tabWidth - ((realIdx + 1) % peditor->settings.tabWidth); (j < end) && (j < peditor->scrbuf.w); ++j)
+			for (uint32_t end = j + peditor->settings.tabWidth - ((realIdx) % peditor->settings.tabWidth) - 1; (j < end) && (j < peditor->scrbuf.w); ++j)
 			{
 				destination[j].Char.UnicodeChar = L' ';
 			} 

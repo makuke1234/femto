@@ -323,11 +323,7 @@ void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth
 	self->virtcurx = 0;
 	for (uint32_t i = 0; i < self->curx; ++i)
 	{
-		++self->virtcurx;
-		if (self->line[i] == '\t')
-		{
-			self->virtcurx += tabWidth - (self->virtcurx % tabWidth);
-		}
+		self->virtcurx += (self->line[i] == L'\t') ? tabWidth - (self->virtcurx % tabWidth) : 1;
 	}
 }
 uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t virtcur, uint32_t tabWidth)

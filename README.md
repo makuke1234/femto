@@ -7,7 +7,7 @@
 ![C version](https://img.shields.io/badge/version-C99-blue.svg)
 
 It is a bigger more feature-rich version of my other console text editor [atto](https://github.com/makuke1234/atto).
-It is also written in vanilla C + Win32 Console API - it's designed to be used solely on Microsoft Windows.
+It is also written in vanilla C & Win32 Console API - it's designed to be used solely on Microsoft Windows.
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) reports ~4800 source code lines (excluding whitespace & comments):
@@ -133,7 +133,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [x] Primitive tab support
     * [x] Proper tab support
 	* [x] Tab support for cursor selection with mouse
-    * [ ] Tab support when scrolling horizontally
+    * [x] Tab support when scrolling horizontally
 * 1.2
     * [x] Proper setting loading from file
     * [x] Built-in hashmap support
