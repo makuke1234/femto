@@ -1,7 +1,7 @@
 #ifndef SAFEC_H
 #define SAFEC_H
 
-#include "common.h"
+#include <stdint.h>
 
 /**
  * @brief "Safely" duplicate string contents on the heap

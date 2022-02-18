@@ -1,5 +1,9 @@
 #include "safec.h"
 
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
 char * strdup_s(const char * restrict str, size_t len)
 {
 	len = strnlen_s(str, len) + 1;
