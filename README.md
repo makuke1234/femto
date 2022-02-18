@@ -24,19 +24,31 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 # Features
 
 - [x] All saved files use CRLF line-ending format by default, LF and CR are also supported
+	* *Editing text files is sublime*
 - [x] The femto editor utilizes the whole command prompt window, window is as big as your console currently is
+	* *As big as you like*
 - [x] The last line of the window is dedicated to status, for example showing success or failure when an attempting to save a file
+	* *You can see **exactly** what's going on*
 - [ ] Search support & search results highlighting
 - [ ] Syntax highlighting
 - [x] Mouse scrolling, also horizontal scrolling
+	* *Ever used a laptop's touchpad in the terminal **properly**?*
 - [x] Mouse operated text cursor
-- [x] Proper tab support, optional tabs-to-spaces, tab width adjustment, by default tab is 4 spaces wide
+	* *Click anywhere and it works!*
+- [x] Proper tab support, optional tabs-to-spaces, tab width adjustment
+	* *Tabs are 4 spaces wide by default*
 - [x] Automatic indentation, on by default
+	* *The one best feature to speed up coding*
+- [x] All settings can be given by command line arguments
+	* *No settings file necessary*
 - [x] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
     * *If multiple files exist with any of the names above, the settings file will be selected following this exact priority*
-- [x] All settings can be given by command line arguments
+	* *Settings file modifies already given arguments only and only if they (settings from file) don't match the defaults*
+	* *Settings file can be also given by command line arguments*
 - [ ] Multi-file support
 - [x] Optionally "visible" whitespace
+	* *Never dismiss another 'tab'*
+	* *Configurable color*
 - [x] Keyboard shortcuts:
     | Key                            | Action                                        |
     | ------------------------------ | --------------------------------------------- |
