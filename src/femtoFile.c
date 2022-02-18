@@ -459,7 +459,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 				femtoFile_deleteBackward(self);
 			}
 		}
-		else if (femtoFile_checkLineAt(self, -pset->tabWidth, L"\t", 1))
+		else if (femtoFile_checkLineAt(self, -1, L"\t", 1))
 		{
 			femtoFile_deleteBackward(self);
 		}

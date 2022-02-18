@@ -129,6 +129,8 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+	* [x] Primitive tab support
+	* [ ] Tab support when scrolling horizontally
 * 1.2
     * [x] Proper setting loading from file
     * [x] Built-in hashmap support
