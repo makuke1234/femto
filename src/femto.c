@@ -587,25 +587,15 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			idx += node->freeSpaceLen;
 			continue;
 		}
-		if (node->line[idx] == L'\t')
-		{
-			j += peditor->settings.tabWidth - (j % peditor->settings.tabWidth);
-		}
-		else
-		{
-			++j;
-		}
+		j += (node->line[idx] == L'\t') ? peditor->settings.tabWidth - (j % peditor->settings.tabWidth) : 1;
 		++idx;
 	}
 	// Check to inlucde tab character
-	if
-	(
-		(idx > 0) && (node->line[idx - 1] == L'\t') &&
-		((pfile->data.curx % peditor->settings.tabWidth))
-	)
+	if ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)))
 	{
 		--idx;
 	}
+	
 	for (uint32_t j = 0; idx < node->lineEndx && j < peditor->scrbuf.w;)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))

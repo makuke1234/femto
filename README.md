@@ -132,7 +132,7 @@ Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32) re
 * 1.3 (planned)
     * [x] Primitive tab support
     * [x] Proper tab support
-	* [x] Tab support for cursor selection with mouse
+    * [x] Tab support for cursor selection with mouse
     * [x] Tab support when scrolling horizontally
 * 1.2
     * [x] Proper setting loading from file
