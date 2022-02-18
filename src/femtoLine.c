@@ -333,7 +333,7 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 
 
 	uint32_t curx = 0;
-	for (uint32_t i = 0; (i < virtcur) && (curx < self->lineEndx); ++curx)
+	for (uint32_t i = 0; (i < virtcur) && (curx < self->lineEndx);)
 	{
 		if ((curx == self->curx) && (self->freeSpaceLen > 0))
 		{
@@ -341,6 +341,7 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 			continue;
 		}
 		i += (self->line[curx] == L'\t') ? tabWidth - (i % tabWidth) : 1;
+		++curx;
 	}
 
 	writeProfiler("femtoLine_calcCursor", "virtual: %d curx: %d", virtcur, curx);
