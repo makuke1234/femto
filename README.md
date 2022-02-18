@@ -34,11 +34,11 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 - [x] Mouse scrolling, also horizontal scrolling
 	* *Ever used a laptop's touchpad in the terminal **properly**?*
 - [x] Mouse operated text cursor
-	* *Click anywhere and it works!*
+	* *Click anywhere and it just works!*
 - [x] Proper tab support, optional tabs-to-spaces, tab width adjustment
-	* *Tabs are 4 spaces wide by default*
+	* *Tabs are 4 spaces by default*
 - [x] Automatic indentation, on by default
-	* *The one best feature to speed up coding*
+	* *The single best feature to speed up coding*
 - [x] All settings can be given by command line arguments
 	* *No settings file necessary*
 - [x] Optional settings JSON file, can be named either `femto.json`, `femto-settings.json`, `femto_settings.json` or `settings.json`
