@@ -331,7 +331,6 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 	assert(self != NULL);
 	assert(tabWidth > 0);
 
-
 	uint32_t curx = 0;
 	for (uint32_t i = 0; (i < virtcur) && (curx < self->lineEndx);)
 	{
