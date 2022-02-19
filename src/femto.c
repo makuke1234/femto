@@ -380,22 +380,35 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			else if ((key == sac_Ctrl_R) && !boolGet(prevkeybuffer, sac_Ctrl_R))	// Reload file
 			{
-				const wchar_t * res;
-				if ((res = femtoFile_read(pfile)) != NULL)
+				bool reload = true;
+				if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
 				{
-					swprintf_s(tempstr, MAX_STATUS, res);
+					// Check for changes
+					if (femtoFile_checkUnsaved(pfile, NULL, NULL) != checkRes_nothingNew)
+					{
+						reload = false;
+						swprintf_s(tempstr, MAX_STATUS, L"Unsaved work detected. Press Ctrl+Shift+R to confirm reload");
+					}
 				}
-				else
+				if (reload)
 				{
-					swprintf_s(
-						tempstr,
-						MAX_STATUS,
-						L"File reloaded successfully! %s%s EOL sequences",
-						(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
-						(pfile->eolSeq & EOL_LF) ? L"LF" : L""
-					);
+					const wchar_t * res;
+					if ((res = femtoFile_read(pfile)) != NULL)
+					{
+						swprintf_s(tempstr, MAX_STATUS, res);
+					}
+					else
+					{
+						swprintf_s(
+							tempstr,
+							MAX_STATUS,
+							L"File reloaded successfully! %s%s EOL sequences",
+							(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
+							(pfile->eolSeq & EOL_LF) ? L"LF" : L""
+						);
+					}
+					femtoData_refresh(peditor);
 				}
-				femtoData_refresh(peditor);
 			}
 			else if ((key == sac_Ctrl_S) && !boolGet(prevkeybuffer, sac_Ctrl_S))	// Save file
 			{
@@ -440,10 +453,32 @@ bool femto_loop(femtoData_t * restrict peditor)
 				{
 				// Save as...
 				case L'S':
-					if ((GetAsyncKeyState(VK_LCONTROL) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
 					{
 						send = false;
 						swprintf_s(tempstr, MAX_STATUS, L"Save as...");
+					}
+					break;
+				case L'R':
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && (GetAsyncKeyState(VK_SHIFT) & 0x8000))
+					{
+						send = false;
+						const wchar_t * res;
+						if ((res = femtoFile_read(pfile)) != NULL)
+						{
+							swprintf_s(tempstr, MAX_STATUS, res);
+						}
+						else
+						{
+							swprintf_s(
+								tempstr,
+								MAX_STATUS,
+								L"File reloaded successfully! %s%s EOL sequences",
+								(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
+								(pfile->eolSeq & EOL_LF) ? L"LF" : L""
+							);
+						}
+						femtoData_refresh(peditor);
 					}
 					break;
 				case VK_TAB:

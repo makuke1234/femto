@@ -3,5 +3,6 @@
 	"tabWidth": 4,
 	"autoindent": true,
 	"whitespaceVisible": true,
-	"whitespaceColor": 30000
+	"whitespaceColor": 30000,
+	"whitespaceCh": "\u2192"
 }
