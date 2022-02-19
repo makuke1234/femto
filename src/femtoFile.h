@@ -32,6 +32,8 @@ typedef struct femtoFile
 		bool typed;
 		bool updateAll;
 	} data;
+
+	bool unsaved;
 } femtoFile_t;
 
 /**
@@ -107,6 +109,22 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restric
  */
 const wchar_t * femtoFile_read(femtoFile_t * restrict self);
 
+enum femtoFile_checkRes
+{
+	checkRes_nothingNew,
+	checkRes_needsSaving,
+	checkRes_memError
+};
+/**
+ * @brief Checks if any changes have been made to file, sets unsaved member of structure
+ * 
+ * @param self Pointer to femtoFile_t structure
+ * @param editorContents Address of pointer receiving data from editor's screen, can be NULL
+ * @param editorContLen Address of variable receiving size of editor's screen data, can be NULL
+ * @return int32_t Error code
+ */
+int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorContents, uint32_t * editorContLen);
+
 enum femtoFile_writeRes
 {
 	writeRes_nothingNew = -1,
@@ -120,11 +138,10 @@ enum femtoFile_writeRes
  * file if anything has been changed
  * 
  * @param self Pointer to femtoFile_t structure
- * @param tabWidth Tab character width in monospace characters
  * @return int32_t Negative values represent error code, positive values (0 inclusive)
  * represent number of bytes written to disc
  */
-int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth);
+int32_t femtoFile_write(femtoFile_t * restrict self);
 /**
  * @brief Set console title according to last given filename, also shows
  * editor name on the titlebar

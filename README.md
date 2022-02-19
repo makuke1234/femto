@@ -29,6 +29,8 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* *As big as you like*
 - [x] The last line of the window is dedicated to status, for example showing success or failure when an attempting to save a file
 	* *You can see **exactly** what's going on*
+- [x] Warns about any unsaved work
+	* *Never lose your edits again*
 - [ ] Search support & search results highlighting
 - [ ] Syntax highlighting
 - [x] Mouse scrolling, also horizontal scrolling
@@ -52,8 +54,10 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 - [x] Keyboard shortcuts:
     | Key                            | Action                                        |
     | ------------------------------ | --------------------------------------------- |
-    | <kbd>ESC</kbd>                 | Exit editor                                   |
-    | <kbd>Ctrl+Q</kbd>              | Exit editor                                   |
+    | <kbd>ESC</kbd>                 | Exit editor, ask to save any unsaved changes  |
+	| <kbd>Ctrl+Q</kbd>              | Same as above                                 |
+	| <kbd>Shift+ESC</kbd>           | Force exit editor                             |
+    | <kbd>Ctrl+Shift+Q</kbd>        | Same as above                                 |
     | <kbd>Ctrl+N</kbd>              | Create new blank file                         |
     | <kbd>Ctrl+O</kbd>              | Open file                                     |
     | <kbd>Ctrl+S</kbd>              | Save file                                     |
@@ -106,9 +110,9 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
     | --tabsToSpaces=\[value\]      | Same as above                                       |
     | --tabWidth=\[value\]          | Value can be any number from 1-32 (inclusive)       |
     | --tabw=\[value\]              | Same as above                                       |
-    | --autoindent=\[value\]        | Value can be either true/false or 1/0               |
-    | --autoi=\[value\]             | Same as above                                       |
-    | --aindent=\[value\]           | Same as above                                       |
+    | --autoIndent=\[value\]        | Value can be either true/false or 1/0               |
+    | --autoI=\[value\]             | Same as above                                       |
+    | --aIndent=\[value\]           | Same as above                                       |
     | --whitespaceVisible=\[value\] | Value can be either true/false or 1/0               |
     | --visibleWhitespace=\[value\] | Same as above                                       |
     | --whitespaceCh=\[value\]      | Specifies "visible" whitespace character to be used |
@@ -119,7 +123,7 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
     | ----------------- | ------- |
     | tabsToSpaces      | boolean |
     | tabWidth          | number  |
-    | autoindent        | boolean |
+    | autoIndent        | boolean |
     | whitespaceVisible | boolean |
     | whitespaceCh      | string  |
 	| whitespaceColor   | number  |
@@ -141,7 +145,7 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 
 * 1.4 (planned)
     * [ ] Line numbers, absolute & relative mode
-    * [ ] Warning about any unsaved work
+    * [x] Warning about any unsaved work
     * [ ] Practical multi-file support
     * [ ] Search support, also search result highlighting
     * [ ] Syntax highlighting, supported languages:
@@ -152,7 +156,7 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
     * [x] Optionally "visible" whitespace
-    * [x] Configurable whitespace colors
+    * [x] Configurable whitespace color
 * 1.3
     * [x] Primitive tab support
     * [x] Proper tab support

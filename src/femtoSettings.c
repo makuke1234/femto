@@ -154,14 +154,14 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		argumentsUsed[mi - 1] = true;
 	}
 
-	femtoArg_fetchArgv(argc, argv, L"autoindent", &mi, 1, &farg);
+	femtoArg_fetchArgv(argc, argv, L"autoIndent", &mi, 1, &farg);
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"autoi", &mi, 1, &farg);
+		femtoArg_fetchArgv(argc, argv, L"autoI", &mi, 1, &farg);
 	}
 	if (mi == 0)
 	{
-		femtoArg_fetchArgv(argc, argv, L"aindent", &mi, 1, &farg);
+		femtoArg_fetchArgv(argc, argv, L"aIndent", &mi, 1, &farg);
 	}
 	if (mi != 0)
 	{
@@ -320,7 +320,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		attr = jsonObject_get(obj, "autoindent");
+		attr = jsonObject_get(obj, "autoIndent");
 		if (attr != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);

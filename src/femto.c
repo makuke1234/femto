@@ -303,7 +303,34 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 			if ((wVirtKey == VK_ESCAPE) || (key == sac_Ctrl_Q))	// Exit on Escape or Ctrl+Q
 			{
-				return false;
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+				{
+					return false;
+				}
+				uint32_t realLen = 0;
+
+				realLen += (uint32_t)swprintf_s(tempstr, MAX_STATUS, L"Unsaved file(s): ");
+
+				// Scan for any unsaved work
+				bool unsavedAny = false;
+				for (size_t i = 0; i < peditor->filesSize; ++i)
+				{
+					femtoFile_t * f = peditor->files[i];
+					femtoFile_checkUnsaved(f, NULL, NULL);
+					if (f->unsaved && (realLen < MAX_STATUS))
+					{
+						unsavedAny = true;
+						realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s; ", f->fileName);
+					}
+				}
+				if (!unsavedAny)
+				{
+					return false;
+				}
+				else if (realLen < MAX_STATUS)
+				{
+					swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm exit", (key == sac_Ctrl_Q) ? L"Ctrl+Shift+Q" : L"Shift+ESC");
+				}
 			}
 			else if (waitingEnc && (key != sac_Ctrl_E))
 			{
@@ -372,7 +399,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			else if ((key == sac_Ctrl_S) && !boolGet(prevkeybuffer, sac_Ctrl_S))	// Save file
 			{
-				int32_t saved = femtoFile_write(pfile, peditor->settings.tabWidth);
+				int32_t saved = femtoFile_write(pfile);
 				switch (saved)
 				{
 				case writeRes_nothingNew:

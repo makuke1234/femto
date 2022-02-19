@@ -217,7 +217,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 
 	return NULL;
 }
-int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
+int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorContents, uint32_t * editorContLen)
 {
 	assert(self != NULL);
 	// Generate lines
@@ -242,15 +242,12 @@ int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 			{
 				free(lines);
 			}
-			return writeRes_memError;
+			return checkRes_memError;
 		}
 
 		uint32_t lineLen = (uint32_t)wcsnlen(line, lineCap);
 
-		writeProfiler("femtoFile_write", "Got line with size of %u characters. Line contents: \"%S\"", lineLen, line);
-
 		uint32_t addnewline = (node->nextNode != NULL) ? 1 + isCRLF : 0;
-
 		uint32_t newLinesLen = linesLen + lineLen + addnewline;
 
 		// Add line to lines, concatenate \n character, if necessary
@@ -271,13 +268,11 @@ int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 				{
 					free(lines);
 				}
-				return writeRes_memError;
+				return checkRes_memError;
 			}
 
 			lines    = mem;
 			linesCap = newCap;
-
-			writeProfiler("femtoFile_write", "Resized line string. New cap, length is %u, %u bytes.", linesCap, linesLen);
 		}
 
 		// Copy line
@@ -306,11 +301,6 @@ int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 	}
 	free(line);
 
-	writeProfiler("femtoFile_write", "All file contents (%u): \"%S\"", linesLen, lines);
-
-	// Convert spaces to tabs
-	femto_spacesToTabs(&lines, &linesLen, tabWidth);
-
 	// Try to convert lines string to UTF-8
 	char * utf8 = NULL;
 	uint32_t utf8sz = 0;
@@ -322,11 +312,8 @@ int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 	// Error-check conversion
 	if (utf8 == NULL)
 	{
-		return writeRes_memError;
+		return checkRes_memError;
 	}
-
-	writeProfiler("femtoFile_write", "Converted UTF-16 string to UTF-8 string");
-	writeProfiler("femtoFile_write", "UTF-8 contents: \"%s\"", utf8);
 
 	// Check if anything has changed, for that load original file again
 	char * compFile = NULL;
@@ -334,20 +321,47 @@ int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 	if (femtoFile_readBytes(self, &compFile, &compSize) == NULL)
 	{
 		// Reading was successful
-		writeProfiler("femtoFile_write", "Comparing strings: \"%s\" and \"%s\" with sizes %u and %u", utf8, compFile, utf8sz, compSize);
-
 		bool areEqual = strncmp(utf8, compFile, (size_t)u32Min(utf8sz, compSize)) == 0;
 		free(compFile);
-
-		writeProfiler("femtoFile_write", "The strings in question are %s", areEqual ? "equal" : "not equal");
 
 		if (areEqual)
 		{
 			// Free all resources before returning
 			free(utf8);
-			return writeRes_nothingNew;
+			self->unsaved = false;
+			return checkRes_nothingNew;
 		}
 	}
+
+	if ((editorContents != NULL) && (editorContLen != NULL))
+	{
+		*editorContents = utf8;
+		*editorContLen  = utf8sz;
+	}
+	else
+	{
+		free(utf8);
+	}
+
+	self->unsaved = true;
+	return checkRes_needsSaving;
+}
+int32_t femtoFile_write(femtoFile_t * restrict self)
+{
+	assert(self != NULL);
+	char * utf8 = NULL;
+	uint32_t utf8sz = 0;
+	int32_t checkres = femtoFile_checkUnsaved(self, &utf8, &utf8sz);
+	switch (checkres)
+	{
+	case checkRes_memError:
+		return writeRes_memError;
+	case checkRes_nothingNew:
+		return writeRes_nothingNew;
+	}
+	
+	// Make sure that any bugs won't slip through
+	assert(utf8 != NULL);
 
 	// Try to open file for writing
 	if (femtoFile_open(self, NULL, true) == false)
@@ -387,6 +401,7 @@ int32_t femtoFile_write(femtoFile_t * restrict self, uint8_t tabWidth)
 	}
 	else
 	{
+		self->unsaved = false;
 		return (int32_t)dwWritten;
 	}
 }
