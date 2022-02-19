@@ -6,5 +6,4 @@ profiler.txt
 test*.txt
 /.ssh
 .lesshst
-settings.json
 *.a
