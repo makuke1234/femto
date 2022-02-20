@@ -656,27 +656,42 @@ bool femto_loop(femtoData_t * restrict peditor)
 			if (ir.Event.MouseEvent.dwEventFlags & MOUSE_MOVED)
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-
-				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
+				if ((pos.Y == peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
+				{
+					draw = false;
+				}
+				else
+				{
+					pos.X -= (SHORT)(pfile->data.noLen + 1);
+					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
+				}
 			}
 			else
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				writeProfiler("femto_loop", "Mouse click @%hd, %hd", pos.X, pos.Y);
-
-				if (pfile->data.pcury != NULL)
+				if ((pos.Y == peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
 				{
-					pfile->data.currentNode = pfile->data.pcury;
-					const femtoLineNode_t * lastcurnode = pfile->data.currentNode;
-					femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
-					pfile->data.updateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.lineNumRelative;
-					// Now move the cursor to correct X position
-					femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx, peditor->settings.tabWidth));
-					femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
-					pfile->data.lastx = pfile->data.currentNode->virtcurx;
-					femtoData_refresh(peditor);
+					draw = false;
 				}
-				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
+				else
+				{
+					pos.X -= (SHORT)(pfile->data.noLen + 1);
+					writeProfiler("femto_loop", "Mouse click @%hd, %hd", pos.X, pos.Y);
+
+					if (pfile->data.pcury != NULL)
+					{
+						pfile->data.currentNode = pfile->data.pcury;
+						const femtoLineNode_t * lastcurnode = pfile->data.currentNode;
+						femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
+						pfile->data.updateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.lineNumRelative;
+						// Now move the cursor to correct X position
+						femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx, peditor->settings.tabWidth));
+						femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
+						pfile->data.lastx = pfile->data.currentNode->virtcurx;
+						femtoData_refresh(peditor);
+					}
+					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
+				}
 			}
 		}
 		else

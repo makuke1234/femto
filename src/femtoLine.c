@@ -343,20 +343,21 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 	assert(self != NULL);
 	assert(tabWidth > 0);
 
-	uint32_t curx = 0;
-	for (uint32_t i = 0; (i < virtcur) && (curx < self->lineEndx);)
+	uint32_t realcurx = 0;
+	for (uint32_t i = 0, curx = 0; (curx < virtcur) && (i < self->lineEndx);)
 	{
-		if ((curx == self->curx) && (self->freeSpaceLen > 0))
+		if ((i == self->curx) && (self->freeSpaceLen > 0))
 		{
-			curx += self->freeSpaceLen;
+			i += self->freeSpaceLen;
 			continue;
 		}
-		i += (self->line[curx] == L'\t') ? tabWidth - (i % tabWidth) : 1;
-		++curx;
+		curx += (self->line[i] == L'\t') ? tabWidth - (curx % tabWidth) : 1;
+		++realcurx;
+		++i;
 	}
 
 	writeProfiler("femtoLine_calcCursor", "virtual: %d curx: %d", virtcur, curx);
-	return curx;
+	return realcurx;
 }
 
 void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2)
