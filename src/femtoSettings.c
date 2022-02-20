@@ -22,6 +22,7 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.whitespaceCh      = L'→',
 		.whitespaceCol     = FEMTO_DEFAULT_COLOR,
 
+		.lineNumRelative = false,
 
 		.lastErr = { 0 }
 	};
@@ -195,6 +196,14 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	if (mi != 0)
 	{
 		self->whitespaceCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINWSCOL, FEMTO_SETTINGS_MAXWSCOL);
+		argumentsUsed[mi - 1] = true;
+	}
+
+	femtoArg_fetchArgv(argc, argv, L"lineNumRelative", &mi, 1, &farg);
+	if (mi != 0)
+	{
+		self->lineNumRelative = femtoArg_strToBool(farg);
+		argumentsUsed[mi - 1] = true;
 	}
 
 
@@ -377,6 +386,16 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			if (suc && (value >= (double)FEMTO_SETTINGS_MINWSCOL) && (value <= (double)FEMTO_SETTINGS_MAXWSCOL) && val != def.whitespaceCol)
 			{
 				self->whitespaceCol = val;
+			}
+		}
+
+		attr = jsonObject_get(obj, "lineNumRelative");
+		if (attr != NULL)
+		{
+			bool value = jsonValue_getBoolean(attr, &suc);
+			if (suc && (def.lineNumRelative != value))
+			{
+				self->lineNumRelative = value;
 			}
 		}
 	}

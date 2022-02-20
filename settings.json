@@ -4,5 +4,6 @@
 	"autoindent": true,
 	"whitespaceVisible": true,
 	"whitespaceColor": 30000,
-	"whitespaceCh": "\u2192"
+	"whitespaceCh": "\u2192",
+	"lineNumRelative": true
 }

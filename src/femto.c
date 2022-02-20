@@ -718,7 +718,6 @@ bool femto_updateScrbuf(femtoData_t * restrict peditor, uint32_t * curline)
 			{
 				drawCursor = true;
 			}
-
 			if (node != NULL)
 			{
 				node = node->nextNode;
@@ -756,7 +755,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 		pfile->data.typed = false;
 		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
-		int32_t delta = (int32_t)curnode->virtcurx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx;
+		int32_t delta = (int32_t)curnode->virtcurx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx + (int32_t)pfile->data.noLen + 1;
 		if (delta >= 0)
 		{
 			pfile->data.curx += (uint32_t)(delta + 1);
@@ -797,7 +796,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 	
 	// if line is active line and cursor fits
 	femtoLine_calcVirtCursor(node, peditor->settings.tabWidth);
-	uint32_t curx = node->virtcurx - pfile->data.curx;
+	uint32_t curx = node->virtcurx - pfile->data.curx + pfile->data.noLen + 1;
 	if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
 	{
 		// Get cursor information
@@ -830,13 +829,25 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		j += (node->line[idx] == L'\t') ? peditor->settings.tabWidth - (j % peditor->settings.tabWidth) : 1;
 		++idx;
 	}
+
 	// Check to include tab character
 	if ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)))
 	{
 		--idx;
 	}
-	
-	for (uint32_t j = 0; idx < node->lineEndx && j < peditor->scrbuf.w;)
+
+	uint32_t number = (uint32_t)node->lineNumber;
+	uint8_t noLen = (uint8_t)log10((double)number) + 1;
+	destination[pfile->data.noLen].Char.UnicodeChar = L'|';
+	for (int8_t j = (int8_t)pfile->data.noLen - 1; j >= 0; --j)
+	{
+		if (j >= (pfile->data.noLen - noLen))
+		{
+			destination[j].Char.UnicodeChar = (wchar_t)(number % 10) + L'0';
+			number /= 10u;
+		}
+	}
+	for (uint32_t j = (uint8_t)pfile->data.noLen + 1; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
 		{

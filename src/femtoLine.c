@@ -1,8 +1,9 @@
 #include "femtoLine.h"
 
 
-femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool autoIndent)
+femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool autoIndent, uint8_t * restrict noLen)
 {
+	assert(noLen != NULL);
 	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
 	if (node == NULL)
 	{
@@ -73,14 +74,17 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
 	node->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
 	node->prevNode = curnode;
 	node->nextNode = nextnode;
+	node->lineNumber = 1;
 	if (curnode != NULL)
 	{
 		curnode->nextNode  = node;
+		node->lineNumber = curnode->lineNumber + 1;
 	}
 	if (nextnode != NULL)
 	{
 		nextnode->prevNode = node;
 	}
+	femtoLine_updateLineNumbers(node, node->lineNumber, noLen);
 	node->virtcurx = 0;
 
 	return node;
@@ -90,9 +94,12 @@ femtoLineNode_t * femtoLine_createText(
 	femtoLineNode_t * restrict curnode,
 	femtoLineNode_t * restrict nextnode,
 	const wchar_t * restrict lineText,
-	int32_t mText
+	int32_t mText,
+	uint8_t * restrict noLen
 )
 {
+	assert(noLen != NULL);
+
 	uint32_t maxText = (mText == -1) ? (uint32_t)wcslen(lineText) : (uint32_t)mText;
 
 	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
@@ -116,14 +123,17 @@ femtoLineNode_t * femtoLine_createText(
 
 	node->prevNode = curnode;
 	node->nextNode = nextnode;
+	node->lineNumber = 1;
 	if (curnode != NULL)
 	{
 		curnode->nextNode  = node;
+		node->lineNumber = curnode->lineNumber + 1;
 	}
 	if (nextnode != NULL)
 	{
 		nextnode->prevNode = node;
 	}
+	femtoLine_updateLineNumbers(node, node->lineNumber, noLen);
 	node->virtcurx = 0;
 	return node;
 }
@@ -205,7 +215,7 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	return true;
 }
 
-bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** restrict ppcury)
+bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** restrict ppcury, uint8_t * restrict noLen)
 {
 	assert(self != NULL);
 	assert(ppcury != NULL);
@@ -245,7 +255,9 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	{
 		self->nextNode->prevNode = self;
 	}
-	femtoLine_destroy(n); 
+	femtoLine_free(n); 
+
+	femtoLine_updateLineNumbers(self->nextNode, self->lineNumber + 1, noLen);
 
 	return true;
 }
@@ -357,14 +369,37 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
 	node1->lineEndx     = node2->lineEndx;
 	node1->curx         = node2->curx;
 	node1->freeSpaceLen = node2->freeSpaceLen;
+	node1->virtcurx     = node2->virtcurx;
 
 	node2->line         = temp.line;
 	node2->lineEndx     = temp.lineEndx;
 	node2->curx         = temp.curx;
 	node2->freeSpaceLen = temp.freeSpaceLen;
+	node2->virtcurx     = temp.virtcurx;
 }
 
-void femtoLine_destroy(femtoLineNode_t * restrict self)
+void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen)
+{
+	femtoLineNode_t * prevnode = NULL;
+	while (startnode != NULL)
+	{
+		startnode->lineNumber = startLno;
+		++startLno;
+
+		prevnode  = startnode;
+		startnode = startnode->nextNode;
+	}
+	if ((prevnode != NULL) && (prevnode->lineNumber > 0))
+	{
+		*noLen = (uint8_t)log10((double)prevnode->lineNumber) + 1;
+	}
+	else
+	{
+		*noLen = 1;
+	}
+}
+
+void femtoLine_free(femtoLineNode_t * restrict self)
 {
 	assert(self != NULL);
 	if (self->line != NULL)

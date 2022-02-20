@@ -5,12 +5,6 @@
 
 #define FEMTO_LNODE_DEFAULT_FREE 10
 
-/*
-	Example:
-	L"This is text\0\0\0\0\0\0"
-	              ^ - curx
-				  <----------> - freeSpaceLen = 6
-*/
 
 typedef struct femtoLineNode
 {
@@ -18,6 +12,8 @@ typedef struct femtoLineNode
 	uint32_t lineEndx, curx, freeSpaceLen;
 	struct femtoLineNode * prevNode, * nextNode;
 	uint32_t virtcurx;
+
+	uint32_t lineNumber;
 } femtoLineNode_t;
 
 /**
@@ -27,9 +23,16 @@ typedef struct femtoLineNode
  * @param nextnode Pointer to next line node, can be NULL
  * @param tabsToSpaces Tabs are converted to spaces
  * @param autoIndent Automatically insert tabs to match whitespace of the previous line
+ * @param noLen Pointer receiving last line number length in characters
  * @return femtoLineNode_t* Pointer to newly created line node, NULL on failure
  */
-femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool autoIndent);
+femtoLineNode_t * femtoLine_create(
+	femtoLineNode_t * restrict curnode,
+	femtoLineNode_t * restrict nextnode,
+	bool tabsToSpaces,
+	bool autoIndent,
+	uint8_t * noLen
+);
 /**
  * @brief Creates new line in-between current line and next line
  * 
@@ -39,13 +42,15 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
  * copied to the newly created line
  * @param maxText Maximum amount of characters to copy (not including null-terminator),
  * can be -1, if string is null-terminated
+ * @param noLen Pointer receiving last line number length in characters
  * @return femtoLineNode_t* Pointer to newly created line node, NULL on failure
  */
 femtoLineNode_t * femtoLine_createText(
 	femtoLineNode_t * restrict curnode,
 	femtoLineNode_t * restrict nextnode,
 	const wchar_t * restrict lineText,
-	int32_t maxText
+	int32_t maxText,
+	uint8_t * restrict noLen
 );
 
 /**
@@ -76,10 +81,11 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self);
  * 
  * @param self Pointer to current line node
  * @param ppcury Address of pointer to current y-position line node
+ * @param noLen Pointer receiving last line number length in characters
  * @return true Success
  * @return false Failure
  */
-bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** restrict ppcury);
+bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** restrict ppcury, uint8_t * restrict noLen);
 
 /**
  * @brief Moves (internal) cursor on current line node, clamps movement
@@ -129,11 +135,20 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2);
 
 /**
+ * @brief Updates line numbers starting from given startnode (inclusive)
+ * 
+ * @param startnode Starting node for line number updater
+ * @param startLno Starting line number
+ * @param noLen Pointer receiving last line number length in characters
+ */
+void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen);
+
+/**
  * @brief Destroys line node, frees memory
  * 
  * @param self Pointer to line node
  */
-void femtoLine_destroy(femtoLineNode_t * restrict self);
+void femtoLine_free(femtoLineNode_t * restrict self);
 
 
 #endif

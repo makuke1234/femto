@@ -33,6 +33,8 @@ typedef struct femtoSettings
 	wchar_t whitespaceCh;
 	WORD whitespaceCol;
 
+	bool lineNumRelative;
+
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
 } femtoSettings_t;

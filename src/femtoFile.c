@@ -87,7 +87,7 @@ void femtoFile_clearLines(femtoFile_t * restrict self)
 	while (node != NULL)
 	{
 		femtoLineNode_t * next = node->nextNode;
-		femtoLine_destroy(node);
+		femtoLine_free(node);
 		node = next;
 	}
 }
@@ -182,7 +182,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	femtoFile_clearLines(self);
 	if (numLines == 0)
 	{
-		self->data.firstNode = femtoLine_create(NULL, NULL, false, false);
+		self->data.firstNode = femtoLine_create(NULL, NULL, false, false, &self->data.noLen);
 		if (self->data.firstNode == NULL)
 		{
 			free(lines);
@@ -192,7 +192,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	}
 	else
 	{
-		self->data.firstNode = femtoLine_createText(NULL, NULL, lines[0], -1);
+		self->data.firstNode = femtoLine_createText(NULL, NULL, lines[0], -1, &self->data.noLen);
 		if (self->data.firstNode == NULL)
 		{
 			free(lines);
@@ -203,7 +203,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	self->data.currentNode = self->data.firstNode;
 	for (uint32_t i = 1; i < numLines; ++i)
 	{
-		femtoLineNode_t * node = femtoLine_createText(self->data.currentNode, NULL, lines[i], -1);
+		femtoLineNode_t * node = femtoLine_createText(self->data.currentNode, NULL, lines[i], -1, &self->data.noLen);
 		if (node == NULL)
 		{
 			free(lines);
@@ -526,7 +526,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			}
 
 			// Destroy current line
-			femtoLine_destroy(node);
+			femtoLine_free(node);
 			self->data.updateAll = true;
 		}
 		break;
@@ -658,7 +658,7 @@ bool femtoFile_deleteForward(femtoFile_t * restrict self)
 	else if (node->nextNode != NULL)
 	{
 		self->data.updateAll = true;
-		return femtoLine_mergeNext(node, &self->data.pcury);
+		return femtoLine_mergeNext(node, &self->data.pcury, &self->data.noLen);
 	}
 	else
 	{
@@ -680,7 +680,7 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self)
 		// Add current node data to previous node data
 		self->data.currentNode = node->prevNode;
 		self->data.updateAll = true;
-		return femtoLine_mergeNext(self->data.currentNode, &self->data.pcury);
+		return femtoLine_mergeNext(self->data.currentNode, &self->data.pcury, &self->data.noLen);
 	}
 	else
 	{
@@ -690,7 +690,7 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self)
 bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool autoIndent)
 {
 	assert(self != NULL);
-	femtoLineNode_t * node = femtoLine_create(self->data.currentNode, self->data.currentNode->nextNode, tabsToSpaces, autoIndent);
+	femtoLineNode_t * node = femtoLine_create(self->data.currentNode, self->data.currentNode->nextNode, tabsToSpaces, autoIndent, &self->data.noLen);
 	if (node == NULL)
 	{
 		return false;

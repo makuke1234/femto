@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include <safec.h>
 

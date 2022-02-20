@@ -29,6 +29,8 @@ typedef struct femtoFile
 		femtoLineNode_t * pcury;
 		uint32_t curx, lastx;
 
+		uint8_t noLen;
+
 		bool typed;
 		bool updateAll;
 	} data;
