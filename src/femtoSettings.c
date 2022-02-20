@@ -23,6 +23,7 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.whitespaceCol     = FEMTO_DEFAULT_COLOR,
 
 		.lineNumRelative = false,
+		.lineNumCol      = FEMTO_DEFAULT_COLOR,
 
 		.lastErr = { 0 }
 	};
@@ -195,7 +196,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 	if (mi != 0)
 	{
-		self->whitespaceCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINWSCOL, FEMTO_SETTINGS_MAXWSCOL);
+		self->whitespaceCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -203,6 +204,17 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	if (mi != 0)
 	{
 		self->lineNumRelative = femtoArg_strToBool(farg);
+		argumentsUsed[mi - 1] = true;
+	}
+
+	femtoArg_fetchArgv(argc, argv, L"lineNumColor", &mi, 1, &farg);
+	if (mi == 0)
+	{
+		femtoArg_fetchArgv(argc, argv, L"lineNumCol", &mi, 1, &farg);
+	}
+	if (mi != 0)
+	{
+		self->lineNumCol = (uint16_t)u32Clamp((uint32_t)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -308,8 +320,8 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 
 	if (suc)
 	{
-		jsonValue_t * attr = jsonObject_get(obj, "tabsToSpaces");
-		if (attr != NULL)
+		jsonValue_t * attr;
+		if ((attr = jsonObject_get(obj, "tabsToSpaces")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.tabsToSpaces != value))
@@ -318,8 +330,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		attr = jsonObject_get(obj, "tabWidth");
-		if (attr != NULL)
+		if ((attr = jsonObject_get(obj, "tabWidth")) != NULL)
 		{
 			double value = jsonValue_getNumber(attr, &suc);
 			uint8_t val8 = (uint8_t)value;
@@ -329,8 +340,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		attr = jsonObject_get(obj, "autoIndent");
-		if (attr != NULL)
+		if ((attr = jsonObject_get(obj, "autoIndent")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.autoIndent != value))
@@ -339,8 +349,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		attr = jsonObject_get(obj, "whitespaceVisible");
-		if (attr != NULL)
+		if ((attr = jsonObject_get(obj, "whitespaceVisible")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.whitespaceVisible != value))
@@ -349,8 +358,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		attr = jsonObject_get(obj, "whitespaceCh");
-		if (attr != NULL)
+		if ((attr = jsonObject_get(obj, "whitespaceCh")) != NULL)
 		{
 			const char * str = jsonValue_getString(attr, &suc);
 			size_t len = strlen(str);
@@ -378,24 +386,32 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		attr = jsonObject_get(obj, "whitespaceColor");
-		if (attr != NULL)
+		if ((attr = jsonObject_get(obj, "whitespaceColor")) != NULL)
 		{
 			double value = jsonValue_getNumber(attr, &suc);
 			uint16_t val = (uint16_t)value;
-			if (suc && (value >= (double)FEMTO_SETTINGS_MINWSCOL) && (value <= (double)FEMTO_SETTINGS_MAXWSCOL) && val != def.whitespaceCol)
+			if (suc && (value >= (double)FEMTO_SETTINGS_MINCOLOR) && (value <= (double)FEMTO_SETTINGS_MAXCOLOR) && val != def.whitespaceCol)
 			{
 				self->whitespaceCol = val;
 			}
 		}
 
-		attr = jsonObject_get(obj, "lineNumRelative");
-		if (attr != NULL)
+		if ((attr = jsonObject_get(obj, "lineNumRelative")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.lineNumRelative != value))
 			{
 				self->lineNumRelative = value;
+			}
+		}
+
+		if ((attr = jsonObject_get(obj, "lineNumColor")) != NULL)
+		{
+			double value = jsonValue_getNumber(attr, &suc);
+			uint16_t val = (uint16_t)value;
+			if (suc && (value >= (double)FEMTO_SETTINGS_MINCOLOR) && (value <= (double)FEMTO_SETTINGS_MAXCOLOR) && val != def.lineNumCol)
+			{
+				self->lineNumCol = val;
 			}
 		}
 	}

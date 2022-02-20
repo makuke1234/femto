@@ -13,8 +13,8 @@
 #define FEMTO_SETTINGS_MINTAB 1
 #define FEMTO_SETTINGS_MAXTAB 32
 
-#define FEMTO_SETTINGS_MINWSCOL 0
-#define FEMTO_SETTINGS_MAXWSCOL UINT16_MAX
+#define FEMTO_SETTINGS_MINCOLOR 0
+#define FEMTO_SETTINGS_MAXCOLOR UINT8_MAX
 
 
 typedef struct femtoSettings
@@ -34,6 +34,7 @@ typedef struct femtoSettings
 	WORD whitespaceCol;
 
 	bool lineNumRelative;
+	WORD lineNumCol;
 
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];

@@ -656,7 +656,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			if (ir.Event.MouseEvent.dwEventFlags & MOUSE_MOVED)
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if ((pos.Y == peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
+				if ((pos.Y == (SHORT)peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
 				{
 					draw = false;
 				}
@@ -669,7 +669,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			else
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if ((pos.Y == peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
+				if ((pos.Y == (SHORT)peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
 				{
 					draw = false;
 				}
@@ -855,9 +855,11 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 	uint32_t number = (!peditor->settings.lineNumRelative || (node == curnode)) ? (uint32_t)node->lineNumber : (uint32_t)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	uint8_t noLen = (uint8_t)log10((double)number) + 1;
+	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
 	destination[pfile->data.noLen].Char.UnicodeChar = L'|';
 	for (int8_t j = (int8_t)pfile->data.noLen - 1; j >= 0; --j)
 	{
+		destination[j].Attributes = peditor->settings.lineNumCol;
 		if (j >= (pfile->data.noLen - noLen))
 		{
 			destination[j].Char.UnicodeChar = (wchar_t)(number % 10) + L'0';

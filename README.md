@@ -11,7 +11,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~3300 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -120,6 +120,8 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
     | --whitespaceColor=\[value\]   | Specifies whitespace color, number between 0-65535  |
     | --whitespaceCol=\[value\]     | Same as above                                       |
     | --lineNumRelative=\[value\]   | Value can be either true/false or 1/0               |
+    | --lineNumColor=\[value\]      | Specifies line number color, number between 0-65535 |
+    | --lineNumCol=\[value\]        | Same as above                                       |
 - [x] List of settings:
     | Setting           | Type    |
     | ----------------- | ------- |
@@ -130,6 +132,7 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
     | whitespaceCh      | string  |
     | whitespaceColor   | number  |
     | lineNumRelative   | boolean |
+    | lineNumColor      | number  |
 
 
 # Screenshots
@@ -146,9 +149,7 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 
 # Changelog
 
-* 1.4 (planned)
-    * [x] Line numbers, absolute & relative mode
-    * [x] Warning about any unsaved work
+* 1.5 (planned)
     * [ ] Practical multi-file support
     * [ ] Search support, also search result highlighting
     * [ ] Syntax highlighting, supported languages:
@@ -158,6 +159,9 @@ reports ~3200 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+* 1.4
+    * [x] Line numbers, absolute & relative mode
+    * [x] Warning about any unsaved work
     * [x] Optionally "visible" whitespace
     * [x] Configurable whitespace color
 * 1.3

@@ -3,7 +3,8 @@
 	"tabWidth": 4,
 	"autoindent": true,
 	"whitespaceVisible": true,
-	"whitespaceColor": 30000,
+	"whitespaceColor": 9,
 	"whitespaceCh": "\u2192",
-	"lineNumRelative": true
+	"lineNumRelative": true,
+	"lineNumColor": 8
 }
