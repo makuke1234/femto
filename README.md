@@ -117,10 +117,10 @@ reports ~3300 source code lines (excluding whitespace, comments & [jsonlite2](ht
     | --whitespaceVisible=\[value\] | Value can be either true/false or 1/0               |
     | --visibleWhitespace=\[value\] | Same as above                                       |
     | --whitespaceCh=\[value\]      | Specifies "visible" whitespace character to be used |
-    | --whitespaceColor=\[value\]   | Specifies whitespace color, number between 0-65535  |
+    | --whitespaceColor=\[value\]   | Specifies whitespace color, number between 0-255    |
     | --whitespaceCol=\[value\]     | Same as above                                       |
     | --lineNumRelative=\[value\]   | Value can be either true/false or 1/0               |
-    | --lineNumColor=\[value\]      | Specifies line number color, number between 0-65535 |
+    | --lineNumColor=\[value\]      | Specifies line number color, number between 0-255   |
     | --lineNumCol=\[value\]        | Same as above                                       |
 - [x] List of settings:
     | Setting           | Type    |
