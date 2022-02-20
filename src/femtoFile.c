@@ -444,6 +444,8 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 {
 	assert(self != NULL);
 	self->data.typed = true;
+	const femtoLineNode_t * lastcurnode = self->data.currentNode;
+
 	switch (ch)
 	{
 	case VK_TAB:
@@ -603,6 +605,8 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	default:
 		return false;
 	}
+
+	self->data.updateAll |= (self->data.currentNode != lastcurnode) & pset->lineNumRelative;
 
 	return true;
 }

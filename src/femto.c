@@ -667,7 +667,9 @@ bool femto_loop(femtoData_t * restrict peditor)
 				if (pfile->data.pcury != NULL)
 				{
 					pfile->data.currentNode = pfile->data.pcury;
+					const femtoLineNode_t * lastcurnode = pfile->data.currentNode;
 					femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
+					pfile->data.updateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.lineNumRelative;
 					// Now move the cursor to correct X position
 					femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx, peditor->settings.tabWidth));
 					femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
@@ -836,7 +838,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		--idx;
 	}
 
-	uint32_t number = (uint32_t)node->lineNumber;
+	uint32_t number = (!peditor->settings.lineNumRelative || (node == curnode)) ? (uint32_t)node->lineNumber : (uint32_t)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	uint8_t noLen = (uint8_t)log10((double)number) + 1;
 	destination[pfile->data.noLen].Char.UnicodeChar = L'|';
 	for (int8_t j = (int8_t)pfile->data.noLen - 1; j >= 0; --j)
