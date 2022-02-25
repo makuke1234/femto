@@ -28,7 +28,6 @@ $(TESTS)/bin:
 
 
 srcs = $(wildcard $(SRC)/*.c)
-#srcs += $(wildcard $(SRC)/*.rc)
 srcs := $(subst $(SRC)/,,$(srcs))
 
 tests = $(wildcard $(TESTS)/*.c)
@@ -52,6 +51,8 @@ objs_r = $(srcs:%=$(OBJ)/%.o)
 
 objs_d += $(jsonlite2_obj)
 objs_r += $(jsonlite2_obj)
+
+objs_test = $(subst $(OBJD)/main.c.o,,$(objs_d))
 
 
 $(OBJ)/%.c.o: $(SRC)/%.c $(OBJ) $(jsonlite2_lib)
@@ -81,7 +82,7 @@ bulkr: $(jsonlite2_lib) bulkr_impl
 bulkr_impl: $(bulk_srcs)
 	$(CC) $^ -o $(TARGET).exe $(CDEFFLAGS) $(CFLAGS) $(LIB)
 
-$(TESTS)/bin/%: $(TESTS)/%.c $(objs_d)
+$(TESTS)/bin/%: $(TESTS)/%.c $(objs_test)
 	$(CC) $(CDEFFLAGS) $^ -o $@ $(LIB)
 
 test: $(jsonlite2_lib) $(TESTS)/bin $(TESTBINS)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main()
+int wmain(void)
 {
 	printf("hello world1\n");	
 	return 0;
