@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-void testInsert(hashMap_t * map, const char * key, intptr_t value, size_t newsize)
+static inline void testInsert(hashMap_t * map, const char * key, intptr_t value, size_t newsize)
 {
 	hashMap_insert(map, key, (void *)value);
 	test(hashMap_get(map, key) != NULL, "insertion failed");
@@ -14,7 +14,7 @@ void testInsert(hashMap_t * map, const char * key, intptr_t value, size_t newsiz
 	}
 }
 
-void testRemove(hashMap_t * map, const char * key, intptr_t value)
+static inline void testRemove(hashMap_t * map, const char * key, intptr_t value)
 {
 	hashNode_t * node = hashMap_get(map, key);
 	test(node != NULL, "that key should exist!");

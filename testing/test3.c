@@ -7,7 +7,7 @@
 
 #define TESTCAT(str1, str2) testcat(str1, str2, str1 str2)
 
-void testcat(const char * str1, const char * str2, const char * sum)
+static inline void testcat(const char * str1, const char * str2, const char * sum)
 {
 	char * receiver = strdup_s(str1, SIZE_MAX);
 	test(strcmp(str1, receiver) == 0, "strings are not equal!");
