@@ -752,7 +752,7 @@ static inline void json_inner_checkValue(const char * restrict * restrict it, co
 	assert(perr != NULL);
 	
 	bool done = false;
-	for (;*it != end; ++*it)
+	for (; *it != end; ++*it)
 	{
 		switch (**it)
 		{
@@ -997,11 +997,15 @@ static inline size_t json_inner_checkValues(const char * restrict * restrict it,
 		case '\r':
 			++*it;
 			break;
+		case ']':
+			if (vals)
+			{
+				done = true;
+				break;
+			}
+			/* fall through */
 		case '}':
 			*perr = jsonErr_invalidTerminator;
-			break;
-		case ']':
-			done = true;
 			break;
 		default:
 			json_inner_checkValue(it, end, perr);
