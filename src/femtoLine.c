@@ -356,7 +356,7 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 		++i;
 	}
 
-	writeProfiler("femtoLine_calcCursor", "virtual: %d curx: %d", virtcur, curx);
+	writeProfiler("femtoLine_calcCursor", "virtual: %d realcurx: %d", virtcur, realcurx);
 	return realcurx;
 }
 
