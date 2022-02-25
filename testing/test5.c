@@ -12,7 +12,7 @@ static inline void testCheckNot(const char * str)
 
 int wmain(void)
 {
-	setlib("JSON parser");
+	setlib("JSON checker");
 
 	testCheck("");
 	testCheck("{}");
