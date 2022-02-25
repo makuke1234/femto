@@ -7,6 +7,7 @@
 void stack_init(stack_t * restrict self, size_t elemSize)
 {
 	assert(self != NULL);
+	assert(elemSize > 0);
 
 	*self = (stack_t){
 		.mem      = NULL,
