@@ -1,7 +1,9 @@
-#include <stdio.h>
+#include "test.h"
 
 int wmain(void)
 {
-	printf("hello world1\n");	
+	testn("Always true", true, "That can't be false!");
+	testn("Always false", false, "This is always false!");
+
 	return 0;
 }
