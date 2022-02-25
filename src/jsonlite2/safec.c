@@ -6,6 +6,10 @@
 
 char * strdup_s(const char * restrict str, size_t len)
 {
+	if (str == NULL)
+	{
+		return NULL;
+	}
 	len = strnlen_s(str, len) + 1;
 	char * mem = malloc(sizeof(char) * len);
 	if (mem == NULL)
@@ -18,6 +22,10 @@ char * strdup_s(const char * restrict str, size_t len)
 }
 wchar_t * wcsdup_s(const wchar_t * restrict wstr, size_t len)
 {
+	if (wstr == NULL)
+	{
+		return NULL;
+	}
 	len = wcsnlen_s(wstr, len) + 1;
 	wchar_t * mem = malloc(sizeof(wchar_t) * len);
 	if (mem == NULL)
