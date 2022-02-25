@@ -29,6 +29,7 @@ int wmain(void)
 	testCheckNot("{]");
 	testCheckNot("[}");
 	testCheckNot("{");
+	testCheckNot("[");
 	testCheckNot("{[");
 	testCheckNot("{{");
 	testCheckNot("[[");
@@ -41,6 +42,8 @@ int wmain(void)
 	testCheckNot("abcdefg");
 	testCheck("\"abcdefg\"");
 	testCheckNot("[5, .5, 'single quotes', \"quotes in \"quotes\" in quotes\"]");
+	testCheckNot("{ \"user\": \"<div class=\"user\">Ryan</div>\" }");
+	testCheck("{ \"test\": \"each \n on \n new \n line\"}");
 
 	return 0;
 }
