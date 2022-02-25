@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: Windows **Other OSes won't be accepted yet!**
+ - OS: [e.g. Windows 10 21H1] **OSes other than Windows won't be accepted yet!**
  - Version [e.g. 1.4] **Only bug reports for latest release will be accepted!**
 
 **Additional context**
