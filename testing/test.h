@@ -2,6 +2,7 @@
 #define TEST_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
 
@@ -29,6 +30,7 @@ static inline void test(bool cond, const char * errmsg, ...)
 		vfprintf(stderr, errmsg, ap);
 		va_end(ap);
 		fprintf(stderr, "\n");
+		exit(1);
 	}
 }
 
