@@ -40,6 +40,7 @@ int wmain(void)
 	testCheckNot("fals");
 	testCheckNot("abcdefg");
 	testCheck("\"abcdefg\"");
+	testCheckNot("[5, .5, 'single quotes', \"quotes in \"quotes\" in quotes\"]");
 
 	return 0;
 }
