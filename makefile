@@ -3,6 +3,7 @@ TARGET=femto
 OBJ=obj
 OBJD=objd
 SRC=src
+TESTS=testing
 
 
 export C_INCLUDE_PATH=$(JSONLITE2_SRC)
@@ -19,13 +20,20 @@ LIB=-ljsonlite2
 default: debug
 
 $(OBJ):
-	mkdir $(OBJ)
+	mkdir $@
 $(OBJD):
-	mkdir $(OBJD)
+	mkdir $@
+$(TESTS)/bin:
+	mkdir $@
+
 
 srcs = $(wildcard $(SRC)/*.c)
 #srcs += $(wildcard $(SRC)/*.rc)
 srcs := $(subst $(SRC)/,,$(srcs))
+
+tests = $(wildcard $(TESTS)/*.c)
+tests := $(subst $(TESTS)/,,$(tests))
+TESTBINS = $(tests:%.c=$(TESTS)/bin/%)
 
 jsonlite2_srcs = $(wildcard $(JSONLITE2_SRC)/*.c)
 jsonlite2_srcs := $(subst $(JSONLITE2_SRC)/,,$(jsonlite2_srcs))
@@ -73,6 +81,11 @@ bulkr: $(jsonlite2_lib) bulkr_impl
 bulkr_impl: $(bulk_srcs)
 	$(CC) $^ -o $(TARGET).exe $(CDEFFLAGS) $(CFLAGS) $(LIB)
 
+$(TESTS)/bin/%: $(TESTS)/%.c $(objs_d)
+	$(CC) $(CDEFFLAGS) $^ -o $@ $(LIB)
+
+test: $(jsonlite2_lib) $(TESTS)/bin $(TESTBINS)
+	for test in $(TESTBINS) ; do ./$$test ; done
 
 clean:
 	rm -r -f $(OBJ)
@@ -80,3 +93,4 @@ clean:
 	rm -f $(TARGET).exe
 	rm -f deb$(TARGET).exe
 	rm -f $(jsonlite2_lib)
+	rm -r -f $(TESTS)/bin
