@@ -64,7 +64,11 @@ bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileNa
 	else
 	{
 		self->canWrite = writemode;
-		self->fileName = fileName;
+		self->fileName = wcsredup(self->fileName, fileName);
+		if (self->fileName == NULL)
+		{
+			return false;
+		}
 		return true;
 	}
 }
@@ -757,4 +761,10 @@ void femtoFile_destroy(femtoFile_t * restrict self)
 	assert(self != NULL);
 	femtoFile_close(self);
 	femtoFile_clearLines(self);
+
+	if (self->fileName != NULL)
+	{
+		free(self->fileName);
+		self->fileName = NULL;
+	}
 }

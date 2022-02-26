@@ -593,7 +593,39 @@ bool femto_loop(femtoData_t * restrict peditor)
 						wchar_t inp[MAX_STATUS];
 						if (femto_askInput(peditor, inp, MAX_STATUS))
 						{
-							swprintf_s(tempstr, MAX_STATUS, L"Saved %s successfully!", inp);
+							wchar_t * oldfilename = pfile->fileName;
+							pfile->fileName = inp;
+							int32_t saved = femtoFile_write(pfile);
+							switch (saved)
+							{
+							case writeRes_nothingNew:
+								wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
+								break;
+							case writeRes_openError:
+								wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
+								break;
+							case writeRes_writeError:
+								wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
+								break;
+							case writeRes_memError:
+								wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
+								break;
+							default:
+								swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes to %s", saved, inp);
+							}
+
+							switch (saved)
+							{
+							case writeRes_openError:
+							case writeRes_writeError:
+							case writeRes_memError:
+								// Revert back to old name
+								pfile->fileName = oldfilename;
+								break;
+							default:
+								// Switch to the new name
+								pfile->fileName = wcsredup(oldfilename, inp);
+							}
 						}
 						else
 						{

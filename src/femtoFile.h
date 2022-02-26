@@ -17,7 +17,7 @@ enum femtoEOLsequence
 
 typedef struct femtoFile
 {
-	const wchar_t * fileName;
+	wchar_t * fileName;
 	HANDLE hFile;
 	bool canWrite;
 	enum femtoEOLsequence eolSeq;
