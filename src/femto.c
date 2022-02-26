@@ -386,7 +386,7 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 	femtoLine_destroy(&temp);
 
 	SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
-	return read & (line[0] != L'\0');
+	return read;
 }
 bool femto_loop(femtoData_t * restrict peditor)
 {
