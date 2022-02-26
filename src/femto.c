@@ -491,7 +491,19 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			else if ((key == sac_Ctrl_O) && !boolGet(prevkeybuffer, sac_Ctrl_O))
 			{
-				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+O");
+				swprintf_s(tempstr, MAX_STATUS, L"Open :");
+				femtoData_statusDraw(peditor, tempstr, NULL);
+
+				wchar_t inp[MAX_STATUS];
+				if (femto_askInput(peditor, inp, MAX_STATUS))
+				{
+					// Try to create new tab and open file
+					swprintf_s(tempstr, MAX_STATUS, L"Opened %s successfully!", inp);
+				}
+				else
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"Opening canceled by user");
+				}
 			}
 			else if ((key == sac_Ctrl_W) && !boolGet(prevkeybuffer, sac_Ctrl_W))
 			{

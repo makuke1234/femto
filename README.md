@@ -12,7 +12,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~3400 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~3500 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -150,7 +150,7 @@ reports ~3400 source code lines (excluding whitespace, comments & [jsonlite2](ht
 
 # Changelog
 
-* 1.5 (planned)
+* 1.6 (planned)
     * [ ] Practical multi-file support
     * [ ] Search support, also search result highlighting
     * [ ] Syntax highlighting, supported languages:
@@ -160,6 +160,8 @@ reports ~3400 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+* 1.5
+    * [x] Asks for user input on open & save as
     * [x] User input support on the last line of the editor
     * [x] Fix auto-indentation bug, inserts too many tabs
     * [x] Fix backwards tabbing (space removal)
