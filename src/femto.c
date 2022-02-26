@@ -469,7 +469,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					pfile->eolSeq = EOL_CR;
 					break;
 				default:
-					swprintf_s(tempstr, MAX_STATUS, L"Unknown EOL combination!");
+					wcscpy_s(tempstr, MAX_STATUS, L"Unknown EOL combination!");
 					done = false;
 				}
 				if (done)
@@ -487,11 +487,11 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			else if ((key == sac_Ctrl_N) && !boolGet(prevkeybuffer, sac_Ctrl_N))
 			{
-				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+N");
+				wcscpy_s(tempstr, MAX_STATUS, L"Ctrl+N");
 			}
 			else if (key == sac_Ctrl_O)
 			{
-				swprintf_s(tempstr, MAX_STATUS, L"Open :");
+				wcscpy_s(tempstr, MAX_STATUS, L"Open :");
 				femtoData_statusDraw(peditor, tempstr, NULL);
 
 				wchar_t inp[MAX_STATUS];
@@ -502,7 +502,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				}
 				else
 				{
-					swprintf_s(tempstr, MAX_STATUS, L"Opening canceled by user");
+					wcscpy_s(tempstr, MAX_STATUS, L"Opening canceled by user");
 				}
 			}
 			else if ((key == sac_Ctrl_W) && !boolGet(prevkeybuffer, sac_Ctrl_W))
@@ -518,7 +518,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					if (femtoFile_checkUnsaved(pfile, NULL, NULL) != checkRes_nothingNew)
 					{
 						reload = false;
-						swprintf_s(tempstr, MAX_STATUS, L"Unsaved work detected. Press Ctrl+Shift+R to confirm reload");
+						wcscpy_s(tempstr, MAX_STATUS, L"Unsaved work detected. Press Ctrl+Shift+R to confirm reload");
 					}
 				}
 				if (reload)
@@ -547,16 +547,16 @@ bool femto_loop(femtoData_t * restrict peditor)
 				switch (saved)
 				{
 				case writeRes_nothingNew:
-					swprintf_s(tempstr, MAX_STATUS, L"Nothing new to save");
+					wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
 					break;
 				case writeRes_openError:
-					swprintf_s(tempstr, MAX_STATUS, L"File open error!");
+					wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
 					break;
 				case writeRes_writeError:
-					swprintf_s(tempstr, MAX_STATUS, L"File is write-protected!");
+					wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
 					break;
 				case writeRes_memError:
-					swprintf_s(tempstr, MAX_STATUS, L"Memory allocation error!");
+					wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
 					break;
 				default:
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
@@ -565,7 +565,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			else if ((key == sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
 			{
 				waitingEnc = true;
-				swprintf_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
+				wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
 			}
 			// Normal keys
 			else if (key > sac_last_code)
@@ -587,7 +587,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
 					{
 						send = false;
-						swprintf_s(tempstr, MAX_STATUS, L"Save as... :");
+						wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
 						femtoData_statusDraw(peditor, tempstr, NULL);
 
 						wchar_t inp[MAX_STATUS];
@@ -597,7 +597,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						}
 						else
 						{
-							swprintf_s(tempstr, MAX_STATUS, L"Saving canceled by user");
+							wcscpy_s(tempstr, MAX_STATUS, L"Saving canceled by user");
 						}
 					}
 					break;
@@ -608,7 +608,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						const wchar_t * res;
 						if ((res = femtoFile_read(pfile)) != NULL)
 						{
-							swprintf_s(tempstr, MAX_STATUS, res);
+							wcscpy_s(tempstr, MAX_STATUS, res);
 						}
 						else
 						{
@@ -713,13 +713,13 @@ bool femto_loop(femtoData_t * restrict peditor)
 					break;
 				}
 				case VK_CAPITAL:
-					swprintf_s(tempstr, MAX_STATUS, L"'CAPS' %s", (GetKeyState(VK_CAPITAL) & 0x0001) ? L"On" : L"Off");
+					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off");
 					break;
 				case VK_NUMLOCK:
-					swprintf_s(tempstr, MAX_STATUS, L"'NUMLOCK' %s", (GetKeyState(VK_NUMLOCK) & 0x0001) ? L"On" : L"Off");
+					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_NUMLOCK) & 0x0001) ? L"'NUMLOCK' On" : L"'NUMLOCK' Off");
 					break;
 				case VK_SCROLL:
-					swprintf_s(tempstr, MAX_STATUS, L"'SCRLOCK' %s", (GetKeyState(VK_SCROLL) & 0x0001) ? L"On" : L"Off");
+					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_SCROLL) & 0x0001) ? L"'SCRLOCK' On" : L"'SCRLOCK' Off");
 					break;
 				default:
 					draw = false;
