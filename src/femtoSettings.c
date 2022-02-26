@@ -223,7 +223,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 
 	// If filename wasn't specified and the last argument isn't used, take the last argument
 	// If the last argument is already in use, leave fileName as NULL, opens an empty new file
-	if ((self->fileName == NULL) && !argumentsUsed[argc - 2])
+	if ((self->fileName == NULL) && !argumentsUsed[argc - 2] && (argc > 1))
 	{
 		self->fileName = wcsdup_s(argv[argc - 1], SIZE_MAX);
 		if (self->fileName == NULL)

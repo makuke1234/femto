@@ -36,7 +36,7 @@ int wmain(int argc, const wchar_t * argv[])
 				return 2;
 			}
 		}
-		else if (editor.settings.helpRequested)
+		else if (editor.settings.helpRequested || (argc == 1))
 		{
 			femto_printHelp(argv[0]);
 			return 0;

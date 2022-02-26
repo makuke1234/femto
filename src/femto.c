@@ -526,7 +526,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					const wchar_t * res;
 					if ((res = femtoFile_read(pfile)) != NULL)
 					{
-						swprintf_s(tempstr, MAX_STATUS, res);
+						wcscpy_s(tempstr, MAX_STATUS, res);
 					}
 					else
 					{
