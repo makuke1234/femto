@@ -471,7 +471,7 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t 
 	}
 }
 
-void femtoLine_free(femtoLineNode_t * restrict self)
+void femtoLine_destroy(femtoLineNode_t * restrict self)
 {
 	assert(self != NULL);
 	if (self->line != NULL)
@@ -479,5 +479,10 @@ void femtoLine_free(femtoLineNode_t * restrict self)
 		free(self->line);
 		self->line = NULL;
 	}
+}
+void femtoLine_free(femtoLineNode_t * restrict self)
+{
+	assert(self != NULL);
+	femtoLine_destroy(self);
 	free(self);
 }

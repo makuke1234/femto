@@ -173,6 +173,12 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
 void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen);
 
 /**
+ * @brief Destroys line node, does NOT free any memory
+ * 
+ * @param self Pointer to line node
+ */
+void femtoLine_destroy(femtoLineNode_t * restrict self);
+/**
  * @brief Destroys line node, frees memory
  * 
  * @param self Pointer to line node
