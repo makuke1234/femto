@@ -37,6 +37,46 @@ wchar_t * wcsdup_s(const wchar_t * restrict wstr, size_t len)
 	return mem;
 }
 
+char * strredup(char * restrict str, const char * restrict newstr)
+{
+	size_t exlen = (str != NULL) ? strlen(str) + 1 : 0;
+	size_t newlen = strlen(newstr) + 1;
+	if (newlen > exlen)
+	{
+		char * mem = realloc(str, sizeof(char) * newlen);
+		if (mem == NULL)
+		{
+			if (str != NULL)
+			{
+				free(str);
+			}
+			return NULL;
+		}
+		str = mem;
+	}
+	memcpy(str, newstr, sizeof(char) * newlen);
+	return str;
+}
+wchar_t * wcsredup(wchar_t * restrict str, const wchar_t * restrict newstr)
+{
+	size_t exlen = (str != NULL) ? wcslen(str) + 1 : 0;
+	size_t newlen = wcslen(newstr) + 1;
+	if (newlen > exlen)
+	{
+		wchar_t * mem = realloc(str, sizeof(wchar_t) * newlen);
+		if (mem == NULL)
+		{
+			if (str != NULL)
+			{
+				free(str);
+			}
+			return NULL;
+		}
+		str = mem;
+	}
+	memcpy(str, newstr, sizeof(wchar_t) * newlen);
+	return str;
+}
 
 char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr)
 {

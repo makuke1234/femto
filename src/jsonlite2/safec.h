@@ -22,6 +22,24 @@ char * strdup_s(const char * restrict str, size_t len);
  */
 wchar_t * wcsdup_s(const wchar_t * restrict wstr, size_t len);
 
+/**
+ * @brief Duplicate string newstr to memory provided by str, reallocates memory
+ * if necessary, frees memory allocated by str on memory errors
+ * 
+ * @param str Pointer to destination memory to use/reallocate
+ * @param newstr Pointer to source string to copy
+ * @return char* Pointer to newly allocated string, NULL on failure
+ */
+char * strredup(char * restrict str, const char * restrict newstr);
+/**
+ * @brief Duplicate string newstr to memory provided by str, reallocates memory
+ * if necessary, frees memory allocated by str on memory errors
+ * 
+ * @param str Pointer to destination memory to use/reallocate
+ * @param newstr Pointer to source string to copy
+ * @return wchar_t* Pointer to newly allocated string, NULL on failure
+ */
+wchar_t * wcsredup(wchar_t * restrict str, const wchar_t * restrict newstr);
 
 char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr);
 char * dynstrncat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr, size_t addStrLen);
