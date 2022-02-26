@@ -17,6 +17,12 @@ typedef struct femtoLineNode
 } femtoLineNode_t;
 
 /**
+ * @brief Initialises already pre-allocated memory of femtoLineNode_t structure
+ * 
+ * @param self Pointer to line node
+ */
+void femtoLine_init(femtoLineNode_t * restrict self);
+/**
  * @brief Creates new line in-between current line and next line
  * 
  * @param curnode Pointer to current line node, can be NULL
@@ -74,6 +80,29 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restric
  * @return false Failure
  */
 bool femtoLine_realloc(femtoLineNode_t * restrict self);
+
+/**
+ * @brief Add character to line
+ * 
+ * @param self Pointer to line node
+ * @param ch Character to add
+ * @param tabWidth Tab character width (to move cursor)
+ * @return true Success
+ * @return false Failure
+ */
+bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar_t ch, uint32_t tabWidth);
+
+/**
+ * @brief Checks current line contents for matching string
+ * 
+ * @param node Pointer to line node
+ * @param maxdelta Offset from current cursor position, value is clamped
+ * @param string Pointer to character array to match with
+ * @param maxString Absolute maximum number of characters to check, stops anyway on null-terminator
+ * @return true Found a match
+ * @return false Didn't find any match
+ */
+bool femtoLine_checkAt(const femtoLineNode_t * restrict node, int32_t maxdelta, const wchar_t * restrict string, uint32_t maxString);
 
 /**
  * @brief Merges current line node with next line node, adjusts current
