@@ -63,10 +63,7 @@ char * femto_cpcat_s(char ** restrict pstr, size_t * restrict psize, size_t * pl
 
 	// Add converted string to original array
 	char * ret = dynstrncat_s(pstr, psize, *plen, (char *)conv, len);
-	if (ret != NULL)
-	{
-		*plen += len;
-	}
+	*plen = (ret != NULL) ? (*plen + len) : *plen;
 	return ret;
 }
 
@@ -269,6 +266,8 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 	// Start asking input
 	COORD cur = { .X = sidx, .Y = (SHORT)(peditor->scrbuf.h - 1) };
 	SetConsoleCursorPosition(peditor->scrbuf.handle, cur);
+
+	line[0] = L'\0';
 	
 	bool read = true, update = false, updateCur = false;
 	while (1)
@@ -291,13 +290,9 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 			wchar_t key      = ir.Event.KeyEvent.uChar.UnicodeChar;
 			wchar_t wVirtKey = ir.Event.KeyEvent.wVirtualKeyCode;
 
-			if (wVirtKey == VK_ESCAPE)
+			if ((wVirtKey == VK_ESCAPE) || (wVirtKey == VK_RETURN))
 			{
-				read = false;
-				break;
-			}
-			else if (wVirtKey == VK_RETURN)
-			{
+				read = (wVirtKey == VK_RETURN);
 				break;
 			}
 			else if (key > sac_last_code)
@@ -419,18 +414,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 		if (keydown)
 		{
-			if ((key == prevkey) && (wVirtKey == prevwVirtKey))
-			{
-				++keyCount;
-			}
-			else
-			{
-				keyCount = 1;
-			}
-		}
-
-		if (keydown)
-		{
+			keyCount = ((key == prevkey) && (wVirtKey == prevwVirtKey)) ? (keyCount + 1) : 1;
+			
 			boolPut(keybuffer, key, true);
 			wchar_t tempstr[MAX_STATUS];
 			bool draw = true;
@@ -742,6 +727,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			boolPut(keybuffer, key, false);
 		}
+
 		prevkey = key;
 		prevwVirtKey = wVirtKey;
 		memcpy(prevkeybuffer, keybuffer, 32 * sizeof(uint8_t));
@@ -758,11 +744,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
 			writeProfiler("femto_loop", "Mouse wheel was used, delta: %d", delta);
 
-			if ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0))
-			{
-				s_delta = 0;
-			}
-			s_delta += delta;
+			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
 			int32_t lineDelta = 2 * s_delta / WHEEL_DELTA;
 			if (lineDelta != 0)
@@ -779,11 +761,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
 			writeProfiler("femto_loop", "Mouse hwhell was used, delta %d", delta);
 
-			if ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0))
-			{
-				s_delta = 0;
-			}
-			s_delta += delta;
+			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
 			int32_t chDelta = s_delta / WHEEL_DELTA;
 			if (chDelta != 0)
@@ -843,6 +821,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			draw = false;
 		}
+		
 		if (draw)
 		{
 			femtoData_statusDraw(peditor, tempstr, NULL);
@@ -988,15 +967,13 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			idx += node->freeSpaceLen;
 			continue;
 		}
+
 		j += (node->line[idx] == L'\t') ? peditor->settings.tabWidth - (j % peditor->settings.tabWidth) : 1;
 		++idx;
 	}
 
 	// Check to include tab character
-	if ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)))
-	{
-		--idx;
-	}
+	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
 	uint32_t number = (!peditor->settings.lineNumRelative || (node == curnode)) ? (uint32_t)node->lineNumber : (uint32_t)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	uint8_t noLen = (uint8_t)log10((double)number) + 1;
@@ -1011,13 +988,14 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			number /= 10u;
 		}
 	}
-	for (uint32_t j = (uint8_t)pfile->data.noLen + 1; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
+	for (uint32_t j = (uint32_t)pfile->data.noLen + 1; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
 		{
 			idx += node->freeSpaceLen;
 			continue;
 		}
+
 		destination[j].Attributes = FEMTO_DEFAULT_COLOR;
 		if (node->line[idx] == L'\t')
 		{
@@ -1063,7 +1041,7 @@ uint32_t femto_convToUnicode(const char * restrict utf8, int numBytes, wchar_t *
 		0
 	);
 	// Try to allocate memory
-	if (sz != NULL && *sz < size)
+	if ((sz != NULL) && (*sz < size))
 	{
 		void * mem = realloc(*putf16, size * sizeof(wchar_t));
 		if (mem == NULL)
@@ -1073,7 +1051,7 @@ uint32_t femto_convToUnicode(const char * restrict utf8, int numBytes, wchar_t *
 		*putf16 = mem;
 		*sz     = size;
 	}
-	else if (*putf16 == NULL || sz == NULL)
+	else if ((*putf16 == NULL) || (sz == NULL))
 	{
 		*putf16 = malloc(size * sizeof(wchar_t));
 		if (*putf16 == NULL)
@@ -1116,7 +1094,7 @@ uint32_t femto_convFromUnicode(const wchar_t * restrict utf16, int numChars, cha
 	);
 
 	// Alloc mem
-	if (sz != NULL && *sz < size)
+	if ((sz != NULL) && (*sz < size))
 	{
 		void * mem = realloc(*putf8, size * sizeof(char));
 		if (mem == NULL)
@@ -1126,7 +1104,7 @@ uint32_t femto_convFromUnicode(const wchar_t * restrict utf16, int numChars, cha
 		*putf8 = mem;
 		*sz    = size;
 	}
-	else if (*putf8 == NULL || sz == NULL)
+	else if ((*putf8 == NULL) || (sz == NULL))
 	{
 		*putf8 = malloc(size * sizeof(char));
 		if (*putf8 == NULL)
@@ -1190,7 +1168,7 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
 	uint32_t starti = 0, j = 0;
 	for (uint32_t i = 0; i < chars; ++i)
 	{
-		if (utf16[i] == L'\n' || utf16[i] == L'\r')
+		if ((utf16[i] == L'\n') || (utf16[i] == L'\r'))
 		{
 			utf16[i] = L'\0';
 			(*lines)[j] = &utf16[starti];
@@ -1202,101 +1180,6 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
 	(*lines)[j] = &utf16[starti];
 
 	return newlines;
-}
-uint32_t femto_tabsToSpaces(wchar_t ** restrict str, uint32_t * restrict len, uint8_t tabWidth)
-{
-	assert(str != NULL);
-	assert(*str != NULL);
-	assert((tabWidth > 1) && (tabWidth <= 32));
-	uint32_t realLen = ((len == NULL || *len == 0) ? (uint32_t)wcslen(*str) + 1 : *len);
-	uint32_t realCap = realLen;
-
-	// Conversion happens here
-	wchar_t * s = *str;
-
-	for (uint32_t i = 0; i < realLen;)
-	{
-		if (s[i] == L'\t')
-		{
-			if ((realLen + tabWidth - 1) > realCap)
-			{
-				realCap = (realLen + tabWidth - 1) * 2;
-				s = realloc(s, sizeof(wchar_t) * realCap);
-				if (s == NULL)
-				{
-					return 0;
-				}
-			}
-			memmove(&s[i + tabWidth - 1], &s[i], sizeof(wchar_t) * (realLen - i));
-			for (uint32_t j = 0; j < tabWidth; ++i, ++j)
-			{
-				s[i] = L'\t';
-			}
-			realLen += tabWidth - 1;
-		}
-		else
-		{
-			++i;
-		}
-	}
-
-	*str = s;
-	// Shrink string
-	s = realloc(s, sizeof(wchar_t) * realLen);
-	if (s != NULL)
-	{
-		*str = s;
-	}
-	
-	if (len != NULL)
-	{
-		*len = realLen;
-	}
-	return realLen;
-}
-uint32_t femto_spacesToTabs(wchar_t ** restrict str, uint32_t * restrict len, uint8_t tabWidth)
-{
-	assert(str != NULL);
-	assert(*str != NULL);
-	assert((tabWidth >= 1) && (tabWidth <= 32));
-	
-	uint32_t realLen = ((len == NULL || *len == 0) ? (uint32_t)wcslen(*str) + 1 : *len);
-
-	wchar_t * s = *str;
-
-	for (uint32_t i = 0; i < realLen; ++i)
-	{
-		if (s[i] == L'\t' && ((i + tabWidth - 1) < realLen))
-		{
-			bool convert = true;
-			for (uint32_t j = 1; j < tabWidth; ++j)
-			{
-				if (s[i+j] != L'\t')
-				{
-					convert = false;
-				}
-			}
-			if (!convert)
-			{
-				continue;
-			}
-
-			memmove(&s[i + 1], &s[i + tabWidth], sizeof(wchar_t) * (realLen - i - tabWidth));
-			realLen -= tabWidth - 1;
-		}
-	}
-
-	s = realloc(s, sizeof(wchar_t) * realLen);
-	if (s != NULL)
-	{
-		*str = s;
-	}
-
-	if (len != NULL)
-	{
-		*len = realLen;
-	}
-	return realLen;
 }
 
 bool femto_testFile(const wchar_t * filename)
