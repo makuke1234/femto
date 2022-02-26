@@ -26,8 +26,8 @@ wchar_t * wcsdup_s(const wchar_t * restrict wstr, size_t len);
  * @brief Duplicate string newstr to memory provided by str, reallocates memory
  * if necessary, frees memory allocated by str on memory errors
  * 
- * @param str Pointer to destination memory to use/reallocate
- * @param newstr Pointer to source string to copy
+ * @param str Pointer to destination memory to use/reallocate, can be NULL, has to be null-terminated
+ * @param newstr Pointer to source string to copy, cannot be NULL, has to be null-terminated
  * @return char* Pointer to newly allocated string, NULL on failure
  */
 char * strredup(char * restrict str, const char * restrict newstr);
@@ -35,8 +35,8 @@ char * strredup(char * restrict str, const char * restrict newstr);
  * @brief Duplicate string newstr to memory provided by str, reallocates memory
  * if necessary, frees memory allocated by str on memory errors
  * 
- * @param str Pointer to destination memory to use/reallocate
- * @param newstr Pointer to source string to copy
+ * @param str Pointer to destination memory to use/reallocate, can be NULL, has to be null-terminated
+ * @param newstr Pointer to source string to copy, cannot be NULL, has to be null-terminated
  * @return wchar_t* Pointer to newly allocated string, NULL on failure
  */
 wchar_t * wcsredup(wchar_t * restrict str, const wchar_t * restrict newstr);
