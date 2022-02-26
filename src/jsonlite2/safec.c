@@ -39,7 +39,7 @@ wchar_t * wcsdup_s(const wchar_t * restrict wstr, size_t len)
 
 char * strredup(char * restrict str, const char * restrict newstr)
 {
-	size_t exlen = (str != NULL) ? strlen(str) + 1 : 0;
+	size_t exlen = (str != NULL) ? (strlen(str) + 1) : 0;
 	size_t newlen = strlen(newstr) + 1;
 	if (newlen > exlen)
 	{
@@ -59,7 +59,7 @@ char * strredup(char * restrict str, const char * restrict newstr)
 }
 wchar_t * wcsredup(wchar_t * restrict str, const wchar_t * restrict newstr)
 {
-	size_t exlen = (str != NULL) ? wcslen(str) + 1 : 0;
+	size_t exlen = (str != NULL) ? (wcslen(str) + 1) : 0;
 	size_t newlen = wcslen(newstr) + 1;
 	if (newlen > exlen)
 	{
