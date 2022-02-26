@@ -10,7 +10,7 @@ export C_INCLUDE_PATH=$(JSONLITE2_SRC)
 export LIBRARY_PATH=$(JSONLITE2_SRC)
 
 CC=gcc
-WARN=-Wall -Wextra -Wpedantic -Wconversion -Wunused-variable -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wdouble-promotion -Waggregate-return -Winline -Wunused-function -Wunused-result
+WARN=-Wall -Wextra -Wpedantic -Wconversion -Wunused-variable -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wdouble-promotion -Waggregate-return -Wunused-function -Wunused-result
 CDEFFLAGS=-std=c99 $(WARN) -municode -D UNICODE -D _UNICODE
 CFLAGS=-O3 -Wl,--strip-all,--build-id=none,--gc-sections -fno-ident -D NDEBUG
 CFLAGSD=-g -O0 -D PROFILING_ENABLE=1
