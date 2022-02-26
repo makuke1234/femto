@@ -419,32 +419,24 @@ void femtoFile_setConTitle(const femtoFile_t * restrict self)
 bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch, uint32_t tabWidth)
 {
 	assert(self != NULL);
-	assert(self->data.currentNode != NULL);
+	femtoLineNode_t * node = self->data.currentNode;
+	assert(node != NULL);
 	self->data.typed = true;
 	
 	writeProfiler("femtoFile_addNormalCh", "Add character %C", ch);
-	femtoLineNode_t * node = self->data.currentNode;
 
-	if ((node->freeSpaceLen == 0) && !femtoLine_realloc(node))
+	if (!femtoLine_addChar(node, ch, tabWidth))
 	{
 		return false;
 	}
-
-	writeProfiler("femtoFile_addNormalCh", "curx: %u, free: %u, end: %u", node->curx, node->freeSpaceLen, node->lineEndx);
-
-	node->line[node->curx] = ch;
-	++node->curx;
-	--node->freeSpaceLen;
-
-	femtoLine_calcVirtCursor(self->data.currentNode, tabWidth);
-	self->data.lastx = self->data.currentNode->virtcurx;
+	self->data.lastx = node->virtcurx;
 	return true;
 }
 bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch, const femtoSettings_t * pset)
 {
 	assert(self != NULL);
 	self->data.typed = true;
-	const femtoLineNode_t * lastcurnode = self->data.currentNode;
+	femtoLineNode_t * lastcurnode = self->data.currentNode;
 
 	switch (ch)
 	{
@@ -471,26 +463,26 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	}
 	case VK_OEM_BACKTAB:
 		// Check if there's 4 spaces before the caret
-		if (femtoFile_checkLineAt(self, -pset->tabWidth, pset->tabSpaceStr1, pset->tabWidth))
+		if (femtoLine_checkAt(lastcurnode, -pset->tabWidth, pset->tabSpaceStr1, pset->tabWidth))
 		{
 			for (int i = 0; i < pset->tabWidth; ++i)
 			{
 				femtoFile_deleteBackward(self);
 			}
 		}
-		else if (femtoFile_checkLineAt(self, -1, L"\t", 1))
+		else if (femtoLine_checkAt(lastcurnode, -1, L"\t", 1))
 		{
 			femtoFile_deleteBackward(self);
 		}
 		// If there isn't, check if there's 4 spaces after the caret
-		else if (femtoFile_checkLineAt(self, 0, pset->tabSpaceStr1, pset->tabWidth))
+		else if (femtoLine_checkAt(lastcurnode, 0, pset->tabSpaceStr1, pset->tabWidth))
 		{
 			for (int i = 0; i < pset->tabWidth; ++i)
 			{
 				femtoFile_deleteForward(self);
 			}
 		}
-		else if (femtoFile_checkLineAt(self, 0, L"\t", 1))
+		else if (femtoLine_checkAt(lastcurnode, 0, L"\t", 1))
 		{
 			femtoFile_deleteForward(self);
 		}
@@ -513,30 +505,29 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case FEMTO_SHIFT_DEL:	// Shift+Delete
-		if (self->data.currentNode->nextNode != NULL)
+		if (lastcurnode->nextNode != NULL)
 		{
-			if (self->data.pcury == self->data.currentNode)
+			if (self->data.pcury == lastcurnode)
 			{
 				self->data.pcury = self->data.pcury->nextNode;
 			}
-			femtoLineNode_t * node = self->data.currentNode;
-			self->data.currentNode = node->nextNode;
-			self->data.currentNode->prevNode = node->prevNode;
-			if (node->prevNode != NULL)
+			self->data.currentNode = lastcurnode->nextNode;
+			self->data.currentNode->prevNode = lastcurnode->prevNode;
+			if (lastcurnode->prevNode != NULL)
 			{
-				node->prevNode->nextNode = self->data.currentNode;
+				lastcurnode->prevNode->nextNode = self->data.currentNode;
 			}
 
 			// Destroy current line
-			femtoLine_free(node);
+			femtoLine_free(lastcurnode);
 			self->data.updateAll = true;
 		}
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
-		if (self->data.currentNode->prevNode != NULL)
+		if (lastcurnode->prevNode != NULL)
 		{
-			femtoLine_swap(self->data.currentNode, self->data.currentNode->prevNode);
+			femtoLine_swap(lastcurnode, self->data.currentNode->prevNode);
 			self->data.currentNode = self->data.currentNode->prevNode;
 			femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 			self->data.lastx       = self->data.currentNode->virtcurx;
@@ -545,9 +536,9 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		break;
 	case FEMTO_MOVELINE_DOWN:
 		// Swap current line with next if possible
-		if (self->data.currentNode->nextNode != NULL)
+		if (lastcurnode->nextNode != NULL)
 		{
-			femtoLine_swap(self->data.currentNode, self->data.currentNode->nextNode);
+			femtoLine_swap(lastcurnode, self->data.currentNode->nextNode);
 			self->data.currentNode = self->data.currentNode->nextNode;
 			femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 			self->data.lastx       = self->data.currentNode->virtcurx;
@@ -555,24 +546,24 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		}
 		break;
 	case VK_LEFT:	// Left arrow
-		if (self->data.currentNode->curx > 0)
+		if (lastcurnode->curx > 0)
 		{
-			femtoLine_moveCursor(self->data.currentNode, -1);
+			femtoLine_moveCursor(lastcurnode, -1);
 		}
-		else if (self->data.currentNode->prevNode != NULL)
+		else if (lastcurnode->prevNode != NULL)
 		{
-			self->data.currentNode = self->data.currentNode->prevNode;
+			self->data.currentNode = lastcurnode->prevNode;
 			femtoLine_moveCursor(self->data.currentNode, (int32_t)self->data.currentNode->lineEndx);
 		}
 		femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case VK_RIGHT:	// Right arrow
-		if ((self->data.currentNode->curx + self->data.currentNode->freeSpaceLen) < self->data.currentNode->lineEndx)
+		if ((lastcurnode->curx + lastcurnode->freeSpaceLen) < lastcurnode->lineEndx)
 		{
-			femtoLine_moveCursor(self->data.currentNode, 1);
+			femtoLine_moveCursor(lastcurnode, 1);
 		}
-		else if (self->data.currentNode->nextNode != NULL)
+		else if (lastcurnode->nextNode != NULL)
 		{
 			self->data.currentNode = self->data.currentNode->nextNode;
 			femtoLine_moveCursor(self->data.currentNode, -(int32_t)self->data.currentNode->lineEndx);
@@ -597,10 +588,10 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		femtoLine_moveCursorAbs(self->data.currentNode, femtoLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_END:
-		femtoLine_moveCursor(self->data.currentNode, (int32_t)self->data.currentNode->lineEndx);
+		femtoLine_moveCursor(lastcurnode, (int32_t)lastcurnode->lineEndx);
 		break;
 	case VK_HOME:
-		femtoLine_moveCursor(self->data.currentNode, -(int32_t)self->data.currentNode->lineEndx);
+		femtoLine_moveCursor(lastcurnode, -(int32_t)lastcurnode->lineEndx);
 		break;
 	default:
 		return false;
@@ -611,45 +602,6 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	return true;
 }
 
-bool femtoFile_checkLineAt(const femtoFile_t * restrict self, int32_t maxdelta, const wchar_t * restrict string, uint32_t maxString)
-{
-	assert(self != NULL);
-	assert(string != NULL);
-	const femtoLineNode_t * restrict node = self->data.currentNode;
-	if (node == NULL)
-	{
-		return false;
-	}
-
-	int32_t idx = (int32_t)node->curx + maxdelta, i = 0, m = (int32_t)maxString;
-	if (idx < 0)
-	{
-		return false;
-	}
-	for (; idx < (int32_t)node->lineEndx && i < m && *string != '\0';)
-	{
-		if (idx == (int32_t)node->curx)
-		{
-			idx += (int32_t)node->freeSpaceLen;
-			continue;
-		}
-		
-		if (node->line[idx] != *string)
-		{
-			return false;
-		}
-
-		++string;
-		++i;
-		++idx;
-	}
-	if (*string != '\0' && i < m)
-	{
-		return false;
-	}
-
-	return true;
-}
 bool femtoFile_deleteForward(femtoFile_t * restrict self)
 {
 	assert(self != NULL);

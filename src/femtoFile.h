@@ -175,17 +175,6 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch, uint32_t tab
 bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch, const femtoSettings_t * pset);
 
 /**
- * @brief Checks current line contents for matching string
- * 
- * @param self Pointer to femtoFile_t structure
- * @param maxdelta Offset from current cursor position, value is clamped
- * @param string Pointer to character array to match with
- * @param maxString Absolute maximum number of characters to check, stops anyway on null-terminator
- * @return true Found a match
- * @return false Didn't find any match
- */
-bool femtoFile_checkLineAt(const femtoFile_t * restrict self, int32_t maxdelta, const wchar_t * restrict string, uint32_t maxString);
-/**
  * @brief Deletes a character on current line going forward (right, cursor stationary),
  * merges with the next line (if possible), if cursor is already at the end of the line
  * 

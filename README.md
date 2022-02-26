@@ -185,7 +185,7 @@ reports ~3300 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * [x] Tweak keypress status messages
     * [x] Refactor/optimise codebase using same optimisations applied to [atto](https://github.com/makuke1234/atto)
     * [x] Optimise screen buffer updating frequency on keyboard/mouse input
-    * [x] Only update line that's being edited, if viewport doesn't change
+    * [x] Only update the line that's being edited
     * [x] Refactor, check all pointers in debug mode
     * [x] Tweak status messages, optimise for clarity, minimise redundant punctuation
 * 1.0
