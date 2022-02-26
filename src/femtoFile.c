@@ -449,7 +449,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		}
 		if (pset->tabsToSpaces)
 		{
-			for (int i = 1; (i < pset->tabWidth) && (self->data.currentNode->curx % pset->tabWidth); ++i)
+			for (uint32_t i = 0, max = pset->tabWidth - (lastcurnode->virtcurx % pset->tabWidth); i < max; ++i)
 			{
 				if (femtoFile_addNormalCh(self, tch, pset->tabWidth) == false)
 				{
@@ -463,11 +463,17 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	}
 	case VK_OEM_BACKTAB:
 		// Check if there's 4 spaces before the caret
-		if (femtoLine_checkAt(lastcurnode, -pset->tabWidth, pset->tabSpaceStr1, pset->tabWidth))
+		if (femtoLine_checkAt(lastcurnode, -1, L" ", 1))
 		{
-			for (int i = 0; i < pset->tabWidth; ++i)
+			femtoFile_deleteBackward(self);
+			--lastcurnode->virtcurx;
+			uint32_t max = lastcurnode->virtcurx % pset->tabWidth;
+			if (femtoLine_checkAt(lastcurnode, -(int32_t)max, pset->tabSpaceStr1, max))
 			{
-				femtoFile_deleteBackward(self);
+				for (uint32_t i = 0; i < max; ++i)
+				{
+					femtoFile_deleteBackward(self);
+				}
 			}
 		}
 		else if (femtoLine_checkAt(lastcurnode, -1, L"\t", 1))
