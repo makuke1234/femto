@@ -241,7 +241,20 @@ void femto_printHelpClue(const wchar_t * restrict app)
 	fwprintf(stderr, L"To show all available commands type:\n%S --help\n", app);
 }
 
+bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uint32_t maxLen)
+{
+	assert(peditor != NULL);
+	assert(line != NULL);
+	assert(maxLen > 0);
 
+	femtoLineNode_t temp;
+	femtoLine_init(&temp);
+
+	
+
+	femtoLine_destroy(&temp);
+	return true;
+}
 bool femto_loop(femtoData_t * restrict peditor)
 {
 	assert(peditor != NULL);

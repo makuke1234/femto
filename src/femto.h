@@ -75,7 +75,16 @@ void femto_printHelp(const wchar_t * restrict app);
  */
 void femto_printHelpClue(const wchar_t * restrict app);
 
-
+/**
+ * @brief Asks user input on last line of editor
+ * 
+ * @param peditor Pointer to femtoData_t structure
+ * @param line Pointer to array which will hold the result
+ * @param maxLen Length of that array in characters (including null-terminator)
+ * @return true User accepted and entered input
+ * @return false User canceled
+ */
+bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uint32_t maxLen);
 /**
  * @brief Performs text editor loop tasks
  * 
