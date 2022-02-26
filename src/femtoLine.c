@@ -1,6 +1,20 @@
 #include "femtoLine.h"
 
+void femtoLine_init(femtoLineNode_t * restrict self)
+{
+	assert(self != NULL);
+	*self = (femtoLineNode_t){
+		.line         = NULL,
+		.lineEndx     = 0,
+		.curx         = 0,
+		.freeSpaceLen = 0,
+		.prevNode     = NULL,
+		.nextNode     = NULL,
+		.virtcurx     = 0,
 
+		.lineNumber   = 1
+	};
+}
 femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool autoIndent, uint8_t * restrict noLen)
 {
 	assert(noLen != NULL);
@@ -13,28 +27,29 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
 	wchar_t tch = tabsToSpaces ? L' ' : L'\t';
 
 	uint32_t space = 0;
-	if (autoIndent)
-	{
-		for (uint32_t i = 0; i < curnode->lineEndx;)
-		{
-			if ((i == curnode->curx) && (curnode->freeSpaceLen > 0))
-			{
-				i += curnode->freeSpaceLen;
-				continue;
-			}
-
-			if (curnode->line[i] != L' ' && curnode->line[i] != L'\t')
-			{
-				break;
-			}
-
-			++space;
-			++i;
-		}
-	}
-
 	if (curnode != NULL)
 	{
+		if (autoIndent)
+		{
+			for (uint32_t i = 0; i < curnode->lineEndx;)
+			{
+				if ((i == curnode->curx) && (curnode->freeSpaceLen > 0))
+				{
+					i += curnode->freeSpaceLen;
+					continue;
+				}
+
+				if (curnode->line[i] != L' ' && curnode->line[i] != L'\t')
+				{
+					break;
+				}
+
+				++space;
+				++i;
+			}
+		}
+
+		
 		// Create normal empty line
 		if ((curnode->curx + curnode->freeSpaceLen) == curnode->lineEndx)
 		{
@@ -212,6 +227,62 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	self->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
 
 	writeProfiler("femtoLine_realloc", "Reallocation succeeded");
+	return true;
+}
+
+bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar_t ch, uint32_t tabWidth)
+{
+	assert(self != NULL);
+	assert(ch   != L'\0');
+
+	if ((self->freeSpaceLen == 0) && !femtoLine_realloc(self))
+	{
+		return false;
+	}
+
+	self->line[self->curx] = ch;
+	++self->curx;
+	--self->freeSpaceLen;
+
+	femtoLine_calcVirtCursor(self, tabWidth);
+
+	return true;
+}
+bool femtoLine_checkAt(const femtoLineNode_t * restrict node, int32_t maxdelta, const wchar_t * restrict string, uint32_t maxString)
+{
+	assert(string != NULL);
+	if (node == NULL)
+	{
+		return false;
+	}
+
+	int32_t idx = (int32_t)node->curx + maxdelta, i = 0, m = (int32_t)maxString;
+	if (idx < 0)
+	{
+		return false;
+	}
+	for (; idx < (int32_t)node->lineEndx && i < m && *string != '\0';)
+	{
+		if (idx == (int32_t)node->curx)
+		{
+			idx += (int32_t)node->freeSpaceLen;
+			continue;
+		}
+		
+		if (node->line[idx] != *string)
+		{
+			return false;
+		}
+
+		++string;
+		++i;
+		++idx;
+	}
+	if (*string != '\0' && i < m)
+	{
+		return false;
+	}
+
 	return true;
 }
 
