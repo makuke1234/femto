@@ -160,6 +160,9 @@ reports ~3300 source code lines (excluding whitespace, comments & [jsonlite2](ht
     * [ ] Proper text copying/pasting support
         * *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
     * [ ] 'Raw editing'/'saving later to a file' support
+    * [x] User input support on the last line of the editor
+    * [ ] Fix auto-indentation bug, inserts too many tabs
+    * [ ] Fix backwards tabbing (space removal)
 * 1.4
     * [x] Line numbers, absolute & relative mode
     * [x] Warning about any unsaved work
