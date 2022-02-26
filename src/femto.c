@@ -489,7 +489,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			{
 				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+N");
 			}
-			else if ((key == sac_Ctrl_O) && !boolGet(prevkeybuffer, sac_Ctrl_O))
+			else if (key == sac_Ctrl_O)
 			{
 				swprintf_s(tempstr, MAX_STATUS, L"Open :");
 				femtoData_statusDraw(peditor, tempstr, NULL);
