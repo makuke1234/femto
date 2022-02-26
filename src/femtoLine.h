@@ -28,6 +28,7 @@ void femtoLine_init(femtoLineNode_t * restrict self);
  * @param curnode Pointer to current line node, can be NULL
  * @param nextnode Pointer to next line node, can be NULL
  * @param tabsToSpaces Tabs are converted to spaces
+ * @param tabWidth Tab character width in spaces
  * @param autoIndent Automatically insert tabs to match whitespace of the previous line
  * @param noLen Pointer receiving last line number length in characters
  * @return femtoLineNode_t* Pointer to newly created line node, NULL on failure
@@ -36,6 +37,7 @@ femtoLineNode_t * femtoLine_create(
 	femtoLineNode_t * restrict curnode,
 	femtoLineNode_t * restrict nextnode,
 	bool tabsToSpaces,
+	uint8_t tabWidth,
 	bool autoIndent,
 	uint8_t * noLen
 );

@@ -182,7 +182,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	femtoFile_clearLines(self);
 	if (numLines == 0)
 	{
-		self->data.firstNode = femtoLine_create(NULL, NULL, false, false, &self->data.noLen);
+		self->data.firstNode = femtoLine_create(NULL, NULL, false, 0, false, &self->data.noLen);
 		if (self->data.firstNode == NULL)
 		{
 			free(lines);
@@ -496,7 +496,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case VK_RETURN:	// Enter key
-		femtoFile_addNewLine(self, pset->tabsToSpaces, pset->autoIndent);
+		femtoFile_addNewLine(self, pset->tabsToSpaces, pset->tabWidth, pset->autoIndent);
 		femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
@@ -653,10 +653,17 @@ bool femtoFile_deleteBackward(femtoFile_t * restrict self)
 		return false;
 	}
 }
-bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, bool autoIndent)
+bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, uint8_t tabWidth, bool autoIndent)
 {
 	assert(self != NULL);
-	femtoLineNode_t * node = femtoLine_create(self->data.currentNode, self->data.currentNode->nextNode, tabsToSpaces, autoIndent, &self->data.noLen);
+	femtoLineNode_t * node = femtoLine_create(
+		self->data.currentNode,
+		self->data.currentNode->nextNode,
+		tabsToSpaces,
+		tabWidth,
+		autoIndent,
+		&self->data.noLen
+	);
 	if (node == NULL)
 	{
 		return false;

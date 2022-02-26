@@ -15,7 +15,14 @@ void femtoLine_init(femtoLineNode_t * restrict self)
 		.lineNumber   = 1
 	};
 }
-femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLineNode_t * restrict nextnode, bool tabsToSpaces, bool autoIndent, uint8_t * restrict noLen)
+femtoLineNode_t * femtoLine_create(
+	femtoLineNode_t * restrict curnode,
+	femtoLineNode_t * restrict nextnode,
+	bool tabsToSpaces,
+	uint8_t tabWidth,
+	bool autoIndent,
+	uint8_t * restrict noLen
+)
 {
 	assert(noLen != NULL);
 	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
@@ -39,13 +46,21 @@ femtoLineNode_t * femtoLine_create(femtoLineNode_t * restrict curnode, femtoLine
 					continue;
 				}
 
-				if (curnode->line[i] != L' ' && curnode->line[i] != L'\t')
+				if ((curnode->line[i] != L' ') && (curnode->line[i] != L'\t'))
 				{
 					break;
 				}
-
 				++space;
+				if (curnode->line[i] == L'\t')
+				{
+					space += tabWidth - (space % tabWidth);
+				}
+
 				++i;
+			}
+			if (!tabsToSpaces)
+			{
+				space /= tabWidth;
 			}
 		}
 
