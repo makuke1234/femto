@@ -589,9 +589,13 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		break;
 	case VK_END:
 		femtoLine_moveCursor(lastcurnode, (int32_t)lastcurnode->lineEndx);
+		femtoLine_calcVirtCursor(lastcurnode, pset->tabWidth);
+		self->data.lastx = lastcurnode->virtcurx;
 		break;
 	case VK_HOME:
 		femtoLine_moveCursor(lastcurnode, -(int32_t)lastcurnode->lineEndx);
+		femtoLine_calcVirtCursor(lastcurnode, pset->tabWidth);
+		self->data.lastx = lastcurnode->virtcurx;
 		break;
 	default:
 		return false;

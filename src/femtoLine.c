@@ -183,7 +183,7 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restric
 	wchar_t * t = *text;
 	for (uint32_t i = 0; i < self->lineEndx;)
 	{
-		if (i == self->curx)
+		if ((i == self->curx) && (self->freeSpaceLen > 0))
 		{
 			i += self->freeSpaceLen;
 			continue;
@@ -196,6 +196,28 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restric
 	*t = L'\0';
 
 	return true;
+}
+void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar_t * restrict text, uint32_t maxLen)
+{
+	assert(self != NULL);
+	assert(text != NULL);
+	assert(maxLen > 0);
+
+	uint32_t len = 0;
+	for (uint32_t i = 0; (i < self->lineEndx) && (len < (maxLen - 1));)
+	{
+		if ((i == self->curx) && (self->freeSpaceLen > 0))
+		{
+			i += self->freeSpaceLen;
+			continue;
+		}
+
+		text[len] = self->line[i];
+		++len;
+		++i;
+	}
+
+	text[len] = L'\0';
 }
 
 bool femtoLine_realloc(femtoLineNode_t * restrict self)

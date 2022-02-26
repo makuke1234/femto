@@ -72,6 +72,15 @@ femtoLineNode_t * femtoLine_createText(
  */
 bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restrict text, uint32_t * restrict tarrsz);
 /**
+ * @brief Fetches text from given line node, copies it to wchar_t character array
+ * until the length reaches maxLen (including the null-terminator)
+ * 
+ * @param self Pointer to line node to fetch text from
+ * @param text wchar_t pointer to character array
+ * @param maxLen Maximum length of character array in characters (including the null-terminator)
+ */
+void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar_t * restrict text, uint32_t maxLen);
+/**
  * @brief Reallocates free space on given line node, guarantees
  * femto_LNODE_DEFAULT_FREE characters for space
  * 

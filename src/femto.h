@@ -6,6 +6,19 @@
 
 #define MAX_STATUS 256
 
+enum SpecialAsciiCodes
+{
+	sac_Ctrl_E = 5,
+	sac_Ctrl_N = 14,
+	sac_Ctrl_O = 15,
+	sac_Ctrl_Q = 17,
+	sac_Ctrl_R = 18,
+	sac_Ctrl_S = 19,
+	sac_Ctrl_W = 23,
+
+	sac_last_code = 31
+};
+
 /**
  * @brief Get value from compact boolean array
  * 

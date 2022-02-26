@@ -246,32 +246,153 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 	assert(peditor != NULL);
 	assert(line != NULL);
 	assert(maxLen > 0);
+	maxLen = u32Min(maxLen, peditor->scrbuf.w + 1);
+
+	femtoSettings_t * restrict pset = &peditor->settings;
 
 	femtoLineNode_t temp;
 	femtoLine_init(&temp);
 
+	// Find first non-space on the last line
+	CHAR_INFO * lastline = &peditor->scrbuf.mem[peditor->scrbuf.w * (peditor->scrbuf.h - 1)];
+
+	int16_t sidx = (int16_t)(peditor->scrbuf.w - 1);
+	for (; sidx > 0; --sidx)
+	{
+		if (lastline[sidx].Char.UnicodeChar != L' ')
+		{
+			++sidx;
+			break;
+		}
+	}
+
+	// Start asking input
+	COORD cur = { .X = sidx, .Y = (SHORT)(peditor->scrbuf.h - 1) };
+	SetConsoleCursorPosition(peditor->scrbuf.handle, cur);
 	
+	bool read = true, update = false, updateCur = false;
+	while (1)
+	{
+		INPUT_RECORD ir;
+		DWORD evRead;
+		if (!ReadConsoleInputW(peditor->conIn, &ir, 1, &evRead) || !evRead)
+		{
+			continue;
+		}
+		else if (evRead)
+		{
+			FlushConsoleInputBuffer(peditor->conIn);
+		}
+
+		if ((ir.EventType == KEY_EVENT) && ir.Event.KeyEvent.bKeyDown)
+		{
+			update    = false;
+			updateCur = false;
+			wchar_t key      = ir.Event.KeyEvent.uChar.UnicodeChar;
+			wchar_t wVirtKey = ir.Event.KeyEvent.wVirtualKeyCode;
+
+			if (wVirtKey == VK_ESCAPE)
+			{
+				read = false;
+				break;
+			}
+			else if (wVirtKey == VK_RETURN)
+			{
+				break;
+			}
+			else if (key > sac_last_code)
+			{
+				// If there's room in the array
+				if ((temp.lineEndx - temp.freeSpaceLen + 1) < maxLen)
+				{
+					// Normal keys
+
+					// add key
+					if (!femtoLine_addChar(&temp, key, pset->tabWidth))
+					{
+						return false;
+					}
+
+					// reload contents to line
+					update = true;
+				}
+			}
+			else
+			{
+				// Special keys
+				switch (wVirtKey)
+				{
+				case VK_DELETE:
+					if ((temp.curx + temp.freeSpaceLen) < temp.lineEndx)
+					{
+						++temp.freeSpaceLen;
+						update = true;
+					}
+					break;
+				case VK_BACK:
+					if (temp.curx > 0)
+					{
+						--temp.curx;
+						++temp.freeSpaceLen;
+						femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+						update = true;
+					}
+					break;
+				case VK_LEFT:
+					if (temp.curx > 0)
+					{
+						femtoLine_moveCursor(&temp, -1);
+						femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+						updateCur = true;
+					}
+					break;
+				case VK_RIGHT:
+					if ((temp.curx + temp.freeSpaceLen) < temp.lineEndx)
+					{
+						femtoLine_moveCursor(&temp, 1);
+						femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+						updateCur = true;
+					}
+					break;
+				case VK_HOME:
+					femtoLine_moveCursor(&temp, -(int32_t)temp.lineEndx);
+					femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+					updateCur = true;
+					break;
+				case VK_END:
+					femtoLine_moveCursor(&temp, (int32_t)temp.lineEndx);
+					femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+					updateCur = true;
+					break;
+
+				}
+			}
+
+			// Update last line
+			if (update)
+			{
+				femtoLine_getTextLim(&temp, line, maxLen);
+				femtoData_statusDraw(peditor, line, NULL);
+			}
+			if (update | updateCur)
+			{
+				// Update cursor position
+				cur.X = (int16_t)temp.virtcurx;
+				SetConsoleCursorPosition(peditor->scrbuf.handle, cur);
+			}
+		}
+	}
 
 	femtoLine_destroy(&temp);
-	return true;
+
+	SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
+	return read & (line[0] != L'\0');
 }
 bool femto_loop(femtoData_t * restrict peditor)
 {
 	assert(peditor != NULL);
 	femtoFile_t * restrict pfile = peditor->file;
 	assert(pfile != NULL);
-	enum SpecialAsciiCodes
-	{
-		sac_Ctrl_E = 5,
-		sac_Ctrl_N = 14,
-		sac_Ctrl_O = 15,
-		sac_Ctrl_Q = 17,
-		sac_Ctrl_R = 18,
-		sac_Ctrl_S = 19,
-		sac_Ctrl_W = 23,
-
-		sac_last_code = 31
-	};
 
 	INPUT_RECORD ir;
 	DWORD evRead;
@@ -469,7 +590,18 @@ bool femto_loop(femtoData_t * restrict peditor)
 					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
 					{
 						send = false;
-						swprintf_s(tempstr, MAX_STATUS, L"Save as...");
+						swprintf_s(tempstr, MAX_STATUS, L"Save as... :");
+						femtoData_statusDraw(peditor, tempstr, NULL);
+
+						wchar_t inp[MAX_STATUS];
+						if (femto_askInput(peditor, inp, MAX_STATUS))
+						{
+							swprintf_s(tempstr, MAX_STATUS, L"Saved %s successfully!", inp);
+						}
+						else
+						{
+							swprintf_s(tempstr, MAX_STATUS, L"Saving canceled by user");
+						}
 					}
 					break;
 				case L'R':
