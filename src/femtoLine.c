@@ -333,11 +333,7 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	}
 	
 	femtoLineNode_t * restrict n = self->nextNode;
-
-	if (*ppcury == n)
-	{
-		*ppcury = self;
-	}
+	*ppcury = (*ppcury == n) ? self : *ppcury;
 
 	// Allocate more memory for first line
 	void * linemem = realloc(

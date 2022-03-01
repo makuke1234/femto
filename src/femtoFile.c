@@ -49,10 +49,7 @@ HANDLE femtoFile_sopen(const wchar_t * restrict fileName, bool writemode)
 bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileName, bool writemode)
 {
 	assert(self != NULL);
-	if (fileName == NULL)
-	{
-		fileName = self->fileName;
-	}
+	fileName = (fileName == NULL) ? self->fileName : fileName;
 
 	// try to open file
 	self->hFile = femtoFile_sopen(fileName, writemode);
