@@ -152,8 +152,9 @@ reports ~3500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 # Changelog
 
 * 1.6 (planned)
+	* [x] Micro-optimisations in codebase
 	* [x] Save-as support
-	* [ ] Practical multi-file support
+	* [ ] Practical multi-file support, tabs' system
 	* [ ] Search support, also search result highlighting
 	* [ ] Syntax highlighting, supported languages:
 		* [ ] C
