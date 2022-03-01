@@ -1,17 +1,6 @@
 #include "femto.h"
 #include "femtoData.h"
 
-bool boolGet(uint8_t * restrict arr, size_t index)
-{
-	assert(arr != NULL);
-	return (arr[index / 8] & (0x01 << (index % 8))) != 0;
-}
-void boolPut(uint8_t * restrict arr, size_t index, bool value)
-{
-	assert(arr != NULL);
-	const uint8_t pattern = 0x01 << (index % 8);
-	value ? (arr[index / 8] |= pattern) : (arr[index / 8] &= (uint8_t)~pattern);
-}
 
 int32_t i32Min(int32_t a, int32_t b)
 {
@@ -383,6 +372,45 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 	SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
 	return read;
 }
+
+static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar_t * restrict tempstr, wchar_t key, const wchar_t * restrict normMsg)
+{
+	if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+	{
+		return false;
+	}
+	uint32_t realLen = 0;
+
+	realLen += (uint32_t)swprintf_s(tempstr, MAX_STATUS, L"Unsaved file(s): ");
+
+	// Scan for any unsaved work
+	bool unsavedAny = false;
+	for (size_t i = 0; i < peditor->filesSize; ++i)
+	{
+		femtoFile_t * f = peditor->files[i];
+		femtoFile_checkUnsaved(f, NULL, NULL);
+		if (f->unsaved && (realLen < MAX_STATUS))
+		{
+			unsavedAny = true;
+			realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s; ", f->fileName);
+		}
+	}
+	if (!unsavedAny)
+	{
+		return false;
+	}
+	else if (realLen < MAX_STATUS)
+	{
+		swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm exit", (key == sac_Ctrl_Q) ? L"Ctrl+Shift+Q" : normMsg);
+	}
+
+	return true;
+}
+static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar_t * restrict tempstr, bool forceClose)
+{
+	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", peditor->file->fileName);
+}
+
 bool femto_loop(femtoData_t * restrict peditor)
 {
 	assert(peditor != NULL);
@@ -402,7 +430,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 	if (ir.EventType == KEY_EVENT)
 	{
-		static uint8_t keybuffer[32] = { 0 }, prevkeybuffer[32] = { 0 };
 		static wchar_t prevkey, prevwVirtKey;
 
 		static uint32_t keyCount = 1;
@@ -416,39 +443,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			keyCount = ((key == prevkey) && (wVirtKey == prevwVirtKey)) ? (keyCount + 1) : 1;
 			
-			boolPut(keybuffer, key, true);
 			wchar_t tempstr[MAX_STATUS];
 			bool draw = true;
 
-			if ((wVirtKey == VK_ESCAPE) || (key == sac_Ctrl_Q))	// Exit on Escape or Ctrl+Q
+			if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sac_Ctrl_Q) && (key != sac_Ctrl_Q)))	// Exit on Escape or Ctrl+Q
 			{
-				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+				if (!femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 				{
 					return false;
-				}
-				uint32_t realLen = 0;
-
-				realLen += (uint32_t)swprintf_s(tempstr, MAX_STATUS, L"Unsaved file(s): ");
-
-				// Scan for any unsaved work
-				bool unsavedAny = false;
-				for (size_t i = 0; i < peditor->filesSize; ++i)
-				{
-					femtoFile_t * f = peditor->files[i];
-					femtoFile_checkUnsaved(f, NULL, NULL);
-					if (f->unsaved && (realLen < MAX_STATUS))
-					{
-						unsavedAny = true;
-						realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s; ", f->fileName);
-					}
-				}
-				if (!unsavedAny)
-				{
-					return false;
-				}
-				else if (realLen < MAX_STATUS)
-				{
-					swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm exit", (key == sac_Ctrl_Q) ? L"Ctrl+Shift+Q" : L"Shift+ESC");
 				}
 			}
 			else if (waitingEnc && (key != sac_Ctrl_E))
@@ -485,9 +487,11 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 				waitingEnc = false;
 			}
-			else if ((key == sac_Ctrl_N) && !boolGet(prevkeybuffer, sac_Ctrl_N))
+			else if ((key == sac_Ctrl_N) && (prevkey != sac_Ctrl_N))
 			{
-				wcscpy_s(tempstr, MAX_STATUS, L"Ctrl+N");
+				static uint32_t counter = 0;
+				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+N %u", counter);
+				++counter;
 			}
 			else if (key == sac_Ctrl_O)
 			{
@@ -505,11 +509,21 @@ bool femto_loop(femtoData_t * restrict peditor)
 					wcscpy_s(tempstr, MAX_STATUS, L"Opening canceled by user");
 				}
 			}
-			else if ((key == sac_Ctrl_W) && !boolGet(prevkeybuffer, sac_Ctrl_W))
+			else if ((key == sac_Ctrl_W) && (prevkey != sac_Ctrl_W))
 			{
-				swprintf_s(tempstr, MAX_STATUS, L"Closed tab #%u", keyCount);
+				if (peditor->filesSize == 1)
+				{
+					if (!femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					femto_inner_closeTab(peditor, tempstr, false);
+				}
 			}
-			else if ((key == sac_Ctrl_R) && !boolGet(prevkeybuffer, sac_Ctrl_R))	// Reload file
+			else if ((key == sac_Ctrl_R) && (prevkey != sac_Ctrl_R))	// Reload file
 			{
 				bool reload = true;
 				if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
@@ -541,7 +555,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					femtoData_refresh(peditor);
 				}
 			}
-			else if ((key == sac_Ctrl_S) && !boolGet(prevkeybuffer, sac_Ctrl_S))	// Save file
+			else if ((key == sac_Ctrl_S) && (prevkey != sac_Ctrl_S))	// Save file
 			{
 				int32_t saved = femtoFile_write(pfile);
 				switch (saved)
@@ -562,7 +576,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
 				}
 			}
-			else if ((key == sac_Ctrl_E) && !boolGet(prevkeybuffer, sac_Ctrl_E))
+			else if ((key == sac_Ctrl_E) && (prevkey != sac_Ctrl_E))
 			{
 				waitingEnc = true;
 				wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
@@ -584,7 +598,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				{
 				// Save as...
 				case L'S':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000))
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S'))
 					{
 						send = false;
 						wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
@@ -633,8 +647,25 @@ bool femto_loop(femtoData_t * restrict peditor)
 						}
 					}
 					break;
+				case L'W':
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && (GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'W'))
+					{
+						send = false;
+						if (peditor->filesSize == 1)
+						{
+							if (!femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
+							{
+								return false;
+							}
+						}
+						else
+						{
+							femto_inner_closeTab(peditor, tempstr, true);
+						}
+					}
+					break;
 				case L'R':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && (GetAsyncKeyState(VK_SHIFT) & 0x8000))
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && (GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
 					{
 						send = false;
 						const wchar_t * res;
@@ -769,12 +800,11 @@ bool femto_loop(femtoData_t * restrict peditor)
 		}
 		else
 		{
-			boolPut(keybuffer, key, false);
+			key = wVirtKey = 0;
 		}
 
 		prevkey = key;
 		prevwVirtKey = wVirtKey;
-		memcpy(prevkeybuffer, keybuffer, 32 * sizeof(uint8_t));
 	}
 	// Mouse wheel was used
 	else if (ir.EventType == MOUSE_EVENT)
