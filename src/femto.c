@@ -423,11 +423,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 	{
 		return true;
 	}
-	else if (evRead)
-	{
-		FlushConsoleInputBuffer(peditor->conIn);
-	}
 
+	FlushConsoleInputBuffer(peditor->conIn);
 	if (ir.EventType == KEY_EVENT)
 	{
 		static wchar_t prevkey, prevwVirtKey;
