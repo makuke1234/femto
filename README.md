@@ -66,6 +66,7 @@ reports ~3500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	| <kbd>Ctrl+Tab</kbd>            | Switch forwards between open files            |
 	| <kbd>Ctrl+Shift+Tab</kbd>      | Switch backwards between open files           |
 	| <kbd>Ctrl+W</kbd>              | Close current tab                             |
+	| <kbd>Ctrl+Shift+W</kbd>        | Force close current tab                       |
 	| <kbd>Ctrl+R</kbd>              | Reload current file, ask to save changes      |
 	| <kbd>Ctrl+Shift+R</kbd>        | Force reload current file                     |
 	| <kbd>Ctrl+E</kbd> <kbd>F</kbd> | Switch to CRLF EOL sequence                   |
