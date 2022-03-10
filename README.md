@@ -6,6 +6,7 @@
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/femto/total)](https://github.com/makuke1234/femto/releases)
 ![C version](https://img.shields.io/badge/version-C99-blue.svg)
 ![Tests](https://img.shields.io/badge/build-passing-green.svg)
+[![wakatime](https://wakatime.com/badge/github/makuke1234/femto.svg)](https://wakatime.com/badge/github/makuke1234/femto)
 
 It is a bigger more feature-rich version of my other console text editor [atto](https://github.com/makuke1234/atto).
 It is also written in vanilla C & Win32 Console API - it's designed to be used solely on Microsoft Windows.
