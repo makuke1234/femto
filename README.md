@@ -165,6 +165,7 @@ reports ~3500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~'Raw editing'/'saving later to a file' support~~
 	* [x] Allow multiple sequential file opens
+	* [x] Fix indentation bug
 * 1.5
 	* [x] Asks for user input on open & save as
 	* [x] User input support on the last line of the editor
