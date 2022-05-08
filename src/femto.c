@@ -1059,7 +1059,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			number /= 10u;
 		}
 	}
-	for (uint32_t j = (uint32_t)pfile->data.noLen + 1; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
+	for (uint32_t startj = (uint32_t)pfile->data.noLen + 1, j = startj; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1070,7 +1070,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		destination[j].Attributes = FEMTO_DEFAULT_COLOR;
 		if (node->line[idx] == L'\t')
 		{
-			uint32_t realIdx = j + pfile->data.curx;
+			uint32_t realIdx = j - startj + pfile->data.curx;
 			destination[j].Char.UnicodeChar = peditor->settings.whitespaceVisible ? peditor->settings.whitespaceCh  : L' ';
 			destination[j].Attributes       = peditor->settings.whitespaceVisible ? peditor->settings.whitespaceCol : destination[j].Attributes;
 			++j;
