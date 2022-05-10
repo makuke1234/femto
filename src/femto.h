@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "femtoData.h"
+#include "femtoSyntax.h"
 
 #define MAX_STATUS 256
 

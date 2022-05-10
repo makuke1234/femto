@@ -389,7 +389,7 @@ static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar_t * re
 	{
 		femtoFile_t * f = peditor->files[i];
 		femtoFile_checkUnsaved(f, NULL, NULL);
-		if (f->unsaved && (realLen < MAX_STATUS))
+		if (f->bUnsaved && (realLen < MAX_STATUS))
 		{
 			unsavedAny = true;
 			realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s; ", f->fileName);
@@ -830,7 +830,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			static int32_t s_delta = 0;
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			writeProfiler("femto_loop", "Mouse hwhell was used, delta %d", delta);
+			writeProfiler("femto_loop", "Mouse hwheel was used, delta %d", delta);
 
 			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
@@ -877,7 +877,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						pfile->data.currentNode = pfile->data.pcury;
 						const femtoLineNode_t * lastcurnode = pfile->data.currentNode;
 						femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
-						pfile->data.updateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.lineNumRelative;
+						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.lineNumRelative;
 						// Now move the cursor to correct X position
 						femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx, peditor->settings.tabWidth));
 						femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
@@ -960,12 +960,12 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 	femtoLineNode_t * curnode = pfile->data.currentNode;
 	
-	if (pfile->data.typed || (pfile->data.pcury == NULL))
+	if (pfile->data.bTyped || (pfile->data.pcury == NULL))
 	{
 		uint32_t prevcurx          = pfile->data.curx;
 		femtoLineNode_t * prevcury = pfile->data.pcury;
 
-		pfile->data.typed = false;
+		pfile->data.bTyped = false;
 		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
 		int32_t delta = (int32_t)curnode->virtcurx - (int32_t)peditor->scrbuf.w - (int32_t)pfile->data.curx + (int32_t)pfile->data.noLen + 1;
 		if (delta >= 0)
@@ -979,13 +979,13 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 
 		if ((prevcurx != pfile->data.curx) || (prevcury != pfile->data.pcury))
 		{
-			pfile->data.updateAll = false;
+			pfile->data.bUpdateAll = false;
 			return false;
 		}
 	}
-	if (pfile->data.updateAll)
+	if (pfile->data.bUpdateAll)
 	{
-		pfile->data.updateAll = false;
+		pfile->data.bUpdateAll = false;
 		return false;
 	}
 
@@ -1059,6 +1059,13 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			number /= 10u;
 		}
 	}
+
+	writeProfiler("femto_updateScrbufLine", "Syntax ptr: %p", node->syntax);
+	if (!femtoLine_updateSyntax(node, pfile->syntax))
+	{
+		femtoData_statusDraw(peditor, L"Error refreshing syntax highlighting!", NULL);
+	}
+
 	for (uint32_t startj = (uint32_t)pfile->data.noLen + 1, j = startj; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
@@ -1082,6 +1089,8 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		else
 		{
 			destination[j].Char.UnicodeChar = node->line[idx];
+			const uint32_t stxIdx = (idx > node->curx) ? (idx - node->freeSpaceLen) : idx;
+			destination[j].Attributes = (node->syntax != NULL) ? node->syntax[stxIdx] : destination[j].Attributes;
 			++j;
 		}
 		

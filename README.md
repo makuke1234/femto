@@ -34,7 +34,7 @@ reports ~3500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 - [x] Warns about any unsaved work
 	* *Never lose your edits again*
 - [ ] Search support & search results highlighting
-- [ ] Syntax highlighting
+- [x] Syntax highlighting
 - [x] Mouse scrolling, also horizontal scrolling
 	* *Ever used a laptop's touchpad in the terminal **properly**?*
 - [x] Mouse operated text cursor
@@ -157,10 +157,10 @@ reports ~3500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* [x] Save-as support
 	* [ ] Practical multi-file support, tabs' system
 	* [ ] Search support, also search result highlighting
-	* [ ] Syntax highlighting, supported languages:
-		* [ ] C
-		* [ ] C++
-		* [ ] Markdown
+	* [x] Syntax highlighting, supported languages:
+		* [x] C
+		* [x] C++ (partial)
+		* [x] Markdown (partial)
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~'Raw editing'/'saving later to a file' support~~

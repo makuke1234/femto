@@ -2,6 +2,7 @@
 #define FEMTOLINE_H
 
 #include "common.h"
+#include "femtoSyntax.h"
 
 #define FEMTO_LNODE_DEFAULT_FREE 10
 
@@ -14,7 +15,12 @@ typedef struct femtoLineNode
 	uint32_t virtcurx;
 
 	uint32_t lineNumber;
+
+	WORD * syntax;
+	bool blockComment;
+
 } femtoLineNode_t;
+
 
 /**
  * @brief Initialises already pre-allocated memory of femtoLineNode_t structure
@@ -182,6 +188,16 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
  * @param noLen Pointer receiving last line number length in characters
  */
 void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen);
+
+/**
+ * @brief Updates the syntax highlighting of a given node
+ * 
+ * @param node Pointer to node
+ * @param fs Syntax identifier
+ * @return true Success
+ * @return false Failure, usually when allocating memory
+ */
+bool femtoLine_updateSyntax(femtoLineNode_t * restrict node, enum femtoSyntax fs);
 
 /**
  * @brief Destroys line node, does NOT free any memory

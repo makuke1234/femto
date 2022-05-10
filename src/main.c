@@ -1,5 +1,6 @@
 #include "femto.h"
 #include "femtoArg.h"
+#include "femtoSyntax.h"
 
 
 static femtoData_t editor;
@@ -72,10 +73,11 @@ int wmain(int argc, const wchar_t * argv[])
 			swprintf_s(
 				tempstr,
 				MAX_STATUS,
-				L"File loaded successfully! %s%s EOL sequences; Settings file: %s",
+				L"File loaded successfully! %s%s EOL sequences; Settings file: %s; Syntax: %S",
 				(editor.file->eolSeq & EOL_CR) ? L"CR" : L"",
 				(editor.file->eolSeq & EOL_LF) ? L"LF" : L"",
-				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-"
+				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-",
+				fSyntaxName(editor.file->syntax)
 			);
 		}
 		femtoData_statusDraw(&editor, tempstr, NULL);

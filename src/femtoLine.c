@@ -1,4 +1,5 @@
 #include "femtoLine.h"
+#include "femtoSyntax.h"
 
 void femtoLine_init(femtoLineNode_t * restrict self)
 {
@@ -12,7 +13,10 @@ void femtoLine_init(femtoLineNode_t * restrict self)
 		.nextNode     = NULL,
 		.virtcurx     = 0,
 
-		.lineNumber   = 1
+		.lineNumber   = 1,
+
+		.syntax       = NULL,
+		.blockComment = false
 	};
 }
 femtoLineNode_t * femtoLine_create(
@@ -117,6 +121,9 @@ femtoLineNode_t * femtoLine_create(
 	femtoLine_updateLineNumbers(node, node->lineNumber, noLen);
 	node->virtcurx = 0;
 
+	node->syntax = NULL;
+	node->blockComment = false;
+
 	return node;
 }
 
@@ -165,6 +172,10 @@ femtoLineNode_t * femtoLine_createText(
 	}
 	femtoLine_updateLineNumbers(node, node->lineNumber, noLen);
 	node->virtcurx = 0;
+
+	node->syntax = NULL;
+	node->blockComment = false;
+
 	return node;
 }
 
@@ -262,6 +273,9 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 
 	self->lineEndx     = totalLen + FEMTO_LNODE_DEFAULT_FREE;
 	self->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
+
+	free(self->syntax);
+	self->syntax = NULL;
 
 	writeProfiler("femtoLine_realloc", "Reallocation succeeded");
 	return true;
@@ -362,6 +376,9 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	femtoLine_free(n); 
 
 	femtoLine_updateLineNumbers(self->nextNode, self->lineNumber + 1, noLen);
+
+	free(self->syntax);
+	self->syntax = NULL;
 
 	return true;
 }
@@ -475,12 +492,14 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
 	node1->curx         = node2->curx;
 	node1->freeSpaceLen = node2->freeSpaceLen;
 	node1->virtcurx     = node2->virtcurx;
+	node1->syntax       = node2->syntax;
 
 	node2->line         = temp.line;
 	node2->lineEndx     = temp.lineEndx;
 	node2->curx         = temp.curx;
 	node2->freeSpaceLen = temp.freeSpaceLen;
 	node2->virtcurx     = temp.virtcurx;
+	node2->syntax       = temp.syntax;
 }
 
 void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen)
@@ -504,14 +523,32 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t 
 	}
 }
 
+bool femtoLine_updateSyntax(femtoLineNode_t * restrict node, enum femtoSyntax fs)
+{
+	assert(node != NULL);
+
+	switch (fs)
+	{
+	case fstxC:
+		return fSyntaxParseC(node);
+	case fstxCPP:
+		return fSyntaxParseCpp(node);
+	case fstxMD:
+		return fSyntaxParseMd(node);
+	default:
+		return true;
+	}
+}
+
 void femtoLine_destroy(femtoLineNode_t * restrict self)
 {
 	assert(self != NULL);
-	if (self->line != NULL)
-	{
-		free(self->line);
-		self->line = NULL;
-	}
+	
+	free(self->line);
+	self->line = NULL;
+
+	free(self->syntax);
+	self->syntax = NULL;
 }
 void femtoLine_free(femtoLineNode_t * restrict self)
 {

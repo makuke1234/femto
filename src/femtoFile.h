@@ -4,6 +4,9 @@
 #include "common.h"
 #include "femtoLine.h"
 #include "femtoSettings.h"
+#include "femtoSyntax.h"
+
+#define MAX_SUFFIX 8
 
 enum femtoEOLsequence
 {
@@ -19,8 +22,6 @@ typedef struct femtoFile
 {
 	wchar_t * fileName;
 	HANDLE hFile;
-	bool canWrite;
-	enum femtoEOLsequence eolSeq;
 
 	struct
 	{
@@ -31,11 +32,16 @@ typedef struct femtoFile
 
 		uint8_t noLen;
 
-		bool typed;
-		bool updateAll;
+		bool bTyped:1;
+		bool bUpdateAll:1;
 	} data;
 
-	bool unsaved;
+	enum femtoEOLsequence eolSeq;
+	bool bCanWrite:1;
+	bool bUnsaved:1;
+	bool bSyntaxByUser:1;
+	enum femtoSyntax syntax:4;
+
 } femtoFile_t;
 
 /**

@@ -6,4 +6,5 @@
 #include "../femtoLine.c"
 #include "../femtoProfiler.c"
 #include "../femtoSettings.c"
+#include "../femtoSyntax.c"
 #include "../main.c"
