@@ -162,20 +162,20 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 # Changelog
 
 * 1.6 (planned)
-	* [x] Micro-optimisations in codebase
+	* [x] Fix indentation bug
 	* [x] Save-as support
-	* [ ] Practical multi-file support, tabs' system
-	* [ ] Search support, also search result highlighting
+	* [x] Allow multiple sequential file opens
+	* [ ] ~~'Raw editing'/'saving later to a file' support~~
 	* [x] Syntax highlighting, supported languages:
 		* [x] C
 		* [x] C++
 		* [x] Markdown
 	* [x] Asynchronous drawing
+	* [x] Micro-optimisations in codebase
+	* [ ] Search support, also search result highlighting
+	* [ ] Practical multi-file support, tabs' system
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
-	* [ ] ~~'Raw editing'/'saving later to a file' support~~
-	* [x] Allow multiple sequential file opens
-	* [x] Fix indentation bug
 * 1.5
 	* [x] Asks for user input on open & save as
 	* [x] User input support on the last line of the editor
