@@ -140,7 +140,7 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 
 # Screenshots
 
-## Demonstrating unicode support, file test.txt is open with CRLF EOL sequences
+## Unicode support, CRLF end-of-line sequences
 ![Unicode Support](./images/unicodeSupport.png)
 
 ## Last key shown on status bar with respective repeat count
