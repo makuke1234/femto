@@ -11,13 +11,14 @@ typedef enum femtoErr
 	ferrTHREAD,
 
 	ferrNUM_OF_ELEMS
-} femtoErr_t;
+
+} femtoErr_e;
 /**
  * @brief Prints error message to stderr, adds newline character
  * 
- * @param errCode Error code
+ * @param errCode Error code, ferrOK on success
  */
-void femto_printErr(femtoErr_t errCode);
+void femto_printErr(femtoErr_e errCode);
 
 
 #endif

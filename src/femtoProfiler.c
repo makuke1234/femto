@@ -18,7 +18,7 @@ void initProfiler(void)
 	fputs("\n", profilingFile);
 	writeProfiler("initProfiler", "Started application...");
 }
-void writeProfiler(const char * restrict function, const char * restrict format, ...)
+void writeProfiler_inner(const char * restrict function, const char * restrict format, ...)
 {
 	assert(function != NULL);
 	assert(format != NULL);
@@ -61,11 +61,11 @@ void profilerStart(void)
 	assert(curStackLen < PROFILER_STACK_SIZE);
 	profilerStack[curStackLen++] = clock();
 }
-void profilerEnd(const char * funcName)
+void profilerEnd_inner(const char * funcName)
 {
 	assert(curStackLen > 0);
 	--curStackLen;
-	writeProfiler(funcName, "Elapsed %.3f s", (double)(clock() - profilerStack[curStackLen]) / (double)CLOCKS_PER_SEC);
+	writeProfiler_inner(funcName, "Elapsed %.3f s", (double)(clock() - profilerStack[curStackLen]) / (double)CLOCKS_PER_SEC);
 }
 
 #endif

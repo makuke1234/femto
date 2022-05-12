@@ -3,23 +3,24 @@
 
 #include "common.h"
 
-typedef struct femtoArgument
+typedef struct femtoArg
 {
 	const wchar_t * begin, * end;
-} femtoArgument_t, femtoArg_t;
+
+} femtoArg_t;
 
 /**
  * @brief Convert string to boolean
  * 
  * @param arg String wrapper
  */
-bool femtoArg_strToBool(femtoArgument_t arg);
+bool femtoArg_strToBool(femtoArg_t arg);
 /**
  * @brief Convert string to UTF-16 character
  * 
  * @param arg String wrapper
  */
-wchar_t femtoArg_strToCh(femtoArgument_t arg);
+wchar_t femtoArg_strToCh(femtoArg_t arg);
 
 
 /**

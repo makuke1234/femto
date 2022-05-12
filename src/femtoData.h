@@ -12,14 +12,14 @@ typedef struct femtoDrawThread
 	CRITICAL_SECTION crit;
 	CONDITION_VARIABLE cv;
 
-	bool ready:1, killSwitch:1;
+	volatile bool bReady:1, bKillSwitch:1;
 
 } femtoDrawThread_t;
 
 typedef struct femtoData
 {
 	DWORD prevConsoleMode;
-	bool prevConsoleModeSet;
+	bool bPrevConsoleModeSet;
 
 	HANDLE conIn, conOut;
 	struct

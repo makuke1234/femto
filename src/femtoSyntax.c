@@ -32,8 +32,6 @@ bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
 
 static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti)
 {
-	writeProfiler("checkCToken", "start: %u, last: %u", start, lasti);
-
 	if ((lasti - start) < 1)
 	{
 		return;
@@ -181,7 +179,6 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 		}
 		for (uint32_t j = 0; j < words[n].len; ++j)
 		{
-			writeProfiler("checkCToken", "str: \"%S\"", kwBuf + (MAX_KWBUF - 1) - n);
 			if (wcscmp(kwBuf + (MAX_KWBUF - 1) - n, words[n].words[j]) == 0)
 			{
 				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
@@ -196,8 +193,6 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 }
 static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti)
 {
-	writeProfiler("checkCToken", "start: %u, last: %u", start, lasti);
-
 	if ((lasti - start) < 1)
 	{
 		return;
@@ -369,8 +364,6 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		++filled;
 	}
 
-	writeProfiler("checkCPPToken", "Filled: %u, str: %S", filled, kwBuf + (MAX_KWBUF - 1) - filled);
-
 	for (uint32_t i = 0; i < nwordLens; ++i)
 	{
 		const uint32_t n = wordLens[nwordLens - i - 1];
@@ -381,7 +374,6 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 
 		for (uint32_t j = 0; j < words[n].len; ++j)
 		{
-			writeProfiler("checkCPPToken", "str: \"%S\"", kwBuf + (MAX_KWBUF - 1) - n);
 			if (wcscmp(kwBuf + (MAX_KWBUF - 1) - n, words[n].words[j]) == 0)
 			{
 				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
@@ -406,7 +398,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
 	
-	blockComment = (node->prevNode != NULL) ? node->prevNode->blockComment : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->bBlockComment : false;
 
 	uint32_t previ = 0;
 	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
@@ -594,7 +586,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 		checkCToken(node, tokenStart, previ);
 	}
 
-	node->blockComment = blockComment;
+	node->bBlockComment = blockComment;
 
 	return true;
 }
@@ -609,7 +601,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
 	
-	blockComment = (node->prevNode != NULL) ? node->prevNode->blockComment : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->bBlockComment : false;
 
 	uint32_t previ = 0;
 	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
@@ -797,7 +789,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 		checkCPPToken(node, tokenStart, previ);
 	}
 
-	node->blockComment = blockComment;
+	node->bBlockComment = blockComment;
 
 	return true;
 }

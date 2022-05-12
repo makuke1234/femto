@@ -19,7 +19,7 @@ int wmain(int argc, const wchar_t * argv[])
 
 	// Limit the scope of errCode
 	{
-		femtoErr_t errCode = femtoSettings_populate(&editor.settings, argc, argv);
+		femtoErr_e errCode = femtoSettings_populate(&editor.settings, argc, argv);
 		if (errCode != ferrOK)
 		{
 			if (errCode == ferrUNKNOWN)
@@ -37,7 +37,7 @@ int wmain(int argc, const wchar_t * argv[])
 				return 2;
 			}
 		}
-		else if (editor.settings.helpRequested || (argc == 1))
+		else if (editor.settings.bHelpRequest || (argc == 1))
 		{
 			femto_printHelp(argv[0]);
 			return 0;
@@ -74,8 +74,8 @@ int wmain(int argc, const wchar_t * argv[])
 				tempstr,
 				MAX_STATUS,
 				L"File loaded successfully! %s%s EOL sequences; Settings file: %s; Syntax: %S",
-				(editor.file->eolSeq & EOL_CR) ? L"CR" : L"",
-				(editor.file->eolSeq & EOL_LF) ? L"LF" : L"",
+				(editor.file->eolSeq & eolCR) ? L"CR" : L"",
+				(editor.file->eolSeq & eolLF) ? L"LF" : L"",
 				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-",
 				fSyntaxName(editor.file->syntax)
 			);

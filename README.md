@@ -5,7 +5,7 @@
 [![Release version](https://img.shields.io/github/v/release/makuke1234/femto?display_name=release&include_prereleases)](https://github.com/makuke1234/femto/releases/latest)
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/femto/total)](https://github.com/makuke1234/femto/releases)
 ![C version](https://img.shields.io/badge/version-C99-blue.svg)
-![Tests](https://img.shields.io/badge/build-passing-green.svg)
+![Tests](https://img.shields.io/badge/build-passing-yellow.svg)
 [![wakatime](https://wakatime.com/badge/github/makuke1234/femto.svg)](https://wakatime.com/badge/github/makuke1234/femto)
 
 It is a bigger more feature-rich version of my other console text editor [atto](https://github.com/makuke1234/atto).
@@ -140,7 +140,7 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 
 # Screenshots
 
-## Demonstrating unicode support, file test.txt is open with CRLF EOL sequences
+## Unicode support, CRLF end-of-line sequences
 ![Unicode Support](./images/unicodeSupport.png)
 
 ## Last key shown on status bar with respective repeat count
@@ -161,21 +161,26 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 
 # Changelog
 
-* 1.6 (planned)
-	* [x] Micro-optimisations in codebase
-	* [x] Save-as support
-	* [ ] Practical multi-file support, tabs' system
+* 1.7 (planned, planned)
+	* [ ] Syntax highlighting customisable
 	* [ ] Search support, also search result highlighting
+	* [ ] Practical multi-file support, tabs' system
+	* [ ] Proper text copying/pasting support
+		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+	* [ ] More syntax highlighting (maybe)
+		* [ ] Python
+		* [ ] JavaScript
+	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
+* 1.6 (planned)
+	* [x] Fix indentation bug
+	* [x] Save-as support
+	* [x] Allow multiple sequential file opens
 	* [x] Syntax highlighting, supported languages:
 		* [x] C
 		* [x] C++
 		* [x] Markdown
 	* [x] Asynchronous drawing
-	* [ ] Proper text copying/pasting support
-		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
-	* [ ] ~~'Raw editing'/'saving later to a file' support~~
-	* [x] Allow multiple sequential file opens
-	* [x] Fix indentation bug
+	* [x] Micro-optimisations in codebase
 * 1.5
 	* [x] Asks for user input on open & save as
 	* [x] User input support on the last line of the editor

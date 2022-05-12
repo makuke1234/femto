@@ -1,6 +1,6 @@
 #include "femtoArg.h"
 
-bool femtoArg_strToBool(femtoArgument_t arg)
+bool femtoArg_strToBool(femtoArg_t arg)
 {
 	if (((arg.end - arg.begin) >= 4) && (wcsncmp(arg.begin, L"true", 4) == 0))
 	{
@@ -16,7 +16,7 @@ bool femtoArg_strToBool(femtoArgument_t arg)
 		return wcstol(arg.begin, NULL, 10) != 0;
 	}
 }
-wchar_t femtoArg_strToCh(femtoArgument_t arg)
+wchar_t femtoArg_strToCh(femtoArg_t arg)
 {
 	if ((arg.end - arg.begin) >= 1)
 	{

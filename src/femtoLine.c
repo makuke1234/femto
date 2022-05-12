@@ -16,7 +16,7 @@ void femtoLine_init(femtoLineNode_t * restrict self)
 		.lineNumber   = 1,
 
 		.syntax       = NULL,
-		.blockComment = false
+		.bBlockComment = false
 	};
 }
 femtoLineNode_t * femtoLine_create(
@@ -122,7 +122,7 @@ femtoLineNode_t * femtoLine_create(
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
-	node->blockComment = false;
+	node->bBlockComment = false;
 
 	return node;
 }
@@ -174,7 +174,7 @@ femtoLineNode_t * femtoLine_createText(
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
-	node->blockComment = false;
+	node->bBlockComment = false;
 
 	return node;
 }
@@ -185,7 +185,7 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restric
 	assert(text != NULL);
 
 	uint32_t totalLen = self->lineEndx - self->freeSpaceLen + 1;
-	writeProfiler("femtoLine_getText", "Total length: %u characters", totalLen);
+	writeProfiler("Total length: %u characters", totalLen);
 
 	if (tarrsz != NULL && *tarrsz < totalLen)
 	{
@@ -251,10 +251,8 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	assert(self != NULL);
 	if (self->freeSpaceLen == FEMTO_LNODE_DEFAULT_FREE)
 	{
-		writeProfiler("femtoLine_realloc", "Reallocation succeeded");
 		return true;
 	}
-	writeProfiler("femtoLine_realloc", "Reallocating line");
 	uint32_t totalLen = self->lineEndx - self->freeSpaceLen;
 	void * newmem = realloc(self->line, sizeof(wchar_t) * (totalLen + FEMTO_LNODE_DEFAULT_FREE));
 	if (newmem == NULL)
@@ -277,7 +275,6 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	free(self->syntax);
 	self->syntax = NULL;
 
-	writeProfiler("femtoLine_realloc", "Reallocation succeeded");
 	return true;
 }
 
@@ -477,7 +474,6 @@ uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t vi
 		++i;
 	}
 
-	writeProfiler("femtoLine_calcCursor", "virtual: %d realcurx: %d", virtcur, realcurx);
 	return realcurx;
 }
 

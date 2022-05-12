@@ -17,7 +17,7 @@ typedef struct femtoLineNode
 	uint32_t lineNumber;
 
 	WORD * syntax;
-	bool blockComment;
+	bool bBlockComment;
 
 } femtoLineNode_t;
 
