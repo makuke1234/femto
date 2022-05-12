@@ -10,7 +10,7 @@ int wmain(int argc, const wchar_t * argv[])
 	femto_exitHandlerSetVars(&editor);
 	if (!femtoData_reset(&editor))
 	{
-		femto_printErr(femtoErr_memory);
+		femto_printErr(ferrMEMORY);
 		return 1;
 	}
 
@@ -20,9 +20,9 @@ int wmain(int argc, const wchar_t * argv[])
 	// Limit the scope of errCode
 	{
 		femtoErr_t errCode = femtoSettings_populate(&editor.settings, argc, argv);
-		if (errCode != femtoErr_ok)
+		if (errCode != ferrOK)
 		{
-			if (errCode == femtoErr_unknown)
+			if (errCode == ferrUNKNOWN)
 			{
 				// Get last error
 				wchar_t errMsg[FEMTO_SETTINGS_ERR_MAX];
@@ -47,7 +47,7 @@ int wmain(int argc, const wchar_t * argv[])
 
 	if (!femtoFile_open(editor.file, editor.settings.fileName, false))
 	{
-		femto_printErr(femtoErr_file);
+		femto_printErr(ferrFILE);
 		return 3;
 	}
 	femtoFile_close(editor.file);
@@ -57,7 +57,7 @@ int wmain(int argc, const wchar_t * argv[])
 
 	if (!femtoData_init(&editor))
 	{
-		femto_printErr(femtoErr_window);
+		femto_printErr(ferrWINDOW);
 		return 4;
 	}
 
@@ -84,7 +84,16 @@ int wmain(int argc, const wchar_t * argv[])
 	}
 
 	femtoData_refresh(&editor);
+
+	if (!femto_loopDraw_createThread(&editor))
+	{
+		femto_printErr(ferrTHREAD);
+		return 5;
+	}
+
 	while (femto_loop(&editor));
+
+	femto_loopDraw_closeThread(&editor);
 
 	return 0;
 }

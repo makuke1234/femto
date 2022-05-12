@@ -3,13 +3,14 @@
 
 typedef enum femtoErr
 {
-	femtoErr_ok,
-	femtoErr_unknown,
-	femtoErr_file,
-	femtoErr_window,
-	femtoErr_memory,
+	ferrOK,
+	ferrUNKNOWN,
+	ferrFILE,
+	ferrWINDOW,
+	ferrMEMORY,
+	ferrTHREAD,
 
-	femtoErr_num_of_elems
+	ferrNUM_OF_ELEMS
 } femtoErr_t;
 /**
  * @brief Prints error message to stderr, adds newline character

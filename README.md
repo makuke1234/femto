@@ -161,6 +161,7 @@ reports ~4300 source code lines (excluding whitespace, comments & [jsonlite2](ht
 		* [x] C
 		* [x] C++ (partial)
 		* [x] Markdown (partial)
+	* [x] Asynchronous drawing
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~'Raw editing'/'saving later to a file' support~~

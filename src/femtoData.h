@@ -5,6 +5,16 @@
 #include "femtoFile.h"
 #include "femtoSettings.h"
 
+typedef struct femtoDrawThread
+{
+	HANDLE hthread;
+
+	CRITICAL_SECTION crit;
+	CONDITION_VARIABLE cv;
+
+	bool ready:1, killSwitch:1;
+
+} femtoDrawThread_t;
 
 typedef struct femtoData
 {
@@ -26,6 +36,9 @@ typedef struct femtoData
 	femtoFile_t * file;
 
 	femtoSettings_t settings;
+
+	femtoDrawThread_t drawThread;
+
 } femtoData_t;
 
 /**
@@ -48,6 +61,13 @@ bool femtoData_init(femtoData_t * restrict self);
  * @param self Pointer to femtoData_t structure
  */
 void femtoData_refresh(femtoData_t * restrict self);
+/**
+ * @brief Multithreaded version of femtoData_refresh, refreshes the screen's editing
+ * part only asynchronously
+ * 
+ * @param self Pointer to femtoData structure
+ */
+void femtoData_refreshThread(femtoData_t * restrict self);
 /**
  * @brief Refreshes whole screen
  * 

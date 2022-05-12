@@ -584,7 +584,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 				if (femtoFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 				{
-					femtoData_refresh(peditor);
+					femtoData_refreshThread(peditor);
 				}
 			}
 			// Special keys
@@ -822,7 +822,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			{
 				s_delta -= lineDelta * WHEEL_DELTA / 2;
 				femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
-				femtoData_refresh(peditor);
+				femtoData_refreshThread(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
 		}
@@ -839,7 +839,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			{
 				s_delta -= chDelta * WHEEL_DELTA;
 				femtoFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
-				femtoData_refresh(peditor);
+				femtoData_refreshThread(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
 		}
@@ -901,6 +901,91 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 	return true;
 }
+DWORD WINAPI femto_loopDraw(LPVOID pdataV)
+{
+	femtoData_t * pdata = pdataV;
+	assert(pdata != NULL);
+	femtoDrawThread_t * dt = &pdata->drawThread;
+	assert(dt != NULL);
+
+	while (!dt->killSwitch)
+	{
+		EnterCriticalSection(&dt->crit);
+
+		while (!dt->ready)
+		{
+			SleepConditionVariableCS(&dt->cv, &dt->crit, INFINITE);
+		}
+		dt->ready = false;
+
+		LeaveCriticalSection(&dt->crit);
+
+		if (dt->killSwitch)
+		{
+			break;
+		}
+
+		// Do the drawing here
+		femtoData_refresh(pdata);
+	}
+
+	return 0;
+}
+bool femto_loopDraw_createThread(femtoData_t * restrict pdata)
+{
+	assert(pdata != NULL);
+
+	// Initialize thread resources
+
+	femtoDrawThread_t * dt = &pdata->drawThread;
+
+	// Create critical section (mutex), cv
+	InitializeCriticalSection(&dt->crit);
+	InitializeConditionVariable(&dt->cv);
+	
+	dt->killSwitch = false;
+	dt->ready = false;
+
+	dt->hthread = CreateThread(
+		NULL,
+		20 * sizeof(size_t),
+		&femto_loopDraw,
+		pdata,
+		0,
+		NULL
+	);
+
+	// Check if CreateThread fails
+	if (dt->hthread == NULL)
+	{
+		DeleteCriticalSection(&dt->crit);
+		return false;
+	}
+
+	return true;
+}
+void femto_loopDraw_closeThread(femtoData_t * restrict pdata)
+{
+	assert(pdata != NULL);
+
+	femtoDrawThread_t * dt = &pdata->drawThread;
+
+	// Trigger thread killSwitch
+	EnterCriticalSection(&dt->crit);
+
+	dt->killSwitch = true;
+	dt->ready = true;
+	WakeConditionVariable(&dt->cv);
+
+	LeaveCriticalSection(&dt->crit);
+
+	// Wait for thread to finish
+	WaitForSingleObject(dt->hthread, INFINITE);
+
+	// Free resources
+	DeleteCriticalSection(&dt->crit);
+}
+
 bool femto_updateScrbuf(femtoData_t * restrict peditor, uint32_t * curline)
 {
 	assert(peditor != NULL);

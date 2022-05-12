@@ -75,7 +75,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	bool * argumentsUsed = calloc((size_t)(argc - 1), sizeof(bool));
 	if (argumentsUsed == NULL)
 	{
-		return femtoErr_memory;
+		return ferrMEMORY;
 	}
 
 	int mi;
@@ -85,7 +85,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	{
 		self->helpRequested = true;
 		free(argumentsUsed);
-		return femtoErr_ok;
+		return ferrOK;
 	}
 	femtoArg_t farg;
 
@@ -96,7 +96,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		if (self->fileName == NULL)
 		{
 			free(argumentsUsed);
-			return femtoErr_memory;
+			return ferrMEMORY;
 		}
 		argumentsUsed[mi - 1] = true;
 	}
@@ -114,7 +114,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		if (mem == NULL)
 		{
 			free(argumentsUsed);
-			return femtoErr_memory;
+			return ferrMEMORY;
 		}
 		argumentsUsed[mi - 1] = true;
 
@@ -150,7 +150,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		if (!femtoSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);
-			return femtoErr_memory;
+			return ferrMEMORY;
 		}
 
 		argumentsUsed[mi - 1] = true;
@@ -229,7 +229,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 		if (self->fileName == NULL)
 		{
 			free(argumentsUsed);
-			return femtoErr_memory;
+			return ferrMEMORY;
 		}
 		// Just in case, redundant otherwise
 		argumentsUsed[argc - 2] = true;
@@ -264,7 +264,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	// Everything is OK
 	free(argumentsUsed);
 
-	return result == NULL ? femtoErr_ok : femtoErr_unknown;
+	return result == NULL ? ferrOK : ferrUNKNOWN;
 }
 
 const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)

@@ -1,19 +1,20 @@
 #include "femtoErr.h"
 #include "common.h"
 
-static const char * femto_errCodes[femtoErr_num_of_elems] = {
-	[femtoErr_ok]      = "Everything OK",
-	[femtoErr_unknown] = "Uknown error occurred!",
-	[femtoErr_file]    = "Error reading file!",
-	[femtoErr_window]  = "Error initialising window!",
-	[femtoErr_memory]  = "Error allocating memory!"
+static const char * femto_errCodes[ferrNUM_OF_ELEMS] = {
+	[ferrOK]      = "Everything OK",
+	[ferrUNKNOWN] = "Uknown error occurred!",
+	[ferrFILE]    = "Error reading file!",
+	[ferrWINDOW]  = "Error initialising window!",
+	[ferrMEMORY]  = "Error allocating memory!",
+	[ferrTHREAD]  = "Error creating thread!"
 };
 
 void femto_printErr(femtoErr_t errCode)
 {
-	if (errCode >= femtoErr_num_of_elems)
+	if (errCode >= ferrNUM_OF_ELEMS)
 	{
-		errCode = femtoErr_unknown;
+		errCode = ferrUNKNOWN;
 	}
 	fprintf(stderr, "%s\n", femto_errCodes[errCode]);
 }

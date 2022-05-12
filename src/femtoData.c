@@ -138,6 +138,18 @@ void femtoData_refresh(femtoData_t * restrict self)
 		);
 	}
 }
+void femtoData_refreshThread(femtoData_t * restrict self)
+{
+	assert(self != NULL);
+	femtoDrawThread_t * dt = &self->drawThread;
+
+	EnterCriticalSection(&dt->crit);
+
+	dt->ready = true;
+	WakeConditionVariable(&dt->cv);
+
+	LeaveCriticalSection(&dt->crit);
+}
 void femtoData_refreshAll(femtoData_t * restrict self)
 {
 	assert(self != NULL);

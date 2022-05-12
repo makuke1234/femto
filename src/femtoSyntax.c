@@ -148,10 +148,11 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 		[13] = { .len = ARRAYSIZE(keywordsLen13), .words = keywordsLen13 },
 		[14] = { .len = ARRAYSIZE(keywordsLen14), .words = keywordsLen14 }
 	};
-	#define nwordLens 13
-	static const uint32_t wordLens[nwordLens] = {
+	static const uint32_t wordLens[] = {
 		14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
 	};
+	static const size_t nwordLens = ARRAYSIZE(wordLens);
+
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
@@ -190,8 +191,6 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 			}
 		}
 	}
-
-	#undef nwordLens
 }
 static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti)
 {
@@ -311,10 +310,11 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		[13] = { .len = ARRAYSIZE(keywordsLen13), .words = keywordsLen13 },
 		[14] = { .len = ARRAYSIZE(keywordsLen14), .words = keywordsLen14 }
 	};
-	#define nwordLens 13
-	static const uint32_t wordLens[nwordLens] = {
+	static const uint32_t wordLens[] = {
 		14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
 	};
+	static const size_t nwordLens = ARRAYSIZE(wordLens);
+
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
@@ -353,8 +353,6 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 			}
 		}
 	}
-
-	#undef nwordLens
 }
 
 bool fSyntaxParseC(femtoLineNode_t * restrict node)
@@ -430,7 +428,6 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			previ = i;
 			continue;
 		}
-		/**//* This is it*/
 		else if ((ch == '/') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			comment = true;
@@ -462,6 +459,8 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			case L')':
 			case L'{':
 			case L'}':
+			case L'[':
+			case L']':
 			case L'.':
 			case L',':
 			case L'*':
@@ -613,7 +612,6 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 			previ = i;
 			continue;
 		}
-		/**//* This is it*/
 		else if ((ch == '/') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			comment = true;
@@ -645,6 +643,8 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 			case L')':
 			case L'{':
 			case L'}':
+			case L'[':
+			case L']':
 			case L'.':
 			case L',':
 			case L'*':

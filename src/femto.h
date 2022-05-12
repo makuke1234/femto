@@ -92,6 +92,28 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
  */
 bool femto_loop(femtoData_t * restrict pdata);
 /**
+ * @brief Performs text editor drawing asynchronously
+ * 
+ * @param pdata Pointer to femtoData_t structure
+ * @return DWORD Irrelevant return value
+ */
+DWORD WINAPI femto_loopDraw(LPVOID pdata);
+/**
+ * @brief Tries to create a loop-drawing thread
+ * 
+ * @param pdata Pointer to femtoData structure
+ * @return true Success
+ * @return false Failure creating thread
+ */
+bool femto_loopDraw_createThread(femtoData_t * restrict pdata);
+/**
+ * @brief Closes the loopDrawing thread
+ * 
+ * @param pdata Pointer to femtoData structure
+ */
+void femto_loopDraw_closeThread(femtoData_t * restrict pdata);
+
+/**
  * @brief Update screen buffer
  * 
  * @param peditor Pointer to femtoData_t structure
