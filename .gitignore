@@ -7,4 +7,3 @@ test*.txt
 /.ssh
 .lesshst
 *.a
-/test.c
