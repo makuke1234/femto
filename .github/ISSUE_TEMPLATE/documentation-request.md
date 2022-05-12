@@ -1,6 +1,6 @@
 ---
 name: Documentation request
-about: Suggest documenation clarification
+about: Suggest documentation clarification
 title: "[DOC] Better description"
 labels: documentation
 assignees: makuke1234
