@@ -5,7 +5,7 @@
 [![Release version](https://img.shields.io/github/v/release/makuke1234/femto?display_name=release&include_prereleases)](https://github.com/makuke1234/femto/releases/latest)
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/femto/total)](https://github.com/makuke1234/femto/releases)
 ![C version](https://img.shields.io/badge/version-C99-blue.svg)
-![Tests](https://img.shields.io/badge/build-passing-green.svg)
+![Tests](https://img.shields.io/badge/build-passing-yellow.svg)
 [![wakatime](https://wakatime.com/badge/github/makuke1234/femto.svg)](https://wakatime.com/badge/github/makuke1234/femto)
 
 It is a bigger more feature-rich version of my other console text editor [atto](https://github.com/makuke1234/atto).
