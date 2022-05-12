@@ -408,7 +408,8 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 	
 	blockComment = (node->prevNode != NULL) ? node->prevNode->blockComment : false;
 
-	for (uint32_t i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
+	uint32_t previ = 0;
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -516,6 +517,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			case L'<':
 			case L'>':
 			case L'=':
+			case L';':
 			case L':':
 				node->syntax[j] = FOREGROUND_GREEN;
 				/* fall through */
@@ -587,6 +589,11 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 		previ = i;
 	}
 
+	if (!blockComment && !comment && !preproc && !quoteMode)
+	{
+		checkCToken(node, tokenStart, previ);
+	}
+
 	node->blockComment = blockComment;
 
 	return true;
@@ -604,7 +611,8 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 	
 	blockComment = (node->prevNode != NULL) ? node->prevNode->blockComment : false;
 
-	for (uint32_t i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
+	uint32_t previ = 0;
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -713,6 +721,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 			case L'>':
 			case L'=':
 			case L':':
+			case L';':
 				node->syntax[j] = FOREGROUND_GREEN;
 				/* fall through */
 			case L' ':
@@ -783,6 +792,11 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 		previ = i;
 	}
 
+	if (!blockComment && !comment && !preproc && !quoteMode)
+	{
+		checkCPPToken(node, tokenStart, previ);
+	}
+
 	node->blockComment = blockComment;
 
 	return true;
@@ -793,7 +807,30 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 	{
 		return false;
 	}
-
+	
+	/*
+		Markdown logic:
+		
+		Find '#' at the beginning of the line, there can be less than tabWidth worth of spaces
+		Count number of spaces at beginning of line, if more than tabWidth, highlight
+		If less than tabWidth search dash '-'
+		
+		Patterns:
+		![asd]
+		[asd]
+		...[asd](text)
+		*asd* & _asd_
+		**asd** & __asd__
+		~~sdd~~
+		
+	*/
+	
+	uint32_t firstChIdx = 0;
+	bool done = false, headingMode = false, valueMode = false, bracketMode = false,
+		extraBracketMode = false, italicsMode = false, boldMode = false,
+		containsStar = false, strikeMode = false, parenMode1 = false,
+		parenMode2 = false, enable = false, coneMode = false;
+	
 	for (uint32_t i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
@@ -805,7 +842,169 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 		}
 		node->syntax[j] = FEMTO_DEFAULT_COLOR;
 
+		const wchar_t ch = node->line[i];
 		
+		if (valueMode)
+		{
+			node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE;
+		}
+		else if (coneMode)
+		{
+			node->syntax[j] = FOREGROUND_RED | FOREGROUND_GREEN;
+		}
+		else if (strikeMode)
+		{
+			if ((ch == L'~') && (node->line[previ] == L'~'))
+			{
+				strikeMode = false;
+				node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else
+			{
+				node->syntax[j] = FOREGROUND_INTENSITY;
+			}
+		}
+		else if (italicsMode)
+		{
+			if (containsStar && ( ( (ch == L'*') && (node->line[previ] == L'*') ) || ( (ch == L'_') && (node->line[previ] == L'_') ) ) )
+			{
+				boldMode = true;
+				italicsMode = false;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else if ((ch == L'*') || (ch == L'_'))
+			{
+				italicsMode = false;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else
+			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
+			}
+
+			containsStar = false;
+		}
+		else if (boldMode)
+		{
+			if ( ( (ch == L'*') && (node->line[previ] == L'*') ) || ( (ch == L'_') && (node->line[previ] == L'_') ) )
+			{
+				boldMode = false;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else
+			{
+				node->syntax[j] = FOREGROUND_RED | FOREGROUND_BLUE;
+			}
+		}
+		else if (bracketMode)
+		{
+			if (ch == L']')
+			{
+				bracketMode = false;
+				extraBracketMode = false;
+				parenMode1 = true;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else
+			{
+				node->syntax[j] = extraBracketMode ? FOREGROUND_INTENSITY | FOREGROUND_GREEN : FOREGROUND_GREEN;
+			}
+		}
+		else if (parenMode1)
+		{
+			parenMode1 = false;
+			if (ch == L'(')
+			{
+				parenMode2 = true;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+		}
+		else if (parenMode2)
+		{
+			if (ch == L')')
+			{
+				parenMode2 = false;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else
+			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_BLUE;
+			}
+		}
+		else if (headingMode)
+		{
+			node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;
+		}
+		else if (!done)
+		{
+			if (ch == L'#')
+			{
+				headingMode = true;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;
+			}
+			else if (ch == L'-')
+			{
+				// Dash coloring
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else if (ch == L'>')
+			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				coneMode = true;
+			}
+			if ((ch != L' ') && (ch != L'\t'))
+			{
+				done = true;
+				enable = true;
+				if (firstChIdx >= 4)
+				{
+					valueMode = true;
+					node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE;
+				}
+			}
+			else if (ch == L' ')
+			{
+				firstChIdx += 1;
+			}
+			else if (ch == L'\t')
+			{
+				firstChIdx += 4;
+			}
+		}
+		else
+		{
+			enable = true;
+		}
+
+		if (enable)
+		{
+			enable = false;
+
+			if (ch == L'[')
+			{
+				bracketMode = true;
+				if ((previ > 0) && (node->line[previ] == L'!'))
+				{
+					node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+					extraBracketMode = true;
+				}
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else if ((ch == L'*') || (ch == L'_'))
+			{
+				containsStar = true;
+				italicsMode = true;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+			else if ((ch == L'~') && (previ > 0) && (node->line[previ] == L'~'))
+			{
+				strikeMode = true;
+				node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+			}
+		}
 
 		previ = i;
 	}

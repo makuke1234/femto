@@ -51,13 +51,8 @@ bool femtoData_init(femtoData_t * restrict self)
 		return false;
 	}
 
-	// Set extended mode
-	if (!SetConsoleMode(self->conIn, ENABLE_EXTENDED_FLAGS))
-	{
-		return false;
-	}
-	// Disable quick edit mode
-	if (!SetConsoleMode(self->conIn, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
+	// Set extended mode and disable quick edit mode
+	if (!SetConsoleMode(self->conIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
 	{
 		return false;
 	}
