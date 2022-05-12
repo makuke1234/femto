@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define MAX_KWBUF 10
+#define MAX_KWBUF 15
 
 struct femtoLineNode;
 
