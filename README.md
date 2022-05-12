@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~4300 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -159,7 +159,7 @@ reports ~4300 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* [ ] Search support, also search result highlighting
 	* [x] Syntax highlighting, supported languages:
 		* [x] C
-		* [x] C++ (partial)
+		* [x] C++
 		* [x] Markdown (partial)
 	* [x] Asynchronous drawing
 	* [ ] Proper text copying/pasting support

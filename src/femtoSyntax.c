@@ -61,6 +61,7 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 		L"enum",
 		L"long",
 		L"void",
+		L"goto",
 
 		L"bool"
 	};
@@ -92,7 +93,8 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 
 		L"alignas",
 		L"alignof",
-		L"complex"
+		L"complex",
+		L"typedef"
 	};
 	static const wchar_t * keywordsLen8[] = {
 		L"continue",
@@ -157,7 +159,7 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti; i >= 0 && j >= 0;)
+	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
 		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
@@ -173,7 +175,7 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 	for (uint32_t i = 0; i < nwordLens; ++i)
 	{
 		const uint32_t n = wordLens[nwordLens - i - 1];
-		if (n > filled)
+		if ((n > filled) || ((filled - n) > 2))
 		{
 			continue;
 		}
@@ -209,11 +211,18 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 
 	static const wchar_t * keywordsLen2[] = {
 		L"do",
-		L"if"
+		L"if",
+		L"or"
 	};
 	static const wchar_t * keywordsLen3[] = {
 		L"for",
-		L"int"
+		L"int",
+		L"and",
+		L"asm",
+		L"new",
+		L"not",
+		L"xor",
+		L"try"
 	};
 	static const wchar_t * keywordsLen4[] = {
 		L"auto",
@@ -223,8 +232,10 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		L"enum",
 		L"long",
 		L"void",
-
-		L"bool"
+		L"goto",
+		L"this",
+		L"bool",
+		L"true"
 	};
 	static const wchar_t * keywordsLen5[] = {
 		L"break",
@@ -233,8 +244,15 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		L"short",
 		L"union",
 		L"while",
-
-		L"_Bool"
+		L"bitor",
+		L"class",
+		L"catch",
+		L"compl",
+		L"false",
+		L"or_eq",
+		L"throw",
+		L"using",
+		L"final"
 	};
 	static const wchar_t * keywordsLen6[] = {
 		L"double",
@@ -245,54 +263,73 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		L"sizeof",
 		L"static",
 		L"struct",
-		L"switch"
+		L"switch",
+		L"and_eq",
+		L"bitand",
+		L"delete",
+		L"export",
+		L"friend",
+		L"not_eq",
+		L"public",
+		L"typeid",
+		L"xor_eq",
+		L"import",
+		L"module"
 	};
 	static const wchar_t * keywordsLen7[] = {
-		L"default",
-
-		L"_Atomic",
-
 		L"alignas",
 		L"alignof",
-		L"complex"
+		L"char8_t",
+		L"concept",
+		L"default",
+		L"mutable",
+		L"nullptr",
+		L"private",
+		L"typedef",
+		L"virtual",
+		L"wchar_t"
 	};
 	static const wchar_t * keywordsLen8[] = {
+		L"char16_t",
+		L"char32_t",
 		L"continue",
+		L"co_await",
+		L"co_yield",
+		L"decltype",
+		L"explicit",
+		L"noexcept",
+		L"operator",
 		L"register",
-		L"restrict",
+		L"requires",
+		L"template",
+		L"typename",
 		L"unsigned",
 		L"volatile",
-
-		L"_Alignas",
-		L"_Alignof",
-		L"_Complex",
-		L"_Generic",
-
-		L"noreturn"
+		L"override"
 	};
 	static const wchar_t * keywordsLen9[] = {
-		L"_Noreturn",
-
-		L"imaginary"
+		L"consteval",
+		L"constexpr",
+		L"constinit",
+		L"co_return",
+		L"namespace",
+		L"protected"
 	};
 	static const wchar_t * keywordsLen10[] = {
-		L"_Decimal64",
-		L"_Decimal32",
-		L"_Imaginary"
+		L"const_cast"
 	};
 	static const wchar_t * keywordsLen11[] = {
-		L"_Decimal128"
+		L"static_cast"
 	};
 	static const wchar_t * keywordsLen12[] = {
+		L"dynamic_cast",
 		L"thread_local"
 	};
 	static const wchar_t * keywordsLen13[] = {
-		L"_Thread_local",
-
 		L"static_assert"
 	};
-	static const wchar_t * keywordsLen14[] = {
-		L"_Static_assert"
+	static const wchar_t * keywordsLen16[] = {
+		L"reinterpret_cast"
 	};
 
 	static const struct keyword words[] = {
@@ -308,10 +345,10 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		[11] = { .len = ARRAYSIZE(keywordsLen11), .words = keywordsLen11 },
 		[12] = { .len = ARRAYSIZE(keywordsLen12), .words = keywordsLen12 },
 		[13] = { .len = ARRAYSIZE(keywordsLen13), .words = keywordsLen13 },
-		[14] = { .len = ARRAYSIZE(keywordsLen14), .words = keywordsLen14 }
+		[16] = { .len = ARRAYSIZE(keywordsLen16), .words = keywordsLen16 }
 	};
 	static const uint32_t wordLens[] = {
-		14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
+		16, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
 	};
 	static const size_t nwordLens = ARRAYSIZE(wordLens);
 
@@ -319,7 +356,7 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti; i >= 0 && j >= 0;)
+	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
 		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
@@ -332,16 +369,19 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 		++filled;
 	}
 
+	writeProfiler("checkCPPToken", "Filled: %u, str: %S", filled, kwBuf + (MAX_KWBUF - 1) - filled);
+
 	for (uint32_t i = 0; i < nwordLens; ++i)
 	{
 		const uint32_t n = wordLens[nwordLens - i - 1];
-		if (n > filled)
+		if ((n > filled) || ((filled - n) > 2))
 		{
 			continue;
 		}
+
 		for (uint32_t j = 0; j < words[n].len; ++j)
 		{
-			writeProfiler("checkCToken", "str: \"%S\"", kwBuf + (MAX_KWBUF - 1) - n);
+			writeProfiler("checkCPPToken", "str: \"%S\"", kwBuf + (MAX_KWBUF - 1) - n);
 			if (wcscmp(kwBuf + (MAX_KWBUF - 1) - n, words[n].words[j]) == 0)
 			{
 				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
@@ -387,6 +427,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			if ((ch == L'/') && (j > 0) && (node->line[previ] == L'*'))
 			{
 				blockComment = false;
+				tokenStart = i;
 			}
 			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY;
 			previ = i;
@@ -407,15 +448,18 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			node->syntax[j] = FOREGROUND_RED;
 			if (skip)
 			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
 				skip = false;
 			}
 			else if (ch == L'\\')
 			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
 				skip = true;
 			}
 			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
 			{
 				quoteMode = false;
+				tokenStart = i;
 			}
 			previ = i;
 			continue;
@@ -472,6 +516,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			case L'<':
 			case L'>':
 			case L'=':
+			case L':':
 				node->syntax[j] = FOREGROUND_GREEN;
 				/* fall through */
 			case L' ':
@@ -502,6 +547,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 					else
 					{
 						hex = false;
+						tokenStart = i;
 					}
 				}
 				else if (isZero || octal)
@@ -515,6 +561,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 					else
 					{
 						octal = false;
+						tokenStart = i;
 					}
 				}
 				else if ((ch >= L'0') && (ch <= L'9'))
@@ -523,12 +570,17 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 					{
 						isZero = (ch == L'0');
 						node->syntax[j] = FOREGROUND_BLUE;
+						tokenStart = i;
 					}
 				}
 				else
 				{
 					const wchar_t lch = (wchar_t)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+					if (!letter)
+					{
+						tokenStart = i;
+					}
 				}
 		}
 
@@ -571,6 +623,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 			if ((ch == L'/') && (j > 0) && (node->line[previ] == L'*'))
 			{
 				blockComment = false;
+				tokenStart = i;
 			}
 			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY;
 			previ = i;
@@ -591,15 +644,18 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 			node->syntax[j] = FOREGROUND_RED;
 			if (skip)
 			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
 				skip = false;
 			}
 			else if (ch == L'\\')
 			{
+				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
 				skip = true;
 			}
 			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
 			{
 				quoteMode = false;
+				tokenStart = i;
 			}
 			previ = i;
 			continue;
@@ -656,6 +712,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 			case L'<':
 			case L'>':
 			case L'=':
+			case L':':
 				node->syntax[j] = FOREGROUND_GREEN;
 				/* fall through */
 			case L' ':
@@ -686,6 +743,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 					else
 					{
 						hex = false;
+						tokenStart = i;
 					}
 				}
 				else if (isZero || octal)
@@ -699,6 +757,7 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 					else
 					{
 						octal = false;
+						tokenStart = i;
 					}
 				}
 				else if ((ch >= L'0') && (ch <= L'9'))
@@ -707,12 +766,17 @@ bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
 					{
 						isZero = (ch == L'0');
 						node->syntax[j] = FOREGROUND_BLUE;
+						tokenStart = i;
 					}
 				}
 				else
 				{
 					const wchar_t lch = (wchar_t)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+					if (!letter)
+					{
+						tokenStart = i;
+					}
 				}
 		}
 
