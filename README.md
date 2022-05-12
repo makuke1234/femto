@@ -149,6 +149,12 @@ reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 ## Saving was successful, file size is now 151 bytes
 ![!Saving success](./images/savingSuc.png)
 
+## C syntax highlighting
+![!C syntax](./images/syntaxC.png)
+
+## C++ syntax highlighting
+![!C++ syntax](./images/syntaxCPP.png)
+
 
 # Changelog
 
