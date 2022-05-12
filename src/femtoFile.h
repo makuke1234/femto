@@ -8,14 +8,14 @@
 
 #define MAX_SUFFIX 8
 
-enum femtoEOLsequence
+enum eolSequence
 {
-	EOL_not  = 0x00,
-	EOL_CR   = 0x01,
-	EOL_LF   = 0x02,
-	EOL_CRLF = EOL_CR | EOL_LF,
+	eolNOT  = 0x00,
+	eolCR   = 0x01,
+	eolLF   = 0x02,
+	eolCRLF = eolCR | eolLF,
 
-	EOL_def  = EOL_CRLF,
+	eolDEF  = eolCRLF,
 };
 
 typedef struct femtoFile
@@ -36,7 +36,7 @@ typedef struct femtoFile
 		bool bUpdateAll:1;
 	} data;
 
-	enum femtoEOLsequence eolSeq;
+	enum eolSequence eolSeq;
 	bool bCanWrite:1;
 	bool bUnsaved:1;
 	bool bSyntaxByUser:1;

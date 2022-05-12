@@ -10,7 +10,7 @@ static const char * femto_errCodes[ferrNUM_OF_ELEMS] = {
 	[ferrTHREAD]  = "Error creating thread!"
 };
 
-void femto_printErr(femtoErr_t errCode)
+void femto_printErr(femtoErr_e errCode)
 {
 	if (errCode >= ferrNUM_OF_ELEMS)
 	{

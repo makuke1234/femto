@@ -9,15 +9,15 @@
 
 enum specialAsciiCodes
 {
-	sac_Ctrl_E = 5,
-	sac_Ctrl_N = 14,
-	sac_Ctrl_O = 15,
-	sac_Ctrl_Q = 17,
-	sac_Ctrl_R = 18,
-	sac_Ctrl_S = 19,
-	sac_Ctrl_W = 23,
+	sacCTRL_E = 5,
+	sacCTRL_N = 14,
+	sacCTRL_O = 15,
+	sacCTRL_Q = 17,
+	sacCTRL_R = 18,
+	sacCTRL_S = 19,
+	sacCTRL_W = 23,
 
-	sac_last_code = 31
+	sacLAST_CODE = 31
 };
 
 
@@ -165,10 +165,10 @@ uint32_t femto_convFromUnicode(const wchar_t * restrict utf16, int numChars, cha
  * @param lines Address of wchar_t double-pointer, double-pointer hosts wchar_t
  * pointer array, where each pointer is a character array representing line in the text file.
  * Initial value of double-pointer is irrelevant
- * @param eolSeq Address of femtoEOLsequence enumerator, receives the EOL format used
+ * @param eolSeq Address of eolSequence enumerator, receives the EOL format used
  * @return uint32_t Number of lines found
  */
-uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t *** restrict lines, enum femtoEOLsequence * restrict eolSeq);
+uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t *** restrict lines, enum eolSequence * restrict eolSeq);
 
 /**
  * @brief Tests if file with designated filename exists

@@ -17,7 +17,7 @@ void initProfiler(void);
  * @param format Standard printf message format
  * @param ... Variadic format arguments
  */
-void writeProfiler(const char * restrict function, const char * restrict format, ...);
+void writeProfiler_inner(const char * restrict function, const char * restrict format, ...);
 /**
  * @brief Start profiler timestamp
  * 
@@ -28,15 +28,17 @@ void profilerStart(void);
  * 
  * @param funcName Function name of timestamp writer
  */
-void profilerEnd(const char * funcName);
+void profilerEnd_inner(const char * funcName);
 
+#define writeProfiler(...) writeProfiler_inner(__FUNCTION__, __VA_ARGS__)
+#define profilerEnd() profilerEnd_inner(__FUNCTION__)
 
 #else
 
 #define initProfiler()
-#define writeProfiler(function, ...)
+#define writeProfiler(...)
 #define profilerStart()
-#define profilerEnd(funcName)
+#define profilerEnd()
 
 typedef int make_iso_compilers_happy;
 

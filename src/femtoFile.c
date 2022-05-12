@@ -17,7 +17,7 @@ void femtoFile_reset(femtoFile_t * restrict self)
 			.bTyped      = false,
 			.bUpdateAll  = false
 		},
-		.eolSeq        = EOL_not,
+		.eolSeq        = eolNOT,
 		.bCanWrite     = false,
 		.bUnsaved      = false,
 		.bSyntaxByUser = false,
@@ -215,8 +215,8 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	{
 		return L"Unicode conversion error!";
 	}
-	writeProfiler("femtoFile_read", "Converted %u bytes of character to %u UTF-16 characters.", size, chars);
-	writeProfiler("femtoFile_read", "File UTF-16 contents \"%S\"", utf16);
+	writeProfiler("Converted %u bytes of character to %u UTF-16 characters.", size, chars);
+	writeProfiler("File UTF-16 contents \"%S\"", utf16);
 
 	// Save lines to structure
 	wchar_t ** lines = NULL;
@@ -226,11 +226,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 		free(utf16);
 		return L"Line reading error!";
 	}
-	writeProfiler("femtoFile_read", "Total of %u lines", numLines);
-	for (uint32_t i = 0; i < numLines; ++i)
-	{
-		writeProfiler("femtoFile_read", "Line %d: \"%S\"", i, lines[i]);
-	}
+	writeProfiler("Total of %u lines", numLines);
 
 	femtoFile_clearLines(self);
 	if (numLines == 0)
@@ -268,11 +264,6 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	free(lines);
 	free(utf16);
 
-	for (femtoLineNode_t * node1 = self->data.firstNode; node1 != NULL; node1 = node1->nextNode)
-	{
-		writeProfiler("femtoFile_read", "node->syntax: %p", node1->syntax);
-	}
-
 	return NULL;
 }
 int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorContents, uint32_t * editorContLen)
@@ -285,13 +276,13 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 	femtoLineNode_t * node = self->data.firstNode;
 
 	const uint8_t eolSeq = self->eolSeq;
-	bool isCRLF = (self->eolSeq == EOL_CRLF);
+	bool isCRLF = (self->eolSeq == eolCRLF);
 
 	while (node != NULL)
 	{
 		if (femtoLine_getText(node, &line, &lineCap) == false)
 		{
-			writeProfiler("femtoFile_write", "Failed to fetch line!");
+			writeProfiler("Failed to fetch line!");
 			if (line != NULL)
 			{
 				free(line);
@@ -341,13 +332,13 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 		{
 			switch (eolSeq)
 			{
-			case EOL_CR:
+			case eolCR:
 				lines[linesLen - 1] = L'\r';
 				break;
-			case EOL_LF:
+			case eolLF:
 				lines[linesLen - 1] = L'\n';
 				break;
-			case EOL_CRLF:
+			case eolCRLF:
 				lines[linesLen - 2] = L'\r';
 				lines[linesLen - 1] = L'\n';
 				break;
@@ -433,7 +424,7 @@ int32_t femtoFile_write(femtoFile_t * restrict self)
 		return writeRes_writeError;
 	}
 
-	writeProfiler("femtoFile_write", "Opened file for writing");
+	writeProfiler("Opened file for writing");
 
 	// Try to write UTF-8 lines string to file
 	DWORD dwWritten;
@@ -454,7 +445,7 @@ int32_t femtoFile_write(femtoFile_t * restrict self)
 	// Do error checking
 	if (!res)
 	{
-		writeProfiler("femtoFile_write", "Error writing to file");
+		writeProfiler("Error writing to file");
 		return writeRes_writeError;
 	}
 	else
@@ -481,7 +472,7 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch, uint32_t tab
 	assert(node != NULL);
 	self->data.bTyped = true;
 	
-	writeProfiler("femtoFile_addNormalCh", "Add character %C", ch);
+	writeProfiler("Add character %C", ch);
 
 	if (!femtoLine_addChar(node, ch, tabWidth))
 	{
@@ -500,12 +491,12 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	{
 	case VK_TAB:
 	{
-		wchar_t tch = pset->tabsToSpaces ? L' ' : L'\t';
+		wchar_t tch = pset->bTabsToSpaces ? L' ' : L'\t';
 		if (!femtoFile_addNormalCh(self, tch, pset->tabWidth))
 		{
 			return false;
 		}
-		if (pset->tabsToSpaces)
+		if (pset->bTabsToSpaces)
 		{
 			for (uint32_t i = 0, max = pset->tabWidth - (lastcurnode->virtcurx % pset->tabWidth); i < max; ++i)
 			{
@@ -554,7 +545,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case VK_RETURN:	// Enter key
-		femtoFile_addNewLine(self, pset->tabsToSpaces, pset->tabWidth, pset->autoIndent);
+		femtoFile_addNewLine(self, pset->bTabsToSpaces, pset->tabWidth, pset->bAutoIndent);
 		femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
@@ -665,7 +656,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		return false;
 	}
 
-	self->data.bUpdateAll |= (self->data.currentNode != lastcurnode) & pset->lineNumRelative;
+	self->data.bUpdateAll |= (self->data.currentNode != lastcurnode) & pset->bRelLineNums;
 
 	return true;
 }

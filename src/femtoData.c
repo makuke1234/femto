@@ -7,7 +7,7 @@ bool femtoData_reset(femtoData_t * restrict self)
 	assert(self != NULL);
 	*self = (femtoData_t){
 		.prevConsoleMode    = 0,
-		.prevConsoleModeSet = false,
+		.bPrevConsoleModeSet = false,
 		.conIn  = INVALID_HANDLE_VALUE,
 		.conOut = INVALID_HANDLE_VALUE,
 		.scrbuf = {
@@ -56,7 +56,7 @@ bool femtoData_init(femtoData_t * restrict self)
 	{
 		return false;
 	}
-	self->prevConsoleModeSet = true;
+	self->bPrevConsoleModeSet = true;
 
 	// Get console current size
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -68,7 +68,7 @@ bool femtoData_init(femtoData_t * restrict self)
 	self->scrbuf.w = (uint32_t)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
 	self->scrbuf.h = (uint32_t)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
 
-	writeProfiler("femtoData_init", "Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
+	writeProfiler("Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
 	self->scrbuf.handle = CreateConsoleScreenBuffer(
 		GENERIC_WRITE,
@@ -140,7 +140,7 @@ void femtoData_refreshThread(femtoData_t * restrict self)
 
 	EnterCriticalSection(&dt->crit);
 
-	dt->ready = true;
+	dt->bReady = true;
 	WakeConditionVariable(&dt->cv);
 
 	LeaveCriticalSection(&dt->crit);
@@ -216,9 +216,9 @@ void femtoData_destroy(femtoData_t * restrict self)
 		SetConsoleActiveScreenBuffer(self->conOut);
 	}
 
-	if (self->prevConsoleModeSet)
+	if (self->bPrevConsoleModeSet)
 	{
-		self->prevConsoleModeSet = false;
+		self->bPrevConsoleModeSet = false;
 		SetConsoleMode(self->conIn, self->prevConsoleMode);
 	}
 

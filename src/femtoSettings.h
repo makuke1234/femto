@@ -19,25 +19,26 @@
 
 typedef struct femtoSettings
 {
-	bool helpRequested;
+	bool bHelpRequest:1;
 	wchar_t * fileName;
 	wchar_t * settingsFileName;
 
-	bool tabsToSpaces;
+	bool bTabsToSpaces:1;
 	uint8_t tabWidth;
 	wchar_t * tabSpaceStr1;	// Contains space characters
 
-	bool autoIndent;
+	bool bAutoIndent:1;
 
-	bool whitespaceVisible;
+	bool bWhiteSpaceVis:1;
 	wchar_t whitespaceCh;
 	WORD whitespaceCol;
 
-	bool lineNumRelative;
+	bool bRelLineNums:1;
 	WORD lineNumCol;
 
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
+
 } femtoSettings_t;
 
 /**
@@ -73,10 +74,10 @@ bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self);
  * @param self Pointer to femtoSettings_t structure
  * @param argc Number of command line arguments
  * @param argv Command line argument vector
- * @return femtoErr_t femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
+ * @return femtoErr_e femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
  * information is necessary, get it via femtoSettings_getLastError()
  */
-femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv);
+femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv);
 
 /**
  * @brief Try to load settings from configured file

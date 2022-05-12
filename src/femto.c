@@ -284,7 +284,7 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 				read = (wVirtKey == VK_RETURN);
 				break;
 			}
-			else if (key > sac_last_code)
+			else if (key > sacLAST_CODE)
 			{
 				// If there's room in the array
 				if ((temp.lineEndx - temp.freeSpaceLen + 1) < maxLen)
@@ -401,7 +401,7 @@ static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar_t * re
 	}
 	else if (realLen < MAX_STATUS)
 	{
-		swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm exit", (key == sac_Ctrl_Q) ? L"Ctrl+Shift+Q" : normMsg);
+		swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm exit", (key == sacCTRL_Q) ? L"Ctrl+Shift+Q" : normMsg);
 	}
 
 	return true;
@@ -424,7 +424,6 @@ bool femto_loop(femtoData_t * restrict peditor)
 		return true;
 	}
 
-	FlushConsoleInputBuffer(peditor->conIn);
 	if (ir.EventType == KEY_EVENT)
 	{
 		static wchar_t prevkey, prevwVirtKey;
@@ -443,29 +442,29 @@ bool femto_loop(femtoData_t * restrict peditor)
 			wchar_t tempstr[MAX_STATUS];
 			bool draw = true;
 
-			if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sac_Ctrl_Q) && (key != sac_Ctrl_Q)))	// Exit on Escape or Ctrl+Q
+			if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sacCTRL_Q) && (key != sacCTRL_Q)))	// Exit on Escape or Ctrl+Q
 			{
 				if (!femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 				{
 					return false;
 				}
 			}
-			else if (waitingEnc && (key != sac_Ctrl_E))
+			else if (waitingEnc && (key != sacCTRL_E))
 			{
 				bool done = true;
 				switch (wVirtKey)
 				{
 				// CRLF
 				case L'F':
-					pfile->eolSeq = EOL_CRLF;
+					pfile->eolSeq = eolCRLF;
 					break;
 				// LF
 				case L'L':
-					pfile->eolSeq = EOL_LF;
+					pfile->eolSeq = eolLF;
 					break;
 				// CR
 				case L'C':
-					pfile->eolSeq = EOL_CR;
+					pfile->eolSeq = eolCR;
 					break;
 				default:
 					wcscpy_s(tempstr, MAX_STATUS, L"Unknown EOL combination!");
@@ -477,20 +476,20 @@ bool femto_loop(femtoData_t * restrict peditor)
 						tempstr,
 						MAX_STATUS,
 						L"Using %s%s EOL sequences",
-						(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
-						(pfile->eolSeq & EOL_LF) ? L"LF" : L""
+						(pfile->eolSeq & eolCR) ? L"CR" : L"",
+						(pfile->eolSeq & eolLF) ? L"LF" : L""
 					);
 				}
 
 				waitingEnc = false;
 			}
-			else if ((key == sac_Ctrl_N) && (prevkey != sac_Ctrl_N))
+			else if ((key == sacCTRL_N) && (prevkey != sacCTRL_N))
 			{
 				static uint32_t counter = 0;
 				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+N %u", counter);
 				++counter;
 			}
-			else if (key == sac_Ctrl_O)
+			else if (key == sacCTRL_O)
 			{
 				wcscpy_s(tempstr, MAX_STATUS, L"Open :");
 				femtoData_statusDraw(peditor, tempstr, NULL);
@@ -506,7 +505,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					wcscpy_s(tempstr, MAX_STATUS, L"Opening canceled by user");
 				}
 			}
-			else if ((key == sac_Ctrl_W) && (prevkey != sac_Ctrl_W))
+			else if ((key == sacCTRL_W) && (prevkey != sacCTRL_W))
 			{
 				if (peditor->filesSize == 1)
 				{
@@ -520,7 +519,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					femto_inner_closeTab(peditor, tempstr, false);
 				}
 			}
-			else if ((key == sac_Ctrl_R) && (prevkey != sac_Ctrl_R))	// Reload file
+			else if ((key == sacCTRL_R) && (prevkey != sacCTRL_R))	// Reload file
 			{
 				bool reload = true;
 				if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
@@ -545,14 +544,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 							tempstr,
 							MAX_STATUS,
 							L"File reloaded successfully! %s%s EOL sequences",
-							(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
-							(pfile->eolSeq & EOL_LF) ? L"LF" : L""
+							(pfile->eolSeq & eolCR) ? L"CR" : L"",
+							(pfile->eolSeq & eolLF) ? L"LF" : L""
 						);
 					}
 					femtoData_refresh(peditor);
 				}
 			}
-			else if ((key == sac_Ctrl_S) && (prevkey != sac_Ctrl_S))	// Save file
+			else if ((key == sacCTRL_S) && (prevkey != sacCTRL_S))	// Save file
 			{
 				int32_t saved = femtoFile_write(pfile);
 				switch (saved)
@@ -573,13 +572,13 @@ bool femto_loop(femtoData_t * restrict peditor)
 					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
 				}
 			}
-			else if ((key == sac_Ctrl_E) && (prevkey != sac_Ctrl_E))
+			else if ((key == sacCTRL_E) && (prevkey != sacCTRL_E))
 			{
 				waitingEnc = true;
 				wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
 			}
 			// Normal keys
-			else if (key > sac_last_code)
+			else if (key > sacLAST_CODE)
 			{
 				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 				if (femtoFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
@@ -676,8 +675,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 								tempstr,
 								MAX_STATUS,
 								L"File reloaded successfully! %s%s EOL sequences",
-								(pfile->eolSeq & EOL_CR) ? L"CR" : L"",
-								(pfile->eolSeq & EOL_LF) ? L"LF" : L""
+								(pfile->eolSeq & eolCR) ? L"CR" : L"",
+								(pfile->eolSeq & eolLF) ? L"LF" : L""
 							);
 						}
 						femtoData_refresh(peditor);
@@ -813,7 +812,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			static int32_t s_delta = 0;
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			writeProfiler("femto_loop", "Mouse wheel was used, delta: %d", delta);
+			writeProfiler("Mouse wheel was used, delta: %d", delta);
 
 			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
@@ -830,7 +829,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			static int32_t s_delta = 0;
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			writeProfiler("femto_loop", "Mouse hwheel was used, delta %d", delta);
+			writeProfiler("Mouse hwheel was used, delta %d", delta);
 
 			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
@@ -870,14 +869,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 				else
 				{
 					pos.X -= (SHORT)(pfile->data.noLen + 1);
-					writeProfiler("femto_loop", "Mouse click @%hd, %hd", pos.X, pos.Y);
+					writeProfiler("Mouse click @%hd, %hd", pos.X, pos.Y);
 
 					if (pfile->data.pcury != NULL)
 					{
 						pfile->data.currentNode = pfile->data.pcury;
 						const femtoLineNode_t * lastcurnode = pfile->data.currentNode;
 						femtoLine_moveCursorVert(&pfile->data.currentNode, (int32_t)pos.Y);
-						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.lineNumRelative;
+						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
 						// Now move the cursor to correct X position
 						femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (uint32_t)pos.X + pfile->data.curx, peditor->settings.tabWidth));
 						femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
@@ -908,19 +907,19 @@ DWORD WINAPI femto_loopDraw(LPVOID pdataV)
 	femtoDrawThread_t * dt = &pdata->drawThread;
 	assert(dt != NULL);
 
-	while (!dt->killSwitch)
+	while (!dt->bKillSwitch)
 	{
 		EnterCriticalSection(&dt->crit);
 
-		while (!dt->ready)
+		while (!dt->bReady)
 		{
 			SleepConditionVariableCS(&dt->cv, &dt->crit, INFINITE);
 		}
-		dt->ready = false;
+		dt->bReady = false;
 
 		LeaveCriticalSection(&dt->crit);
 
-		if (dt->killSwitch)
+		if (dt->bKillSwitch)
 		{
 			break;
 		}
@@ -943,8 +942,8 @@ bool femto_loopDraw_createThread(femtoData_t * restrict pdata)
 	InitializeCriticalSection(&dt->crit);
 	InitializeConditionVariable(&dt->cv);
 	
-	dt->killSwitch = false;
-	dt->ready = false;
+	dt->bKillSwitch = false;
+	dt->bReady = false;
 
 	dt->hthread = CreateThread(
 		NULL,
@@ -973,8 +972,8 @@ void femto_loopDraw_closeThread(femtoData_t * restrict pdata)
 	// Trigger thread killSwitch
 	EnterCriticalSection(&dt->crit);
 
-	dt->killSwitch = true;
-	dt->ready = true;
+	dt->bKillSwitch = true;
+	dt->bReady = true;
 	WakeConditionVariable(&dt->cv);
 
 	LeaveCriticalSection(&dt->crit);
@@ -1131,7 +1130,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 	// Check to include tab character
 	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
-	uint32_t number = (!peditor->settings.lineNumRelative || (node == curnode)) ? (uint32_t)node->lineNumber : (uint32_t)labs((long)curnode->lineNumber - (long)node->lineNumber);
+	uint32_t number = (!peditor->settings.bRelLineNums || (node == curnode)) ? (uint32_t)node->lineNumber : (uint32_t)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	uint8_t noLen = (uint8_t)log10((double)number) + 1;
 	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
 	destination[pfile->data.noLen].Char.UnicodeChar = L'|';
@@ -1145,7 +1144,6 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		}
 	}
 
-	writeProfiler("femto_updateScrbufLine", "Syntax ptr: %p", node->syntax);
 	if (!femtoLine_updateSyntax(node, pfile->syntax))
 	{
 		femtoData_statusDraw(peditor, L"Error refreshing syntax highlighting!", NULL);
@@ -1163,8 +1161,8 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		if (node->line[idx] == L'\t')
 		{
 			uint32_t realIdx = j - startj + pfile->data.curx;
-			destination[j].Char.UnicodeChar = peditor->settings.whitespaceVisible ? peditor->settings.whitespaceCh  : L' ';
-			destination[j].Attributes       = peditor->settings.whitespaceVisible ? peditor->settings.whitespaceCol : destination[j].Attributes;
+			destination[j].Char.UnicodeChar = peditor->settings.bWhiteSpaceVis ? peditor->settings.whitespaceCh  : L' ';
+			destination[j].Attributes       = peditor->settings.bWhiteSpaceVis ? peditor->settings.whitespaceCol : destination[j].Attributes;
 			++j;
 			for (uint32_t end = j + peditor->settings.tabWidth - ((realIdx) % peditor->settings.tabWidth) - 1; (j < end) && (j < peditor->scrbuf.w); ++j)
 			{
@@ -1298,7 +1296,7 @@ uint32_t femto_convFromUnicode(const wchar_t * restrict utf16, int numChars, cha
 	}
 	return size;
 }
-uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t *** restrict lines, enum femtoEOLsequence * restrict eolSeq)
+uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t *** restrict lines, enum eolSequence * restrict eolSeq)
 {
 	assert(utf16 != NULL);
 	assert(lines != NULL);
@@ -1308,18 +1306,18 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
 	uint32_t newlines = 1;
 	
 	// Set default EOL sequence
-	*eolSeq = EOL_def;
+	*eolSeq = eolDEF;
 	for (uint32_t i = 0; i < chars; ++i)
 	{
 		if (utf16[i] == L'\r')
 		{
-			*eolSeq = ((i + 1 < chars) && (utf16[i+1] == L'\n')) ? EOL_CRLF : EOL_CR;
+			*eolSeq = ((i + 1 < chars) && (utf16[i+1] == L'\n')) ? eolCRLF : eolCR;
 			++newlines;
-			i += (*eolSeq == EOL_CRLF);
+			i += (*eolSeq == eolCRLF);
 		}
 		else if (utf16[i] == L'\n')
 		{
-			*eolSeq = EOL_LF;
+			*eolSeq = eolLF;
 			++newlines;
 		}
 	}
@@ -1329,7 +1327,7 @@ uint32_t femto_strnToLines(wchar_t * restrict utf16, uint32_t chars, wchar_t ***
 		return 0;
 	}
 
-	bool isCRLF = (*eolSeq == EOL_CRLF);
+	bool isCRLF = (*eolSeq == eolCRLF);
 	uint32_t starti = 0, j = 0;
 	for (uint32_t i = 0; i < chars; ++i)
 	{

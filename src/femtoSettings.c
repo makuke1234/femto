@@ -8,22 +8,22 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 {
 	assert(self != NULL);
 	*self = (femtoSettings_t){
-		.helpRequested    = false,
+		.bHelpRequest     = false,
 		.fileName         = NULL,
 		.settingsFileName = NULL,
 
-		.tabsToSpaces = false,
-		.tabWidth     = 4,
-		.tabSpaceStr1 = NULL,
+		.bTabsToSpaces = false,
+		.tabWidth      = 4,
+		.tabSpaceStr1  = NULL,
 
-		.autoIndent = true,
+		.bAutoIndent = true,
 		
-		.whitespaceVisible = false,
-		.whitespaceCh      = L'→',
-		.whitespaceCol     = FEMTO_DEFAULT_COLOR,
+		.bWhiteSpaceVis = false,
+		.whitespaceCh   = L'→',
+		.whitespaceCol  = FEMTO_DEFAULT_COLOR,
 
-		.lineNumRelative = false,
-		.lineNumCol      = FEMTO_DEFAULT_COLOR,
+		.bRelLineNums = false,
+		.lineNumCol   = FEMTO_DEFAULT_COLOR,
 
 		.lastErr = { 0 }
 	};
@@ -66,7 +66,7 @@ bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self)
 	return true;
 }
 
-femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv)
+femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv)
 {
 	assert(self != NULL);
 	assert(argc > 0);
@@ -83,7 +83,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	femtoArg_fetchArgv(argc, argv, L"help", &mi, 0);
 	if (mi != 0)
 	{
-		self->helpRequested = true;
+		self->bHelpRequest = true;
 		free(argumentsUsed);
 		return ferrOK;
 	}
@@ -135,7 +135,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 	if (mi != 0)
 	{
-		self->tabsToSpaces = femtoArg_strToBool(farg);
+		self->bTabsToSpaces = femtoArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -167,7 +167,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 	if (mi != 0)
 	{
-		self->autoIndent = femtoArg_strToBool(farg);
+		self->bAutoIndent = femtoArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -178,7 +178,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	}
 	if (mi != 0)
 	{
-		self->whitespaceVisible = femtoArg_strToBool(farg);
+		self->bWhiteSpaceVis = femtoArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -203,7 +203,7 @@ femtoErr_t femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	femtoArg_fetchArgv(argc, argv, L"lineNumRelative", &mi, 1, &farg);
 	if (mi != 0)
 	{
-		self->lineNumRelative = femtoArg_strToBool(farg);
+		self->bRelLineNums = femtoArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -324,9 +324,9 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		if ((attr = jsonObject_get(obj, "tabsToSpaces")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
-			if (suc && (def.tabsToSpaces != value))
+			if (suc && (def.bTabsToSpaces != value))
 			{
-				self->tabsToSpaces = value;
+				self->bTabsToSpaces = value;
 			}
 		}
 
@@ -343,18 +343,18 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		if ((attr = jsonObject_get(obj, "autoIndent")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
-			if (suc && (def.autoIndent != value))
+			if (suc && (def.bAutoIndent != value))
 			{
-				self->autoIndent = value;
+				self->bAutoIndent = value;
 			}
 		}
 
 		if ((attr = jsonObject_get(obj, "whitespaceVisible")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
-			if (suc && (def.whitespaceVisible != value))
+			if (suc && (def.bWhiteSpaceVis != value))
 			{
-				self->whitespaceVisible = value;
+				self->bWhiteSpaceVis = value;
 			}
 		}
 
@@ -399,9 +399,9 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 		if ((attr = jsonObject_get(obj, "lineNumRelative")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
-			if (suc && (def.lineNumRelative != value))
+			if (suc && (def.bRelLineNums != value))
 			{
-				self->lineNumRelative = value;
+				self->bRelLineNums = value;
 			}
 		}
 
