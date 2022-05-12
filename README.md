@@ -169,7 +169,7 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* [x] Syntax highlighting, supported languages:
 		* [x] C
 		* [x] C++
-		* [x] Markdown (partial)
+		* [x] Markdown
 	* [x] Asynchronous drawing
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
