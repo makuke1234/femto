@@ -641,7 +641,7 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 	bool done = false, headingMode = false, valueMode = false, bracketMode = false,
 		extraBracketMode = false, italicsMode = false, boldMode = false,
 		containsStar = false, strikeMode = false, parenMode1 = false,
-		parenMode2 = false, enable = false, coneMode = false;
+		parenMode2 = false, enable = false, coneMode = false, codeMode = false;
 	
 	for (uint32_t i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
 	{
@@ -658,6 +658,14 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 		
 		if (valueMode)
 		{
+			node->syntax[j] = colors[tcMD_VALUE];
+		}
+		else if (codeMode)
+		{
+			if (ch == L'`')
+			{
+				codeMode = false;
+			}
 			node->syntax[j] = colors[tcMD_VALUE];
 		}
 		else if (coneMode)
@@ -745,10 +753,6 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 				node->syntax[j] = colors[tcMD_LINK];
 			}
 		}
-		else if (headingMode)
-		{
-			node->syntax[j] = colors[tcMD_HEADING];
-		}
 		else if (!done)
 		{
 			if (ch == L'#')
@@ -791,6 +795,10 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 		{
 			enable = false;
 
+			if (headingMode)
+			{
+				node->syntax[j] = colors[tcMD_HEADING];
+			}
 			if (ch == L'[')
 			{
 				bracketMode = true;
@@ -812,6 +820,11 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 				strikeMode = true;
 				node->syntax[j-1] = colors[tcPUNCTUATION];
 				node->syntax[j]   = colors[tcPUNCTUATION];
+			}
+			else if (ch == L'`')
+			{
+				codeMode = true;
+				node->syntax[j] = colors[tcMD_VALUE];
 			}
 		}
 

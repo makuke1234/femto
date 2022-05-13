@@ -149,34 +149,36 @@ reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 ## Saving was successful, file size is now 151 bytes
 ![!Saving success](./images/savingSuc.png)
 
-## C syntax highlighting
+## Syntax highlighting, solarized theme, included in `settings.json`
+### C
 ![!C syntax](./images/syntaxC.png)
 
-## C++ syntax highlighting
+### C++
 ![!C++ syntax](./images/syntaxCPP.png)
 
-## Markdown syntax highlighting
+### Markdown
 ![!MD syntax](./images/syntaxMD.png)
 
 
 # Changelog
 
-* 1.7 (planned, planned)
-	* [x] Syntax highlighting customisable
-	* [ ] Custom color palette
+* 1.8 (planned, planned)
 	* [ ] Search support, also search result highlighting
 	* [ ] Practical multi-file support, tabs' system
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
-	* [ ] More syntax highlighting (maybe)
+	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
+* 1.7 (planned)
+	* [x] Syntax highlighting customisable
+	* [x] Custom color palette
+	* [ ] More syntax highlighting
 		* [ ] Python
 		* [ ] JavaScript
 		* [ ] XML-like
 			* [ ] XML
 			* [ ] HTML
 			* [ ] SVG
-	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
-* 1.6 (planned)
+* 1.6
 	* [x] Fix indentation bug
 	* [x] Save-as support
 	* [x] Allow multiple sequential file opens
