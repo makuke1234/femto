@@ -69,10 +69,10 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 			[tcCOMMENT_BLOCK]   = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY,
 			[tcKEYWORD]         = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED,
 			[tcSTRING]          = FOREGROUND_RED,
-			[tcCHARACTER]       = FOREGROUND_RED,
-			[tcESCAPE]          = FOREGROUND_INTENSITY | FOREGROUND_RED,
 			[tcSTRING_QUOTE]    = FOREGROUND_RED,
+			[tcCHARACTER]       = FOREGROUND_RED,
 			[tcCHARACTER_QUOTE] = FOREGROUND_RED,
+			[tcESCAPE]          = FOREGROUND_INTENSITY | FOREGROUND_RED,
 			[tcPREPROC]         = FOREGROUND_INTENSITY | FOREGROUND_RED,
 			[tcNUMBER]          = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
 			[tcHEX]             = FOREGROUND_GREEN | FOREGROUND_RED,
@@ -87,6 +87,31 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 			[tcMD_BRACKET]      = FOREGROUND_GREEN,
 			[tcMD_BRACKETPIC]   = FOREGROUND_INTENSITY | FOREGROUND_GREEN,
 			[tcMD_LINK]         = FOREGROUND_INTENSITY | FOREGROUND_BLUE
+		},
+		.syntaxTokens = {
+			[tcTEXT]            = "text",
+			[tcCOMMENT_LINE]    = "lineComment",
+			[tcCOMMENT_BLOCK]   = "blockComment",
+			[tcKEYWORD]         = "keyword",
+			[tcSTRING]          = "string",
+			[tcSTRING_QUOTE]    = "stringQuote",
+			[tcCHARACTER]       = "character",
+			[tcCHARACTER_QUOTE] = "characterQuote",
+			[tcESCAPE]          = "escapeCharacter",
+			[tcPREPROC]         = "preprocessor",
+			[tcNUMBER]          = "number",
+			[tcHEX]             = "hex",
+			[tcOCT]             = "octal",
+			[tcPUNCTUATION]     = "punctuation",
+			[tcMD_HEADING]      = "MDheading",
+			[tcMD_ITALIC]       = "MDitalic",
+			[tcMD_BOLD]         = "MDbold",
+			[tcMD_STRIKE]       = "MDstrike",
+			[tcMD_VALUE]        = "MDvalue",
+			[tcMD_CONETEXT]     = "MDconeText",
+			[tcMD_BRACKET]      = "MDbracket",
+			[tcMD_BRACKETPIC]   = "MDbracketPicture",
+			[tcMD_LINK]         = "MDlink"
 		},
 
 		.lastErr = { 0 }
@@ -552,12 +577,16 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			(((hObj = jsonValue_getObject(attr, &suc)) != NULL) && suc) )
 		{
 			// If highlighting settings exist
-			WORD * w = self->syntaxColors;
-			const char ** colNames = self->palette.colorNames;
+			WORD * colors = self->syntaxColors;
+			const char ** tokenNames = self->syntaxTokens;
+			const char ** colorNames = self->palette.colorNames;
 
-			if ((val = femtoSettings_checkColor(hObj, "text", colNames)) != CHECK_ERR)
+			for (uint8_t i = 0; i < tcNUM_OF_TOKENS; ++i)
 			{
-				w[tcTEXT] = val;
+				if ((val = femtoSettings_checkColor(hObj, tokenNames[i], colorNames)) != CHECK_ERR)
+				{
+					colors[i] = val;
+				}
 			}
 		}
 	}

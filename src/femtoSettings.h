@@ -24,10 +24,10 @@ enum tokenColor
 	tcCOMMENT_BLOCK,
 	tcKEYWORD,
 	tcSTRING,
-	tcCHARACTER,
-	tcESCAPE,
 	tcSTRING_QUOTE,
+	tcCHARACTER,
 	tcCHARACTER_QUOTE,
+	tcESCAPE,
 	tcPREPROC,
 	tcNUMBER,
 	tcHEX,
@@ -85,6 +85,7 @@ typedef struct femtoSettings
 
 	femtoPalette_t palette;
 	WORD syntaxColors[tcNUM_OF_TOKENS];
+	const char * syntaxTokens[tcNUM_OF_TOKENS];
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
 
