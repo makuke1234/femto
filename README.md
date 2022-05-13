@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -88,7 +88,7 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	| `femto` \[options\] \[file\]        | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
 	| `femto` \[options\] --file=\[file\] | Same as above, just a different syntax                                                                  |
 	| `femto` --help                      | Shows help<br>![help image](./images/help.png)                                                          |
-- [x] About options:
+- [x] Command-line options:
 	* Basic option syntax:
 		*	| Syntax         | Description           |
 			| -------------- | --------------------- |
@@ -102,7 +102,7 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 		* `--`\[option\]`=`\[argument 1\]`;`\[argument 2\]`;`\[argument 3\]
 	* A question mark can also be used as a separator:
 		* `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
-- [x] List of options:
+- [x] Option list:
 	| Option                        | Description                                         |
 	| ----------------------------- | --------------------------------------------------- |
 	| --help                        | Shows help                                          |
