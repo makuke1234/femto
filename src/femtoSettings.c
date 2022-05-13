@@ -293,6 +293,30 @@ femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 	return result == NULL ? ferrOK : ferrUNKNOWN;
 }
 
+
+#define CHECK_ERR UINT16_MAX
+
+static inline uint16_t femtoSettings_checkColor(const jsonObject_t * restrict obj, const char * key)
+{
+	const jsonValue_t * attr = jsonObject_get(obj, key);
+	if (attr == NULL)
+	{
+		return CHECK_ERR;
+	}
+
+	bool success;
+	const double value = jsonValue_getNumber(attr, &success);
+	if (success && (value >= (double)FEMTO_SETTINGS_MINCOLOR) && (value <= (double)FEMTO_SETTINGS_MAXCOLOR))
+	{
+		return (uint16_t)value;
+	}
+	else
+	{
+		return CHECK_ERR;
+	}
+}
+
+
 const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 {
 	assert(self != NULL);
@@ -342,11 +366,13 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 
 	// Browse JSON object
 	bool suc;
-	jsonObject_t * obj = jsonValue_getObject(&json.value, &suc);
+	const jsonObject_t * obj = jsonValue_getObject(&json.value, &suc);
 
 	if (suc)
 	{
-		jsonValue_t * attr;
+		const jsonValue_t * attr;
+		uint16_t val;
+
 		if ((attr = jsonObject_get(obj, "tabsToSpaces")) != NULL)
 		{
 			bool value = jsonValue_getBoolean(attr, &suc);
@@ -358,8 +384,8 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 
 		if ((attr = jsonObject_get(obj, "tabWidth")) != NULL)
 		{
-			double value = jsonValue_getNumber(attr, &suc);
-			uint8_t val8 = (uint8_t)value;
+			const double value = jsonValue_getNumber(attr, &suc);
+			const uint8_t val8 = (uint8_t)value;
 			if (suc && (value >= FEMTO_SETTINGS_MINTAB) && (value <= FEMTO_SETTINGS_MAXTAB) && (def.tabWidth != val8))
 			{
 				self->tabWidth = val8;
@@ -412,14 +438,9 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		if ((attr = jsonObject_get(obj, "whitespaceColor")) != NULL)
+		if (((val = femtoSettings_checkColor(obj, "whitespaceColor")) != CHECK_ERR) && (val != def.whitespaceCol))
 		{
-			double value = jsonValue_getNumber(attr, &suc);
-			uint16_t val = (uint16_t)value;
-			if (suc && (value >= (double)FEMTO_SETTINGS_MINCOLOR) && (value <= (double)FEMTO_SETTINGS_MAXCOLOR) && val != def.whitespaceCol)
-			{
-				self->whitespaceCol = val;
-			}
+			self->whitespaceCol = val;
 		}
 
 		if ((attr = jsonObject_get(obj, "lineNumRelative")) != NULL)
@@ -431,14 +452,17 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		if ((attr = jsonObject_get(obj, "lineNumColor")) != NULL)
+		if (((val = femtoSettings_checkColor(obj, "lineNumColor")) != CHECK_ERR) && (val != def.lineNumCol))
 		{
-			double value = jsonValue_getNumber(attr, &suc);
-			uint16_t val = (uint16_t)value;
-			if (suc && (value >= (double)FEMTO_SETTINGS_MINCOLOR) && (value <= (double)FEMTO_SETTINGS_MAXCOLOR) && val != def.lineNumCol)
-			{
-				self->lineNumCol = val;
-			}
+			self->lineNumCol = val;
+		}
+
+		const jsonObject_t * hObj;
+		if (((attr = jsonObject_get(obj, "highlighting")) != NULL) && 
+			(((hObj = jsonValue_getObject(attr, &suc)) != NULL) && suc) )
+		{
+			// If highlighting settings exist
+			
 		}
 	}
 
