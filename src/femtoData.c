@@ -71,7 +71,7 @@ bool femtoData_init(femtoData_t * restrict self)
 	writeProfiler("Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
 	self->scrbuf.handle = CreateConsoleScreenBuffer(
-		GENERIC_WRITE,
+		GENERIC_READ | GENERIC_WRITE,
 		0,
 		NULL,
 		CONSOLE_TEXTMODE_BUFFER,
@@ -122,6 +122,33 @@ bool femtoData_loadPalette(femtoData_t * restrict self)
 	}
 
 	// Try to apply new palette
+	CONSOLE_SCREEN_BUFFER_INFOEX csbiex;
+	csbiex.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+	if (!GetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
+	{
+		return false;
+	}
+
+	// Copy palette
+	for (uint8_t i = 0; i < MAX_COLORS; ++i)
+	{
+		const COLORREF old = csbiex.ColorTable[i];
+		femtoColor_t * oldCol = &self->settings.palette.oldColors[i];
+		oldCol->r = GetRValue(old);
+		oldCol->g = GetGValue(old);
+		oldCol->b = GetBValue(old);
+
+		const femtoColor_t col = self->settings.palette.colors[i];
+		csbiex.ColorTable[i] = RGB(col.r, col.g, col.b);
+	}
+
+	// Apply new
+	++csbiex.srWindow.Right;
+	++csbiex.srWindow.Bottom;
+	if (!SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -136,6 +163,26 @@ bool femtoData_restorePalette(const femtoData_t * restrict self)
 	}
 
 	// Restore old palette
+
+	CONSOLE_SCREEN_BUFFER_INFOEX csbiex;
+	csbiex.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+	if (!GetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
+	{
+		return false;
+	}
+
+	for (uint8_t i = 0; i < MAX_COLORS; ++i)
+	{
+		const femtoColor_t col = self->settings.palette.oldColors[i];
+		csbiex.ColorTable[i] = RGB(col.r, col.g, col.b);
+	}
+
+	++csbiex.srWindow.Right;
+	++csbiex.srWindow.Bottom;
+	if (!SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
+	{
+		return false;
+	}
 
 	return true;
 }

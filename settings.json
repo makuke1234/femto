@@ -1,5 +1,5 @@
 {
-	"palette":
+	"palette_orig":
 	{
 		"black": 			"rgb( 12,  12,  12)",
 		"dark_blue": 		"rgb(  0,  55, 218)",
@@ -18,6 +18,25 @@
 		"bright_yellow": 	"rgb(249, 241, 165)",
 		"white": 			"rgb(242, 242, 242)"
 	},
+	"palette":
+	{
+		"black": 			"rgb(  0,  43,  54)",
+		"dark_blue": 		"rgb(101, 123, 131)",
+		"dark_green": 		"rgb( 19, 161,  14)",
+		"dark_cyan": 		"rgb( 58, 150, 221)",
+		"dark_red": 		"rgb(203,  75,  22)",
+		"dark_magenta": 	"rgb(211,  54, 130)",
+		"dark_yellow": 		"rgb(181, 137,   0)",
+		"dark_white": 		"rgb(147, 161, 161)",
+		"bright_black": 	"rgb( 88, 110, 117)",
+		"bright_blue": 		"rgb( 38, 139, 210)",
+		"bright_green": 	"rgb(133, 153,   0)",
+		"bright_cyan": 		"rgb( 97, 214, 214)",
+		"bright_red": 		"rgb(220,  50,  47)",
+		"bright_magenta": 	"rgb(108, 113, 196)",
+		"bright_yellow": 	"rgb(249, 241, 165)",
+		"white": 			"rgb(253, 246, 227)"
+	},
 
 
 	"tabsToSpaces": false,
@@ -34,7 +53,7 @@
 		"text": 			"",
 		"lineComment": 		"",
 		"blockComment": 	"",
-		"keyword": 			"",
+		"keyword": 			"bright_green",
 		"string": 			"",
 		"stringQuote": 		"",
 		"character": 		"",
@@ -44,7 +63,7 @@
 		"number": 			"",
 		"hex": 				"",
 		"octal": 			"",
-		"punctuation": 		"",
+		"punctuation": 		"bright_black",
 		"MDheading": 		"",
 		"MDitalic": 		"",
 		"MDbold": 			"",
