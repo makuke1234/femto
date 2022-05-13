@@ -162,7 +162,8 @@ reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 # Changelog
 
 * 1.7 (planned, planned)
-	* [ ] Syntax highlighting customisable
+	* [x] Syntax highlighting customisable
+	* [ ] Custom color palette
 	* [ ] Search support, also search result highlighting
 	* [ ] Practical multi-file support, tabs' system
 	* [ ] Proper text copying/pasting support
