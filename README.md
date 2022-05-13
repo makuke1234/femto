@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -126,16 +126,21 @@ reports ~4500 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	| --lineNumColor=\[value\]      | Specifies line number color, number between 0-255   |
 	| --lineNumCol=\[value\]        | Same as above                                       |
 - [x] List of settings:
-	| Setting           | Type    |
-	| ----------------- | ------- |
-	| tabsToSpaces      | boolean |
-	| tabWidth          | number  |
-	| autoIndent        | boolean |
-	| whitespaceVisible | boolean |
-	| whitespaceCh      | string  |
-	| whitespaceColor   | number  |
-	| lineNumRelative   | boolean |
-	| lineNumColor      | number  |
+	| Setting             | Type    |
+	| ------------------- | ------- |
+	| tabsToSpaces        | boolean |
+	| tabWidth            | number  |
+	| autoIndent          | boolean |
+	| whitespaceVisible   | boolean |
+	| whitespaceCh        | string  |
+	| whitespaceColor     | number  |
+	| lineNumRelative     | boolean |
+	| lineNumColor        | number  |
+	| palette             | object  |
+	| highlighting        | object  |
+
+Have a look at provided [settings file](./settings.json) to get a better understanding of the different settings.
+
 
 
 # Screenshots
