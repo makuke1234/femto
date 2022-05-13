@@ -55,6 +55,9 @@ bool femtoData_reset(femtoData_t * restrict self);
  * @return false Failure
  */
 bool femtoData_init(femtoData_t * restrict self);
+bool femtoData_loadPalette(femtoData_t * restrict self);
+bool femtoData_restorePalette(const femtoData_t * restrict self);
+
 /**
  * @brief Refreshes the screen's editing part only
  * 

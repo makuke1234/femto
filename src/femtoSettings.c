@@ -25,6 +25,44 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 		.bRelLineNums = false,
 		.lineNumCol   = FEMTO_DEFAULT_COLOR,
 
+		.palette = {
+			.colorNames = {
+				"black",
+				"dark_blue",
+				"dark_green",
+				"dark_cyan",
+				"dark_red",
+				"dark_magenta",
+				"dark_yellow",
+				"dark_white",
+				"bright_black",
+				"bright_blue",
+				"bright_green",
+				"bright_cyan",
+				"bright_red",
+				"bright_magenta",
+				"bright_yellow",
+				"white"
+			},
+			.colors = {
+				{  12,  12,  12 },
+				{   0,  55, 218 },
+				{  19, 161,  14 },
+				{  58, 150, 221 },
+				{ 197,  15,  31 },
+				{ 136,  23, 152 },
+				{ 193, 156,   0 },
+				{ 204, 204, 204 },
+				{ 118, 118, 118 },
+				{  59, 120, 255 },
+				{  22, 198,  12 },
+				{  97, 214, 214 },
+				{ 231,  72,  86 },
+				{ 180,   0, 158 },
+				{ 249, 241, 165 },
+				{ 242, 242, 242 }
+			}
+		},
 		.syntaxColors = {
 			[tcTEXT]            = FEMTO_DEFAULT_COLOR,
 			[tcCOMMENT_LINE]    = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
@@ -296,7 +334,7 @@ femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, con
 
 #define CHECK_ERR UINT16_MAX
 
-static inline uint16_t femtoSettings_checkColor(const jsonObject_t * restrict obj, const char * key)
+static inline uint16_t femtoSettings_checkColor(const jsonObject_t * restrict obj, const char * restrict key, const char * colorNames[])
 {
 	const jsonValue_t * attr = jsonObject_get(obj, key);
 	if (attr == NULL)
@@ -305,15 +343,53 @@ static inline uint16_t femtoSettings_checkColor(const jsonObject_t * restrict ob
 	}
 
 	bool success;
-	const double value = jsonValue_getNumber(attr, &success);
-	if (success && (value >= (double)FEMTO_SETTINGS_MINCOLOR) && (value <= (double)FEMTO_SETTINGS_MAXCOLOR))
+	const char * value = jsonValue_getString(attr, &success);
+	if (success && (value != NULL))
 	{
-		return (uint16_t)value;
+		// Search through colorNames
+		for (uint8_t i = 0; i < MAX_COLORS; ++i)
+		{
+			if (strcmp(value, colorNames[i]) == 0)
+			{
+				return i;
+			}
+		}
 	}
-	else
+
+	return CHECK_ERR;
+}
+static inline bool femtoSettings_checkRGBColor(femtoColor_t * restrict col, const jsonObject_t * restrict obj, const char * restrict key)
+{
+	const jsonValue_t * attr = jsonObject_get(obj, key);
+	if (attr == NULL)
 	{
 		return CHECK_ERR;
 	}
+
+	bool success;
+	const char * value = jsonValue_getString(attr, &success);
+	if (success && (value != NULL))
+	{
+		const char * rgbBeg = strstr(value, "rgb(");
+		if (rgbBeg != NULL)
+		{
+			rgbBeg += 4;
+			uint16_t r, g, b;
+			if (sscanf(rgbBeg, "%hu,%hu,%hu)", &r, &g, &b) == 3)
+			{
+				if ((r <= UINT8_MAX) && (g <= UINT8_MAX) && (b <= UINT8_MAX))
+				{
+					col->r = (uint8_t)r;
+					col->g = (uint8_t)g;
+					col->b = (uint8_t)b;
+
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
 }
 
 
@@ -438,7 +514,7 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		if (((val = femtoSettings_checkColor(obj, "whitespaceColor")) != CHECK_ERR) && (val != def.whitespaceCol))
+		if (((val = femtoSettings_checkColor(obj, "whitespaceColor", self->palette.colorNames)) != CHECK_ERR) && (val != def.whitespaceCol))
 		{
 			self->whitespaceCol = val;
 		}
@@ -452,9 +528,23 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			}
 		}
 
-		if (((val = femtoSettings_checkColor(obj, "lineNumColor")) != CHECK_ERR) && (val != def.lineNumCol))
+		if (((val = femtoSettings_checkColor(obj, "lineNumColor", self->palette.colorNames)) != CHECK_ERR) && (val != def.lineNumCol))
 		{
 			self->lineNumCol = val;
+		}
+
+		// Fill palette
+		const jsonObject_t * pObj;
+		if ( ((attr = jsonObject_get(obj, "palette")) != NULL) &&
+			((pObj = jsonValue_getObject(attr, &suc)) != NULL) && suc )
+		{
+			for (uint8_t i = 0; i < MAX_COLORS; ++i)
+			{
+				const char * color = self->palette.colorNames[i];
+				femtoSettings_checkRGBColor(&self->palette.colors[i], pObj, color);
+			}
+
+			self->palette.bUsePalette = true;
 		}
 
 		const jsonObject_t * hObj;
@@ -462,7 +552,13 @@ const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self)
 			(((hObj = jsonValue_getObject(attr, &suc)) != NULL) && suc) )
 		{
 			// If highlighting settings exist
-			
+			WORD * w = self->syntaxColors;
+			const char ** colNames = self->palette.colorNames;
+
+			if ((val = femtoSettings_checkColor(hObj, "text", colNames)) != CHECK_ERR)
+			{
+				w[tcTEXT] = val;
+			}
 		}
 	}
 

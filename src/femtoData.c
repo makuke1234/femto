@@ -104,8 +104,42 @@ bool femtoData_init(femtoData_t * restrict self)
 		return false;
 	}
 
+	if (!femtoData_loadPalette(self))
+	{
+		return false;
+	}
+
 	return true;
 }
+bool femtoData_loadPalette(femtoData_t * restrict self)
+{
+	assert(self != NULL);
+
+	femtoPalette_t * pal = &self->settings.palette;
+	if (!pal->bUsePalette)
+	{
+		return true;
+	}
+
+	// Try to apply new palette
+
+	return true;
+}
+bool femtoData_restorePalette(const femtoData_t * restrict self)
+{
+	assert(self != NULL);
+
+	const femtoPalette_t * pal = &self->settings.palette;
+	if (!pal->bUsePalette)
+	{
+		return true;
+	}
+
+	// Restore old palette
+
+	return true;
+}
+
 void femtoData_refresh(femtoData_t * restrict self)
 {
 	assert(self != NULL);
@@ -232,6 +266,8 @@ void femtoData_destroy(femtoData_t * restrict self)
 	self->files     = NULL;
 	self->filesSize = 0;
 	self->filesMax  = 0;
+
+	femtoData_restorePalette(self);
 
 	femtoSettings_destroy(&self->settings);
 }

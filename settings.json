@@ -1,15 +1,58 @@
 {
+	"palette":
+	{
+		"black": 			"rgb( 12,  12,  12)",
+		"dark_blue": 		"rgb(  0,  55, 218)",
+		"dark_green": 		"rgb( 19, 161,  14)",
+		"dark_cyan": 		"rgb( 58, 150, 221)",
+		"dark_red": 		"rgb(197,  15,  31)",
+		"dark_magenta": 	"rgb(136,  23, 152)",
+		"dark_yellow": 		"rgb(193, 156,   0)",
+		"dark_white": 		"rgb(204, 204, 204)",
+		"bright_black": 	"rgb(118, 118, 118)",
+		"bright_blue": 		"rgb( 59, 120, 255)",
+		"bright_green": 	"rgb( 22, 198,  12)",
+		"bright_cyan": 		"rgb( 97, 214, 214)",
+		"bright_red": 		"rgb(231,  72,  86)",
+		"bright_magenta": 	"rgb(180,   0, 158)",
+		"bright_yellow": 	"rgb(249, 241, 165)",
+		"white": 			"rgb(242, 242, 242)"
+	},
+
+
 	"tabsToSpaces": false,
 	"tabWidth": 4,
 	"autoindent": true,
 	"whitespaceVisible": true,
-	"whitespaceColor": 9,
+	"whitespaceColor": "bright_blue",
 	"whitespaceCh": "\u2192",
 	"lineNumRelative": true,
-	"lineNumColor": 8,
+	"lineNumColor": "bright_black",
 	
 	"highlighting":
 	{
-		"text": 4
+		"text": 			"",
+		"lineComment": 		"",
+		"blockComment": 	"",
+		"keyword": 			"",
+		"string": 			"",
+		"character": 		"",
+		"stringQuote": 		"",
+		"characterQuote": 	"",
+		"escapeCharacter": 	"",
+		"preprocessor": 	"",
+		"number": 			"",
+		"hex": 				"",
+		"octal": 			"",
+		"punctuation": 		"",
+		"MDheading": 		"",
+		"MDitalic": 		"",
+		"MDbold": 			"",
+		"MDstrike": 		"",
+		"MDvalue": 			"",
+		"MDconeText": 		"",
+		"MDbracket": 		"",
+		"MDbracketPicture": "",
+		"MDlink": 			""
 	}
 }

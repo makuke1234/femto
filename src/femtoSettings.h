@@ -47,6 +47,23 @@ enum tokenColor
 	tcNUM_OF_TOKENS
 };
 
+#define MAX_COLORS 16
+
+typedef struct femtoColor
+{
+	uint8_t r, g, b;
+
+} femtoColor_t;
+
+typedef struct femtoPalette
+{
+	const char * colorNames[MAX_COLORS];
+	femtoColor_t colors[MAX_COLORS];
+	femtoColor_t oldColors[MAX_COLORS];
+	bool bUsePalette;
+
+} femtoPalette_t;
+
 typedef struct femtoSettings
 {
 	bool bHelpRequest:1;
@@ -66,6 +83,7 @@ typedef struct femtoSettings
 	bool bRelLineNums:1;
 	WORD lineNumCol;
 
+	femtoPalette_t palette;
 	WORD syntaxColors[tcNUM_OF_TOKENS];
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];

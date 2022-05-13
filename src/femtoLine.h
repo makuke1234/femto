@@ -194,7 +194,7 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t 
  * 
  * @param node Pointer to node
  * @param fs Syntax identifier
- * @param colors Syntax token coloring pallette
+ * @param colors Syntax token coloring palette
  * @return true Success
  * @return false Failure, usually when allocating memory
  */
