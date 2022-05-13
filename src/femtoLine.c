@@ -519,20 +519,24 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t 
 	}
 }
 
-bool femtoLine_updateSyntax(femtoLineNode_t * restrict node, enum femtoSyntax fs)
+bool femtoLine_updateSyntax(
+	femtoLineNode_t * restrict node,
+	enum femtoSyntax fs,
+	const WORD * colors
+)
 {
 	assert(node != NULL);
 
 	switch (fs)
 	{
 	case fstxC:
-		return fSyntaxParseC(node);
+		return fSyntaxParseCLike(node, colors, &checkCToken);
 	case fstxCPP:
-		return fSyntaxParseCpp(node);
+		return fSyntaxParseCLike(node, colors, &checkCPPToken);
 	case fstxMD:
-		return fSyntaxParseMd(node);
+		return fSyntaxParseMd(node, colors);
 	default:
-		return true;
+		return fSyntaxParseNone(node, colors);
 	}
 }
 

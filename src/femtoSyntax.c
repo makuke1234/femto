@@ -1,5 +1,6 @@
 #include "femtoSyntax.h"
 #include "femtoLine.h"
+#include "femtoSettings.h"
 
 
 const char * fSyntaxName(enum femtoSyntax fs)
@@ -30,7 +31,7 @@ bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
 	return true;
 }
 
-static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti)
+void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
 {
 	if ((lasti - start) < 1)
 	{
@@ -184,14 +185,14 @@ static void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_
 				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
 				for (uint32_t k = 0; k < n; --l, ++k)
 				{
-					node->syntax[l] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED;
+					node->syntax[l] = kwCol;
 				}
 				return;
 			}
 		}
 	}
 }
-static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti)
+void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
 {
 	if ((lasti - start) < 1)
 	{
@@ -379,7 +380,7 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
 				for (uint32_t k = 0; k < n; --l, ++k)
 				{
-					node->syntax[l] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED;
+					node->syntax[l] = kwCol;
 				}
 				return;
 			}
@@ -387,7 +388,29 @@ static void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint3
 	}
 }
 
-bool fSyntaxParseC(femtoLineNode_t * restrict node)
+bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restrict colors)
+{
+	if (!fSyntaxParseAutoAlloc(node))
+	{
+		return false;
+	}
+
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	{
+		if ((i == node->curx) && (node->freeSpaceLen > 0))
+		{
+			i += node->freeSpaceLen;
+			--i;
+			--j;
+			continue;
+		}
+
+		node->syntax[j] = colors[tcTEXT];
+	}
+
+	return true;
+}
+bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict colors, tokeniserFunc_t func)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
@@ -410,7 +433,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			--j;
 			continue;
 		}
-		node->syntax[j] = FEMTO_DEFAULT_COLOR;
+		node->syntax[j] = colors[tcTEXT];
 
 
 		const wchar_t ch = node->line[i];
@@ -422,31 +445,31 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 				blockComment = false;
 				tokenStart = i;
 			}
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY;
+			node->syntax[j] = colors[tcCOMMENT_BLOCK];
 			previ = i;
 			continue;
 		}
 		else if (comment)
 		{
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+			node->syntax[j] = colors[tcCOMMENT_LINE];
 			previ = i;
 			continue;
 		}
 		else if (preproc)
 		{
-			node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
+			node->syntax[j] = colors[tcPREPROC];
 		}
 		else if (quoteMode)
 		{
-			node->syntax[j] = FOREGROUND_RED;
+			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
 			if (skip)
 			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
+				node->syntax[j] = colors[tcESCAPE];
 				skip = false;
 			}
 			else if (ch == L'\\')
 			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
+				node->syntax[j] = colors[tcESCAPE];
 				skip = true;
 			}
 			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
@@ -460,16 +483,16 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 		else if ((ch == L'*') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			blockComment = true;
-			node->syntax[j-1] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+			node->syntax[j-1] = colors[tcCOMMENT_BLOCK];
+			node->syntax[j]   = colors[tcCOMMENT_BLOCK];
 			previ = i;
 			continue;
 		}
 		else if ((ch == '/') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			comment = true;
-			node->syntax[j-1] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+			node->syntax[j-1] = colors[tcCOMMENT_LINE];
+			node->syntax[j]   = colors[tcCOMMENT_LINE];
 			previ = i;
 			continue;
 		}
@@ -480,7 +503,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			{
 				letter = false;
 				hex = true;
-				node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED;
+				node->syntax[j] = colors[tcHEX];
 				previ = i;
 				continue;
 			}
@@ -511,12 +534,12 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			case L'=':
 			case L';':
 			case L':':
-				node->syntax[j] = FOREGROUND_GREEN;
+				node->syntax[j] = colors[tcPUNCTUATION];
 				/* fall through */
 			case L' ':
 			case L'\t':
 				letter = false;
-				checkCToken(node, tokenStart, previ);
+				func(node, tokenStart, previ, colors[tcKEYWORD]);
 				tokenStart = i;
 				break;
 			case L'\'':
@@ -525,7 +548,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 			case L'"':
 				quoteMode = true;
 				letter = false;
-				node->syntax[j] = FOREGROUND_RED;
+				node->syntax[j] = colors[tcSTRING_QUOTE];
 				break;
 			case L'#':
 				preproc = true;
@@ -536,7 +559,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 					const wchar_t lch = (wchar_t)towlower(ch);
 					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 					{
-						node->syntax[j] = FOREGROUND_BLUE;
+						node->syntax[j] = colors[tcNUMBER];
 					}
 					else
 					{
@@ -550,7 +573,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 					if (!letter && ((ch >= L'0') && (ch <= '7')))
 					{
 						octal = true;
-						node->syntax[j] = FOREGROUND_RED;
+						node->syntax[j] = colors[tcOCT];
 					}
 					else
 					{
@@ -563,7 +586,7 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 					if (!letter)
 					{
 						isZero = (ch == L'0');
-						node->syntax[j] = FOREGROUND_BLUE;
+						node->syntax[j] = colors[tcNUMBER];
 						tokenStart = i;
 					}
 				}
@@ -583,217 +606,14 @@ bool fSyntaxParseC(femtoLineNode_t * restrict node)
 
 	if (!blockComment && !comment && !preproc && !quoteMode)
 	{
-		checkCToken(node, tokenStart, previ);
+		func(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
 	node->bBlockComment = blockComment;
 
 	return true;
 }
-bool fSyntaxParseCpp(femtoLineNode_t * restrict node)
-{
-	if (!fSyntaxParseAutoAlloc(node))
-	{
-		return false;
-	}
-
-	uint32_t tokenStart = 0;
-	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
-		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
-	
-	blockComment = (node->prevNode != NULL) ? node->prevNode->bBlockComment : false;
-
-	uint32_t previ = 0;
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
-	{
-		if ((i == node->curx) && (node->freeSpaceLen > 0))
-		{
-			i += node->freeSpaceLen;
-			--i;
-			--j;
-			continue;
-		}
-		node->syntax[j] = FEMTO_DEFAULT_COLOR;
-
-
-		const wchar_t ch = node->line[i];
-		
-		if (blockComment)
-		{
-			if ((ch == L'/') && (j > 0) && (node->line[previ] == L'*'))
-			{
-				blockComment = false;
-				tokenStart = i;
-			}
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY;
-			previ = i;
-			continue;
-		}
-		else if (comment)
-		{
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			previ = i;
-			continue;
-		}
-		else if (preproc)
-		{
-			node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
-		}
-		else if (quoteMode)
-		{
-			node->syntax[j] = FOREGROUND_RED;
-			if (skip)
-			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
-				skip = false;
-			}
-			else if (ch == L'\\')
-			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
-				skip = true;
-			}
-			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
-			{
-				quoteMode = false;
-				tokenStart = i;
-			}
-			previ = i;
-			continue;
-		}
-		else if ((ch == L'*') && (j > 0) && (node->line[previ] == L'/'))
-		{
-			blockComment = true;
-			node->syntax[j-1] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			previ = i;
-			continue;
-		}
-		else if ((ch == '/') && (j > 0) && (node->line[previ] == L'/'))
-		{
-			comment = true;
-			node->syntax[j-1] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
-			previ = i;
-			continue;
-		}
-		else if (isZero)
-		{
-			isZero = false;
-			if (ch == L'x')
-			{
-				letter = false;
-				hex = true;
-				node->syntax[j] = FOREGROUND_GREEN | FOREGROUND_RED;
-				previ = i;
-				continue;
-			}
-			if ((ch >= L'0') && (ch <= '7'))
-			{
-				octal = true;
-			}
-		}
-		
-		switch (ch)
-		{
-			case L'(':
-			case L')':
-			case L'{':
-			case L'}':
-			case L'[':
-			case L']':
-			case L'.':
-			case L',':
-			case L'*':
-			case L'+':
-			case L'-':
-			case L'/':
-			case L'&':
-			case L'|':
-			case L'<':
-			case L'>':
-			case L'=':
-			case L':':
-			case L';':
-				node->syntax[j] = FOREGROUND_GREEN;
-				/* fall through */
-			case L' ':
-			case L'\t':
-				letter = false;
-				checkCPPToken(node, tokenStart, previ);
-				tokenStart = i;
-				break;
-			case L'\'':
-				littleQuote = true;
-				/* fall through */
-			case L'"':
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = FOREGROUND_RED;
-				break;
-			case L'#':
-				preproc = true;
-				break;
-			default:
-				if (hex)
-				{
-					const wchar_t lch = (wchar_t)towlower(ch);
-					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
-					{
-						node->syntax[j] = FOREGROUND_BLUE;
-					}
-					else
-					{
-						hex = false;
-						tokenStart = i;
-					}
-				}
-				else if (isZero || octal)
-				{
-					isZero = false;
-					if (!letter && ((ch >= L'0') && (ch <= '7')))
-					{
-						octal = true;
-						node->syntax[j] = FOREGROUND_RED;
-					}
-					else
-					{
-						octal = false;
-						tokenStart = i;
-					}
-				}
-				else if ((ch >= L'0') && (ch <= L'9'))
-				{
-					if (!letter)
-					{
-						isZero = (ch == L'0');
-						node->syntax[j] = FOREGROUND_BLUE;
-						tokenStart = i;
-					}
-				}
-				else
-				{
-					const wchar_t lch = (wchar_t)towlower(ch);
-					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
-					if (!letter)
-					{
-						tokenStart = i;
-					}
-				}
-		}
-
-		previ = i;
-	}
-
-	if (!blockComment && !comment && !preproc && !quoteMode)
-	{
-		checkCPPToken(node, tokenStart, previ);
-	}
-
-	node->bBlockComment = blockComment;
-
-	return true;
-}
-bool fSyntaxParseMd(femtoLineNode_t * restrict node)
+bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
@@ -832,29 +652,29 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 			--j;
 			continue;
 		}
-		node->syntax[j] = FEMTO_DEFAULT_COLOR;
+		node->syntax[j] = colors[tcTEXT];
 
 		const wchar_t ch = node->line[i];
 		
 		if (valueMode)
 		{
-			node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE;
+			node->syntax[j] = colors[tcMD_VALUE];
 		}
 		else if (coneMode)
 		{
-			node->syntax[j] = FOREGROUND_RED | FOREGROUND_GREEN;
+			node->syntax[j] = colors[tcMD_CONETEXT];
 		}
 		else if (strikeMode)
 		{
 			if ((ch == L'~') && (node->line[previ] == L'~'))
 			{
 				strikeMode = false;
-				node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j-1] = colors[tcPUNCTUATION];
+				node->syntax[j]   = colors[tcPUNCTUATION];
 			}
 			else
 			{
-				node->syntax[j] = FOREGROUND_INTENSITY;
+				node->syntax[j] = colors[tcMD_STRIKE];
 			}
 		}
 		else if (italicsMode)
@@ -863,16 +683,17 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 			{
 				boldMode = true;
 				italicsMode = false;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j]   = colors[tcMD_BOLD];
+				node->syntax[j-1] = colors[tcMD_BOLD];
 			}
 			else if ((ch == L'*') || (ch == L'_'))
 			{
 				italicsMode = false;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcMD_ITALIC];
 			}
 			else
 			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED;
+				node->syntax[j] = colors[tcMD_ITALIC];
 			}
 
 			containsStar = false;
@@ -882,12 +703,11 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 			if ( ( (ch == L'*') && (node->line[previ] == L'*') ) || ( (ch == L'_') && (node->line[previ] == L'_') ) )
 			{
 				boldMode = false;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
-				node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcMD_BOLD];
 			}
 			else
 			{
-				node->syntax[j] = FOREGROUND_RED | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcMD_BOLD];
 			}
 		}
 		else if (bracketMode)
@@ -897,11 +717,11 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 				bracketMode = false;
 				extraBracketMode = false;
 				parenMode1 = true;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcPUNCTUATION];
 			}
 			else
 			{
-				node->syntax[j] = extraBracketMode ? FOREGROUND_INTENSITY | FOREGROUND_GREEN : FOREGROUND_GREEN;
+				node->syntax[j] = colors[extraBracketMode ? tcMD_BRACKETPIC : tcMD_BRACKET];
 			}
 		}
 		else if (parenMode1)
@@ -910,7 +730,7 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 			if (ch == L'(')
 			{
 				parenMode2 = true;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcPUNCTUATION];
 			}
 		}
 		else if (parenMode2)
@@ -918,34 +738,31 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 			if (ch == L')')
 			{
 				parenMode2 = false;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcPUNCTUATION];
 			}
 			else
 			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcMD_LINK];
 			}
 		}
 		else if (headingMode)
 		{
-			node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;
+			node->syntax[j] = colors[tcMD_HEADING];
 		}
 		else if (!done)
 		{
 			if (ch == L'#')
 			{
 				headingMode = true;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;
+				node->syntax[j] = colors[tcMD_HEADING];
 			}
-			else if (ch == L'-')
+			else if ((ch == L'-') || (ch == L'>'))
 			{
 				// Dash coloring
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcPUNCTUATION];
+				coneMode = (ch == L'>');
 			}
-			else if (ch == L'>')
-			{
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
-				coneMode = true;
-			}
+
 			if ((ch != L' ') && (ch != L'\t'))
 			{
 				done = true;
@@ -953,7 +770,7 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 				if (firstChIdx >= 4)
 				{
 					valueMode = true;
-					node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE;
+					node->syntax[j] = colors[tcMD_VALUE];
 				}
 			}
 			else if (ch == L' ')
@@ -977,24 +794,24 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node)
 			if (ch == L'[')
 			{
 				bracketMode = true;
-				if ((previ > 0) && (node->line[previ] == L'!'))
+				if ((j > 0) && (node->line[previ] == L'!'))
 				{
-					node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+					node->syntax[j-1] = colors[tcPUNCTUATION];
 					extraBracketMode = true;
 				}
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcPUNCTUATION];
 			}
 			else if ((ch == L'*') || (ch == L'_'))
 			{
 				containsStar = true;
 				italicsMode = true;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j] = colors[tcMD_ITALIC];
 			}
-			else if ((ch == L'~') && (previ > 0) && (node->line[previ] == L'~'))
+			else if ((ch == L'~') && (j > 0) && (node->line[previ] == L'~'))
 			{
 				strikeMode = true;
-				node->syntax[j-1] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
-				node->syntax[j] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
+				node->syntax[j-1] = colors[tcPUNCTUATION];
+				node->syntax[j]   = colors[tcPUNCTUATION];
 			}
 		}
 

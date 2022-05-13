@@ -6,5 +6,10 @@
 	"whitespaceColor": 9,
 	"whitespaceCh": "\u2192",
 	"lineNumRelative": true,
-	"lineNumColor": 8
+	"lineNumColor": 8,
+	
+	"highlighting":
+	{
+		"text": 4
+	}
 }

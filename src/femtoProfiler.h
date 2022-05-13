@@ -30,8 +30,8 @@ void profilerStart(void);
  */
 void profilerEnd_inner(const char * funcName);
 
-#define writeProfiler(...) writeProfiler_inner(__FUNCTION__, __VA_ARGS__)
-#define profilerEnd() profilerEnd_inner(__FUNCTION__)
+#define writeProfiler(...) writeProfiler_inner(__func__, __VA_ARGS__)
+#define profilerEnd() profilerEnd_inner(__func__)
 
 #else
 

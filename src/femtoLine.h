@@ -194,10 +194,15 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t 
  * 
  * @param node Pointer to node
  * @param fs Syntax identifier
+ * @param colors Syntax token coloring pallette
  * @return true Success
  * @return false Failure, usually when allocating memory
  */
-bool femtoLine_updateSyntax(femtoLineNode_t * restrict node, enum femtoSyntax fs);
+bool femtoLine_updateSyntax(
+	femtoLineNode_t * restrict node,
+	enum femtoSyntax fs,
+	const WORD * colors
+);
 
 /**
  * @brief Destroys line node, does NOT free any memory

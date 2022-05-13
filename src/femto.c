@@ -1144,7 +1144,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		}
 	}
 
-	if (!femtoLine_updateSyntax(node, pfile->syntax))
+	if (!femtoLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors))
 	{
 		femtoData_statusDraw(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}

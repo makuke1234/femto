@@ -170,6 +170,10 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* [ ] More syntax highlighting (maybe)
 		* [ ] Python
 		* [ ] JavaScript
+		* [ ] XML-like
+			* [ ] XML
+			* [ ] HTML
+			* [ ] SVG
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
 * 1.6 (planned)
 	* [x] Fix indentation bug

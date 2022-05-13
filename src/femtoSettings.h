@@ -17,6 +17,36 @@
 #define FEMTO_SETTINGS_MAXCOLOR UINT8_MAX
 
 
+enum tokenColor
+{
+	tcTEXT,
+	tcCOMMENT_LINE,
+	tcCOMMENT_BLOCK,
+	tcKEYWORD,
+	tcSTRING,
+	tcCHARACTER,
+	tcESCAPE,
+	tcSTRING_QUOTE,
+	tcCHARACTER_QUOTE,
+	tcPREPROC,
+	tcNUMBER,
+	tcHEX,
+	tcOCT,
+	tcPUNCTUATION,
+	tcMD_HEADING,
+	tcMD_ITALIC,
+	tcMD_BOLD,
+	tcMD_STRIKE,
+	tcMD_VALUE,
+	tcMD_CONETEXT,
+	tcMD_BRACKET,
+	tcMD_BRACKETPIC,
+	tcMD_LINK,
+
+
+	tcNUM_OF_TOKENS
+};
+
 typedef struct femtoSettings
 {
 	bool bHelpRequest:1;
@@ -36,6 +66,7 @@ typedef struct femtoSettings
 	bool bRelLineNums:1;
 	WORD lineNumCol;
 
+	WORD syntaxColors[tcNUM_OF_TOKENS];
 
 	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
 
