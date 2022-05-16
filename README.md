@@ -179,6 +179,7 @@ Have a look at provided [settings file](./settings.json) to get a better underst
 	* [ ] More syntax highlighting
 		* [ ] Python
 		* [ ] JavaScript
+		* [ ] JSON
 		* [ ] XML-like
 			* [ ] XML
 			* [ ] HTML
