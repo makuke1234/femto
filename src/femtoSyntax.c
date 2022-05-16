@@ -1,15 +1,97 @@
 #include "femtoSyntax.h"
 #include "femtoLine.h"
 #include "femtoSettings.h"
+#include "femtoFile.h"
 
+
+enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
+{
+	enum femtoSyntax syntax = fstxNONE;
+	
+	const wchar_t * end = fileName + wcslen(fileName);
+	if (fileName != end)
+	{
+		const wchar_t * dot = end - 1;
+		for (uint8_t i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
+		{
+			if (*dot == L'.')
+			{
+				break;
+			}
+		}
+
+		if (*dot == L'.')
+		{
+			++dot;
+
+			wchar_t suffix[MAX_SUFFIX];
+			++end;
+			for (wchar_t * suf = suffix; dot != end; ++dot, ++suf)
+			{
+				*suf = (wchar_t)towlower(*dot);
+			}
+
+			if ((wcscmp(suffix, L"c") == 0) || (wcscmp(suffix, L"h") == 0))
+			{
+				syntax = fstxC;
+			}
+			else if ((wcscmp(suffix, L"cpp") == 0) || (wcscmp(suffix, L"cxx") == 0) || (wcscmp(suffix, L"cc") == 0) ||
+				(wcscmp(suffix, L"hpp") == 0) || (wcscmp(suffix, L"hxx") == 0) || (wcscmp(suffix, L"hh") == 0))
+			{
+				syntax = fstxCPP;
+			}
+			else if (wcscmp(suffix, L"md") == 0)
+			{
+				syntax = fstxMD;
+			}
+			else if (wcscmp(suffix, L"py") == 0)
+			{
+				syntax = fstxPY;
+			}
+			else if (wcscmp(suffix, L"js") == 0)
+			{
+				syntax = fstxJS;
+			}
+			else if (wcscmp(suffix, L"json") == 0)
+			{
+				syntax = fstxJSON;
+			}
+			else if (wcscmp(suffix, L"css") == 0)
+			{
+				syntax = fstxCSS;
+			}
+			else if (wcscmp(suffix, L"xml") == 0)
+			{
+				syntax = fstxXML;
+			}
+			else if ((wcscmp(suffix, L"html") == 0) || (wcscmp(suffix, L"htm") == 0))
+			{
+				syntax = fstxHTML;
+			}
+			else if (wcscmp(suffix, L"svg") == 0)
+			{
+				syntax = fstxSVG;
+			}
+		}
+	}
+
+	return syntax;
+}
 
 const char * fSyntaxName(enum femtoSyntax fs)
 {
 	static const char * syntaxes[fstxSIZE] = {
-		"None",
-		"C",
-		"C++",
-		"Markdown"
+		[fstxNONE] = "None",
+		[fstxC]    = "C",
+		[fstxCPP]  = "C++",
+		[fstxMD]   = "Markdown",
+		[fstxPY]   = "Python",
+		[fstxJS]   = "JavaScript",
+		[fstxJSON] = "JavaScript Object Notation (JSON)",
+		[fstxCSS]  = "Cascading Style Sheets (CSS)",
+		[fstxXML]  = "eXtensible Markup Language (XML)",
+		[fstxHTML] = "HyperText Markup Language (HTML)",
+		[fstxSVG]  = "Scalable Vector Graphics (SVG)"
 	};
 
 	assert(fs <= fstxSIZE);
@@ -833,3 +915,149 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 
 	return true;
 }
+
+bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict colors)
+{
+	return true;
+}
+
+bool fSyntaxParseJS(struct femtoLineNode * restrict node, const WORD * restrict colors)
+{
+	return true;
+}
+bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restrict colors)
+{
+	if (!fSyntaxParseAutoAlloc(node))
+	{
+		return false;
+	}
+
+	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
+		isZero = false, hex = false, octal = false;
+	
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	{
+		if ((i == node->curx) && (node->freeSpaceLen > 0))
+		{
+			i += node->freeSpaceLen;
+			--i;
+			--j;
+			continue;
+		}
+		node->syntax[j] = colors[tcTEXT];
+
+
+		const wchar_t ch = node->line[i];
+		
+		if (quoteMode)
+		{
+			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
+			if (skip)
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = false;
+			}
+			else if (ch == L'\\')
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = true;
+			}
+			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
+			{
+				quoteMode = false;
+			}
+			continue;
+		}
+		else if (isZero)
+		{
+			isZero = false;
+			if (ch == L'x')
+			{
+				letter = false;
+				hex = true;
+				node->syntax[j] = colors[tcHEX];
+				continue;
+			}
+			if ((ch >= L'0') && (ch <= '7'))
+			{
+				octal = true;
+			}
+		}
+		
+		switch (ch)
+		{
+			case L'{':
+			case L'}':
+			case L'[':
+			case L']':
+			case L'.':
+			case L',':
+			case L':':
+				node->syntax[j] = colors[tcPUNCTUATION];
+				/* fall through */
+			case L' ':
+			case L'\t':
+				letter = false;
+				break;
+			case L'\'':
+				littleQuote = true;
+				/* fall through */
+			case L'"':
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcSTRING_QUOTE];
+				break;
+			default:
+				if (hex)
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
+					{
+						node->syntax[j] = colors[tcNUMBER];
+					}
+					else
+					{
+						hex = false;
+					}
+				}
+				else if (isZero || octal)
+				{
+					isZero = false;
+					if (!letter && ((ch >= L'0') && (ch <= '7')))
+					{
+						octal = true;
+						node->syntax[j] = colors[tcOCT];
+					}
+					else
+					{
+						octal = false;
+					}
+				}
+				else if ((ch >= L'0') && (ch <= L'9'))
+				{
+					if (!letter)
+					{
+						isZero = (ch == L'0');
+						node->syntax[j] = colors[tcNUMBER];
+					}
+				}
+				else
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+				}
+		}
+	}
+
+	return true;
+}
+bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict colors)
+{
+	return true;
+}
+
+bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict colors)
+{
+	return true;
+}
+

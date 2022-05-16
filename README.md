@@ -139,7 +139,7 @@ reports ~4700 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	| palette             | object  |
 	| highlighting        | object  |
 
-Have a look at provided [settings file](./settings.json) to get a better understanding of the different settings.
+Have a look at the provided [settings file](./settings.json) to get a better understanding of the different settings.
 
 
 
@@ -173,6 +173,7 @@ Have a look at provided [settings file](./settings.json) to get a better underst
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
+
 * 1.7 (planned)
 	* [x] Syntax highlighting customisable
 	* [x] Custom color palette
@@ -180,10 +181,12 @@ Have a look at provided [settings file](./settings.json) to get a better underst
 		* [ ] Python
 		* [ ] JavaScript
 		* [ ] JSON
+		* [ ] CSS
 		* [ ] XML-like
 			* [ ] XML
 			* [ ] HTML
 			* [ ] SVG
+
 * 1.6
 	* [x] Fix indentation bug
 	* [x] Save-as support
@@ -194,27 +197,32 @@ Have a look at provided [settings file](./settings.json) to get a better underst
 		* [x] Markdown
 	* [x] Asynchronous drawing
 	* [x] Micro-optimisations in codebase
+
 * 1.5
 	* [x] Asks for user input on open & save as
 	* [x] User input support on the last line of the editor
 	* [x] Fix auto-indentation bug, inserts too many tabs
 	* [x] Fix backwards tabbing (space removal)
+
 * 1.4
 	* [x] Line numbers, absolute & relative mode
 	* [x] Warning about any unsaved work
 	* [x] Optionally "visible" whitespace
 	* [x] Configurable whitespace color
+
 * 1.3
 	* [x] Primitive tab support
 	* [x] Proper tab support
 	* [x] Tab support for cursor selection with mouse
 	* [x] Tab support when scrolling horizontally
+
 * 1.2
 	* [x] Proper setting loading from file
 	* [x] Built-in hashmap support
 	* [x] Built-in JSON support
 	* [x] Tweak key behaviour, Ctrl+E doesn't have to be immediately released anymore
 	* [x] Add placeholders for planned keyboard shortcuts
+
 * 1.1
 	* [x] Automatic indentation, turned on by default, new settings
 	* [x] Command line argument parsing support
@@ -227,6 +235,7 @@ Have a look at provided [settings file](./settings.json) to get a better underst
 	* [x] Only update the line that's being edited
 	* [x] Refactor, check all pointers in debug mode
 	* [x] Tweak status messages, optimise for clarity, minimise redundant punctuation
+
 * 1.0
 	* [x] Theoretical multi-file support
 	* [x] Mouse scrolling support
@@ -240,6 +249,7 @@ Have a look at provided [settings file](./settings.json) to get a better underst
 	* [x] Line moving
 	* [x] Better cursor movement when using left/right arrows between lines
 	* [x] Better cursor movement when using up/down arrows between lines
+
 * 0.1
 	* [x] Initial release, basically a copy of [atto](https://github.com/makuke1234/atto)
 

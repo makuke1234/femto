@@ -535,6 +535,19 @@ bool femtoLine_updateSyntax(
 		return fSyntaxParseCLike(node, colors, &checkCPPToken);
 	case fstxMD:
 		return fSyntaxParseMd(node, colors);
+	case fstxPY:
+		return fSyntaxParsePy(node, colors);
+	case fstxJS:
+		return fSyntaxParseJS(node, colors);
+	case fstxJSON:
+		return fSyntaxParseJSON(node, colors);
+	case fstxCSS:
+		return fSyntaxParseCSS(node, colors);
+	case fstxXML:
+	case fstxSVG:
+		return fSyntaxParseXML(node, colors);
+	case fstxHTML:
+		return fSyntaxParseXML(node, colors);
 	default:
 		return fSyntaxParseNone(node, colors);
 	}

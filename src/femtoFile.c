@@ -58,49 +58,7 @@ bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileNa
 	// Get syntax type from file suffix
 	if (!self->bSyntaxByUser && (fileName != NULL))
 	{
-		// Find end
-		const wchar_t * end = fileName + wcslen(fileName);
-		if (fileName != end)
-		{
-			const wchar_t * dot = end - 1;
-			for (uint8_t i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
-			{
-				if (*dot == L'.')
-				{
-					break;
-				}
-			}
-
-			if (*dot == L'.')
-			{
-				++dot;
-
-				wchar_t suffix[MAX_SUFFIX];
-				++end;
-				for (wchar_t * suf = suffix; dot != end; ++dot, ++suf)
-				{
-					*suf = (wchar_t)towlower(*dot);
-				}
-
-				if ((wcscmp(suffix, L"c") == 0) || (wcscmp(suffix, L"h") == 0))
-				{
-					self->syntax = fstxC;
-				}
-				else if ((wcscmp(suffix, L"cpp") == 0) || (wcscmp(suffix, L"cxx") == 0) || (wcscmp(suffix, L"cc") == 0) ||
-					(wcscmp(suffix, L"hpp") == 0) || (wcscmp(suffix, L"hxx") == 0) || (wcscmp(suffix, L"hh") == 0))
-				{
-					self->syntax = fstxCPP;
-				}
-				else if (wcscmp(suffix, L"md") == 0)
-				{
-					self->syntax = fstxMD;
-				}
-				else
-				{
-					self->syntax = fstxNONE;
-				}
-			}
-		}
+		self->syntax = fSyntaxDetect(fileName);
 	}
 
 	// try to open file
