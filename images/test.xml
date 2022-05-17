@@ -1,5 +1,5 @@
 <note>
-	<to>somebody</to>
+	<to id="1">somebody</to>
 	<from>somebody else</from>
 	<heading>Reminder</heading>
 	<body>Just wanted to remind you that I exist &lt;3</body>

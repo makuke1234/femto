@@ -185,8 +185,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 		* [ ] Python
 		* [ ] JavaScript
 		* [ ] CSS
-		* [ ] XML-like
-			* [ ] HTML
+		* [x] XML-like
+			* [x] HTML
 
 * 1.7
 	* [x] Syntax highlighting customisable

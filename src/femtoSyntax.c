@@ -557,6 +557,7 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
 			{
 				quoteMode = false;
+				littleQuote = false;
 				tokenStart = i;
 			}
 			previ = i;
@@ -626,7 +627,10 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 				break;
 			case L'\'':
 				littleQuote = true;
-				/* fall through */
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcCHARACTER_QUOTE];
+				break;
 			case L'"':
 				quoteMode = true;
 				letter = false;
@@ -965,6 +969,7 @@ bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restric
 			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
 			{
 				quoteMode = false;
+				littleQuote = false;
 			}
 			continue;
 		}
@@ -1001,7 +1006,10 @@ bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restric
 				break;
 			case L'\'':
 				littleQuote = true;
-				/* fall through */
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcCHARACTER_QUOTE];
+				break;
 			case L'"':
 				quoteMode = true;
 				letter = false;
@@ -1102,6 +1110,7 @@ bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict
 			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
 			{
 				quoteMode = false;
+				littleQuote = false;
 			}
 			continue;
 		}
@@ -1144,6 +1153,7 @@ bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict
 			{
 				comm[3] = comm[4] = 0;
 			}
+			continue;
 		}
 		else if (escapeChar)
 		{
@@ -1152,6 +1162,7 @@ bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict
 			{
 				escapeChar = false;
 			}
+			continue;
 		}
 		else if (specialTag)
 		{
@@ -1248,7 +1259,10 @@ bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict
 				break;
 			case L'\'':
 				littleQuote = true;
-				/* fall through */
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcCHARACTER_QUOTE];
+				break;
 			case L'"':
 				quoteMode = true;
 				letter = false;
