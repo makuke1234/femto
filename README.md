@@ -167,8 +167,14 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 ### XML
 ![!XML syntax](./images/syntaxXML.png)
 
+### HTML
+![!HTML syntax](./images/syntaxHTML.png)
+
 ### JSON
 ![!JSON syntax](./images/syntaxJSON.png)
+
+### CSS
+![!CSS syntax](./images/syntaxCSS.png)
 
 
 # Changelog
@@ -184,7 +190,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 	* [ ] More syntax highlighting
 		* [ ] Python
 		* [ ] JavaScript
-		* [ ] CSS
+		* [x] CSS
 		* [x] XML-like
 			* [x] HTML
 

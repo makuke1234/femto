@@ -503,7 +503,7 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
 	
-	blockComment = (node->prevNode != NULL) ? node->prevNode->bBlockComment : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue : false;
 
 	uint32_t previ = 0;
 	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
@@ -695,7 +695,7 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 		func(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
-	node->bBlockComment = blockComment;
+	node->userValue = blockComment;
 
 	return true;
 }
@@ -1061,6 +1061,185 @@ bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restric
 }
 bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict colors)
 {
+	if (!fSyntaxParseAutoAlloc(node))
+	{
+		return false;
+	}
+
+	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
+		isZero = false, hex = false, octal = false, propertyMode = false,
+		valueMode = false, blockComment = false;
+	
+	propertyMode = (node->prevNode != NULL) ? ((node->prevNode->userValue >> 1) & 1) : false;
+	blockComment = (node->prevNode != NULL) ? (node->prevNode->userValue & 1) : false;
+
+	uint32_t previ = 0;
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	{
+		if ((i == node->curx) && (node->freeSpaceLen > 0))
+		{
+			i += node->freeSpaceLen;
+			--i;
+			--j;
+			continue;
+		}
+		node->syntax[j] = colors[tcCSS_SELECTOR];
+
+
+		const wchar_t ch = node->line[i];
+		
+		if (blockComment)
+		{
+			if ((ch == L'/') && (j > 0) && (node->line[previ] == L'*'))
+			{
+				blockComment = false;
+			}
+			node->syntax[j] = colors[tcCOMMENT_BLOCK];
+			previ = i;
+			continue;
+		}
+		if (quoteMode)
+		{
+			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
+			if (skip)
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = false;
+			}
+			else if (ch == L'\\')
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = true;
+			}
+			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
+			{
+				quoteMode = false;
+				littleQuote = false;
+			}
+			continue;
+		}
+		else if ((ch == L'*') && (j > 0) && (node->line[previ] == L'/'))
+		{
+			blockComment = true;
+			node->syntax[j-1] = colors[tcCOMMENT_BLOCK];
+			node->syntax[j]   = colors[tcCOMMENT_BLOCK];
+			previ = i;
+			continue;
+		}
+		else if (isZero)
+		{
+			isZero = false;
+			if (ch == L'x')
+			{
+				letter = false;
+				hex = true;
+				node->syntax[j] = colors[tcHEX];
+				continue;
+			}
+			if ((ch >= L'0') && (ch <= '7'))
+			{
+				octal = true;
+			}
+		}
+		else if (valueMode)
+		{
+			node->syntax[j] = colors[tcMD_VALUE];
+
+			if (ch == L';')
+			{
+				valueMode = false;
+			}
+		}
+		else if (propertyMode)
+		{
+			node->syntax[j] = colors[tcCSS_PROPERTY];
+			if (ch == L':')
+			{
+				valueMode = true;
+			}
+			else if (ch == L'}')
+			{
+				propertyMode = false;
+				node->syntax[j] = colors[tcPUNCTUATION];
+			}
+			else
+			{
+				continue;
+			}
+		}
+		
+		switch (ch)
+		{
+			case L'{':
+				propertyMode = true;
+				/* fall through */
+			case L'.':
+			case L',':
+			case L':':
+			case L';':
+				node->syntax[j] = colors[tcPUNCTUATION];
+				/* fall through */
+			case L' ':
+			case L'\t':
+				letter = false;
+				break;
+			case L'\'':
+				littleQuote = true;
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcCHARACTER_QUOTE];
+				break;
+			case L'"':
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcSTRING_QUOTE];
+				break;
+			default:
+				if (hex)
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
+					{
+						node->syntax[j] = colors[tcNUMBER];
+					}
+					else
+					{
+						hex = false;
+					}
+				}
+				else if (isZero || octal)
+				{
+					isZero = false;
+					if (!letter && ((ch >= L'0') && (ch <= '7')))
+					{
+						octal = true;
+						node->syntax[j] = colors[tcOCT];
+					}
+					else
+					{
+						octal = false;
+					}
+				}
+				else if ((ch >= L'0') && (ch <= L'9'))
+				{
+					if (!letter)
+					{
+						isZero = (ch == L'0');
+						node->syntax[j] = colors[tcNUMBER];
+					}
+				}
+				else
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+				}
+		}
+
+		previ = i;
+	}
+
+	node->userValue = blockComment | ((propertyMode << 1) & 0x02);
+
 	return true;
 }
 
@@ -1076,7 +1255,7 @@ bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict
 		tagEnd = false, blockComment = false, specialTag = false, value = false,
 		escapeChar = false;
 
-	blockComment = (node->prevNode != NULL) ? node->prevNode->bBlockComment : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue : false;
 
 	uint32_t comm[5] = { 0 };
 	
@@ -1310,7 +1489,7 @@ bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict
 		}
 	}
 
-	node->bBlockComment = blockComment;
+	node->userValue = blockComment;
 
 	return true;
 }

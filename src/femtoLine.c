@@ -16,7 +16,7 @@ void femtoLine_init(femtoLineNode_t * restrict self)
 		.lineNumber   = 1,
 
 		.syntax       = NULL,
-		.bBlockComment = false
+		.userValue = false
 	};
 }
 femtoLineNode_t * femtoLine_create(
@@ -122,7 +122,7 @@ femtoLineNode_t * femtoLine_create(
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
-	node->bBlockComment = false;
+	node->userValue = false;
 
 	return node;
 }
@@ -174,7 +174,7 @@ femtoLineNode_t * femtoLine_createText(
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
-	node->bBlockComment = false;
+	node->userValue = false;
 
 	return node;
 }

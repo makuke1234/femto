@@ -73,6 +73,8 @@
 		"MDbracket": 		"",
 		"MDbracketPicture": "",
 		"MDlink": 			"",
-		"XMLid": 			""
+		"XMLid": 			"",
+		"CSSselector": 		"",
+		"CSSproperty": 		""
 	}
 }

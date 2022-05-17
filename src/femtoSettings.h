@@ -43,6 +43,8 @@ enum tokenColor
 	tcMD_BRACKETPIC,
 	tcMD_LINK,
 	tcXML_ID,
+	tcCSS_SELECTOR,
+	tcCSS_PROPERTY,
 
 
 	tcNUM_OF_TOKENS
