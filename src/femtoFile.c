@@ -530,6 +530,11 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			{
 				lastcurnode->prevNode->nextNode = self->data.currentNode;
 			}
+			else if (lastcurnode == self->data.firstNode)
+			{
+				self->data.firstNode = self->data.currentNode;
+			}
+			--self->data.currentNode->lineNumber;
 
 			// Destroy current line
 			femtoLine_free(lastcurnode);
@@ -547,6 +552,10 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			femtoLine_free(lastcurnode);
 			self->data.bUpdateAll = true;
 		}
+		if (self->data.bUpdateAll)
+		{
+			femtoLine_updateLineNumbers(self->data.currentNode, self->data.currentNode->lineNumber, &self->data.noLen);
+		}
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
@@ -556,7 +565,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			self->data.currentNode = self->data.currentNode->prevNode;
 			femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 			self->data.lastx       = self->data.currentNode->virtcurx;
-			self->data.bUpdateAll   = true;
+			self->data.bUpdateAll  = true;
 		}
 		break;
 	case FEMTO_MOVELINE_DOWN:
