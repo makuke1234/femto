@@ -127,6 +127,7 @@ void fHash_initData(
 	{
 		if (!fHash_insert(hash, data[i]))
 		{
+			writeProfiler("Failed on %S", data[i]);
 			hash->init = false;
 			return;
 		}

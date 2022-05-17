@@ -7,5 +7,7 @@
 
 alert('Hello, world!');
 
-console.log("This is a absolutely necessary log...");
-
+for (var i = 0; i < 5; ++i)
+{
+	console.log(i + 1, "-> This is a absolutely necessary log...");
+}

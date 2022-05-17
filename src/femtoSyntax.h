@@ -14,8 +14,8 @@
 #define MAX_PY_TOKEN_MEM 393
 #define MAX_PY_TOKEN_WORD 21
 
-#define MAX_JS_TOKEN_MEM 100
-#define MAX_JS_TOKEN_WORD 20
+#define MAX_JS_TOKEN_MEM 537
+#define MAX_JS_TOKEN_WORD 18
 
 struct femtoLineNode;
 
