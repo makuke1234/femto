@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<note>
+	<to>somebody</to>
+	<from>somebody else</from>
+	<heading>Reminder</heading>
+	<body>Just wanted to remind you that I exist &lt;3</body>
+<!-- This is
+	a
+	block
+	comment
+	-->
+</note>

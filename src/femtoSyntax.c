@@ -1058,6 +1058,246 @@ bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict
 
 bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict colors)
 {
+	if (!fSyntaxParseAutoAlloc(node))
+	{
+		return false;
+	}
+
+	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
+		isZero = false, hex = false, octal = false, tagMode = false, firstTag = false,
+		tagEnd = false, blockComment = false, specialTag = false, value = false,
+		escapeChar = false;
+
+	blockComment = (node->prevNode != NULL) ? node->prevNode->bBlockComment : false;
+
+	uint32_t comm[5] = { 0 };
+	
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	{
+		if ((i == node->curx) && (node->freeSpaceLen > 0))
+		{
+			i += node->freeSpaceLen;
+			--i;
+			--j;
+			continue;
+		}
+		node->syntax[j] = colors[tcTEXT];
+
+
+		const wchar_t ch = node->line[i];
+		
+		if (quoteMode)
+		{
+			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
+			if (skip)
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = false;
+			}
+			else if (ch == L'\\')
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = true;
+			}
+			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
+			{
+				quoteMode = false;
+			}
+			continue;
+		}
+		else if (isZero)
+		{
+			isZero = false;
+			if (ch == L'x')
+			{
+				letter = false;
+				hex = true;
+				node->syntax[j] = colors[tcHEX];
+				continue;
+			}
+			if ((ch >= L'0') && (ch <= '7'))
+			{
+				octal = true;
+			}
+		}
+		else if (blockComment)
+		{
+			node->syntax[j] = colors[tcCOMMENT_BLOCK];
+			if (ch == L'-')
+			{
+				if (comm[3] == 0)
+				{
+					comm[0] = j;
+					comm[3] = 1;
+				}
+				else if (comm[4] == 0)
+				{
+					comm[1] = j;
+					comm[4] = 1;
+				}
+			}
+			else if ((ch == '>') && comm[3] && comm[4])
+			{
+				blockComment = false;
+			}
+			else
+			{
+				comm[3] = comm[4] = 0;
+			}
+		}
+		else if (escapeChar)
+		{
+			node->syntax[j] = colors[tcESCAPE];
+			if (ch == L';')
+			{
+				escapeChar = false;
+			}
+		}
+		else if (specialTag)
+		{
+			node->syntax[j] = colors[tcKEYWORD];
+			if (ch == L'?')
+			{
+				specialTag = false;
+			}
+		}
+		else if (tagEnd)
+		{
+			node->syntax[j] = colors[tcKEYWORD];
+			if (ch == '>')
+			{
+				tagEnd = false;
+				tagMode = false;
+			}
+		}
+		else if (tagMode)
+		{
+			node->syntax[j] = colors[value ? tcXML_ID : tcKEYWORD];
+			if (firstTag)
+			{
+				firstTag = false;
+				if (ch == L'?')
+				{
+					specialTag = true;
+				}
+				else if (ch == L'/')
+				{
+					tagEnd = true;
+				}
+				else if (ch == L'!')
+				{
+					comm[1] = j;
+					comm[3] = 1;
+				}
+			}
+			else
+			{
+				if (ch == L'-')
+				{
+					if (comm[3] && comm[4])
+					{
+						blockComment = true;
+						node->syntax[j]       = colors[tcCOMMENT_BLOCK];
+						node->syntax[comm[2]] = colors[tcCOMMENT_BLOCK];
+						node->syntax[comm[1]] = colors[tcCOMMENT_BLOCK];
+						node->syntax[comm[0]] = colors[tcCOMMENT_BLOCK];
+
+						comm[3] = comm[4] = 0;
+					}
+					else
+					{
+						comm[2] = j;
+						comm[4] = 1;
+					}
+				}
+				else if (ch == L'>')
+				{
+					tagMode = false;
+					node->syntax[j] = colors[tcKEYWORD];
+				}
+				else
+				{
+					comm[3] = comm[4] = 0;
+				}
+			}
+		}
+		else if (ch == L'<')
+		{
+			tagMode  = true;
+			firstTag = true;
+			comm[0]  = j;
+			node->syntax[j] = colors[tcKEYWORD];
+			value = false;
+		}
+		
+		switch (ch)
+		{
+			case '&':
+				node->syntax[j] = colors[tcESCAPE];
+				escapeChar = true;
+				break;
+			case L'.':
+			case L',':
+			case L'=':
+				node->syntax[j] = colors[tcPUNCTUATION];
+				/* fall through */
+			case L' ':
+			case L'\t':
+				letter = false;
+				value = true;
+				break;
+			case L'\'':
+				littleQuote = true;
+				/* fall through */
+			case L'"':
+				quoteMode = true;
+				letter = false;
+				node->syntax[j] = colors[tcSTRING_QUOTE];
+				break;
+			default:
+				if (hex)
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
+					{
+						node->syntax[j] = colors[tcNUMBER];
+					}
+					else
+					{
+						hex = false;
+					}
+				}
+				else if (isZero || octal)
+				{
+					isZero = false;
+					if (!letter && ((ch >= L'0') && (ch <= '7')))
+					{
+						octal = true;
+						node->syntax[j] = colors[tcOCT];
+					}
+					else
+					{
+						octal = false;
+					}
+				}
+				else if ((ch >= L'0') && (ch <= L'9'))
+				{
+					if (!letter)
+					{
+						isZero = (ch == L'0');
+						node->syntax[j] = colors[tcNUMBER];
+					}
+				}
+				else
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+				}
+		}
+	}
+
+	node->bBlockComment = blockComment;
+
 	return true;
 }
 

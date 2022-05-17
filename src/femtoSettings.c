@@ -86,7 +86,8 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 			[tcMD_CONETEXT]     = FOREGROUND_RED | FOREGROUND_GREEN,
 			[tcMD_BRACKET]      = FOREGROUND_GREEN,
 			[tcMD_BRACKETPIC]   = FOREGROUND_INTENSITY | FOREGROUND_GREEN,
-			[tcMD_LINK]         = FOREGROUND_INTENSITY | FOREGROUND_BLUE
+			[tcMD_LINK]         = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
+			[tcXML_ID]          = FOREGROUND_INTENSITY | FOREGROUND_RED
 		},
 		.syntaxTokens = {
 			[tcTEXT]            = "text",
@@ -111,7 +112,8 @@ void femtoSettings_reset(femtoSettings_t * restrict self)
 			[tcMD_CONETEXT]     = "MDconeText",
 			[tcMD_BRACKET]      = "MDbracket",
 			[tcMD_BRACKETPIC]   = "MDbracketPicture",
-			[tcMD_LINK]         = "MDlink"
+			[tcMD_LINK]         = "MDlink",
+			[tcXML_ID]          = "XMLid"
 		},
 
 		.lastErr = { 0 }

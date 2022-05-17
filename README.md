@@ -180,12 +180,12 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 	* [ ] More syntax highlighting
 		* [ ] Python
 		* [ ] JavaScript
-		* [ ] JSON
+		* [x] JSON
 		* [ ] CSS
 		* [ ] XML-like
-			* [ ] XML
+			* [x] XML
 			* [ ] HTML
-			* [ ] SVG
+			* [x] SVG
 
 * 1.6
 	* [x] Fix indentation bug

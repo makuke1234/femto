@@ -535,6 +535,18 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 			femtoLine_free(lastcurnode);
 			self->data.bUpdateAll = true;
 		}
+		else if (lastcurnode->prevNode != NULL)
+		{
+			if (self->data.pcury == lastcurnode)
+			{
+				self->data.pcury = self->data.pcury->prevNode;
+			}
+			self->data.currentNode = lastcurnode->prevNode;
+			self->data.currentNode->nextNode = NULL;
+
+			femtoLine_free(lastcurnode);
+			self->data.bUpdateAll = true;
+		}
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
