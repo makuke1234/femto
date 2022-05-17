@@ -161,6 +161,12 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 ### C++
 ![!C++ syntax](./images/syntaxCPP.png)
 
+### JavaScript
+![!JS syntax](./images/syntaxJS.png)
+
+### Python
+![!PY syntax](./images/syntaxPY.png)
+
 ### Markdown
 ![!MD syntax](./images/syntaxMD.png)
 
@@ -187,9 +193,9 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
 
 * 1.7.1 (planned)
-	* [ ] More syntax highlighting
-		* [ ] Python
-		* [ ] JavaScript
+	* [x] More syntax highlighting
+		* [x] Python
+		* [x] JavaScript
 		* [x] CSS
 		* [x] XML-like
 			* [x] HTML

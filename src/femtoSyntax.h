@@ -3,7 +3,19 @@
 
 #include "common.h"
 
-#define MAX_KWBUF 20
+#define MAX_KWBUF 25
+
+#define MAX_C_TOKEN_MEM 169
+#define MAX_C_TOKEN_WORD 14
+
+#define MAX_CPP_TOKEN_MEM 289
+#define MAX_CPP_TOKEN_WORD 16
+
+#define MAX_PY_TOKEN_MEM 393
+#define MAX_PY_TOKEN_WORD 21
+
+#define MAX_JS_TOKEN_MEM 100
+#define MAX_JS_TOKEN_WORD 20
 
 struct femtoLineNode;
 
@@ -33,6 +45,8 @@ typedef void (*tokeniserFunc_t)(struct femtoLineNode * restrict node, uint32_t s
 
 void checkCToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
 void checkCPPToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
+void checkPyToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
+void checkJSToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
 
 bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restrict colors);
 bool fSyntaxParseCLike(struct femtoLineNode * restrict node, const WORD * restrict colors, tokeniserFunc_t func);
@@ -40,7 +54,6 @@ bool fSyntaxParseMd(struct femtoLineNode * restrict node, const WORD * restrict 
 
 bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict colors);
 
-bool fSyntaxParseJS(struct femtoLineNode * restrict node, const WORD * restrict colors);
 bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restrict colors);
 bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict colors);
 

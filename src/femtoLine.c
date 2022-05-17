@@ -538,7 +538,7 @@ bool femtoLine_updateSyntax(
 	case fstxPY:
 		return fSyntaxParsePy(node, colors);
 	case fstxJS:
-		return fSyntaxParseJS(node, colors);
+		return fSyntaxParseCLike(node, colors, &checkJSToken);
 	case fstxJSON:
 		return fSyntaxParseJSON(node, colors);
 	case fstxCSS:

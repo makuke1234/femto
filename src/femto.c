@@ -408,6 +408,9 @@ static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar_t * re
 }
 static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar_t * restrict tempstr, bool forceClose)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+
 	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", peditor->file->fileName);
 }
 

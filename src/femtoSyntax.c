@@ -2,6 +2,7 @@
 #include "femtoLine.h"
 #include "femtoSettings.h"
 #include "femtoFile.h"
+#include "femtoStatHashmap.h"
 
 
 enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
@@ -94,7 +95,7 @@ const char * fSyntaxName(enum femtoSyntax fs)
 		[fstxSVG]  = "Scalable Vector Graphics (SVG)"
 	};
 
-	assert(fs <= fstxSIZE);
+	assert(fs < fstxSIZE);
 	return syntaxes[fs];
 }
 bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
@@ -115,26 +116,13 @@ bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
 
 void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
 {
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
+	static size_t memory[MAX_C_TOKEN_MEM];
 
-	struct keyword
-	{
-		uint8_t len;
-		const wchar_t ** words;
-	};
-
-	static const wchar_t * keywordsLen2[] = {
+	static const wchar_t * keyWords[] = {
 		L"do",
-		L"if"
-	};
-	static const wchar_t * keywordsLen3[] = {
+		L"if",
 		L"for",
-		L"int"
-	};
-	static const wchar_t * keywordsLen4[] = {
+		L"int",
 		L"auto",
 		L"case",
 		L"char",
@@ -143,20 +131,14 @@ void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti
 		L"long",
 		L"void",
 		L"goto",
-
-		L"bool"
-	};
-	static const wchar_t * keywordsLen5[] = {
+		L"bool",
 		L"break",
 		L"const",
 		L"float",
 		L"short",
 		L"union",
 		L"while",
-
-		L"_Bool"
-	};
-	static const wchar_t * keywordsLen6[] = {
+		L"_Bool",
 		L"double",
 		L"extern",
 		L"inline",
@@ -165,76 +147,42 @@ void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti
 		L"sizeof",
 		L"static",
 		L"struct",
-		L"switch"
-	};
-	static const wchar_t * keywordsLen7[] = {
+		L"switch",
 		L"default",
-
 		L"_Atomic",
-
 		L"alignas",
 		L"alignof",
 		L"complex",
-		L"typedef"
-	};
-	static const wchar_t * keywordsLen8[] = {
+		L"typedef",
 		L"continue",
 		L"register",
 		L"restrict",
 		L"unsigned",
 		L"volatile",
-
 		L"_Alignas",
 		L"_Alignof",
 		L"_Complex",
 		L"_Generic",
-
-		L"noreturn"
-	};
-	static const wchar_t * keywordsLen9[] = {
+		L"noreturn",
 		L"_Noreturn",
-
-		L"imaginary"
-	};
-	static const wchar_t * keywordsLen10[] = {
+		L"imaginary",
 		L"_Decimal64",
 		L"_Decimal32",
-		L"_Imaginary"
-	};
-	static const wchar_t * keywordsLen11[] = {
-		L"_Decimal128"
-	};
-	static const wchar_t * keywordsLen12[] = {
-		L"thread_local"
-	};
-	static const wchar_t * keywordsLen13[] = {
+		L"_Imaginary",
+		L"_Decimal128",
+		L"thread_local",
 		L"_Thread_local",
-
-		L"static_assert"
-	};
-	static const wchar_t * keywordsLen14[] = {
+		L"static_assert",
 		L"_Static_assert"
 	};
+	static fHash_t map = { 0 };
+	
+	if ((lasti - start) < 1)
+	{
+		return;
+	}
 
-	static const struct keyword words[] = {
-		[2]  = { .len = ARRAYSIZE(keywordsLen2),  .words = keywordsLen2  },
-		[3]  = { .len = ARRAYSIZE(keywordsLen3),  .words = keywordsLen3  },
-		[4]  = { .len = ARRAYSIZE(keywordsLen4),  .words = keywordsLen4  },
-		[5]  = { .len = ARRAYSIZE(keywordsLen5),  .words = keywordsLen5  },
-		[6]  = { .len = ARRAYSIZE(keywordsLen6),  .words = keywordsLen6  },
-		[7]  = { .len = ARRAYSIZE(keywordsLen7),  .words = keywordsLen7  },
-		[8]  = { .len = ARRAYSIZE(keywordsLen8),  .words = keywordsLen8  },
-		[9]  = { .len = ARRAYSIZE(keywordsLen9),  .words = keywordsLen9  },
-		[10] = { .len = ARRAYSIZE(keywordsLen10), .words = keywordsLen10 },
-		[11] = { .len = ARRAYSIZE(keywordsLen11), .words = keywordsLen11 },
-		[12] = { .len = ARRAYSIZE(keywordsLen12), .words = keywordsLen12 },
-		[13] = { .len = ARRAYSIZE(keywordsLen13), .words = keywordsLen13 },
-		[14] = { .len = ARRAYSIZE(keywordsLen14), .words = keywordsLen14 }
-	};
-	static const uint32_t wordLens[] = {
-		14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
-	};
-	static const size_t nwordLens = ARRAYSIZE(wordLens);
+	fHash_initData(&map, memory, sizeof(size_t) * MAX_C_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -253,46 +201,32 @@ void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < nwordLens; ++i)
+	for (uint32_t i = 0; i < (MAX_C_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = wordLens[nwordLens - i - 1];
-		if ((n > filled) || ((filled - n) > 2))
+		const uint32_t n = MAX_C_TOKEN_WORD - i;
+		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
-		for (uint32_t j = 0; j < words[n].len; ++j)
+		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			if (wcscmp(kwBuf + (MAX_KWBUF - 1) - n, words[n].words[j]) == 0)
+			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
+			for (uint32_t k = 0; k < n; --l, ++k)
 			{
-				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-				for (uint32_t k = 0; k < n; --l, ++k)
-				{
-					node->syntax[l] = kwCol;
-				}
-				return;
+				node->syntax[l] = kwCol;
 			}
+			return;
 		}
 	}
 }
 void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
 {
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
+	static size_t memory[MAX_CPP_TOKEN_MEM];
 
-	struct keyword
-	{
-		uint8_t len;
-		const wchar_t ** words;
-	};
-
-	static const wchar_t * keywordsLen2[] = {
+	static const wchar_t * keyWords[] = {
 		L"do",
 		L"if",
-		L"or"
-	};
-	static const wchar_t * keywordsLen3[] = {
+		L"or",
 		L"for",
 		L"int",
 		L"and",
@@ -300,9 +234,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"new",
 		L"not",
 		L"xor",
-		L"try"
-	};
-	static const wchar_t * keywordsLen4[] = {
+		L"try",
 		L"auto",
 		L"case",
 		L"char",
@@ -313,9 +245,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"goto",
 		L"this",
 		L"bool",
-		L"true"
-	};
-	static const wchar_t * keywordsLen5[] = {
+		L"true",
 		L"break",
 		L"const",
 		L"float",
@@ -330,9 +260,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"or_eq",
 		L"throw",
 		L"using",
-		L"final"
-	};
-	static const wchar_t * keywordsLen6[] = {
+		L"final",
 		L"double",
 		L"extern",
 		L"inline",
@@ -352,9 +280,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"typeid",
 		L"xor_eq",
 		L"import",
-		L"module"
-	};
-	static const wchar_t * keywordsLen7[] = {
+		L"module",
 		L"alignas",
 		L"alignof",
 		L"char8_t",
@@ -365,9 +291,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"private",
 		L"typedef",
 		L"virtual",
-		L"wchar_t"
-	};
-	static const wchar_t * keywordsLen8[] = {
+		L"wchar_t",
 		L"char16_t",
 		L"char32_t",
 		L"continue",
@@ -383,52 +307,29 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"typename",
 		L"unsigned",
 		L"volatile",
-		L"override"
-	};
-	static const wchar_t * keywordsLen9[] = {
+		L"override",
 		L"consteval",
 		L"constexpr",
 		L"constinit",
 		L"co_return",
 		L"namespace",
-		L"protected"
-	};
-	static const wchar_t * keywordsLen10[] = {
-		L"const_cast"
-	};
-	static const wchar_t * keywordsLen11[] = {
-		L"static_cast"
-	};
-	static const wchar_t * keywordsLen12[] = {
+		L"protected",
+		L"const_cast",
+		L"static_cast",
 		L"dynamic_cast",
-		L"thread_local"
-	};
-	static const wchar_t * keywordsLen13[] = {
-		L"static_assert"
-	};
-	static const wchar_t * keywordsLen16[] = {
+		L"thread_local",
+		L"static_assert",
 		L"reinterpret_cast"
 	};
+	static fHash_t map = { 0 };
 
-	static const struct keyword words[] = {
-		[2]  = { .len = ARRAYSIZE(keywordsLen2),  .words = keywordsLen2  },
-		[3]  = { .len = ARRAYSIZE(keywordsLen3),  .words = keywordsLen3  },
-		[4]  = { .len = ARRAYSIZE(keywordsLen4),  .words = keywordsLen4  },
-		[5]  = { .len = ARRAYSIZE(keywordsLen5),  .words = keywordsLen5  },
-		[6]  = { .len = ARRAYSIZE(keywordsLen6),  .words = keywordsLen6  },
-		[7]  = { .len = ARRAYSIZE(keywordsLen7),  .words = keywordsLen7  },
-		[8]  = { .len = ARRAYSIZE(keywordsLen8),  .words = keywordsLen8  },
-		[9]  = { .len = ARRAYSIZE(keywordsLen9),  .words = keywordsLen9  },
-		[10] = { .len = ARRAYSIZE(keywordsLen10), .words = keywordsLen10 },
-		[11] = { .len = ARRAYSIZE(keywordsLen11), .words = keywordsLen11 },
-		[12] = { .len = ARRAYSIZE(keywordsLen12), .words = keywordsLen12 },
-		[13] = { .len = ARRAYSIZE(keywordsLen13), .words = keywordsLen13 },
-		[16] = { .len = ARRAYSIZE(keywordsLen16), .words = keywordsLen16 }
-	};
-	static const uint32_t wordLens[] = {
-		16, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
-	};
-	static const size_t nwordLens = ARRAYSIZE(wordLens);
+
+	if ((lasti - start) < 1)
+	{
+		return;
+	}
+
+	fHash_initData(&map, memory, sizeof(size_t) * MAX_CPP_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -447,25 +348,257 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < nwordLens; ++i)
+	for (uint32_t i = 0; i < (MAX_CPP_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = wordLens[nwordLens - i - 1];
+		const uint32_t n = MAX_CPP_TOKEN_WORD - i;
+		if ((n > filled) || ((filled - n) > 1))
+		{
+			continue;
+		}
+		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		{
+			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
+			for (uint32_t k = 0; k < n; --l, ++k)
+			{
+				node->syntax[l] = kwCol;
+			}
+			return;
+		}
+	}
+}
+void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+{
+	static size_t memory[MAX_PY_TOKEN_MEM];
+
+	static const wchar_t * keyWords[] = {
+		L"and",
+		L"as",
+		L"assert",
+		L"break",
+		L"class",
+		L"continue",
+		L"def",
+		L"del",
+		L"elif",
+		L"else",
+		L"except",
+		L"False",
+		L"finally",
+		L"for",
+		L"from",
+		L"global",
+		L"if",
+		L"import",
+		L"in",
+		L"is",
+		L"lambda",
+		L"None",
+		L"nonlocal",
+		L"not",
+		L"or",
+		L"pass",
+		L"raise",
+		L"return",
+		L"True",
+		L"while",
+		L"with",
+		L"yield",
+
+		L"abs",
+		L"all",
+		L"any",
+		L"ascii",
+		L"bin",
+		L"bool",
+		L"bytearray",
+		L"bytes",
+		L"callable",
+		L"chr",
+		L"classmethod",
+		L"compile",
+		L"complex",
+		L"delattr",
+		L"dict",
+		L"dir",
+		L"divmod",
+		L"enumerate",
+		L"eval",
+		L"exec",
+		L"filter",
+		L"float",
+		L"format",
+		L"frozenset",
+		L"getattr",
+		L"globals",
+		L"hasattr",
+		L"hash",
+		L"help",
+		L"hex",
+		L"id",
+		L"input",
+		L"int",
+		L"isinstance",
+		L"issubclass",
+		L"iter",
+		L"len",
+		L"list",
+		L"locals",
+		L"map",
+		L"max",
+		L"memoryview",
+		L"min",
+		L"next",
+		L"object",
+		L"oct",
+		L"open",
+		L"ord",
+		L"pow",
+		L"print",
+		L"property",
+		L"range",
+		L"reversed",
+		L"round",
+		L"set",
+		L"setattr",
+		L"slice",
+		L"sorted",
+		L"staticmethod",
+		L"str",
+		L"sum",
+		L"super",
+		L"tuple",
+		L"type",
+		L"vars",
+		L"zip",
+
+		L"ArithmeticError",
+		L"AssertionError",
+		L"AttributeError",
+		L"Exception",
+		L"EOFError",
+		L"FloatingPointError",
+		L"GeneratorExit",
+		L"ImportError",
+		L"IndendationError",
+		L"IndexError",
+		L"KeyError",
+		L"KeyboardInterrupt",
+		L"LookupError",
+		L"MemoryError",
+		L"NameError",
+		L"NotImplementedError",
+		L"OSError",
+		L"OverflowError",
+		L"ReferenceError",
+		L"RuntimeError",
+		L"StopIteration",
+		L"SyntaxError",
+		L"TabError",
+		L"SystemError",
+		L"SystemExit",
+		L"TypeError",
+		L"UnboundLocalError",
+		L"UnicodeError",
+		L"UnicodeEncodeError",
+		L"UnicodeDecodeError",
+		L"UnicodeTranslateError",
+		L"ValueError",
+		L"ZeroDivisionError"
+	};
+	static fHash_t map = { 0 };
+
+
+	if ((lasti - start) < 1)
+	{
+		return;
+	}
+
+	fHash_initData(&map, memory, sizeof(size_t) * MAX_PY_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+
+	wchar_t kwBuf[MAX_KWBUF];
+	kwBuf[MAX_KWBUF - 1] = L'\0';
+
+	uint32_t filled = 0;
+	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	{
+		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		{
+			j -= (int32_t)node->freeSpaceLen;
+			continue;
+		}
+		kwBuf[i] = node->line[j];
+		--i;
+		--j;
+		++filled;
+	}
+
+	for (uint32_t i = 0; i < (MAX_PY_TOKEN_WORD - 1); ++i)
+	{
+		const uint32_t n = MAX_PY_TOKEN_WORD - i;
+		if ((n > filled) || ((filled - n) > 1))
+		{
+			continue;
+		}
+		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		{
+			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
+			for (uint32_t k = 0; k < n; --l, ++k)
+			{
+				node->syntax[l] = kwCol;
+			}
+			return;
+		}
+	}
+}
+void checkJSToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+{
+	static size_t memory[MAX_JS_TOKEN_MEM];
+
+	static const wchar_t * keyWords[] = {
+		L"reinterpret_cast"
+	};
+	static fHash_t map = { 0 };
+
+
+	if ((lasti - start) < 1)
+	{
+		return;
+	}
+
+	fHash_initData(&map, memory, sizeof(size_t) * MAX_JS_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+
+	wchar_t kwBuf[MAX_KWBUF];
+	kwBuf[MAX_KWBUF - 1] = L'\0';
+
+	uint32_t filled = 0;
+	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	{
+		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		{
+			j -= (int32_t)node->freeSpaceLen;
+			continue;
+		}
+		kwBuf[i] = node->line[j];
+		--i;
+		--j;
+		++filled;
+	}
+
+	for (uint32_t i = 0; i < (MAX_JS_TOKEN_WORD - 1); ++i)
+	{
+		const uint32_t n = MAX_JS_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 2))
 		{
 			continue;
 		}
-
-		for (uint32_t j = 0; j < words[n].len; ++j)
+		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			if (wcscmp(kwBuf + (MAX_KWBUF - 1) - n, words[n].words[j]) == 0)
+			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
+			for (uint32_t k = 0; k < n; --l, ++k)
 			{
-				int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-				for (uint32_t k = 0; k < n; --l, ++k)
-				{
-					node->syntax[l] = kwCol;
-				}
-				return;
+				node->syntax[l] = kwCol;
 			}
+			return;
 		}
 	}
 }
@@ -922,13 +1055,225 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 
 bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict colors)
 {
+	if (!fSyntaxParseAutoAlloc(node))
+	{
+		return false;
+	}
+
+	uint32_t tokenStart = 0;
+	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
+		isZero = false, hex = false, octal = false, comment = false, blockComment = false,
+		preComment = false, firstQuote = false;
+	
+	littleQuote  = (node->prevNode != NULL) ? ((node->prevNode->userValue >> 1) & 1) : false;
+	blockComment = (node->prevNode != NULL) ? (node->prevNode->userValue & 1) : false;
+
+	uint32_t previ = 0, prevprevi = UINT32_MAX;
+	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	{
+		if ((i == node->curx) && (node->freeSpaceLen > 0))
+		{
+			i += node->freeSpaceLen;
+			--i;
+			--j;
+			continue;
+		}
+		node->syntax[j] = colors[tcTEXT];
+
+
+		const wchar_t ch = node->line[i];
+		
+		if (blockComment)
+		{
+			if ((j > 1) && (prevprevi != UINT32_MAX) && ((!littleQuote && (ch == L'"') && (node->line[previ] == L'"') && (node->line[prevprevi] == L'"')) ||
+				(littleQuote && (ch == L'\'') && (node->line[previ] == L'\'') && (node->line[prevprevi] == L'\''))) )
+			{
+				blockComment = false;
+				littleQuote = false;
+				tokenStart = i;
+			}
+			node->syntax[j] = colors[tcCOMMENT_BLOCK];
+			prevprevi = previ;
+			previ = i;
+			continue;
+		}
+		else if (comment)
+		{
+			node->syntax[j] = colors[tcCOMMENT_LINE];
+			previ = i;
+			continue;
+		}
+		else if (quoteMode)
+		{
+			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
+			if (skip)
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = false;
+			}
+			else if (ch == L'\\')
+			{
+				node->syntax[j] = colors[tcESCAPE];
+				skip = true;
+			}
+			else if ((!littleQuote && (ch == L'"')) || (littleQuote && (ch == L'\'')))
+			{
+				if (firstQuote)
+				{
+					preComment = true;
+				}
+				else
+				{
+					littleQuote = false;
+				}
+				quoteMode = false;
+				tokenStart = i;
+			}
+			previ = i;
+			firstQuote = false;
+			continue;
+		}
+		else if (preComment)
+		{
+			preComment = false;
+			if ((littleQuote && (ch == L'\'')) || (!littleQuote && (ch == L'"')))
+			{
+				prevprevi = UINT32_MAX;
+				blockComment = true;
+				node->syntax[j-2] = colors[tcCOMMENT_BLOCK];
+				node->syntax[j-1] = colors[tcCOMMENT_BLOCK];
+				node->syntax[j]   = colors[tcCOMMENT_BLOCK];
+				previ = i;
+			}
+			continue;
+		}
+		else if (ch == L'#')
+		{
+			comment = true;
+			node->syntax[j] = colors[tcCOMMENT_LINE];
+			previ = i;
+			continue;
+		}
+		else if (isZero)
+		{
+			isZero = false;
+			if (ch == L'x')
+			{
+				letter = false;
+				hex = true;
+				node->syntax[j] = colors[tcHEX];
+				previ = i;
+				continue;
+			}
+			if ((ch >= L'0') && (ch <= L'7'))
+			{
+				octal = true;
+			}
+		}
+		
+		switch (ch)
+		{
+			case L'(':
+			case L')':
+			case L'{':
+			case L'}':
+			case L'[':
+			case L']':
+			case L'.':
+			case L',':
+			case L'*':
+			case L'+':
+			case L'-':
+			case L'/':
+			case L'&':
+			case L'|':
+			case L'<':
+			case L'>':
+			case L'=':
+			case L';':
+			case L':':
+				node->syntax[j] = colors[tcPUNCTUATION];
+				/* fall through */
+			case L' ':
+			case L'\t':
+				letter = false;
+				checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+				tokenStart = i;
+				break;
+			case L'\'':
+				littleQuote = true;
+				quoteMode = true;
+				firstQuote = true;
+				letter = false;
+				node->syntax[j] = colors[tcCHARACTER_QUOTE];
+				break;
+			case L'"':
+				quoteMode = true;
+				firstQuote = true;
+				letter = false;
+				node->syntax[j] = colors[tcSTRING_QUOTE];
+				break;
+			default:
+				if (hex)
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
+					{
+						node->syntax[j] = colors[tcNUMBER];
+					}
+					else
+					{
+						hex = false;
+						tokenStart = i;
+					}
+				}
+				else if (isZero || octal)
+				{
+					isZero = false;
+					if (!letter && ((ch >= L'0') && (ch <= '7')))
+					{
+						octal = true;
+						node->syntax[j] = colors[tcOCT];
+					}
+					else
+					{
+						octal = false;
+						tokenStart = i;
+					}
+				}
+				else if ((ch >= L'0') && (ch <= L'9'))
+				{
+					if (!letter)
+					{
+						isZero = (ch == L'0');
+						node->syntax[j] = colors[tcNUMBER];
+						tokenStart = i;
+					}
+				}
+				else
+				{
+					const wchar_t lch = (wchar_t)towlower(ch);
+					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+					if (!letter)
+					{
+						tokenStart = i;
+					}
+				}
+		}
+
+		previ = i;
+	}
+
+	if (!blockComment && !comment && !quoteMode)
+	{
+		checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+	}
+
+	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)littleQuote << 1) & 0x02));
+
 	return true;
 }
 
-bool fSyntaxParseJS(struct femtoLineNode * restrict node, const WORD * restrict colors)
-{
-	return true;
-}
 bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
@@ -1098,7 +1443,7 @@ bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict
 			previ = i;
 			continue;
 		}
-		if (quoteMode)
+		else if (quoteMode)
 		{
 			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
 			if (skip)
@@ -1238,7 +1583,7 @@ bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict
 		previ = i;
 	}
 
-	node->userValue = blockComment | ((propertyMode << 1) & 0x02);
+	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)propertyMode << 1) & 0x02));
 
 	return true;
 }
