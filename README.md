@@ -164,6 +164,12 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 ### Markdown
 ![!MD syntax](./images/syntaxMD.png)
 
+### XML
+![!XML syntax](./images/syntaxXML.png)
+
+### JSON
+![!JSON syntax](./images/syntaxJSON.png)
+
 
 # Changelog
 
@@ -174,20 +180,24 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
 
-* 1.7 (planned)
-	* [x] Syntax highlighting customisable
-	* [x] Custom color palette
+* 1.7.1 (planned)
 	* [ ] More syntax highlighting
 		* [ ] Python
 		* [ ] JavaScript
-		* [x] JSON
 		* [ ] CSS
 		* [ ] XML-like
-			* [x] XML
 			* [ ] HTML
+
+* 1.7
+	* [x] Syntax highlighting customisable
+	* [x] More language support
+		* [x] JSON
+		* [x] XML-like
+			* [x] XML
 			* [x] SVG
+	* [x] Custom color palette
 	* [x] Possibility to delete last line
-	* [ ] Fix crash when deleting first line
+	* [x] Fix crash when deleting first line
 
 * 1.6
 	* [x] Fix indentation bug
