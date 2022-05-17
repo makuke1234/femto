@@ -186,6 +186,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 			* [x] XML
 			* [ ] HTML
 			* [x] SVG
+	* [x] Possibility to delete last line
+	* [ ] Fix crash when deleting first line
 
 * 1.6
 	* [x] Fix indentation bug
