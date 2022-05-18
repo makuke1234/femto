@@ -186,6 +186,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.8 (planned)
+	* [x] Add horizontal scrolling support while holding the <kbd>Shift</kbd> key
 	* [ ] Search support, also search result highlighting
 	* [ ] Practical multi-file support, tabs' system
 	* [ ] Proper text copying/pasting support

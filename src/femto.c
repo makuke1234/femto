@@ -810,8 +810,9 @@ bool femto_loop(femtoData_t * restrict peditor)
 	{
 		wchar_t tempstr[MAX_STATUS];
 		bool draw = true;
+		bool shift = (GetAsyncKeyState(VK_LSHIFT) & 0x8000) || (GetAsyncKeyState(VK_RSHIFT) & 0x8000);
 
-		if (ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED)
+		if ((ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED) && !shift)
 		{
 			static int32_t s_delta = 0;
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
@@ -828,7 +829,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
 		}
-		else if (ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED)
+		else if ((ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED) || ((ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED) && shift))
 		{
 			static int32_t s_delta = 0;
 			int32_t delta = (int32_t)(int16_t)HIWORD(ir.Event.MouseEvent.dwButtonState);
@@ -840,10 +841,10 @@ bool femto_loop(femtoData_t * restrict peditor)
 			if (chDelta != 0)
 			{
 				s_delta -= chDelta * WHEEL_DELTA;
-				femtoFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
+				femtoFile_scrollHor(pfile, peditor->scrbuf.w, -chDelta);
 				femtoData_refreshThread(peditor);
 			}
-			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
+			swprintf_s(tempstr, MAX_STATUS, L"'HWHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
 		}
 		// Mouse click
 		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
