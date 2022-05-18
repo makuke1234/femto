@@ -415,22 +415,13 @@ static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar_t 
 	{
 		uint32_t realLen = 0;
 
-		realLen += (uint32_t)swprintf_s(tempstr, MAX_STATUS, L"Unsaved file(s): ");
+		realLen += (uint32_t)swprintf_s(tempstr, MAX_STATUS, L"File ");
 
 		// Scan for any unsaved work
-		bool unsavedAny = false;
-		for (size_t i = 0; i < peditor->filesSize; ++i)
+		femtoFile_checkUnsaved(peditor->files[peditor->fileIdx], NULL, NULL);
+		if (peditor->files[peditor->fileIdx]->bUnsaved && (realLen < MAX_STATUS))
 		{
-			femtoFile_t * f = peditor->files[i];
-			femtoFile_checkUnsaved(f, NULL, NULL);
-			if (f->bUnsaved && (realLen < MAX_STATUS))
-			{
-				unsavedAny = true;
-				realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s; ", f->fileName);
-			}
-		}
-		if (unsavedAny)
-		{
+			realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s is unsaved; ", peditor->files[peditor->fileIdx]->fileName);
 			if (realLen < MAX_STATUS)
 			{
 				swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm closing", L"Ctrl+Shift+W");
