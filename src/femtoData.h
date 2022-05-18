@@ -28,12 +28,12 @@ typedef struct femtoData
 		CHAR_INFO * mem;
 		uint32_t w, h;
 	} scrbuf;
-	COORD cursorpos;
 
-	size_t filesSize, filesMax;
+	uint32_t filesSize, filesMax;
 	femtoFile_t ** files;
+	COORD * cursorpos;
 
-	femtoFile_t * file;
+	int32_t fileIdx;
 
 	femtoSettings_t settings;
 
@@ -90,6 +90,22 @@ void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict 
  * @param self Pointer to femtoData_t structure
  */
 void femtoData_statusRefresh(femtoData_t * restrict self);
+
+/**
+ * @brief Creates a new tab with desired fileName
+ * 
+ * @param self Pointer to femtoData_t structure
+ * @param fileName File name
+ * @return true Success
+ * @return false Failure
+ */
+bool femtoData_openTab(femtoData_t * restrict self, const wchar_t * restrict fileName);
+/**
+ * @brief Closes the current active tab
+ * 
+ * @param self Pointer to femtoData_t structure
+ */
+void femtoData_closeTab(femtoData_t * restrict self);
 
 /**
  * @brief Destroys editor's data structure, frees memory

@@ -45,15 +45,11 @@ int wmain(int argc, const wchar_t * argv[])
 	}
 
 
-	if (!femtoFile_open(editor.file, editor.settings.fileName, false))
+	if (!femtoData_openTab(&editor, editor.settings.fileName))
 	{
 		femto_printErr(ferrFILE);
 		return 3;
 	}
-	femtoFile_close(editor.file);
-
-	// Set console title
-	femtoFile_setConTitle(editor.file);
 
 	if (!femtoData_init(&editor))
 	{
@@ -64,20 +60,19 @@ int wmain(int argc, const wchar_t * argv[])
 	{
 		wchar_t tempstr[MAX_STATUS];
 		const wchar_t * res;
-		if ((res = femtoFile_read(editor.file)) != NULL)
+		if ((res = femtoFile_read(editor.files[editor.fileIdx])) != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);
 		}
 		else
 		{
 			swprintf_s(
-				tempstr,
-				MAX_STATUS,
+				tempstr, MAX_STATUS,
 				L"File loaded successfully! %s%s EOL sequences; Settings file: %s; Syntax: %S",
-				(editor.file->eolSeq & eolCR) ? L"CR" : L"",
-				(editor.file->eolSeq & eolLF) ? L"LF" : L"",
+				(editor.files[editor.fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
+				(editor.files[editor.fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
 				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-",
-				fSyntaxName(editor.file->syntax)
+				fSyntaxName(editor.files[editor.fileIdx]->syntax)
 			);
 		}
 		femtoData_statusDraw(&editor, tempstr, NULL);

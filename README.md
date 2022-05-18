@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~6100 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~6200 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -188,7 +188,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 * 1.8 (planned)
 	* [x] Add horizontal scrolling support while holding the <kbd>Shift</kbd> key
 	* [ ] Search support, also search result highlighting
-	* [ ] Practical multi-file support, tabs' system
+	* [x] Practical multi-file support, tabs' system
+	* [ ] Switching between tabs
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~

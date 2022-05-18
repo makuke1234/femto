@@ -16,23 +16,21 @@ bool femtoData_reset(femtoData_t * restrict self)
 			.w      = 0,
 			.h      = 0
 		},
-		.cursorpos = { 0, 0 },
-		.filesSize = 1,
+		.filesSize = 0,
 		.filesMax  = 1,
 		.files     = malloc(sizeof(femtoFile_t *)),
-		.file      = NULL
+		.cursorpos = malloc(sizeof(COORD)),
+		.fileIdx   = -1
 	};
 
-	if (self->files == NULL)
+	if ((self->files == NULL) || (self->cursorpos == NULL))
 	{
+		free(self->files);
+		free(self->cursorpos);
 		return false;
 	}
-	// Allocate memory for 1 file
-	if ((self->files[0] = femtoFile_resetDyn()) == NULL)
-	{
-		return false;
-	};
-	self->file = self->files[0];
+
+	self->cursorpos[0] = (COORD){ 0, 0 };
 
 	femtoSettings_reset(&self->settings);
 
@@ -284,6 +282,92 @@ void femtoData_statusRefresh(femtoData_t * restrict self)
 	);
 }
 
+bool femtoData_openTab(femtoData_t * restrict self, const wchar_t * restrict fileName)
+{
+	assert(self != NULL);
+	assert(fileName != NULL);
+
+	// Reallocate tabs
+	if (self->filesSize >= self->filesMax)
+	{
+		const uint32_t newcap = (self->filesSize + 1) * 2;
+		void * mem = realloc(self->files, sizeof(femtoFile_t *) * newcap);
+		if (mem == NULL)
+		{
+			return false;
+		}
+
+		self->files    = mem;
+
+		mem = realloc(self->cursorpos, sizeof(COORD) * newcap);
+		if (mem == NULL)
+		{
+			return false;
+		}
+
+		self->cursorpos = mem;
+
+		self->filesMax = newcap;
+	}
+	
+	if ((self->files[self->filesSize] = femtoFile_resetDyn()) == NULL)
+	{
+		return false;
+	}
+	if (!femtoFile_open(self->files[self->filesSize], fileName, false))
+	{
+		return false;
+	}
+
+	self->fileIdx = (int32_t)self->filesSize;
+	++self->filesSize;
+
+	self->cursorpos[self->fileIdx] = (COORD) { 0, 0 };
+
+	femtoFile_close(self->files[self->fileIdx]);
+
+	// Set console title
+	femtoFile_setConTitle(self->files[self->fileIdx]);
+
+	return true;
+}
+void femtoData_closeTab(femtoData_t * restrict self)
+{
+	assert(self != NULL);
+	assert(self->fileIdx != -1);
+
+	femtoFile_t * file = self->files[self->fileIdx];
+	
+	// Remove file from tab list
+	--self->filesSize;
+	for (uint32_t i = (uint32_t)self->fileIdx; i < self->filesSize; ++i)
+	{
+		self->files[i]     = self->files[i + 1];
+		self->cursorpos[i] = self->cursorpos[i + 1];
+	}
+
+	// Select next tab to be active if possible, otherwise select previous, if only 1 is open, set to NULL
+	if ((self->fileIdx > 0) && (self->filesSize > 0))
+	{
+		--self->fileIdx;
+	}
+	else if (!((uint32_t)self->fileIdx < self->filesSize))
+	{
+		self->fileIdx = -1;
+	}
+
+	// Delete "file"
+	femtoFile_destroy(file);
+	free(file);
+
+	// Set console title back
+	if (self->fileIdx != -1)
+	{
+		femtoFile_setConTitle(self->files[self->fileIdx]);
+	}
+}
+
+
 void femtoData_destroy(femtoData_t * restrict self)
 {
 	assert(self != NULL);
@@ -303,7 +387,7 @@ void femtoData_destroy(femtoData_t * restrict self)
 		SetConsoleMode(self->conIn, self->prevConsoleMode);
 	}
 
-	self->file = NULL;
+	self->fileIdx = -1;
 	for (size_t i = 0; i < self->filesSize; ++i)
 	{
 		femtoFile_destroy(self->files[i]);

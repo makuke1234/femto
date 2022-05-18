@@ -369,7 +369,7 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 
 	femtoLine_destroy(&temp);
 
-	SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
+	SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos[peditor->fileIdx]);
 	return read;
 }
 
@@ -411,13 +411,45 @@ static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar_t 
 	assert(peditor != NULL);
 	assert(tempstr != NULL);
 
-	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", peditor->file->fileName);
+	if (!forceClose)
+	{
+		uint32_t realLen = 0;
+
+		realLen += (uint32_t)swprintf_s(tempstr, MAX_STATUS, L"Unsaved file(s): ");
+
+		// Scan for any unsaved work
+		bool unsavedAny = false;
+		for (size_t i = 0; i < peditor->filesSize; ++i)
+		{
+			femtoFile_t * f = peditor->files[i];
+			femtoFile_checkUnsaved(f, NULL, NULL);
+			if (f->bUnsaved && (realLen < MAX_STATUS))
+			{
+				unsavedAny = true;
+				realLen += (uint32_t)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s; ", f->fileName);
+			}
+		}
+		if (unsavedAny)
+		{
+			if (realLen < MAX_STATUS)
+			{
+				swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm closing", L"Ctrl+Shift+W");
+			}
+			return;
+		}
+	}
+
+	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", peditor->files[peditor->fileIdx]->fileName);
+	femtoData_closeTab(peditor);
+	
+	peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+	femtoData_refresh(peditor);
 }
 
 bool femto_loop(femtoData_t * restrict peditor)
 {
 	assert(peditor != NULL);
-	femtoFile_t * restrict pfile = peditor->file;
+	femtoFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
 
 	INPUT_RECORD ir;
@@ -501,11 +533,34 @@ bool femto_loop(femtoData_t * restrict peditor)
 				if (femto_askInput(peditor, inp, MAX_STATUS))
 				{
 					// Try to create new tab and open file
-					swprintf_s(tempstr, MAX_STATUS, L"Opened %s successfully!", inp);
+					const wchar_t * res;
+					const int32_t oldIdx = peditor->fileIdx;
+					if (femtoData_openTab(peditor, inp) && ((res = femtoFile_read(peditor->files[peditor->fileIdx])) == NULL) )
+					{
+						swprintf_s(
+							tempstr, MAX_STATUS,
+							L"Opened %s successfully %s%s EOL sequences; Syntax: %S!",
+							inp,
+							(peditor->files[peditor->fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
+							(peditor->files[peditor->fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
+							fSyntaxName(peditor->files[peditor->fileIdx]->syntax)
+						);
+						femtoData_refresh(peditor);
+					}
+					else if (res != NULL)
+					{
+						wcscpy_s(tempstr, MAX_STATUS, res);
+						femtoData_closeTab(peditor);
+						peditor->fileIdx = oldIdx;
+					}
+					else
+					{
+						swprintf_s(tempstr, MAX_STATUS, L"Failure while opening %s!", inp);
+					}
 				}
 				else
 				{
-					wcscpy_s(tempstr, MAX_STATUS, L"Opening canceled by user");
+					wcscpy_s(tempstr, MAX_STATUS, L"Open canceled by user");
 				}
 			}
 			else if ((key == sacCTRL_W) && (prevkey != sacCTRL_W))
@@ -994,7 +1049,7 @@ bool femto_updateScrbuf(femtoData_t * restrict peditor, uint32_t * curline)
 	assert(peditor != NULL);
 	assert(curline != NULL);
 	assert(peditor->scrbuf.mem != NULL);
-	femtoFile_t * restrict pfile = peditor->file;
+	femtoFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
 
 	// Count to current line
@@ -1043,7 +1098,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 {
 	assert(peditor != NULL);
 	assert(peditor->scrbuf.mem != NULL);
-	femtoFile_t * restrict pfile = peditor->file;
+	femtoFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
 
 	femtoLineNode_t * curnode = pfile->data.currentNode;
@@ -1103,7 +1158,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		GetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 
 		// Update cursor position
-		peditor->cursorpos = (COORD){ .X = (int16_t)curx, .Y = (int16_t)line };
+		peditor->cursorpos[peditor->fileIdx] = (COORD){ .X = (int16_t)curx, .Y = (int16_t)line };
 		// Make cursor visible, if necessary
 		if (cci.bVisible == FALSE)
 		{
@@ -1111,7 +1166,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 			SetConsoleCursorInfo(peditor->scrbuf.handle, &cci);
 		}
 
-		SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos);
+		SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos[peditor->fileIdx]);
 		drawCursor = true;
 	}
 
