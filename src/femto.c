@@ -524,7 +524,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				if (femto_askInput(peditor, inp, MAX_STATUS))
 				{
 					// Try to create new tab and open file
-					const wchar_t * res;
+					const wchar_t * res = NULL;
 					const int32_t oldIdx = peditor->fileIdx;
 					if (femtoData_openTab(peditor, inp) && ((res = femtoFile_read(peditor->files[peditor->fileIdx])) == NULL) )
 					{

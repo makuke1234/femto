@@ -30,6 +30,12 @@ $(TESTS)/bin:
 srcs = $(wildcard $(SRC)/*.c)
 srcs := $(subst $(SRC)/,,$(srcs))
 
+RSC_OBJ=$(wildcard $(SRC)/*.rc)
+RSC_OBJ:=$(RSC_OBJ:%.rc=%.rc.o)
+
+RSC_OBJ_R=$(RSC_OBJ:$(SRC)/%=$(OBJ)/%)
+RSC_OBJ_D=$(RSC_OBJ:$(SRC)/%=$(OBJD)/%)
+
 tests = $(wildcard $(TESTS)/*.c)
 tests := $(subst $(TESTS)/,,$(tests))
 TESTBINS = $(tests:%.c=$(TESTS)/bin/%)
@@ -50,7 +56,10 @@ objs_d = $(srcs:%=$(OBJD)/%.o)
 objs_r = $(srcs:%=$(OBJ)/%.o)
 
 objs_d += $(jsonlite2_obj)
+objs_d += $(RSC_OBJ_D)
+
 objs_r += $(jsonlite2_obj)
+objs_r += $(RSC_OBJ_R)
 
 objs_test = $(subst $(OBJD)/main.c.o,,$(objs_d))
 
@@ -60,6 +69,12 @@ $(OBJ)/%.c.o: $(SRC)/%.c $(OBJ) $(jsonlite2_lib)
 
 $(OBJD)/%.c.o: $(SRC)/%.c $(OBJD) $(jsonlite2_lib)
 	$(CC) -c $< -o $@ $(CDEFFLAGS) $(CFLAGSD)
+
+$(OBJ)/%.rc.o: $(SRC)/%.rc $(OBJ)
+	windres -i $< -o $@ -D NDEBUG
+
+$(OBJD)/%.rc.o: $(SRC)/%.rc $(OBJD)
+	windres -i $< -o $@ -D _DEBUG
 
 
 $(OBJ)/%.c.j.o: $(JSONLITE2_SRC)/%.c $(OBJ)
@@ -72,14 +87,14 @@ debug: $(objs_d)
 	$(CC) $^ -o deb$(TARGET).exe $(CDEFFLAGS) $(CFLAGSD) $(LIB)
 
 bulkd: $(jsonlite2_lib) bulkd_impl
-bulkd_impl: $(bulk_srcs)
+bulkd_impl: $(bulk_srcs) $(RSC_OBJ_D)
 	$(CC) $^ -o deb$(TARGET).exe $(CDEFFLAGS) $(CFLAGSD) $(LIB)
 
 release: $(objs_r)
 	$(CC) $^ -o $(TARGET).exe $(CDEFFLAGS) $(CFLAGS) $(LIB)
 
 bulkr: $(jsonlite2_lib) bulkr_impl
-bulkr_impl: $(bulk_srcs)
+bulkr_impl: $(bulk_srcs) $(RSC_OBJ_R)
 	$(CC) $^ -o $(TARGET).exe $(CDEFFLAGS) $(CFLAGS) $(LIB)
 
 $(TESTS)/bin/%: $(TESTS)/%.c $(objs_test)

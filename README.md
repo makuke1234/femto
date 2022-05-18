@@ -185,14 +185,18 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
-* 1.8 (planned)
-	* [x] Add horizontal scrolling support while holding the <kbd>Shift</kbd> key
+* 1.9 (planned)
 	* [ ] Search support, also search result highlighting
-	* [x] Practical multi-file support, tabs' system
-	* [x] Switching between tabs
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
+
+* 1.8
+	* [x] Add horizontal scrolling support while holding the <kbd>Shift</kbd> key
+	* [x] Practical multi-file support, tabs' system
+	* [x] Switching between tabs
+	* [x] Application signature (file meta-info)
+	* [x] Unique icon
 
 * 1.7.1
 	* [x] More syntax highlighting
@@ -293,3 +297,5 @@ users, the [changelog](#Changelog) may be more useful to keep track of the progr
 # License
 
 This project is using the MIT license.
+
+<a href="https://www.flaticon.com/free-icons/text-editor" title="text editor icons">Text editor icons created by Noor Hakim - Flaticon</a>
