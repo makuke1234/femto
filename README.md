@@ -49,7 +49,7 @@ reports ~6200 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* *If multiple files exist with any of the names above, the settings file will be selected following this exact priority*
 	* *Settings file modifies already given arguments only and only if they (settings from file) don't match the defaults*
 	* *Settings file can be also given by command line arguments*
-- [ ] Multi-file support
+- [x] Multi-file support
 - [x] Optionally "visible" whitespace
 	* *Never dismiss another 'tab'*
 	* *Configurable color*
