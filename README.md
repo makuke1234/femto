@@ -186,6 +186,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.9 (planned)
+	* [x] Fix lag on status-bar input
 	* [ ] Search support, also search result highlighting
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*

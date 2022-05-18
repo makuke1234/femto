@@ -267,10 +267,6 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 		{
 			continue;
 		}
-		else if (evRead)
-		{
-			FlushConsoleInputBuffer(peditor->conIn);
-		}
 
 		if ((ir.EventType == KEY_EVENT) && ir.Event.KeyEvent.bKeyDown)
 		{
