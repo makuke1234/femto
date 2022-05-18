@@ -230,7 +230,7 @@ void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t delt
  * 
  * @param self Pointer to femtoFile_t structure
  * @param width Editor window width
- * @param deltaCh Characters to scroll, positive values mean scrolling right, negative values mean scrolling up
+ * @param deltaCh Characters to scroll, positive values mean scrolling right, negative values mean scrolling left
  */
 void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t deltaCh);
 

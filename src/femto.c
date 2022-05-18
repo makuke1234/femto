@@ -810,7 +810,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 	{
 		wchar_t tempstr[MAX_STATUS];
 		bool draw = true;
-		bool shift = (GetAsyncKeyState(VK_LSHIFT) & 0x8000) || (GetAsyncKeyState(VK_RSHIFT) & 0x8000);
+		const bool shift = (GetAsyncKeyState(VK_LSHIFT) & 0x8000) || (GetAsyncKeyState(VK_RSHIFT) & 0x8000);
 
 		if ((ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED) && !shift)
 		{
@@ -841,7 +841,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			if (chDelta != 0)
 			{
 				s_delta -= chDelta * WHEEL_DELTA;
-				femtoFile_scrollHor(pfile, peditor->scrbuf.w, -chDelta);
+				femtoFile_scrollHor(pfile, peditor->scrbuf.w, -2 * chDelta);
 				femtoData_refreshThread(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'HWHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
