@@ -189,7 +189,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 	* [x] Add horizontal scrolling support while holding the <kbd>Shift</kbd> key
 	* [ ] Search support, also search result highlighting
 	* [x] Practical multi-file support, tabs' system
-	* [ ] Switching between tabs
+	* [x] Switching between tabs
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~

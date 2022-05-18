@@ -733,7 +733,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					break;
 				case VK_TAB:
 				{
-					bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+					const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 					
 					// Shuffle between tabs
 					if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
@@ -742,10 +742,20 @@ bool femto_loop(femtoData_t * restrict peditor)
 						if (shift)
 						{
 							swprintf_s(tempstr, MAX_STATUS, L"Previous tab #%u", keyCount);
+							--peditor->fileIdx;
+							peditor->fileIdx = (peditor->fileIdx < 0) ? (int32_t)peditor->filesSize - 1 : peditor->fileIdx;
 						}
 						else
 						{
 							swprintf_s(tempstr, MAX_STATUS, L"Next tab #%u", keyCount);
+							++peditor->fileIdx;
+							peditor->fileIdx = (peditor->fileIdx >= (int32_t)peditor->filesSize) ? 0 : peditor->fileIdx;
+						}
+						
+						if (peditor->filesSize > 1)
+						{
+							peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+							femtoData_refresh(peditor);
 						}
 					}
 					else if (shift)
