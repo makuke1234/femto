@@ -375,14 +375,49 @@ static inline uint16_t femtoSettings_checkColor(const jsonObject_t * restrict ob
 
 	bool success;
 	const char * value = jsonValue_getString(attr, &success);
+	// Check for comma
+	const char * comma = strchr(value, (char)',');
+	const size_t commaIdx = (comma == NULL) ? PTRDIFF_MAX : (size_t)(comma - value);
+	size_t charIdx = 0;
+	if (comma != NULL)
+	{
+		charIdx = (size_t)(comma - value) + 1;
+		// Skip whitespace
+		for (; (value[charIdx] != '\0'); ++charIdx)
+		{
+			if ((value[charIdx] != ' ') && (value[charIdx] != '\t') )
+			{
+				break;
+			}
+		}
+		charIdx = (value[charIdx] == '\0') ? 0 : charIdx;
+	}
+
 	if (success && (value != NULL))
 	{
+		bool firstDone = false, secondDone = false;
+		uint8_t ret = 0;
 		// Search through colorNames
 		for (uint8_t i = 0; i < MAX_COLORS; ++i)
 		{
-			if (strcmp(value, colorNames[i]) == 0)
+			if (!firstDone && strncmp(value, colorNames[i], commaIdx) == 0)
 			{
-				return i;
+				if (comma == NULL)
+				{
+					return i;
+				}
+				ret |= i;
+				firstDone = true;
+			}
+			else if ((charIdx != 0) && strcmp(&value[charIdx], colorNames[i]) == 0)
+			{
+				ret |= (uint8_t)(i << 4);
+				secondDone = true;
+			}
+
+			if (firstDone && secondDone)
+			{
+				return ret;
 			}
 		}
 	}

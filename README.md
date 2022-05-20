@@ -186,6 +186,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.9 (planned)
+	* [x] Background color customization support
 	* [x] Fix lag on status-bar input
 	* [ ] Search support, also search result highlighting
 	* [ ] Proper text copying/pasting support

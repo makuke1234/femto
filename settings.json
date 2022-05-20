@@ -51,8 +51,8 @@
 	"highlighting":
 	{
 		"text": 			"",
-		"lineComment": 		"",
-		"blockComment": 	"",
+		"lineComment": 		"bright_black",
+		"blockComment": 	"dark_blue",
 		"keyword": 			"bright_green",
 		"string": 			"",
 		"stringQuote": 		"",
