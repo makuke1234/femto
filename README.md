@@ -186,6 +186,9 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.9 (planned)
+	* [ ] Fix weird syntax highlighting with numbers
+	* [x] Notify about unknown key combination
+	* [x] Another way to specify RGB values -> e.g #1234ff
 	* [x] Background color customization support
 	* [x] Fix lag on status-bar input
 	* [ ] Search support, also search result highlighting

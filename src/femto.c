@@ -344,7 +344,6 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar_t * restrict line, uin
 					femtoLine_calcVirtCursor(&temp, pset->tabWidth);
 					updateCur = true;
 					break;
-
 				}
 			}
 
@@ -836,7 +835,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_SCROLL) & 0x0001) ? L"'SCRLOCK' On" : L"'SCRLOCK' Off");
 					break;
 				default:
-					draw = false;
+					//draw = false;
+					wcscpy_s(tempstr, MAX_STATUS, L"Unkown key combination!");
 				}
 
 				if (send && femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey, &peditor->settings))

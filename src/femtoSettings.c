@@ -436,21 +436,18 @@ static inline bool femtoSettings_checkRGBColor(femtoColor_t * restrict col, cons
 	const char * value = jsonValue_getString(attr, &success);
 	if (success && (value != NULL))
 	{
-		const char * rgbBeg = strstr(value, "rgb(");
-		if (rgbBeg != NULL)
+		const char * rgbBeg;
+		uint16_t r, g, b;
+		if ((((rgbBeg = strstr(value, "rgb(")) != NULL) && (sscanf(rgbBeg + 4, "%hu,%hu,%hu)", &r, &g, &b) == 3)) ||
+		( ((rgbBeg = strchr(value, (char)'#')) != NULL) && (sscanf(rgbBeg + 1, "%02hx%02hx%02hx", &r, &g, &b) == 3) ) )
 		{
-			rgbBeg += 4;
-			uint16_t r, g, b;
-			if (sscanf(rgbBeg, "%hu,%hu,%hu)", &r, &g, &b) == 3)
+			if ((r <= UINT8_MAX) && (g <= UINT8_MAX) && (b <= UINT8_MAX))
 			{
-				if ((r <= UINT8_MAX) && (g <= UINT8_MAX) && (b <= UINT8_MAX))
-				{
-					col->r = (uint8_t)r;
-					col->g = (uint8_t)g;
-					col->b = (uint8_t)b;
+				col->r = (uint8_t)r;
+				col->g = (uint8_t)g;
+				col->b = (uint8_t)b;
 
-					return true;
-				}
+				return true;
 			}
 		}
 	}

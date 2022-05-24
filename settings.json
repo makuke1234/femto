@@ -1,7 +1,7 @@
 {
 	"palette_orig":
 	{
-		"black": 			"rgb( 12,  12,  12)",
+		"black": 			"#0c0c0c",
 		"dark_blue": 		"rgb(  0,  55, 218)",
 		"dark_green": 		"rgb( 19, 161,  14)",
 		"dark_cyan": 		"rgb( 58, 150, 221)",
