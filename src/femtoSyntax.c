@@ -852,10 +852,6 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 			previ = i;
 			continue;
 		}
-		else if (preproc)
-		{
-			node->syntax[j] = colors[tcPREPROC];
-		}
 		else if (quoteMode)
 		{
 			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
@@ -909,6 +905,10 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 			{
 				octal = true;
 			}
+		}
+		else if (preproc)
+		{
+			node->syntax[j] = colors[tcPREPROC];
 		}
 		
 		switch (ch)
