@@ -36,12 +36,14 @@ enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
 			{
 				syntax = fstxC;
 			}
-			else if ((wcscmp(suffix, L"cpp") == 0) || (wcscmp(suffix, L"cxx") == 0) || (wcscmp(suffix, L"cc") == 0) ||
-				(wcscmp(suffix, L"hpp") == 0) || (wcscmp(suffix, L"hxx") == 0) || (wcscmp(suffix, L"hh") == 0))
+			else if ((wcscmp(suffix, L"C") == 0) || (wcscmp(suffix, L"cc") == 0) ||
+				(wcscmp(suffix, L"cpp") == 0) || (wcscmp(suffix, L"cxx") == 0) || (wcscmp(suffix, L"c++") == 0) ||
+				(wcscmp(suffix, L"H") == 0) || (wcscmp(suffix, L"hh") == 0) ||
+				(wcscmp(suffix, L"hpp") == 0) || (wcscmp(suffix, L"hxx") == 0) || (wcscmp(suffix, L"h++") == 0))
 			{
 				syntax = fstxCPP;
 			}
-			else if (wcscmp(suffix, L"md") == 0)
+			else if ((wcscmp(suffix, L"md") == 0) || (wcscmp(suffix, L"markdown") == 0))
 			{
 				syntax = fstxMD;
 			}
@@ -73,6 +75,14 @@ enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
 			{
 				syntax = fstxSVG;
 			}
+			else if (wcscmp(suffix, L"rs") == 0)
+			{
+				syntax = fstxRust;
+			}
+			else if (wcscmp(suffix, L"go") == 0)
+			{
+				syntax = fstxGo;
+			}
 		}
 	}
 
@@ -92,7 +102,9 @@ const char * fSyntaxName(enum femtoSyntax fs)
 		[fstxCSS]  = "Cascading Style Sheets (CSS)",
 		[fstxXML]  = "eXtensible Markup Language (XML)",
 		[fstxHTML] = "HyperText Markup Language (HTML)",
-		[fstxSVG]  = "Scalable Vector Graphics (SVG)"
+		[fstxSVG]  = "Scalable Vector Graphics (SVG)",
+		[fstxRust] = "Rust",
+		[fstxGo]   = "Go (Golang)"
 	};
 
 	assert(fs < fstxSIZE);
@@ -550,7 +562,7 @@ void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		}
 	}
 }
-void checkJSToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void checkJSToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
 {
 	static size_t memory[MAX_JS_TOKEN_MEM];
 
@@ -784,6 +796,230 @@ void checkJSToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t
 		}
 	}
 }
+void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+{
+	static size_t memory[MAX_RUST_TOKEN_MEM];
+
+	// Rust keywords
+	static const wchar_t * keyWords[] = {
+		L"as",
+		L"break",
+		L"const",
+		L"continue",
+		L"crate",
+		L"else",
+		L"enum",
+		L"extern",
+		L"false",
+		L"fn",
+		L"for",
+		L"if",
+		L"impl",
+		L"in",
+		L"let",
+		L"loop",
+		L"match",
+		L"mod",
+		L"move",
+		L"mut",
+		L"pub",
+		L"ref",
+		L"return",
+		L"self",
+		L"Self",
+		L"static",
+		L"struct",
+		L"super",
+		L"trait",
+		L"true",
+		L"type",
+		L"unsafe",
+		L"use",
+		L"where",
+		L"while",
+
+		L"async",
+		L"await",
+		L"dyn",
+
+		L"abstract",
+		L"become",
+		L"box",
+		L"do",
+		L"final",
+		L"macro",
+		L"override",
+		L"priv",
+		L"typeof",
+		L"unsized",
+		L"virtual",
+		L"yield",
+
+		L"try",
+
+		// Built-in types
+		L"char",
+		L"String",
+
+		L"i8",
+		L"u8",
+		L"i16",
+		L"u16",
+		L"i32",
+		L"u32",
+		L"i64",
+		L"u64",
+		L"i128",
+		L"u128",
+		L"isize",
+		L"usize",
+
+		L"f32",
+		L"f64",
+
+		L"bool"
+	};
+	static fHash_t map = { 0 };
+	
+	if ((lasti - start) < 1)
+	{
+		return;
+	}
+
+	fHash_initData(&map, memory, sizeof(size_t) * MAX_RUST_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+
+	wchar_t kwBuf[MAX_KWBUF];
+	kwBuf[MAX_KWBUF - 1] = L'\0';
+
+	uint32_t filled = 0;
+	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	{
+		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		{
+			j -= (int32_t)node->freeSpaceLen;
+			continue;
+		}
+		kwBuf[i] = node->line[j];
+		--i;
+		--j;
+		++filled;
+	}
+
+	for (uint32_t i = 0; i < (MAX_RUST_TOKEN_WORD - 1); ++i)
+	{
+		const uint32_t n = MAX_RUST_TOKEN_WORD - i;
+		if ((n > filled) || ((filled - n) > 1))
+		{
+			continue;
+		}
+		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		{
+			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
+			for (uint32_t k = 0; k < n; --l, ++k)
+			{
+				node->syntax[l] = kwCol;
+			}
+			return;
+		}
+	}
+}
+void checkGoToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+{
+	static size_t memory[MAX_GO_TOKEN_MEM];
+
+	// Rust keywords
+	static const wchar_t * keyWords[] = {
+		L"break",
+		L"case",
+		L"chan",
+		L"const",
+		L"continue",
+		L"default",
+		L"defere",
+		L"else",
+		L"fallthrough",
+		L"for",
+		L"func",
+		L"go",
+		L"goto",
+		L"if",
+		L"import",
+		L"interface",
+		L"map",
+		L"package",
+		L"range",
+		L"return",
+		L"select",
+		L"struct",
+		L"switch",
+		L"type",
+		L"var",
+
+		// Built-in types
+		L"string",
+		L"bool",
+		L"int8",
+		L"uint8",
+		L"byte",
+		L"int16",
+		L"uint16",
+		L"int32",
+		L"rune",
+		L"uint32",
+		L"int64",
+		L"uint64",
+		L"int",
+		L"uint",
+		L"uintptr",
+		L"float32",
+		L"float64",
+		L"complex64",
+		L"complex128"
+	};
+	static fHash_t map = { 0 };
+	
+	if ((lasti - start) < 1)
+	{
+		return;
+	}
+
+	fHash_initData(&map, memory, sizeof(size_t) * MAX_GO_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+
+	wchar_t kwBuf[MAX_KWBUF];
+	kwBuf[MAX_KWBUF - 1] = L'\0';
+
+	uint32_t filled = 0;
+	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	{
+		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		{
+			j -= (int32_t)node->freeSpaceLen;
+			continue;
+		}
+		kwBuf[i] = node->line[j];
+		--i;
+		--j;
+		++filled;
+	}
+
+	for (uint32_t i = 0; i < (MAX_GO_TOKEN_WORD - 1); ++i)
+	{
+		const uint32_t n = MAX_GO_TOKEN_WORD - i;
+		if ((n > filled) || ((filled - n) > 1))
+		{
+			continue;
+		}
+		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		{
+			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
+			for (uint32_t k = 0; k < n; --l, ++k)
+			{
+				node->syntax[l] = kwCol;
+			}
+			return;
+		}
+	}
+}
 
 bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restrict colors)
 {
@@ -807,7 +1043,7 @@ bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restric
 
 	return true;
 }
-bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict colors, tokeniserFunc_t func)
+bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict colors, tokeniserFunc_t func, enum femtoSyntax lang)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{

@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~6300 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~6500 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -161,6 +161,12 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 ### C++
 ![!C++ syntax](./images/syntaxCPP.png)
 
+### Rust
+![Rust syntax](./images/syntaxRust.png)
+
+### Go (Golang)
+![Go syntax](./images/syntaxGo.png)
+
 ### ECMAScript (JavaScript)
 ![!JS syntax](./images/syntaxJS.png)
 
@@ -186,6 +192,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.9 (planned)
+	* [ ] Add Go syntax support
+	* [ ] Add Rust syntax highlighting support
 	* [x] Fix weird syntax highlighting with numbers
 	* [x] Notify about unknown key combination
 	* [x] Another way to specify RGB values -> e.g #1234ff

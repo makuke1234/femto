@@ -530,15 +530,15 @@ bool femtoLine_updateSyntax(
 	switch (fs)
 	{
 	case fstxC:
-		return fSyntaxParseCLike(node, colors, &checkCToken);
+		return fSyntaxParseCLike(node, colors, &checkCToken, fstxC);
 	case fstxCPP:
-		return fSyntaxParseCLike(node, colors, &checkCPPToken);
+		return fSyntaxParseCLike(node, colors, &checkCPPToken, fstxCPP);
 	case fstxMD:
 		return fSyntaxParseMd(node, colors);
 	case fstxPY:
 		return fSyntaxParsePy(node, colors);
 	case fstxJS:
-		return fSyntaxParseCLike(node, colors, &checkJSToken);
+		return fSyntaxParseCLike(node, colors, &checkJSToken, fstxJS);
 	case fstxJSON:
 		return fSyntaxParseJSON(node, colors);
 	case fstxCSS:
@@ -548,6 +548,11 @@ bool femtoLine_updateSyntax(
 		return fSyntaxParseXML(node, colors);
 	case fstxHTML:
 		return fSyntaxParseXML(node, colors);
+	case fstxRust:
+		return fSyntaxParseCLike(node, colors, &checkRustToken, fstxRust);
+	case fstxGo:
+		return fSyntaxParseCLike(node, colors, &checkGoToken, fstxGo);
+
 	default:
 		return fSyntaxParseNone(node, colors);
 	}
