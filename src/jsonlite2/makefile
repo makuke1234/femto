@@ -45,3 +45,4 @@ clean:
 	rm -r -f $(OBJ)
 	rm -f *$(TARGET).a
 	rm -f *$(TARGET).dll
+	rm -f *$(TARGET).dll.a

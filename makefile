@@ -105,7 +105,7 @@ clean:
 	rm -r -f $(OBJD)
 	rm -f $(TARGET).exe
 	rm -f deb$(TARGET).exe
-	rm -f $(jsonlite2_lib)
 	rm -r -f $(TESTS)/bin
+	$(MAKE) -C $(JSONLITE2_SRC) clean
 
 .PHONY: bulkd_impl bulkd bulkr_impl bulkr debug_impl debug release_impl release test clean
