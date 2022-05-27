@@ -14,7 +14,7 @@ WARN=-Wall -Wextra -Wpedantic -Wconversion -Wunused-variable -Wshadow -Wpointer-
 CDEFFLAGS=-std=c99 $(WARN) -municode -D UNICODE -D _UNICODE
 CFLAGS=-O3 -Wl,--strip-all,--build-id=none,--gc-sections -fno-ident -D NDEBUG
 CFLAGSD=-g -Og -D PROFILING_ENABLE=1
-LIB=-ljsonlite2
+LIB=-static -ljsonlite2
 
 
 default: debug
