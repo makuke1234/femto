@@ -1,9 +1,10 @@
 /.vscode
-/obj*
-*.exe
-profiler.txt
-.bash_history
-test*.txt
 /.ssh
+obj*
+.bash_history
 .lesshst
+*.exe
+*.dll
 *.a
+profiler.txt
+test*.txt
