@@ -881,7 +881,23 @@ void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t la
 		L"f64",
 
 		L"size_of",
-		L"String"
+		L"String",
+
+		// Traits
+		L"Box",
+		L"Rc",
+		L"Arc",
+		L"Pin",
+		L"Deref",
+		L"DerefMut",
+		L"Drop",
+		L"Copy",
+		L"Clone",
+		L"Send",
+		L"Sync",
+		L"Unpin",
+		L"UnwindSafe",
+		L"Sized"
 	};
 	static fHash_t map = { 0 };
 	
