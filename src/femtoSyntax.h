@@ -5,10 +5,10 @@
 
 #define MAX_KWBUF 25
 
-#define MAX_C_TOKEN_MEM  169
+#define MAX_C_TOKEN_MEM  600
 #define MAX_C_TOKEN_WORD  14
 
-#define MAX_CPP_TOKEN_MEM  289
+#define MAX_CPP_TOKEN_MEM  810
 #define MAX_CPP_TOKEN_WORD  16
 
 #define MAX_PY_TOKEN_MEM  393
