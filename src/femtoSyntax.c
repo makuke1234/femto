@@ -857,9 +857,12 @@ void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t la
 
 		L"try",
 
+		L"union",
+
 		// Built-in types
+		L"bool"
 		L"char",
-		L"String",
+		L"str",
 
 		L"i8",
 		L"u8",
@@ -877,7 +880,8 @@ void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t la
 		L"f32",
 		L"f64",
 
-		L"bool"
+		L"size_of",
+		L"String"
 	};
 	static fHash_t map = { 0 };
 	
@@ -1021,7 +1025,7 @@ void checkGoToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 	}
 }
 
-bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restrict colors)
+bool fSyntaxParseNone(femtoLineNode_t * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
@@ -1043,12 +1047,20 @@ bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restric
 
 	return true;
 }
-bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict colors, tokeniserFunc_t func, enum femtoSyntax lang)
+bool fSyntaxParseCLike(
+	femtoLineNode_t * restrict node,
+	const WORD * restrict colors,
+	tokeniserFunc_t func,
+	enum femtoSyntax lang
+)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
 		return false;
 	}
+
+	// Calculate feature allowances
+	bool bAllowPreproc = (lang == fstxC) | (lang == fstxCPP);
 
 	uint32_t tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
@@ -1188,8 +1200,12 @@ bool fSyntaxParseCLike(femtoLineNode_t * restrict node, const WORD * restrict co
 				node->syntax[j] = colors[tcSTRING_QUOTE];
 				break;
 			case L'#':
-				preproc = true;
-				break;
+				if (bAllowPreproc)
+				{
+					preproc = true;
+					break;
+				}
+				/* fall through */
 			default:
 				if (hex)
 				{
@@ -1471,7 +1487,7 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 	return true;
 }
 
-bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict colors)
+bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
@@ -1692,7 +1708,7 @@ bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict 
 	return true;
 }
 
-bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restrict colors)
+bool fSyntaxParseJSON(femtoLineNode_t * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
@@ -1822,7 +1838,7 @@ bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restric
 
 	return true;
 }
-bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict colors)
+bool fSyntaxParseCSS(femtoLineNode_t * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{
@@ -2006,7 +2022,7 @@ bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict
 	return true;
 }
 
-bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict colors)
+bool fSyntaxParseXML(femtoLineNode_t * restrict node, const WORD * restrict colors)
 {
 	if (!fSyntaxParseAutoAlloc(node))
 	{

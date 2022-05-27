@@ -17,7 +17,7 @@
 #define MAX_JS_TOKEN_MEM  537
 #define MAX_JS_TOKEN_WORD  18
 
-#define MAX_RUST_TOKEN_MEM  210
+#define MAX_RUST_TOKEN_MEM  215
 #define MAX_RUST_TOKEN_WORD   8
 
 #define MAX_GO_TOKEN_MEM  140
@@ -59,7 +59,12 @@ void checkRustToken(struct femtoLineNode * restrict node, uint32_t start, uint32
 void checkGoToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
 
 bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restrict colors);
-bool fSyntaxParseCLike(struct femtoLineNode * restrict node, const WORD * restrict colors, tokeniserFunc_t func, enum femtoSyntax lang);
+bool fSyntaxParseCLike(
+	struct femtoLineNode * restrict node,
+	const WORD * restrict colors,
+	tokeniserFunc_t func,
+	enum femtoSyntax lang
+);
 bool fSyntaxParseMd(struct femtoLineNode * restrict node, const WORD * restrict colors);
 
 bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict colors);
