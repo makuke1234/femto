@@ -137,7 +137,7 @@ bool femtoData_loadPalette(femtoData_t * restrict self)
 		oldCol->b = GetBValue(old);
 
 		const femtoColor_t col = self->settings.palette.colors[i];
-		csbiex.ColorTable[i] = RGB(col.r, col.g, col.b);
+		csbiex.ColorTable[i] = fRGB(col.r, col.g, col.b);
 	}
 
 	// Apply new
@@ -172,7 +172,7 @@ bool femtoData_restorePalette(const femtoData_t * restrict self)
 	for (uint8_t i = 0; i < MAX_COLORS; ++i)
 	{
 		const femtoColor_t col = self->settings.palette.oldColors[i];
-		csbiex.ColorTable[i] = RGB(col.r, col.g, col.b);
+		csbiex.ColorTable[i] = fRGB(col.r, col.g, col.b);
 	}
 
 	++csbiex.srWindow.Right;

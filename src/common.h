@@ -32,4 +32,6 @@
 #define VERSION_STR "v1.9-pre"
 #define VERSION_SEQ 1,9,0,0
 
+#define fRGB(r, g, b) ( (COLORREF)( (DWORD)((BYTE)r) | (DWORD)(((BYTE)g) << 8) | (DWORD)(((BYTE)b) << 16) ) )
+
 #endif
