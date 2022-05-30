@@ -1,9 +1,9 @@
 #ifndef femtoDATA_H
 #define femtoDATA_H
 
-#include "common.h"
-#include "femtoFile.h"
-#include "femtoSettings.h"
+#include "fCommon.h"
+#include "fFile.h"
+#include "fSettings.h"
 
 typedef struct femtoDrawThread
 {

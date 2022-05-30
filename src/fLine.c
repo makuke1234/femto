@@ -1,5 +1,5 @@
-#include "femtoLine.h"
-#include "femtoSyntax.h"
+#include "fLine.h"
+#include "fSyntax.h"
 
 void femtoLine_init(femtoLineNode_t * restrict self)
 {

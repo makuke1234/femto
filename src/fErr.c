@@ -1,5 +1,5 @@
-#include "femtoErr.h"
-#include "common.h"
+#include "fErr.h"
+#include "fCommon.h"
 
 static const char * s_femto_errCodes[ferrNUM_OF_ELEMS] = {
 	[ferrOK]      = "Everything OK",

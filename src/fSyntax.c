@@ -1,8 +1,8 @@
-#include "femtoSyntax.h"
-#include "femtoLine.h"
-#include "femtoSettings.h"
-#include "femtoFile.h"
-#include "femtoStatHashmap.h"
+#include "fSyntax.h"
+#include "fLine.h"
+#include "fSettings.h"
+#include "fFile.h"
+#include "fStatHashmap.h"
 
 
 enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
@@ -354,14 +354,14 @@ void checkCToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwC
 		L"atan2l"
 
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -387,7 +387,7 @@ void checkCToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwC
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)
@@ -696,7 +696,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD k
 		L"atan2",
 		L"atan2l"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 
 
 	if ((lasti - start) < 1)
@@ -704,7 +704,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD k
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -730,7 +730,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD k
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)
@@ -880,7 +880,7 @@ void checkPyToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		L"ValueError",
 		L"ZeroDivisionError"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 
 
 	if ((lasti - start) < 1)
@@ -888,7 +888,7 @@ void checkPyToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -914,7 +914,7 @@ void checkPyToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)
@@ -1114,7 +1114,7 @@ void checkJSToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		L"onsubmit"
 	};
 
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 
 
 	if ((lasti - start) < 1)
@@ -1122,7 +1122,7 @@ void checkJSToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -1148,7 +1148,7 @@ void checkJSToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)
@@ -1262,14 +1262,14 @@ void checkRustToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD 
 		L"UnwindSafe",
 		L"Sized"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -1295,7 +1295,7 @@ void checkRustToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD 
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)
@@ -1359,14 +1359,14 @@ void checkGoToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		L"complex64",
 		L"complex128"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
@@ -1392,7 +1392,7 @@ void checkGoToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)

@@ -1,10 +1,10 @@
-#ifndef femtoFILE_H
-#define femtoFILE_H
+#ifndef FEMTO_FILE_H
+#define FEMTO_FILE_H
 
-#include "common.h"
-#include "femtoLine.h"
-#include "femtoSettings.h"
-#include "femtoSyntax.h"
+#include "fCommon.h"
+#include "fLine.h"
+#include "fSettings.h"
+#include "fSyntax.h"
 
 #define MAX_SUFFIX 8
 

@@ -1,9 +1,9 @@
 #ifndef FEMTO_H
 #define FEMTO_H
 
-#include "common.h"
-#include "femtoData.h"
-#include "femtoSyntax.h"
+#include "fCommon.h"
+#include "fData.h"
+#include "fSyntax.h"
 
 #define MAX_STATUS 256
 

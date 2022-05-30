@@ -1,23 +1,9 @@
 #ifndef FEMTOSETTINGS_H
 #define FEMTOSETTINGS_H
 
-#include "common.h"
+#include "fCommon.h"
 
-#define FEMTO_SETTINGS_ERR_MAX 256
-
-#define FEMTO_SETTINGS_FILE1 L"femto.json"
-#define FEMTO_SETTINGS_FILE2 L"femto-settings.json"
-#define FEMTO_SETTINGS_FILE3 L"femto_settings.json"
-#define FEMTO_SETTINGS_FILE4 L"settings.json"
-
-#define FEMTO_SETTINGS_MINTAB 1
-#define FEMTO_SETTINGS_MAXTAB 32
-
-#define FEMTO_SETTINGS_MINCOLOR 0
-#define FEMTO_SETTINGS_MAXCOLOR UINT8_MAX
-
-
-enum tokenColor
+typedef enum tokenColor
 {
 	tcTEXT,
 	tcCOMMENT_LINE,
@@ -48,7 +34,7 @@ enum tokenColor
 
 
 	tcNUM_OF_TOKENS
-};
+} tokenColor_e;
 
 #define MAX_COLORS 16
 

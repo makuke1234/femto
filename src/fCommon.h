@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef FEMTO_COMMON_H
+#define FEMTO_COMMON_H
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
@@ -18,8 +18,8 @@
 
 #include <safec.h>
 
-#include "femtoProfiler.h"
-#include "femtoErr.h"
+#include "fProfiler.h"
+#include "fErr.h"
 
 // Conscise type definitions
 
@@ -51,6 +51,22 @@ typedef unsigned char uchar;
 #define FEMTO_PROFILER_STACK_SIZE 256
 
 
+
+#define FEMTO_SETTINGS_ERR_MAX 256
+
+#define FEMTO_SETTINGS_FILE1 L"femto.json"
+#define FEMTO_SETTINGS_FILE2 L"femto-settings.json"
+#define FEMTO_SETTINGS_FILE3 L"femto_settings.json"
+#define FEMTO_SETTINGS_FILE4 L"settings.json"
+
+#define FEMTO_SETTINGS_MINTAB 1
+#define FEMTO_SETTINGS_MAXTAB 32
+
+#define FEMTO_SETTINGS_MINCOLOR 0
+#define FEMTO_SETTINGS_MAXCOLOR UINT8_MAX
+
+
+
 #define FEMTO_SHIFT_DEL 0x88
 
 #define FEMTO_MOVELINE_UP   0x89
@@ -58,8 +74,8 @@ typedef unsigned char uchar;
 
 #define FEMTO_DEFAULT_COLOR (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
 
-#define VERSION_STR "v1.9-pre"
-#define VERSION_SEQ 1,9,0,0
+#define FEMTO_VERSION_STR "v1.9-pre"
+#define FEMTO_VERSION_SEQ 1,9,0,0
 
 #define fRGB(r, g, b) ( (COLORREF)( (DWORD)((BYTE)r) | (DWORD)(((BYTE)g) << 8) | (DWORD)(((BYTE)b) << 16) ) )
 

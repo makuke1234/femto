@@ -1,5 +1,5 @@
-#include "femtoSettings.h"
-#include "femtoArg.h"
+#include "fSettings.h"
+#include "fArg.h"
 #include "femto.h"
 
 #include <jsonParser.h>

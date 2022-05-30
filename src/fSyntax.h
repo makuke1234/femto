@@ -1,7 +1,7 @@
 #ifndef FEMTO_SYNTAX_H
 #define FEMTO_SYNTAX_H
 
-#include "common.h"
+#include "fCommon.h"
 
 #define MAX_KWBUF 25
 

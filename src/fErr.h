@@ -1,5 +1,5 @@
-#ifndef FEMTOERR_H
-#define FEMTOERR_H
+#ifndef FEMTO_ERR_H
+#define FEMTO_ERR_H
 
 typedef enum femtoErr
 {

@@ -1,6 +1,6 @@
 #include "femto.h"
-#include "femtoArg.h"
-#include "femtoSyntax.h"
+#include "fArg.h"
+#include "fSyntax.h"
 
 
 static femtoData_t editor;

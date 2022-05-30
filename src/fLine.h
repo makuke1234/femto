@@ -1,8 +1,8 @@
 #ifndef FEMTOLINE_H
 #define FEMTOLINE_H
 
-#include "common.h"
-#include "femtoSyntax.h"
+#include "fCommon.h"
+#include "fSyntax.h"
 
 #define FEMTO_LNODE_DEFAULT_FREE 10
 
