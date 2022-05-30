@@ -162,10 +162,10 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 ![!C++ syntax](./images/syntaxCPP.png)
 
 ### Rust
-![Rust syntax](./images/syntaxRust.png)
+![!Rust syntax](./images/syntaxRust.png)
 
 ### Go (Golang)
-![Go syntax](./images/syntaxGo.png)
+![!Go syntax](./images/syntaxGo.png)
 
 ### ECMAScript (JavaScript)
 ![!JS syntax](./images/syntaxJS.png)
@@ -191,7 +191,13 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
-* 1.9 (planned)
+* 1.10 (planned)
+	* [ ] Support for raw editing/saving later to a file
+	* [ ] Search support, also search result highlighting
+	* [ ] Proper text copying/pasting support
+		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+
+* 1.9
 	* [x] Fix immediate empty file creation if file doesn't exist
 	* [x] Add Go syntax support
 	* [x] Add Rust syntax highlighting support
@@ -200,10 +206,6 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 	* [x] Another way to specify RGB values -> e.g #1234ff
 	* [x] Background color customization support
 	* [x] Fix lag on status-bar input
-	* [ ] Search support, also search result highlighting
-	* [ ] Proper text copying/pasting support
-		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
-	* [ ] ~~Support for 'raw editing'/'saving later to a file'~~
 
 * 1.8
 	* [x] Add horizontal scrolling support while holding the <kbd>Shift</kbd> key
