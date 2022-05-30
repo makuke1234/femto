@@ -191,7 +191,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
-* 1.10 (planned)
+* 2.0 (planned)
 	* [x] More common C++ keywords
 	* [x] Support for raw editing/saving later to a file
 	* [ ] Search support, also search result highlighting
