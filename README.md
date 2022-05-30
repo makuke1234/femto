@@ -192,8 +192,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.9 (planned)
-	* [ ] Add Go syntax support
-	* [ ] Add Rust syntax highlighting support
+	* [x] Add Go syntax support
+	* [x] Add Rust syntax highlighting support
 	* [x] Fix weird syntax highlighting with numbers
 	* [x] Notify about unknown key combination
 	* [x] Another way to specify RGB values -> e.g #1234ff
