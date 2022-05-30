@@ -9,12 +9,12 @@
  * @brief Initialise profiler, exits on failure
  * 
  */
-void initProfiler(void);
+void fProf_init(void);
 /**
  * @brief Closes profiler
  * 
  */
-void closeProfiler(void);
+void fProf_close(void);
 /**
  * @brief Write a profiler log message
  * 
@@ -22,29 +22,29 @@ void closeProfiler(void);
  * @param format Standard printf message format
  * @param ... Variadic format arguments
  */
-void writeProfiler_inner(const char * restrict function, const char * restrict format, ...);
+void fProf_write_inner(const char * restrict function, const char * restrict format, ...);
 /**
  * @brief Start profiler timestamp
  * 
  */
-void profilerStart(void);
+void fProf_start(void);
 /**
  * @brief Stop profiler timestamp
  * 
  * @param funcName Function name of timestamp writer
  */
-void profilerEnd_inner(const char * funcName);
+void fProf_end_inner(const char * funcName);
 
-#define writeProfiler(...) writeProfiler_inner(__func__, __VA_ARGS__)
-#define profilerEnd() profilerEnd_inner(__func__)
+#define fProf_write(...) fProf_write_inner(__func__, __VA_ARGS__)
+#define fProf_end() fProf_end_inner(__func__)
 
 #else
 
-#define initProfiler()
-#define closeProfiler()
-#define writeProfiler(...)
-#define profilerStart()
-#define profilerEnd()
+#define fProf_init()
+#define fProf_close()
+#define fProf_write(...)
+#define fProf_start()
+#define fProf_end()
 
 typedef int make_iso_compilers_happy;
 

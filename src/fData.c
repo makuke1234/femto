@@ -2,10 +2,10 @@
 #include "femto.h"
 
 
-bool femtoData_reset(femtoData_t * restrict self)
+bool fData_reset(fData_t * restrict self)
 {
 	assert(self != NULL);
-	*self = (femtoData_t){
+	*self = (fData_t){
 		.prevConsoleMode    = 0,
 		.bPrevConsoleModeSet = false,
 		.conIn  = INVALID_HANDLE_VALUE,
@@ -18,7 +18,7 @@ bool femtoData_reset(femtoData_t * restrict self)
 		},
 		.filesSize = 0,
 		.filesMax  = 1,
-		.files     = malloc(sizeof(femtoFile_t *)),
+		.files     = malloc(sizeof(fFile_t *)),
 		.cursorpos = malloc(sizeof(COORD)),
 		.fileIdx   = -1
 	};
@@ -32,11 +32,11 @@ bool femtoData_reset(femtoData_t * restrict self)
 
 	self->cursorpos[0] = (COORD){ 0, 0 };
 
-	femtoSettings_reset(&self->settings);
+	fSettings_reset(&self->settings);
 
 	return true;
 }
-bool femtoData_init(femtoData_t * restrict self)
+bool fData_init(fData_t * restrict self)
 {
 	assert(self != NULL);
 	self->conIn  = GetStdHandle(STD_INPUT_HANDLE);
@@ -66,7 +66,7 @@ bool femtoData_init(femtoData_t * restrict self)
 	self->scrbuf.w = (u32)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
 	self->scrbuf.h = (u32)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
 
-	writeProfiler("Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
+	fProf_write("Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
 	self->scrbuf.handle = CreateConsoleScreenBuffer(
 		GENERIC_READ | GENERIC_WRITE,
@@ -102,18 +102,18 @@ bool femtoData_init(femtoData_t * restrict self)
 		return false;
 	}
 
-	if (!femtoData_loadPalette(self))
+	if (!fData_loadPalette(self))
 	{
 		return false;
 	}
 
 	return true;
 }
-bool femtoData_loadPalette(femtoData_t * restrict self)
+bool fData_loadPalette(fData_t * restrict self)
 {
 	assert(self != NULL);
 
-	femtoPalette_t * pal = &self->settings.palette;
+	fPalette_t * pal = &self->settings.palette;
 	if (!pal->bUsePalette)
 	{
 		return true;
@@ -131,12 +131,12 @@ bool femtoData_loadPalette(femtoData_t * restrict self)
 	for (uint8_t i = 0; i < MAX_COLORS; ++i)
 	{
 		const COLORREF old = csbiex.ColorTable[i];
-		femtoColor_t * oldCol = &self->settings.palette.oldColors[i];
+		fColor_t * oldCol = &self->settings.palette.oldColors[i];
 		oldCol->r = GetRValue(old);
 		oldCol->g = GetGValue(old);
 		oldCol->b = GetBValue(old);
 
-		const femtoColor_t col = self->settings.palette.colors[i];
+		const fColor_t col = self->settings.palette.colors[i];
 		csbiex.ColorTable[i] = fRGB(col.r, col.g, col.b);
 	}
 
@@ -150,11 +150,11 @@ bool femtoData_loadPalette(femtoData_t * restrict self)
 
 	return true;
 }
-bool femtoData_restorePalette(const femtoData_t * restrict self)
+bool fData_restorePalette(const fData_t * restrict self)
 {
 	assert(self != NULL);
 
-	const femtoPalette_t * pal = &self->settings.palette;
+	const fPalette_t * pal = &self->settings.palette;
 	if (!pal->bUsePalette)
 	{
 		return true;
@@ -171,7 +171,7 @@ bool femtoData_restorePalette(const femtoData_t * restrict self)
 
 	for (uint8_t i = 0; i < MAX_COLORS; ++i)
 	{
-		const femtoColor_t col = self->settings.palette.oldColors[i];
+		const fColor_t col = self->settings.palette.oldColors[i];
 		csbiex.ColorTable[i] = fRGB(col.r, col.g, col.b);
 	}
 
@@ -185,7 +185,7 @@ bool femtoData_restorePalette(const femtoData_t * restrict self)
 	return true;
 }
 
-void femtoData_refresh(femtoData_t * restrict self)
+void fData_refreshEdit(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
@@ -212,10 +212,10 @@ void femtoData_refresh(femtoData_t * restrict self)
 		);
 	}
 }
-void femtoData_refreshThread(femtoData_t * restrict self)
+void fData_refreshEditAsync(fData_t * restrict self)
 {
 	assert(self != NULL);
-	femtoDrawThread_t * dt = &self->drawThread;
+	fDrawThreadData_t * dt = &self->drawThread;
 
 	EnterCriticalSection(&dt->crit);
 
@@ -224,7 +224,7 @@ void femtoData_refreshThread(femtoData_t * restrict self)
 
 	LeaveCriticalSection(&dt->crit);
 }
-void femtoData_refreshAll(femtoData_t * restrict self)
+void fData_refreshAll(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
@@ -238,7 +238,7 @@ void femtoData_refreshAll(femtoData_t * restrict self)
 		&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1) }
 	);
 }
-void femtoData_statusDraw(femtoData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData)
+void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
@@ -267,9 +267,9 @@ void femtoData_statusDraw(femtoData_t * restrict self, const wchar * restrict me
 			.Attributes = FEMTO_DEFAULT_COLOR
 		};
 	}
-	femtoData_statusRefresh(self);
+	fData_statusRefresh(self);
 }
-void femtoData_statusRefresh(femtoData_t * restrict self)
+void fData_statusRefresh(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
@@ -282,7 +282,7 @@ void femtoData_statusRefresh(femtoData_t * restrict self)
 	);
 }
 
-bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileName)
+bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 {
 	assert(self != NULL);
 	assert(fileName != NULL);
@@ -291,7 +291,7 @@ bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileN
 	if (self->filesSize >= self->filesMax)
 	{
 		const u32 newcap = (self->filesSize + 1) * 2;
-		vptr mem = realloc(self->files, sizeof(femtoFile_t *) * newcap);
+		vptr mem = realloc(self->files, sizeof(fFile_t *) * newcap);
 		if (mem == NULL)
 		{
 			return false;
@@ -310,11 +310,11 @@ bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileN
 		self->filesMax = newcap;
 	}
 	
-	if ((self->files[self->filesSize] = femtoFile_resetDyn()) == NULL)
+	if ((self->files[self->filesSize] = fFile_resetDyn()) == NULL)
 	{
 		return false;
 	}
-	if (!femtoFile_open(self->files[self->filesSize], fileName, false))
+	if (!fFile_open(self->files[self->filesSize], fileName, false))
 	{
 		return false;
 	}
@@ -324,19 +324,19 @@ bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileN
 
 	self->cursorpos[self->fileIdx] = (COORD) { 0, 0 };
 
-	femtoFile_close(self->files[self->fileIdx]);
+	fFile_close(self->files[self->fileIdx]);
 
 	// Set console title
-	femtoFile_setConTitle(self->files[self->fileIdx]);
+	fFile_setConTitle(self->files[self->fileIdx]);
 
 	return true;
 }
-void femtoData_closeTab(femtoData_t * restrict self)
+void fData_closeTab(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->fileIdx != -1);
 
-	femtoFile_t * file = self->files[self->fileIdx];
+	fFile_t * file = self->files[self->fileIdx];
 	
 	// Remove file from tab list
 	--self->filesSize;
@@ -357,18 +357,18 @@ void femtoData_closeTab(femtoData_t * restrict self)
 	}
 
 	// Delete "file"
-	femtoFile_destroy(file);
+	fFile_destroy(file);
 	free(file);
 
 	// Set console title back
 	if (self->fileIdx != -1)
 	{
-		femtoFile_setConTitle(self->files[self->fileIdx]);
+		fFile_setConTitle(self->files[self->fileIdx]);
 	}
 }
 
 
-void femtoData_destroy(femtoData_t * restrict self)
+void fData_destroy(fData_t * restrict self)
 {
 	assert(self != NULL);
 	if (self->scrbuf.mem != NULL)
@@ -390,7 +390,7 @@ void femtoData_destroy(femtoData_t * restrict self)
 	self->fileIdx = -1;
 	for (usize i = 0; i < self->filesSize; ++i)
 	{
-		femtoFile_destroy(self->files[i]);
+		fFile_destroy(self->files[i]);
 		free(self->files[i]);
 	}
 	free(self->files);
@@ -398,7 +398,7 @@ void femtoData_destroy(femtoData_t * restrict self)
 	self->filesSize = 0;
 	self->filesMax  = 0;
 
-	femtoData_restorePalette(self);
+	fData_restorePalette(self);
 
-	femtoSettings_destroy(&self->settings);
+	fSettings_destroy(&self->settings);
 }

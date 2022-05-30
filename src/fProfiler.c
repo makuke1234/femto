@@ -7,7 +7,7 @@
 
 static FILE * s_profilingFile = NULL;
 
-void initProfiler(void)
+void fProf_init(void)
 {
 	s_profilingFile = fopen(FEMTO_PROFILER_FILE, "a+");	
 	if (s_profilingFile == NULL)
@@ -16,20 +16,20 @@ void initProfiler(void)
 		exit(1);
 	}
 	fputc('\n', s_profilingFile);
-	writeProfiler_inner("initProfiler", "Started application...");
+	fProf_write_inner("fProf_init", "Started application...");
 }
-void closeProfiler(void)
+void fProf_close(void)
 {
 	assert(s_profilingFile != NULL);
 	
 	fputc('\n', s_profilingFile);
-	writeProfiler_inner("closeProfiler", "Closing profiler session...");
+	fProf_write_inner("fProf_close", "Closing profiler session...");
 	
 	// Closing file actually
 	fclose(s_profilingFile);
 	s_profilingFile = NULL;
 }
-void writeProfiler_inner(const char * restrict function, const char * restrict format, ...)
+void fProf_write_inner(const char * restrict function, const char * restrict format, ...)
 {
 	assert(function != NULL);
 	assert(format != NULL);
@@ -66,18 +66,18 @@ void writeProfiler_inner(const char * restrict function, const char * restrict f
 static clock_t s_profilerStack[FEMTO_PROFILER_STACK_SIZE];
 static u32 s_curStackLen = 0;
 
-void profilerStart(void)
+void fProf_start(void)
 {
 	assert(s_curStackLen < FEMTO_PROFILER_STACK_SIZE);
 	s_profilerStack[s_curStackLen++] = clock();
 }
-void profilerEnd_inner(const char * funcName)
+void fProf_end_inner(const char * funcName)
 {
 	assert(funcName != NULL);
 	assert(s_curStackLen > 0);
 	
 	--s_curStackLen;
-	writeProfiler_inner(
+	fProf_write_inner(
 		funcName,
 		"Elapsed %.3f s",
 		(f64)(clock() - s_profilerStack[s_curStackLen]) / (f64)CLOCKS_PER_SEC

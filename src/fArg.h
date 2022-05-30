@@ -3,24 +3,24 @@
 
 #include "fCommon.h"
 
-typedef struct femtoArg
+typedef struct fArg
 {
 	const wchar * begin, * end;
 
-} femtoArg_t;
+} fArg_t;
 
 /**
  * @brief Convert string to boolean
  * 
  * @param arg String wrapper
  */
-bool femtoArg_strToBool(femtoArg_t arg);
+bool fArg_strToBool(fArg_t arg);
 /**
  * @brief Convert string to UTF-16 character
  * 
  * @param arg String wrapper
  */
-wchar femtoArg_strToCh(femtoArg_t arg);
+wchar fArg_strToCh(fArg_t arg);
 
 
 /**
@@ -34,7 +34,7 @@ wchar femtoArg_strToCh(femtoArg_t arg);
  * @return u32 Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 femtoArg_fetch(
+u32 fArg_fetch(
 	const wchar * restrict rawStr, i32 maxStr,
 	const wchar * restrict argMatch, u32 maxParams, ...
 );
@@ -49,7 +49,7 @@ u32 femtoArg_fetch(
  * @return u32 Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 femtoArg_vfetch(
+u32 fArg_vfetch(
 	const wchar * restrict rawStr, i32 maxStr,
 	const wchar * restrict argMatch, u32 maxParams, va_list ap
 );
@@ -68,7 +68,7 @@ u32 femtoArg_vfetch(
  * @return u32 Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 femtoArg_fetchArgv(
+u32 fArg_fetchArgv(
 	int argc, const wchar ** restrict argv,
 	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, ...
 );
@@ -85,7 +85,7 @@ u32 femtoArg_fetchArgv(
  * @return u32 Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 femtoArg_vfetchArgv(
+u32 fArg_vfetchArgv(
 	int argc, const wchar ** restrict argv,
 	const wchar * restrict argMatch, int * restrict mathedIndex, u32 maxParams, va_list ap
 );

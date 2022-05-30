@@ -1,6 +1,6 @@
 #include "fArg.h"
 
-bool femtoArg_strToBool(femtoArg_t arg)
+bool fArg_strToBool(fArg_t arg)
 {
 	if (((arg.end - arg.begin) >= 4) && (wcsncmp(arg.begin, L"true", 4) == 0))
 	{
@@ -16,7 +16,7 @@ bool femtoArg_strToBool(femtoArg_t arg)
 		return wcstol(arg.begin, NULL, 10) != 0;
 	}
 }
-wchar femtoArg_strToCh(femtoArg_t arg)
+wchar fArg_strToCh(fArg_t arg)
 {
 	assert(arg.begin != NULL);
 	assert(arg.end   != NULL);
@@ -25,7 +25,7 @@ wchar femtoArg_strToCh(femtoArg_t arg)
 }
 
 
-u32 femtoArg_fetch(
+u32 fArg_fetch(
 	const wchar * restrict rawStr, i32 maxStr,
 	const wchar * restrict argMatch, u32 maxParams, ...
 )
@@ -36,12 +36,12 @@ u32 femtoArg_fetch(
 	va_list ap;
 	va_start(ap, maxParams);
 
-	u32 result = femtoArg_vfetch(rawStr, maxStr, argMatch, maxParams, ap);
+	u32 result = fArg_vfetch(rawStr, maxStr, argMatch, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
-u32 femtoArg_vfetch(
+u32 fArg_vfetch(
 	const wchar * restrict rawStr, i32 maxStr,
 	const wchar * restrict argMatch, u32 maxParams, va_list ap
 )
@@ -109,7 +109,7 @@ u32 femtoArg_vfetch(
 			{
 				if (numArgs < maxParams)
 				{
-					femtoArg_t * arg = va_arg(ap, femtoArg_t *);
+					fArg_t * arg = va_arg(ap, fArg_t *);
 					++numArgs;
 
 					// Set argument settings
@@ -140,7 +140,7 @@ u32 femtoArg_vfetch(
 }
 
 
-u32 femtoArg_fetchArgv(
+u32 fArg_fetchArgv(
 	int argc, const wchar ** restrict argv,
 	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, ...
 )
@@ -152,12 +152,12 @@ u32 femtoArg_fetchArgv(
 	va_list ap;
 	va_start(ap, maxParams);
 	
-	u32 result = femtoArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
+	u32 result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
-u32 femtoArg_vfetchArgv(
+u32 fArg_vfetchArgv(
 	int argc, const wchar ** restrict argv,
 	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, va_list ap
 )
@@ -168,7 +168,7 @@ u32 femtoArg_vfetchArgv(
 
 	for (int i = 1; i < argc; ++i)
 	{
-		u32 result = femtoArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
+		u32 result = fArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
 		if (result != 0)
 		{
 			*matchedIndex = i;

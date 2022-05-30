@@ -3,37 +3,37 @@
 #include "fSyntax.h"
 
 
-static femtoData_t editor;
-
 int wmain(int argc, const wchar * argv[])
 {
+	fData_t editor = { 0 };
+	
 	femto_exitHandlerSetVars(&editor);
-	if (!femtoData_reset(&editor))
+	if (!fData_reset(&editor))
 	{
-		femto_printErr(ferrMEMORY);
+		fErr_print(ferrMEMORY);
 		return 1;
 	}
 
 	// Initialise profiler, if applicable
-	initProfiler();
+	fProf_init();
 
 	// Limit the scope of errCode
 	{
-		femtoErr_e errCode = femtoSettings_populate(&editor.settings, argc, argv);
+		fErr_e errCode = fSettings_cmdLine(&editor.settings, argc, argv);
 		if (errCode != ferrOK)
 		{
 			if (errCode == ferrUNKNOWN)
 			{
 				// Get last error
 				wchar errMsg[FEMTO_SETTINGS_ERR_MAX];
-				femtoSettings_getLastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
+				fSettings_lastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
 				wprintf(L"[Settings]: %S\n", errMsg);
 				femto_printHelpClue(argv[0]);
 				return 2;
 			}
 			else
 			{
-				femto_printErr(errCode);
+				fErr_print(errCode);
 				return 2;
 			}
 		}
@@ -45,22 +45,22 @@ int wmain(int argc, const wchar * argv[])
 	}
 
 
-	if (!femtoData_openTab(&editor, editor.settings.fileName))
+	if (!fData_openTab(&editor, editor.settings.fileName))
 	{
-		femto_printErr(ferrFILE);
+		fErr_print(ferrFILE);
 		return 3;
 	}
 
-	if (!femtoData_init(&editor))
+	if (!fData_init(&editor))
 	{
-		femto_printErr(ferrWINDOW);
+		fErr_print(ferrWINDOW);
 		return 4;
 	}
 
 	{
 		wchar tempstr[MAX_STATUS];
 		const wchar * res;
-		if ((res = femtoFile_read(editor.files[editor.fileIdx])) != NULL)
+		if ((res = fFile_read(editor.files[editor.fileIdx])) != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);
 		}
@@ -72,23 +72,23 @@ int wmain(int argc, const wchar * argv[])
 				(editor.files[editor.fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
 				(editor.files[editor.fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
 				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-",
-				fSyntaxName(editor.files[editor.fileIdx]->syntax)
+				fStx_name(editor.files[editor.fileIdx]->syntax)
 			);
 		}
-		femtoData_statusDraw(&editor, tempstr, NULL);
+		fData_statusMsg(&editor, tempstr, NULL);
 	}
 
-	femtoData_refresh(&editor);
+	fData_refreshEdit(&editor);
 
-	if (!femto_loopDraw_createThread(&editor))
+	if (!femto_loopAyncDrawInit(&editor))
 	{
-		femto_printErr(ferrTHREAD);
+		fErr_print(ferrTHREAD);
 		return 5;
 	}
 
 	while (femto_loop(&editor));
 
-	femto_loopDraw_closeThread(&editor);
+	femto_loopAsyncDrawDestroy(&editor);
 
 	return 0;
 }

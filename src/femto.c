@@ -57,12 +57,12 @@ char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen
 }
 
 
-char * femto_escapeStr(const char * inp)
+char * femto_escStr(const char * inp)
 {
 	assert(inp != NULL);
-	return femto_escapeStr_s(inp, strlen(inp));
+	return femto_escStr_s(inp, strlen(inp));
 }
-char * femto_escapeStr_s(const char * inp, usize len)
+char * femto_escStr_s(const char * inp, usize len)
 {
 	assert(inp != NULL);
 	assert(len > 0);
@@ -203,9 +203,9 @@ char * femto_escapeStr_s(const char * inp, usize len)
 }
 
 
-static femtoData_t * s_atExitData = NULL;
+static fData_t * s_atExitData = NULL;
 
-void femto_exitHandlerSetVars(femtoData_t * pdata)
+void femto_exitHandlerSetVars(fData_t * pdata)
 {
 	assert(pdata != NULL);
 	s_atExitData = pdata;
@@ -213,7 +213,7 @@ void femto_exitHandlerSetVars(femtoData_t * pdata)
 void femto_exitHandler(void)
 {
 	// Clear resources
-	femtoData_destroy(s_atExitData);
+	fData_destroy(s_atExitData);
 }
 
 void femto_printHelp(const wchar * restrict app)
@@ -227,17 +227,17 @@ void femto_printHelpClue(const wchar * restrict app)
 	fwprintf(stderr, L"To show all available commands type:\n%S --help\n", app);
 }
 
-bool femto_askInput(femtoData_t * restrict peditor, wchar * restrict line, u32 maxLen)
+bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLen)
 {
 	assert(peditor != NULL);
 	assert(line != NULL);
 	assert(maxLen > 0);
 	maxLen = min_u32(maxLen, peditor->scrbuf.w + 1);
 
-	femtoSettings_t * restrict pset = &peditor->settings;
+	fSettings_t * restrict pset = &peditor->settings;
 
-	femtoLineNode_t temp;
-	femtoLine_init(&temp);
+	fLine_t temp;
+	fLine_init(&temp);
 
 	// Find first non-space on the last line
 	CHAR_INFO * lastline = &peditor->scrbuf.mem[peditor->scrbuf.w * (peditor->scrbuf.h - 1)];
@@ -288,7 +288,7 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar * restrict line, u32 m
 					// Normal keys
 
 					// add key
-					if (!femtoLine_addChar(&temp, key, pset->tabWidth))
+					if (!fLine_addChar(&temp, key, pset->tabWidth))
 					{
 						return false;
 					}
@@ -314,34 +314,34 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar * restrict line, u32 m
 					{
 						--temp.curx;
 						++temp.freeSpaceLen;
-						femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+						fLine_calcVirtCursor(&temp, pset->tabWidth);
 						update = true;
 					}
 					break;
 				case VK_LEFT:
 					if (temp.curx > 0)
 					{
-						femtoLine_moveCursor(&temp, -1);
-						femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+						fLine_moveCursor(&temp, -1);
+						fLine_calcVirtCursor(&temp, pset->tabWidth);
 						updateCur = true;
 					}
 					break;
 				case VK_RIGHT:
 					if ((temp.curx + temp.freeSpaceLen) < temp.lineEndx)
 					{
-						femtoLine_moveCursor(&temp, 1);
-						femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+						fLine_moveCursor(&temp, 1);
+						fLine_calcVirtCursor(&temp, pset->tabWidth);
 						updateCur = true;
 					}
 					break;
 				case VK_HOME:
-					femtoLine_moveCursor(&temp, -(i32)temp.lineEndx);
-					femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+					fLine_moveCursor(&temp, -(i32)temp.lineEndx);
+					fLine_calcVirtCursor(&temp, pset->tabWidth);
 					updateCur = true;
 					break;
 				case VK_END:
-					femtoLine_moveCursor(&temp, (i32)temp.lineEndx);
-					femtoLine_calcVirtCursor(&temp, pset->tabWidth);
+					fLine_moveCursor(&temp, (i32)temp.lineEndx);
+					fLine_calcVirtCursor(&temp, pset->tabWidth);
 					updateCur = true;
 					break;
 				}
@@ -350,8 +350,8 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar * restrict line, u32 m
 			// Update last line
 			if (update)
 			{
-				femtoLine_getTextLim(&temp, line, maxLen);
-				femtoData_statusDraw(peditor, line, NULL);
+				fLine_getTextLim(&temp, line, maxLen);
+				fData_statusMsg(peditor, line, NULL);
 			}
 			if (update | updateCur)
 			{
@@ -362,13 +362,13 @@ bool femto_askInput(femtoData_t * restrict peditor, wchar * restrict line, u32 m
 		}
 	}
 
-	femtoLine_destroy(&temp);
+	fLine_destroy(&temp);
 
 	SetConsoleCursorPosition(peditor->scrbuf.handle, peditor->cursorpos[peditor->fileIdx]);
 	return read;
 }
 
-static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar * restrict tempstr, wchar key, const wchar * restrict normMsg)
+static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restrict tempstr, wchar key, const wchar * restrict normMsg)
 {
 	if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
 	{
@@ -382,8 +382,8 @@ static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar * rest
 	bool unsavedAny = false;
 	for (usize i = 0; i < peditor->filesSize; ++i)
 	{
-		femtoFile_t * f = peditor->files[i];
-		femtoFile_checkUnsaved(f, NULL, NULL);
+		fFile_t * f = peditor->files[i];
+		fFile_checkUnsaved(f, NULL, NULL);
 		if (f->bUnsaved && (realLen < MAX_STATUS))
 		{
 			unsavedAny = true;
@@ -401,7 +401,7 @@ static inline bool femto_inner_quit(femtoData_t * restrict peditor, wchar * rest
 
 	return true;
 }
-static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar * restrict tempstr, bool forceClose)
+static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * restrict tempstr, bool forceClose)
 {
 	assert(peditor != NULL);
 	assert(tempstr != NULL);
@@ -413,7 +413,7 @@ static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar * 
 		realLen += (u32)swprintf_s(tempstr, MAX_STATUS, L"File ");
 
 		// Scan for any unsaved work
-		femtoFile_checkUnsaved(peditor->files[peditor->fileIdx], NULL, NULL);
+		fFile_checkUnsaved(peditor->files[peditor->fileIdx], NULL, NULL);
 		if (peditor->files[peditor->fileIdx]->bUnsaved && (realLen < MAX_STATUS))
 		{
 			realLen += (u32)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s is unsaved; ", peditor->files[peditor->fileIdx]->fileName);
@@ -426,16 +426,16 @@ static inline void femto_inner_closeTab(femtoData_t * restrict peditor, wchar * 
 	}
 
 	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", peditor->files[peditor->fileIdx]->fileName);
-	femtoData_closeTab(peditor);
+	fData_closeTab(peditor);
 	
 	peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
-	femtoData_refresh(peditor);
+	fData_refreshEdit(peditor);
 }
 
-bool femto_loop(femtoData_t * restrict peditor)
+bool femto_loop(fData_t * restrict peditor)
 {
 	assert(peditor != NULL);
-	femtoFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
 
 	INPUT_RECORD ir;
@@ -465,7 +465,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 			if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sacCTRL_Q) && (key != sacCTRL_Q)))	// Exit on Escape or Ctrl+Q
 			{
-				if (!femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
+				if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 				{
 					return false;
 				}
@@ -513,7 +513,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 			else if (key == sacCTRL_O)
 			{
 				wcscpy_s(tempstr, MAX_STATUS, L"Open :");
-				femtoData_statusDraw(peditor, tempstr, NULL);
+				fData_statusMsg(peditor, tempstr, NULL);
 
 				wchar inp[MAX_STATUS];
 				if (femto_askInput(peditor, inp, MAX_STATUS))
@@ -521,7 +521,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					// Try to create new tab and open file
 					const wchar * res = NULL;
 					const i32 oldIdx = peditor->fileIdx;
-					if (femtoData_openTab(peditor, inp) && ((res = femtoFile_read(peditor->files[peditor->fileIdx])) == NULL) )
+					if (fData_openTab(peditor, inp) && ((res = fFile_read(peditor->files[peditor->fileIdx])) == NULL) )
 					{
 						swprintf_s(
 							tempstr, MAX_STATUS,
@@ -529,14 +529,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 							inp,
 							(peditor->files[peditor->fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
 							(peditor->files[peditor->fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
-							fSyntaxName(peditor->files[peditor->fileIdx]->syntax)
+							fStx_name(peditor->files[peditor->fileIdx]->syntax)
 						);
-						femtoData_refresh(peditor);
+						fData_refreshEdit(peditor);
 					}
 					else if (res != NULL)
 					{
 						wcscpy_s(tempstr, MAX_STATUS, res);
-						femtoData_closeTab(peditor);
+						fData_closeTab(peditor);
 						peditor->fileIdx = oldIdx;
 					}
 					else
@@ -553,14 +553,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 			{
 				if (peditor->filesSize == 1)
 				{
-					if (!femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
+					if (!s_femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
 					{
 						return false;
 					}
 				}
 				else
 				{
-					femto_inner_closeTab(peditor, tempstr, false);
+					s_femto_inner_closeTab(peditor, tempstr, false);
 				}
 			}
 			else if ((key == sacCTRL_R) && (prevkey != sacCTRL_R))	// Reload file
@@ -569,7 +569,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
 				{
 					// Check for changes
-					if (femtoFile_checkUnsaved(pfile, NULL, NULL) != checkRes_nothingNew)
+					if (fFile_checkUnsaved(pfile, NULL, NULL) != ffcrNOTHING_NEW)
 					{
 						reload = false;
 						wcscpy_s(tempstr, MAX_STATUS, L"Unsaved work detected. Press Ctrl+Shift+R to confirm reload");
@@ -578,7 +578,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 				if (reload)
 				{
 					const wchar * res;
-					if ((res = femtoFile_read(pfile)) != NULL)
+					if ((res = fFile_read(pfile)) != NULL)
 					{
 						wcscpy_s(tempstr, MAX_STATUS, res);
 					}
@@ -592,24 +592,24 @@ bool femto_loop(femtoData_t * restrict peditor)
 							(pfile->eolSeq & eolLF) ? L"LF" : L""
 						);
 					}
-					femtoData_refresh(peditor);
+					fData_refreshEdit(peditor);
 				}
 			}
 			else if ((key == sacCTRL_S) && (prevkey != sacCTRL_S))	// Save file
 			{
-				i32 saved = femtoFile_write(pfile);
+				i32 saved = fFile_write(pfile);
 				switch (saved)
 				{
-				case writeRes_nothingNew:
+				case ffwrNOTHING_NEW:
 					wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
 					break;
-				case writeRes_openError:
+				case ffwrOPEN_ERROR:
 					wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
 					break;
-				case writeRes_writeError:
+				case ffwrWRITE_ERROR:
 					wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
 					break;
-				case writeRes_memError:
+				case ffwrMEM_ERROR:
 					wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
 					break;
 				default:
@@ -625,9 +625,9 @@ bool femto_loop(femtoData_t * restrict peditor)
 			else if (key > sacLAST_CODE)
 			{
 				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
-				if (femtoFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
+				if (fFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 				{
-					femtoData_refreshThread(peditor);
+					fData_refreshEditAsync(peditor);
 				}
 			}
 			// Special keys
@@ -642,26 +642,26 @@ bool femto_loop(femtoData_t * restrict peditor)
 					{
 						send = false;
 						wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
-						femtoData_statusDraw(peditor, tempstr, NULL);
+						fData_statusMsg(peditor, tempstr, NULL);
 
 						wchar inp[MAX_STATUS];
 						if (femto_askInput(peditor, inp, MAX_STATUS))
 						{
 							wchar * oldfilename = pfile->fileName;
 							pfile->fileName = inp;
-							i32 saved = femtoFile_write(pfile);
+							i32 saved = fFile_write(pfile);
 							switch (saved)
 							{
-							case writeRes_nothingNew:
+							case ffwrNOTHING_NEW:
 								wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
 								break;
-							case writeRes_openError:
+							case ffwrOPEN_ERROR:
 								wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
 								break;
-							case writeRes_writeError:
+							case ffwrWRITE_ERROR:
 								wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
 								break;
-							case writeRes_memError:
+							case ffwrMEM_ERROR:
 								wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
 								break;
 							default:
@@ -670,9 +670,9 @@ bool femto_loop(femtoData_t * restrict peditor)
 
 							switch (saved)
 							{
-							case writeRes_openError:
-							case writeRes_writeError:
-							case writeRes_memError:
+							case ffwrOPEN_ERROR:
+							case ffwrWRITE_ERROR:
+							case ffwrMEM_ERROR:
 								// Revert back to old name
 								pfile->fileName = oldfilename;
 								break;
@@ -693,14 +693,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 						send = false;
 						if (peditor->filesSize == 1)
 						{
-							if (!femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
+							if (!s_femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
 							{
 								return false;
 							}
 						}
 						else
 						{
-							femto_inner_closeTab(peditor, tempstr, true);
+							s_femto_inner_closeTab(peditor, tempstr, true);
 						}
 					}
 					break;
@@ -709,7 +709,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 					{
 						send = false;
 						const wchar * res;
-						if ((res = femtoFile_read(pfile)) != NULL)
+						if ((res = fFile_read(pfile)) != NULL)
 						{
 							wcscpy_s(tempstr, MAX_STATUS, res);
 						}
@@ -723,7 +723,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 								(pfile->eolSeq & eolLF) ? L"LF" : L""
 							);
 						}
-						femtoData_refresh(peditor);
+						fData_refreshEdit(peditor);
 					}
 					break;
 				case VK_TAB:
@@ -750,7 +750,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 						if (peditor->filesSize > 1)
 						{
 							peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
-							femtoData_refresh(peditor);
+							fData_refreshEdit(peditor);
 						}
 					}
 					else if (shift)
@@ -839,14 +839,14 @@ bool femto_loop(femtoData_t * restrict peditor)
 					wcscpy_s(tempstr, MAX_STATUS, L"Unkown key combination!");
 				}
 
-				if (send && femtoFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey, &peditor->settings))
+				if (send && fFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey, &peditor->settings))
 				{
-					femtoData_refresh(peditor);
+					fData_refreshEdit(peditor);
 				}
 			}
 			if (draw)
 			{
-				femtoData_statusDraw(peditor, tempstr, NULL);
+				fData_statusMsg(peditor, tempstr, NULL);
 			}
 		}
 		else
@@ -868,7 +868,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			static i32 s_delta = 0;
 			i32 delta = (i32)(i16)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			writeProfiler("Mouse wheel was used, delta: %d", delta);
+			fProf_write("Mouse wheel was used, delta: %d", delta);
 
 			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
@@ -876,8 +876,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 			if (lineDelta != 0)
 			{
 				s_delta -= lineDelta * WHEEL_DELTA / 2;
-				femtoFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
-				femtoData_refreshThread(peditor);
+				fFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
+				fData_refreshEditAsync(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
 		}
@@ -885,7 +885,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		{
 			static i32 s_delta = 0;
 			i32 delta = (i32)(i16)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			writeProfiler("Mouse hwheel was used, delta %d", delta);
+			fProf_write("Mouse hwheel was used, delta %d", delta);
 
 			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
 
@@ -893,8 +893,8 @@ bool femto_loop(femtoData_t * restrict peditor)
 			if (chDelta != 0)
 			{
 				s_delta -= chDelta * WHEEL_DELTA;
-				femtoFile_scrollHor(pfile, peditor->scrbuf.w, -2 * chDelta);
-				femtoData_refreshThread(peditor);
+				fFile_scrollHor(pfile, peditor->scrbuf.w, -2 * chDelta);
+				fData_refreshEditAsync(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'HWHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
 		}
@@ -925,19 +925,19 @@ bool femto_loop(femtoData_t * restrict peditor)
 				else
 				{
 					pos.X -= (SHORT)(pfile->data.noLen + 1);
-					writeProfiler("Mouse click @%hd, %hd", pos.X, pos.Y);
+					fProf_write("Mouse click @%hd, %hd", pos.X, pos.Y);
 
 					if (pfile->data.pcury != NULL)
 					{
 						pfile->data.currentNode = pfile->data.pcury;
-						const femtoLineNode_t * lastcurnode = pfile->data.currentNode;
-						femtoLine_moveCursorVert(&pfile->data.currentNode, (i32)pos.Y);
+						const fLine_t * lastcurnode = pfile->data.currentNode;
+						fLine_moveCursorVert(&pfile->data.currentNode, (i32)pos.Y);
 						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
 						// Now move the cursor to correct X position
-						femtoLine_moveCursorAbs(pfile->data.currentNode, femtoLine_calcCursor(pfile->data.currentNode, (u32)pos.X + pfile->data.curx, peditor->settings.tabWidth));
-						femtoLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
+						fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (u32)pos.X + pfile->data.curx, peditor->settings.tabWidth));
+						fLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
 						pfile->data.lastx = pfile->data.currentNode->virtcurx;
-						femtoData_refresh(peditor);
+						fData_refreshEdit(peditor);
 					}
 					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
 				}
@@ -950,7 +950,7 @@ bool femto_loop(femtoData_t * restrict peditor)
 		
 		if (draw)
 		{
-			femtoData_statusDraw(peditor, tempstr, NULL);
+			fData_statusMsg(peditor, tempstr, NULL);
 		}
 	}
 
@@ -958,9 +958,9 @@ bool femto_loop(femtoData_t * restrict peditor)
 }
 DWORD WINAPI femto_loopDraw(LPVOID pdataV)
 {
-	femtoData_t * pdata = pdataV;
+	fData_t * pdata = pdataV;
 	assert(pdata != NULL);
-	femtoDrawThread_t * dt = &pdata->drawThread;
+	fDrawThreadData_t * dt = &pdata->drawThread;
 	assert(dt != NULL);
 
 	while (!dt->bKillSwitch)
@@ -981,18 +981,18 @@ DWORD WINAPI femto_loopDraw(LPVOID pdataV)
 		}
 
 		// Do the drawing here
-		femtoData_refresh(pdata);
+		fData_refreshEdit(pdata);
 	}
 
 	return 0;
 }
-bool femto_loopDraw_createThread(femtoData_t * restrict pdata)
+bool femto_loopAyncDrawInit(fData_t * restrict pdata)
 {
 	assert(pdata != NULL);
 
 	// Initialize thread resources
 
-	femtoDrawThread_t * dt = &pdata->drawThread;
+	fDrawThreadData_t * dt = &pdata->drawThread;
 
 	// Create critical section (mutex), cv
 	InitializeCriticalSection(&dt->crit);
@@ -1019,11 +1019,11 @@ bool femto_loopDraw_createThread(femtoData_t * restrict pdata)
 
 	return true;
 }
-void femto_loopDraw_closeThread(femtoData_t * restrict pdata)
+void femto_loopAsyncDrawDestroy(fData_t * restrict pdata)
 {
 	assert(pdata != NULL);
 
-	femtoDrawThread_t * dt = &pdata->drawThread;
+	fDrawThreadData_t * dt = &pdata->drawThread;
 
 	// Trigger thread killSwitch
 	EnterCriticalSection(&dt->crit);
@@ -1041,17 +1041,17 @@ void femto_loopDraw_closeThread(femtoData_t * restrict pdata)
 	DeleteCriticalSection(&dt->crit);
 }
 
-bool femto_updateScrbuf(femtoData_t * restrict peditor, u32 * curline)
+bool femto_updateScrbuf(fData_t * restrict peditor, u32 * curline)
 {
 	assert(peditor != NULL);
 	assert(curline != NULL);
 	assert(peditor->scrbuf.mem != NULL);
-	femtoFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
 
 	// Count to current line
 	u32 line = 0;
-	femtoLineNode_t * node = pfile->data.pcury;
+	fLine_t * node = pfile->data.pcury;
 	while ((node != NULL) && (node != pfile->data.currentNode))
 	{
 		node = node->nextNode;
@@ -1091,22 +1091,22 @@ bool femto_updateScrbuf(femtoData_t * restrict peditor, u32 * curline)
 	*curline = line;
 	return true;
 }
-bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * restrict node, u32 line)
+bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node, u32 line)
 {
 	assert(peditor != NULL);
 	assert(peditor->scrbuf.mem != NULL);
-	femtoFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
 
-	femtoLineNode_t * curnode = pfile->data.currentNode;
+	fLine_t * curnode = pfile->data.currentNode;
 	
 	if (pfile->data.bTyped || (pfile->data.pcury == NULL))
 	{
 		u32 prevcurx          = pfile->data.curx;
-		femtoLineNode_t * prevcury = pfile->data.pcury;
+		fLine_t * prevcury = pfile->data.pcury;
 
 		pfile->data.bTyped = false;
-		femtoFile_updateCury(pfile, peditor->scrbuf.h - 2);
+		fFile_updateCury(pfile, peditor->scrbuf.h - 2);
 		i32 delta = (i32)curnode->virtcurx - (i32)peditor->scrbuf.w - (i32)pfile->data.curx + (i32)pfile->data.noLen + 1;
 		if (delta >= 0)
 		{
@@ -1147,7 +1147,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 	CONSOLE_CURSOR_INFO cci = { 0 };
 	
 	// if line is active line and cursor fits
-	femtoLine_calcVirtCursor(node, peditor->settings.tabWidth);
+	fLine_calcVirtCursor(node, peditor->settings.tabWidth);
 	u32 curx = node->virtcurx - pfile->data.curx + pfile->data.noLen + 1;
 	if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
 	{
@@ -1200,9 +1200,9 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 		}
 	}
 
-	if (!femtoLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors))
+	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors))
 	{
-		femtoData_statusDraw(peditor, L"Error refreshing syntax highlighting!", NULL);
+		fData_statusMsg(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}
 
 	for (u32 startj = (u32)pfile->data.noLen + 1, j = startj; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
@@ -1246,7 +1246,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, femtoLineNode_t * re
 	return true;
 }
 
-u32 femto_convToUnicode(const char * restrict utf8, int numBytes, wchar ** restrict putf16, u32 * restrict sz)
+u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, u32 * restrict sz)
 {
 	assert(utf8 != NULL);
 	assert(putf16 != NULL);
@@ -1297,7 +1297,7 @@ u32 femto_convToUnicode(const char * restrict utf8, int numBytes, wchar ** restr
 	}
 	return size;
 }
-u32 femto_convFromUnicode(const wchar * restrict utf16, int numChars, char ** restrict putf8, u32 * restrict sz)
+u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, u32 * restrict sz)
 {
 	assert(utf16 != NULL);
 	assert(putf8 != NULL);
@@ -1352,7 +1352,7 @@ u32 femto_convFromUnicode(const wchar * restrict utf16, int numChars, char ** re
 	}
 	return size;
 }
-u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict lines, enum eolSequence * restrict eolSeq)
+u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq)
 {
 	assert(utf16 != NULL);
 	assert(lines != NULL);

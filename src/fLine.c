@@ -1,10 +1,10 @@
 #include "fLine.h"
 #include "fSyntax.h"
 
-void femtoLine_init(femtoLineNode_t * restrict self)
+void fLine_init(fLine_t * restrict self)
 {
 	assert(self != NULL);
-	*self = (femtoLineNode_t){
+	*self = (fLine_t){
 		.line         = NULL,
 		.lineEndx     = 0,
 		.curx         = 0,
@@ -19,9 +19,9 @@ void femtoLine_init(femtoLineNode_t * restrict self)
 		.userValue = false
 	};
 }
-femtoLineNode_t * femtoLine_create(
-	femtoLineNode_t * restrict curnode,
-	femtoLineNode_t * restrict nextnode,
+fLine_t * fLine_create(
+	fLine_t * restrict curnode,
+	fLine_t * restrict nextnode,
 	bool tabsToSpaces,
 	uint8_t tabWidth,
 	bool autoIndent,
@@ -29,7 +29,7 @@ femtoLineNode_t * femtoLine_create(
 )
 {
 	assert(noLen != NULL);
-	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
+	fLine_t * node = malloc(sizeof(fLine_t));
 	if (node == NULL)
 	{
 		return NULL;
@@ -118,7 +118,7 @@ femtoLineNode_t * femtoLine_create(
 	{
 		nextnode->prevNode = node;
 	}
-	femtoLine_updateLineNumbers(node, node->lineNumber, noLen);
+	fLine_updateLineNumbers(node, node->lineNumber, noLen);
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
@@ -127,9 +127,9 @@ femtoLineNode_t * femtoLine_create(
 	return node;
 }
 
-femtoLineNode_t * femtoLine_createText(
-	femtoLineNode_t * restrict curnode,
-	femtoLineNode_t * restrict nextnode,
+fLine_t * fLine_createText(
+	fLine_t * restrict curnode,
+	fLine_t * restrict nextnode,
 	const wchar * restrict lineText,
 	i32 mText,
 	uint8_t * restrict noLen
@@ -139,7 +139,7 @@ femtoLineNode_t * femtoLine_createText(
 
 	u32 maxText = (mText == -1) ? (u32)wcslen(lineText) : (u32)mText;
 
-	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
+	fLine_t * node = malloc(sizeof(fLine_t));
 	if (node == NULL)
 	{
 		return NULL;
@@ -170,7 +170,7 @@ femtoLineNode_t * femtoLine_createText(
 	{
 		nextnode->prevNode = node;
 	}
-	femtoLine_updateLineNumbers(node, node->lineNumber, noLen);
+	fLine_updateLineNumbers(node, node->lineNumber, noLen);
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
@@ -179,13 +179,13 @@ femtoLineNode_t * femtoLine_createText(
 	return node;
 }
 
-bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar ** restrict text, u32 * restrict tarrsz)
+bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, u32 * restrict tarrsz)
 {
 	assert(self != NULL);
 	assert(text != NULL);
 
 	u32 totalLen = self->lineEndx - self->freeSpaceLen + 1;
-	writeProfiler("Total length: %u characters", totalLen);
+	fProf_write("Total length: %u characters", totalLen);
 
 	if (tarrsz != NULL && *tarrsz < totalLen)
 	{
@@ -223,7 +223,7 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar ** restrict 
 
 	return true;
 }
-void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar * restrict text, u32 maxLen)
+void fLine_getTextLim(const fLine_t * restrict self, wchar * restrict text, u32 maxLen)
 {
 	assert(self != NULL);
 	assert(text != NULL);
@@ -246,7 +246,7 @@ void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar * restric
 	text[len] = L'\0';
 }
 
-bool femtoLine_realloc(femtoLineNode_t * restrict self)
+bool fLine_realloc(fLine_t * restrict self)
 {
 	assert(self != NULL);
 	if (self->freeSpaceLen == FEMTO_LNODE_DEFAULT_FREE)
@@ -278,12 +278,12 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	return true;
 }
 
-bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar ch, u32 tabWidth)
+bool fLine_addChar(fLine_t * restrict self, wchar ch, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(ch   != L'\0');
 
-	if ((self->freeSpaceLen == 0) && !femtoLine_realloc(self))
+	if ((self->freeSpaceLen == 0) && !fLine_realloc(self))
 	{
 		return false;
 	}
@@ -292,11 +292,11 @@ bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar ch, u32 tabWidth)
 	++self->curx;
 	--self->freeSpaceLen;
 
-	femtoLine_calcVirtCursor(self, tabWidth);
+	fLine_calcVirtCursor(self, tabWidth);
 
 	return true;
 }
-bool femtoLine_checkAt(const femtoLineNode_t * restrict node, i32 maxdelta, const wchar * restrict string, u32 maxString)
+bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * restrict string, u32 maxString)
 {
 	assert(string != NULL);
 	if (node == NULL)
@@ -334,7 +334,7 @@ bool femtoLine_checkAt(const femtoLineNode_t * restrict node, i32 maxdelta, cons
 	return true;
 }
 
-bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** restrict ppcury, uint8_t * restrict noLen)
+bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, uint8_t * restrict noLen)
 {
 	assert(self != NULL);
 	assert(ppcury != NULL);
@@ -343,7 +343,7 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 		return false;
 	}
 	
-	femtoLineNode_t * restrict n = self->nextNode;
+	fLine_t * restrict n = self->nextNode;
 	*ppcury = (*ppcury == n) ? self : *ppcury;
 
 	// Allocate more memory for first line
@@ -358,8 +358,8 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	self->line = linemem;
 
 	// Move cursor to end, if needed
-	femtoLine_moveCursor(self, (i32)self->lineEndx);
-	femtoLine_moveCursor(n,    (i32)n->lineEndx);
+	fLine_moveCursor(self, (i32)self->lineEndx);
+	fLine_moveCursor(n,    (i32)n->lineEndx);
 
 	self->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
 	self->lineEndx     = self->curx + n->curx + FEMTO_LNODE_DEFAULT_FREE;
@@ -370,9 +370,9 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	{
 		self->nextNode->prevNode = self;
 	}
-	femtoLine_free(n); 
+	fLine_free(n); 
 
-	femtoLine_updateLineNumbers(self->nextNode, self->lineNumber + 1, noLen);
+	fLine_updateLineNumbers(self->nextNode, self->lineNumber + 1, noLen);
 
 	free(self->syntax);
 	self->syntax = NULL;
@@ -380,7 +380,7 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	return true;
 }
 
-void femtoLine_moveCursor(femtoLineNode_t * restrict self, i32 delta)
+void fLine_moveCursor(fLine_t * restrict self, i32 delta)
 {
 	assert(self != NULL);
 	if (delta < 0)
@@ -402,7 +402,7 @@ void femtoLine_moveCursor(femtoLineNode_t * restrict self, i32 delta)
 		}
 	}
 }
-void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, u32 curx)
+void fLine_moveCursorAbs(fLine_t * restrict self, u32 curx)
 {
 	assert(self != NULL);
 	if (curx < self->curx)
@@ -424,12 +424,12 @@ void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, u32 curx)
 		}
 	}
 }
-void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, i32 delta)
+void fLine_moveCursorVert(fLine_t ** restrict self, i32 delta)
 {
 	assert(self != NULL);
 	assert(*self != NULL);
 
-	femtoLineNode_t * node = *self;
+	fLine_t * node = *self;
 	if (delta < 0)
 	{
 		for (; delta != 0 && node->prevNode != NULL; ++delta)
@@ -446,7 +446,7 @@ void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, i32 delta)
 	}
 	*self = node;
 }
-void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, u32 tabWidth)
+void fLine_calcVirtCursor(fLine_t * restrict self, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(tabWidth > 0);
@@ -456,7 +456,7 @@ void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, u32 tabWidth)
 		self->virtcurx += (self->line[i] == L'\t') ? tabWidth - (self->virtcurx % tabWidth) : 1;
 	}
 }
-u32 femtoLine_calcCursor(const femtoLineNode_t * restrict self, u32 virtcur, u32 tabWidth)
+u32 fLine_calcCursor(const fLine_t * restrict self, u32 virtcur, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(tabWidth > 0);
@@ -477,12 +477,12 @@ u32 femtoLine_calcCursor(const femtoLineNode_t * restrict self, u32 virtcur, u32
 	return realcurx;
 }
 
-void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict node2)
+void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 {
 	assert(node1 != NULL);
 	assert(node2 != NULL);
 
-	femtoLineNode_t temp = *node1;
+	fLine_t temp = *node1;
 	node1->line         = node2->line;
 	node1->lineEndx     = node2->lineEndx;
 	node1->curx         = node2->curx;
@@ -498,9 +498,9 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
 	node2->syntax       = temp.syntax;
 }
 
-void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, u32 startLno, uint8_t * restrict noLen)
+void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, uint8_t * restrict noLen)
 {
-	femtoLineNode_t * prevnode = NULL;
+	fLine_t * prevnode = NULL;
 	while (startnode != NULL)
 	{
 		startnode->lineNumber = startLno;
@@ -519,9 +519,9 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, u32 start
 	}
 }
 
-bool femtoLine_updateSyntax(
-	femtoLineNode_t * restrict node,
-	enum femtoSyntax fs,
+bool fLine_updateSyntax(
+	fLine_t * restrict node,
+	enum fSyntax fs,
 	const WORD * colors
 )
 {
@@ -530,35 +530,35 @@ bool femtoLine_updateSyntax(
 	switch (fs)
 	{
 	case fstxC:
-		return fSyntaxParseCLike(node, colors, &checkCToken, fstxC);
+		return fStx_parseCLike(node, colors, &fStx_checkCToken, fstxC);
 	case fstxCPP:
-		return fSyntaxParseCLike(node, colors, &checkCPPToken, fstxCPP);
+		return fStx_parseCLike(node, colors, &fStx_checkCPPToken, fstxCPP);
 	case fstxMD:
-		return fSyntaxParseMd(node, colors);
+		return fStx_parseMd(node, colors);
 	case fstxPY:
-		return fSyntaxParsePy(node, colors);
+		return fStx_parsePy(node, colors);
 	case fstxJS:
-		return fSyntaxParseCLike(node, colors, &checkJSToken, fstxJS);
+		return fStx_parseCLike(node, colors, &fStx_checkJSToken, fstxJS);
 	case fstxJSON:
-		return fSyntaxParseJSON(node, colors);
+		return fStx_parseJSON(node, colors);
 	case fstxCSS:
-		return fSyntaxParseCSS(node, colors);
+		return fStx_parseCSS(node, colors);
 	case fstxXML:
 	case fstxSVG:
-		return fSyntaxParseXML(node, colors);
+		return fStx_parseXML(node, colors);
 	case fstxHTML:
-		return fSyntaxParseXML(node, colors);
+		return fStx_parseXML(node, colors);
 	case fstxRust:
-		return fSyntaxParseCLike(node, colors, &checkRustToken, fstxRust);
+		return fStx_parseCLike(node, colors, &fStx_checkRustToken, fstxRust);
 	case fstxGo:
-		return fSyntaxParseCLike(node, colors, &checkGoToken, fstxGo);
+		return fStx_parseCLike(node, colors, &fStx_checkGoToken, fstxGo);
 
 	default:
-		return fSyntaxParseNone(node, colors);
+		return fStx_parseNone(node, colors);
 	}
 }
 
-void femtoLine_destroy(femtoLineNode_t * restrict self)
+void fLine_destroy(fLine_t * restrict self)
 {
 	assert(self != NULL);
 	
@@ -568,9 +568,9 @@ void femtoLine_destroy(femtoLineNode_t * restrict self)
 	free(self->syntax);
 	self->syntax = NULL;
 }
-void femtoLine_free(femtoLineNode_t * restrict self)
+void fLine_free(fLine_t * restrict self)
 {
 	assert(self != NULL);
-	femtoLine_destroy(self);
+	fLine_destroy(self);
 	free(self);
 }

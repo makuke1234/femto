@@ -5,7 +5,7 @@
 #include "fFile.h"
 #include "fSettings.h"
 
-typedef struct femtoDrawThread
+typedef struct fDrawThreadData
 {
 	HANDLE hthread;
 
@@ -14,9 +14,9 @@ typedef struct femtoDrawThread
 
 	volatile bool bReady:1, bKillSwitch:1;
 
-} femtoDrawThread_t;
+} fDrawThreadData_t;
 
-typedef struct femtoData
+typedef struct fData
 {
 	DWORD prevConsoleMode;
 	bool bPrevConsoleModeSet;
@@ -30,88 +30,88 @@ typedef struct femtoData
 	} scrbuf;
 
 	u32 filesSize, filesMax;
-	femtoFile_t ** files;
+	fFile_t ** files;
 	COORD * cursorpos;
 
 	i32 fileIdx;
 
-	femtoSettings_t settings;
+	fSettings_t settings;
 
-	femtoDrawThread_t drawThread;
+	fDrawThreadData_t drawThread;
 
-} femtoData_t;
+} fData_t;
 
 /**
  * @brief Resets internal memory fields, zeroes them
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  */
-bool femtoData_reset(femtoData_t * restrict self);
+bool fData_reset(fData_t * restrict self);
 /**
  * @brief Initialises editor data strucutre, also sets atexit() handler function
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  * @return true Success
  * @return false Failure
  */
-bool femtoData_init(femtoData_t * restrict self);
-bool femtoData_loadPalette(femtoData_t * restrict self);
-bool femtoData_restorePalette(const femtoData_t * restrict self);
+bool fData_init(fData_t * restrict self);
+bool fData_loadPalette(fData_t * restrict self);
+bool fData_restorePalette(const fData_t * restrict self);
 
 /**
  * @brief Refreshes the screen's editing part only
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  */
-void femtoData_refresh(femtoData_t * restrict self);
+void fData_refreshEdit(fData_t * restrict self);
 /**
- * @brief Multithreaded version of femtoData_refresh, refreshes the screen's editing
+ * @brief Multithreaded version of fData_refreshEdit, refreshes the screen's editing
  * part only asynchronously
  * 
- * @param self Pointer to femtoData structure
+ * @param self Pointer to fData structure
  */
-void femtoData_refreshThread(femtoData_t * restrict self);
+void fData_refreshEditAsync(fData_t * restrict self);
 /**
  * @brief Refreshes whole screen
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  */
-void femtoData_refreshAll(femtoData_t * restrict self);
+void fData_refreshAll(fData_t * restrict self);
 /**
  * @brief Draws a status bar message, refreshes statusbar
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  * @param message 
  */
-void femtoData_statusDraw(femtoData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData);
+void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData);
 /**
  * @brief Refreshes status bar
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  */
-void femtoData_statusRefresh(femtoData_t * restrict self);
+void fData_statusRefresh(fData_t * restrict self);
 
 /**
  * @brief Creates a new tab with desired fileName
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  * @param fileName File name
  * @return true Success
  * @return false Failure
  */
-bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileName);
+bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName);
 /**
  * @brief Closes the current active tab
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  */
-void femtoData_closeTab(femtoData_t * restrict self);
+void fData_closeTab(fData_t * restrict self);
 
 /**
  * @brief Destroys editor's data structure, frees memory
  * 
- * @param self Pointer to femtoData_t structure
+ * @param self Pointer to fData_t structure
  */
-void femtoData_destroy(femtoData_t * restrict self);
+void fData_destroy(fData_t * restrict self);
 
 #endif

@@ -5,9 +5,9 @@
 #include "fStatHashmap.h"
 
 
-enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
+enum fSyntax fStx_detect(const wchar_t * restrict fileName)
 {
-	enum femtoSyntax syntax = fstxNONE;
+	enum fSyntax syntax = fstxNONE;
 	
 	const wchar_t * end = fileName + wcslen(fileName);
 	if (fileName != end)
@@ -89,7 +89,7 @@ enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
 	return syntax;
 }
 
-const char * fSyntaxName(enum femtoSyntax fs)
+const char * fStx_name(enum fSyntax fs)
 {
 	static const char * syntaxes[fstxSIZE] = {
 		[fstxNONE] = "None",
@@ -110,7 +110,7 @@ const char * fSyntaxName(enum femtoSyntax fs)
 	assert(fs < fstxSIZE);
 	return syntaxes[fs];
 }
-bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
+bool fStx_autoAlloc(fLine_t * restrict node)
 {
 	assert(node != NULL);
 
@@ -126,7 +126,7 @@ bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
 	return true;
 }
 
-void checkCToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_C_TOKEN_MEM];
 
@@ -398,7 +398,7 @@ void checkCToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwC
 		}
 	}
 }
-void checkCPPToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_CPP_TOKEN_MEM];
 
@@ -741,7 +741,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD k
 		}
 	}
 }
-void checkPyToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_PY_TOKEN_MEM];
 
@@ -925,7 +925,7 @@ void checkPyToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		}
 	}
 }
-void checkJSToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_JS_TOKEN_MEM];
 
@@ -1159,7 +1159,7 @@ void checkJSToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 		}
 	}
 }
-void checkRustToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_RUST_TOKEN_MEM];
 
@@ -1306,7 +1306,7 @@ void checkRustToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD 
 		}
 	}
 }
-void checkGoToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkGoToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_GO_TOKEN_MEM];
 
@@ -1404,9 +1404,9 @@ void checkGoToken(femtoLineNode_t * restrict node, u32 start, u32 lasti, WORD kw
 	}
 }
 
-bool fSyntaxParseNone(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -1426,14 +1426,14 @@ bool fSyntaxParseNone(femtoLineNode_t * restrict node, const WORD * restrict col
 
 	return true;
 }
-bool fSyntaxParseCLike(
-	femtoLineNode_t * restrict node,
+bool fStx_parseCLike(
+	fLine_t * restrict node,
 	const WORD * restrict colors,
-	tokeniserFunc_t func,
-	enum femtoSyntax lang
+	fStx_tokeniserFunc_t func,
+	enum fSyntax lang
 )
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -1645,9 +1645,9 @@ bool fSyntaxParseCLike(
 
 	return true;
 }
-bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -1866,9 +1866,9 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 	return true;
 }
 
-bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -2010,7 +2010,7 @@ bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict color
 			case L' ':
 			case L'\t':
 				letter = false;
-				checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+				fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
 				tokenStart = i;
 				break;
 			case L'\'':
@@ -2079,7 +2079,7 @@ bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict color
 
 	if (!blockComment && !comment && !quoteMode)
 	{
-		checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+		fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
 	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)littleQuote << 1) & 0x02));
@@ -2087,9 +2087,9 @@ bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict color
 	return true;
 }
 
-bool fSyntaxParseJSON(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -2217,9 +2217,9 @@ bool fSyntaxParseJSON(femtoLineNode_t * restrict node, const WORD * restrict col
 
 	return true;
 }
-bool fSyntaxParseCSS(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -2401,9 +2401,9 @@ bool fSyntaxParseCSS(femtoLineNode_t * restrict node, const WORD * restrict colo
 	return true;
 }
 
-bool fSyntaxParseXML(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}

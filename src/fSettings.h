@@ -3,7 +3,7 @@
 
 #include "fCommon.h"
 
-typedef enum tokenColor
+typedef enum fTokenColor
 {
 	tcTEXT,
 	tcCOMMENT_LINE,
@@ -34,26 +34,26 @@ typedef enum tokenColor
 
 
 	tcNUM_OF_TOKENS
-} tokenColor_e;
+} fTokenColor_e, fTC_e;
 
 #define MAX_COLORS 16
 
-typedef struct femtoColor
+typedef struct fColor
 {
 	uint8_t r, g, b;
 
-} femtoColor_t;
+} fColor_t;
 
-typedef struct femtoPalette
+typedef struct fPalette
 {
 	const char * colorNames[MAX_COLORS];
-	femtoColor_t colors[MAX_COLORS];
-	femtoColor_t oldColors[MAX_COLORS];
+	fColor_t colors[MAX_COLORS];
+	fColor_t oldColors[MAX_COLORS];
 	bool bUsePalette;
 
-} femtoPalette_t;
+} fPalette_t;
 
-typedef struct femtoSettings
+typedef struct fSettings
 {
 	bool bHelpRequest:1;
 	wchar * fileName;
@@ -72,66 +72,66 @@ typedef struct femtoSettings
 	bool bRelLineNums:1;
 	WORD lineNumCol;
 
-	femtoPalette_t palette;
+	fPalette_t palette;
 	WORD syntaxColors[tcNUM_OF_TOKENS];
 	const char * syntaxTokens[tcNUM_OF_TOKENS];
 
 	wchar lastErr[FEMTO_SETTINGS_ERR_MAX];
 
-} femtoSettings_t;
+} fSettings_t;
 
 /**
- * @brief Reset memory contents of a femtoSettings_t structure
+ * @brief Reset memory contents of a fSettings_t structure
  * 
- * @param self Pointer to femtoSettings_t structure
+ * @param self Pointer to fSettings_t structure
  */
-void femtoSettings_reset(femtoSettings_t * restrict self);
+void fSettings_reset(fSettings_t * restrict self);
 
 /**
  * @brief Copy the last error message to an array, clear the initial array
  * 
- * @param self Pointer to femtoSettings_t structure
+ * @param self Pointer to fSettings_t structure
  * @param errArr Pointer to an array to copy error message to
  * @param errMax Maximum amount of characters to copy
  * @return true Getting last error succeeded
  * @return false No last error set
  */
-bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar * restrict errArr, u32 errMax);
+bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u32 errMax);
 
 /**
  * @brief Generate tabs to spaces string, consisting of spaces to represent the tab
  * 
- * @param self Pointer to femtoSettings_t structure
+ * @param self Pointer to fSettings_t structure
  * @return true Success
  * @return false Failure
  */
-bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self);
+bool fSettings_makeTabSpaceStr(fSettings_t * restrict self);
 
 /**
  * @brief Populate settings using command line arguments
  * 
- * @param self Pointer to femtoSettings_t structure
+ * @param self Pointer to fSettings_t structure
  * @param argc Number of command line arguments
  * @param argv Command line argument vector
- * @return femtoErr_e femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
- * information is necessary, get it via femtoSettings_getLastError()
+ * @return fErr_e ferr_ok -> everything is ok, ferr_unknown -> extra
+ * information is necessary, get it via fSettings_lastError()
  */
-femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar ** restrict argv);
+fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** restrict argv);
 
 /**
  * @brief Try to load settings from configured file
  * 
- * @param self Pointer to femtoSettings_t structure
+ * @param self Pointer to fSettings_t structure
  * @return const wchar* Error message, NULL if everything is OK
  */
-const wchar * femtoSettings_loadFromFile(femtoSettings_t * restrict self);
+const wchar * fSettings_loadFromFile(fSettings_t * restrict self);
 
 /**
- * @brief Destroy femtoSettings_t structure
+ * @brief Destroy fSettings_t structure
  * 
- * @param self Pointer to femtoSettings_t structure
+ * @param self Pointer to fSettings_t structure
  */
-void femtoSettings_destroy(femtoSettings_t * restrict self);
+void fSettings_destroy(fSettings_t * restrict self);
 
 
 #endif

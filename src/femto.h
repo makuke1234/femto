@@ -7,7 +7,7 @@
 
 #define MAX_STATUS 256
 
-enum specialAsciiCodes
+typedef enum specialASCIIcodes
 {
 	sacCTRL_E = 5,
 	sacCTRL_N = 14,
@@ -18,7 +18,8 @@ enum specialAsciiCodes
 	sacCTRL_W = 23,
 
 	sacLAST_CODE = 31
-};
+
+} specialASCIIcodes_e, sac_e;
 
 
 i32 min_i32(i32 a, i32 b);
@@ -48,7 +49,7 @@ char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen
  * @param inp Input null-terminated character array
  * @return char* Output character array
  */
-char * femto_escapeStr(const char * inp);
+char * femto_escStr(const char * inp);
 /**
  * @brief Escapes the escape characters in given character array,
  * produces pointer to the new character array
@@ -57,14 +58,14 @@ char * femto_escapeStr(const char * inp);
  * @param len Input character array length in characters
  * @return char* Output character array
  */
-char * femto_escapeStr_s(const char * inp, usize len);
+char * femto_escStr_s(const char * inp, usize len);
 
 /**
  * @brief Set exit handler data argument pointer
  * 
- * @param pdata Pointer to femtoData_t structure
+ * @param pdata Pointer to fData_t structure
  */
-void femto_exitHandlerSetVars(femtoData_t * pdata);
+void femto_exitHandlerSetVars(fData_t * pdata);
 /**
  * @brief Specialised exit handler, executed after returning from main
  * 
@@ -87,62 +88,62 @@ void femto_printHelpClue(const wchar * restrict app);
 /**
  * @brief Asks user input on last line of editor
  * 
- * @param peditor Pointer to femtoData_t structure
+ * @param peditor Pointer to fData_t structure
  * @param line Pointer to array which will hold the result
  * @param maxLen Length of that array in characters (including null-terminator)
  * @return true User accepted and entered input
  * @return false User canceled
  */
-bool femto_askInput(femtoData_t * restrict peditor, wchar * restrict line, u32 maxLen);
+bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLen);
 /**
  * @brief Performs text editor loop tasks
  * 
- * @param pdata Pointer to femtoData_t structure
+ * @param pdata Pointer to fData_t structure
  * @return true Normal operation
  * @return false Application is ready to quit
  */
-bool femto_loop(femtoData_t * restrict pdata);
+bool femto_loop(fData_t * restrict pdata);
 /**
  * @brief Performs text editor drawing asynchronously
  * 
- * @param pdata Pointer to femtoData_t structure
+ * @param pdata Pointer to fData_t structure
  * @return DWORD Irrelevant return value
  */
 DWORD WINAPI femto_loopDraw(LPVOID pdata);
 /**
  * @brief Tries to create a loop-drawing thread
  * 
- * @param pdata Pointer to femtoData structure
+ * @param pdata Pointer to fData structure
  * @return true Success
  * @return false Failure creating thread
  */
-bool femto_loopDraw_createThread(femtoData_t * restrict pdata);
+bool femto_loopAyncDrawInit(fData_t * restrict pdata);
 /**
  * @brief Closes the loopDrawing thread
  * 
- * @param pdata Pointer to femtoData structure
+ * @param pdata Pointer to fData structure
  */
-void femto_loopDraw_closeThread(femtoData_t * restrict pdata);
+void femto_loopAsyncDrawDestroy(fData_t * restrict pdata);
 
 /**
  * @brief Update screen buffer
  * 
- * @param peditor Pointer to femtoData_t structure
+ * @param peditor Pointer to fData_t structure
  * @param line Pointer to Y-index of current line in relation to current viewpoint, this variable is a receiver
  * @return true Only current line needs redrawing
  * @return false Whole buffer needs redrawing
  */
-bool femto_updateScrbuf(femtoData_t * restrict peditor, u32 * line);
+bool femto_updateScrbuf(fData_t * restrict peditor, u32 * line);
 /**
  * @brief Update one line in screen buffer
  * 
- * @param peditor Pointer to femtoData_t structure
+ * @param peditor Pointer to fData_t structure
  * @param node Pointer to line node
  * @param line Line number to update, starting from 0
  * @return true Update only one line
  * @return false Whole screen buffer needs updating
  */
-bool femto_updateScrbufLine(femtoData_t * restrict peditor, struct femtoLineNode * restrict node, u32 line);
+bool femto_updateScrbufLine(fData_t * restrict peditor, struct fLine * restrict node, u32 line);
 
 /**
  * @brief Convert UTF-8 string to UTF-16 string, allocates memory only if
@@ -154,7 +155,7 @@ bool femto_updateScrbufLine(femtoData_t * restrict peditor, struct femtoLineNode
  * @param sz Address of UTF-16 array size, can be NULL
  * @return u32 Number of characters converted
  */
-u32 femto_convToUnicode(const char * restrict utf8, int numBytes, wchar ** restrict putf16, u32 * restrict sz);
+u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, u32 * restrict sz);
 /**
  * @brief Convert UTF-16 string to UTF-8 string, allocates memory only if
  * *putf8 is too small or sz == NULL
@@ -165,7 +166,7 @@ u32 femto_convToUnicode(const char * restrict utf8, int numBytes, wchar ** restr
  * @param sz Address of UTF-8 array size, can be NULL
  * @return u32 Number of characters converted
  */
-u32 femto_convFromUnicode(const wchar * restrict utf16, int numChars, char ** restrict putf8, u32 * restrict sz);
+u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, u32 * restrict sz);
 /**
  * @brief Convert UTF-16 string to lines array, modifies original string. After
  * creation the double-pointer's "lines" can be safely freed with a single free.
@@ -179,7 +180,7 @@ u32 femto_convFromUnicode(const wchar * restrict utf16, int numChars, char ** re
  * @param eolSeq Address of eolSequence enumerator, receives the EOL format used
  * @return u32 Number of lines found
  */
-u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict lines, enum eolSequence * restrict eolSeq);
+u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq);
 
 /**
  * @brief Tests if file with designated filename exists
