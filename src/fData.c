@@ -371,7 +371,7 @@ void fData_destroy(fData_t * restrict self)
 	}
 	if (self->scrbuf.handle != INVALID_HANDLE_VALUE)
 	{
-		fProf_write("Restoring palette: %s", fData_restorePalette(self) ? "success" : "fail");
+		fData_restorePalette(self);
 		SetConsoleActiveScreenBuffer(self->conOut);
 	}
 
