@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~6900 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~7000 source code lines (excluding whitespace, comments & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -192,6 +192,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.10 (planned)
+	* [x] More common C++ keywords
 	* [ ] Support for raw editing/saving later to a file
 	* [ ] Search support, also search result highlighting
 	* [ ] Proper text copying/pasting support

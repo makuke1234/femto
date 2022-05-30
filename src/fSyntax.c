@@ -5,9 +5,9 @@
 #include "fStatHashmap.h"
 
 
-enum fSyntax fStx_detect(const wchar_t * restrict fileName)
+fStx_e fStx_detect(const wchar_t * restrict fileName)
 {
-	enum fSyntax syntax = fstxNONE;
+	fStx_e syntax = fstxNONE;
 	
 	const wchar_t * end = fileName + wcslen(fileName);
 	if (fileName != end)
@@ -89,7 +89,7 @@ enum fSyntax fStx_detect(const wchar_t * restrict fileName)
 	return syntax;
 }
 
-const char * fStx_name(enum fSyntax fs)
+const char * fStx_name(fStx_e fs)
 {
 	static const char * syntaxes[fstxSIZE] = {
 		[fstxNONE] = "None",
@@ -638,7 +638,7 @@ void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCo
 		L"vector",
 		L"cout",
 		L"cin",
-		L"iostream",
+		L"basic_iostream",
 		L"istream",
 		L"ostream",
 		L"stringstream",
@@ -646,6 +646,13 @@ void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCo
 		L"ostringstream",
 		L"wstring",
 		L"basic_string",
+		L"basic_string_view",
+		L"string_view",
+		L"wstring_view",
+		L"map",
+		L"unordered_map",
+		L"set",
+		L"unordered_set",
 
 		L"atol",
 		L"atoll",
@@ -694,7 +701,72 @@ void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCo
 
 		L"atan2f",
 		L"atan2",
-		L"atan2l"
+		L"atan2l",
+
+		L"endl",
+		L"flush",
+		L"push_back",
+		L"emplace_back",
+		L"at",
+		L"substr",
+		L"front",
+		L"back",
+		L"begin",
+		L"end",
+		L"rbegin",
+		L"rend",
+		L"size",
+		L"empty",
+		L"max_size",
+		L"reserve",
+		L"capacity",
+		L"shrink_to_fit",
+		L"clear",
+		L"insert",
+		L"erase",
+		L"pop_back",
+		L"append",
+		L"compare",
+		L"replace",
+		L"find",
+		L"rfind",
+		L"swap",
+		L"resize",
+		L"stoi",
+		L"stol",
+		L"stoll",
+		L"stoul",
+		L"stoull",
+		L"stof",
+		L"stod",
+		L"stold",
+		L"to_string",
+		L"to_wstring",
+		L"hash",
+		L"data",
+		L"c_str",
+		L"get_allocator",
+		L"starts_with",
+		L"ends_with",
+		L"copy",
+		L"emplace_hint",
+		L"emplace",
+		L"insert_or_assign",
+		L"try_emplace",
+		L"extract",
+		L"merge",
+		L"contains",
+		L"equal_range",
+		L"lower_bound",
+		L"upper_bound",
+		L"erase_if",
+		L"count",
+		L"bucket_count",
+		L"max_bucket_count",
+		L"load_factor",
+		L"max_load_factor",
+		L"rehash",
+		L"bucket"
 	};
 	static fStatHash_t map = { 0 };
 
@@ -1430,7 +1502,7 @@ bool fStx_parseCLike(
 	fLine_t * restrict node,
 	const WORD * restrict colors,
 	fStx_tokeniserFunc_t func,
-	enum fSyntax lang
+	fStx_e lang
 )
 {
 	if (!fStx_autoAlloc(node))
