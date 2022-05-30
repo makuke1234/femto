@@ -401,6 +401,33 @@ static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restri
 
 	return true;
 }
+static inline void s_femto_inner_openTab(fData_t * restrict peditor, wchar * restrict tempstr, const wchar * restrict inp)
+{
+	const wchar * res = NULL;
+	const i32 oldIdx = peditor->fileIdx;
+	if (fData_openTab(peditor, inp) && ((res = fFile_read(peditor->files[peditor->fileIdx])) == NULL) )
+	{
+		swprintf_s(
+			tempstr, MAX_STATUS,
+			L"Opened %s successfully; %s%s EOL sequences; Syntax: %S",
+			(inp == NULL) ? L"new tab" : inp,
+			(peditor->files[peditor->fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
+			(peditor->files[peditor->fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
+			fStx_name(peditor->files[peditor->fileIdx]->syntax)
+		);
+		fData_refreshEdit(peditor);
+	}
+	else if (res != NULL)
+	{
+		wcscpy_s(tempstr, MAX_STATUS, res);
+		fData_closeTab(peditor);
+		peditor->fileIdx = oldIdx;
+	}
+	else
+	{
+		swprintf_s(tempstr, MAX_STATUS, L"Failure while opening %s!", (inp == NULL) ? L"new tab" : inp);
+	}
+}
 static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * restrict tempstr, bool forceClose)
 {
 	assert(peditor != NULL);
@@ -425,7 +452,8 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 		}
 	}
 
-	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", peditor->files[peditor->fileIdx]->fileName);
+	const wchar * restrict fname = peditor->files[peditor->fileIdx]->fileName;
+	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", (fname == NULL) ? L"untitled" : fname);
 	fData_closeTab(peditor);
 	
 	peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
@@ -558,9 +586,7 @@ bool femto_loop(fData_t * restrict peditor)
 			}
 			else if ((key == sacCTRL_N) && (prevkey != sacCTRL_N))
 			{
-				static u32 counter = 0;
-				swprintf_s(tempstr, MAX_STATUS, L"Ctrl+N %u", counter);
-				++counter;
+				s_femto_inner_openTab(peditor, tempstr, NULL);
 			}
 			else if (key == sacCTRL_O)
 			{
@@ -571,30 +597,7 @@ bool femto_loop(fData_t * restrict peditor)
 				if (femto_askInput(peditor, inp, MAX_STATUS))
 				{
 					// Try to create new tab and open file
-					const wchar * res = NULL;
-					const i32 oldIdx = peditor->fileIdx;
-					if (fData_openTab(peditor, inp) && ((res = fFile_read(peditor->files[peditor->fileIdx])) == NULL) )
-					{
-						swprintf_s(
-							tempstr, MAX_STATUS,
-							L"Opened %s successfully %s%s EOL sequences; Syntax: %S!",
-							inp,
-							(peditor->files[peditor->fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
-							(peditor->files[peditor->fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
-							fStx_name(peditor->files[peditor->fileIdx]->syntax)
-						);
-						fData_refreshEdit(peditor);
-					}
-					else if (res != NULL)
-					{
-						wcscpy_s(tempstr, MAX_STATUS, res);
-						fData_closeTab(peditor);
-						peditor->fileIdx = oldIdx;
-					}
-					else
-					{
-						swprintf_s(tempstr, MAX_STATUS, L"Failure while opening %s!", inp);
-					}
+					s_femto_inner_openTab(peditor, tempstr, inp);
 				}
 				else
 				{
@@ -768,6 +771,7 @@ bool femto_loop(fData_t * restrict peditor)
 						{
 							peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
 							fData_refreshEdit(peditor);
+							femto_setConTitle(peditor->files[peditor->fileIdx]->fileName);
 						}
 					}
 					else if (shift)

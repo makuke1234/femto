@@ -194,6 +194,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 * 2.0 (planned)
 	* [x] More common C++ keywords
 	* [x] Support for raw editing/saving later to a file
+	* [x] Proper new tab creation with <kbd>Ctrl+N</kbd>
+	* [x] Now titlebar name also changes while switching between tabs
 	* [ ] Search support, also search result highlighting
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
