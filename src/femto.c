@@ -1423,3 +1423,18 @@ bool femto_testFile(const wchar * filename)
 		return true;
 	}
 }
+HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
+{
+	assert(fileName != NULL);
+	HANDLE hfile = CreateFileW(
+		fileName,
+		writemode ? GENERIC_WRITE : GENERIC_READ,
+		FILE_SHARE_READ,
+		NULL,
+		writemode ? CREATE_ALWAYS : OPEN_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
+
+	return hfile;
+}

@@ -190,5 +190,14 @@ u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict line
  * @return false File doesn't exist/is inaccessible
  */
 bool femto_testFile(const wchar * filename);
+/**
+ * @brief Opens new file with desired name and write access
+ * 
+ * @param fileName Desired file name, CANNOT be NULL
+ * @param writemode Desired write access, true for write mode, false for read mode
+ * @return HANDLE Opened file handle, INVALID_HANDLE_VALUE on failure; Use
+ * CloseHandle() to close the file afterwards
+ */
+HANDLE femto_openFile(const wchar * restrict fileName, bool writemode);
 
 #endif

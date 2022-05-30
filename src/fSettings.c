@@ -468,7 +468,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 	fSettings_reset(&def);
 
 	// Try to load file, for every value, change it only if it's default value
-	HANDLE hset = fFile_sopen(self->settingsFileName, false);
+	HANDLE hset = femto_openFile(self->settingsFileName, false);
 	if (hset == INVALID_HANDLE_VALUE)
 	{
 		return L"Error opening file!";

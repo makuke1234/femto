@@ -60,15 +60,6 @@ fFile_t * fFile_resetDyn(void);
 /**
  * @brief Opens new file with desired name and write access
  * 
- * @param fileName Desired file name, CANNOT be NULL
- * @param writemode Desired write access, true for write mode, false for read mode
- * @return HANDLE Opened file handle, INVALID_HANDLE_VALUE on failure; Use
- * CloseHandle() to close the file afterwards
- */
-HANDLE fFile_sopen(const wchar * restrict fileName, bool writemode);
-/**
- * @brief Opens new file with desired name and write access
- * 
  * @param self Pointer to fFile_t structure
  * @param selfName Desired file name, can be NULL; If is NULL, previously given file
  * name will be used

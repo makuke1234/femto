@@ -35,21 +35,6 @@ fFile_t * fFile_resetDyn(void)
 	fFile_reset(file);
 	return file;
 }
-HANDLE fFile_sopen(const wchar * restrict fileName, bool writemode)
-{
-	assert(fileName != NULL);
-	HANDLE hfile = CreateFileW(
-		fileName,
-		writemode ? GENERIC_WRITE : GENERIC_READ,
-		FILE_SHARE_READ,
-		NULL,
-		writemode ? CREATE_ALWAYS : OPEN_ALWAYS,
-		FILE_ATTRIBUTE_NORMAL,
-		NULL
-	);
-
-	return hfile;
-}
 bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool writemode)
 {
 	assert(self != NULL);
@@ -62,7 +47,7 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 	}
 
 	// try to open file
-	self->hFile = fFile_sopen(fileName, writemode);
+	self->hFile = femto_openFile(fileName, writemode);
 	if (self->hFile == INVALID_HANDLE_VALUE)
 	{
 		self->bCanWrite = false;
