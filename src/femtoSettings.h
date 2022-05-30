@@ -70,17 +70,17 @@ typedef struct femtoPalette
 typedef struct femtoSettings
 {
 	bool bHelpRequest:1;
-	wchar_t * fileName;
-	wchar_t * settingsFileName;
+	wchar * fileName;
+	wchar * settingsFileName;
 
 	bool bTabsToSpaces:1;
 	uint8_t tabWidth;
-	wchar_t * tabSpaceStr1;	// Contains space characters
+	wchar * tabSpaceStr1;	// Contains space characters
 
 	bool bAutoIndent:1;
 
 	bool bWhiteSpaceVis:1;
-	wchar_t whitespaceCh;
+	wchar whitespaceCh;
 	WORD whitespaceCol;
 
 	bool bRelLineNums:1;
@@ -90,7 +90,7 @@ typedef struct femtoSettings
 	WORD syntaxColors[tcNUM_OF_TOKENS];
 	const char * syntaxTokens[tcNUM_OF_TOKENS];
 
-	wchar_t lastErr[FEMTO_SETTINGS_ERR_MAX];
+	wchar lastErr[FEMTO_SETTINGS_ERR_MAX];
 
 } femtoSettings_t;
 
@@ -110,7 +110,7 @@ void femtoSettings_reset(femtoSettings_t * restrict self);
  * @return true Getting last error succeeded
  * @return false No last error set
  */
-bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar_t * restrict errArr, uint32_t errMax);
+bool femtoSettings_getLastError(femtoSettings_t * restrict self, wchar * restrict errArr, u32 errMax);
 
 /**
  * @brief Generate tabs to spaces string, consisting of spaces to represent the tab
@@ -130,15 +130,15 @@ bool femtoSettings_makeTabSpaceStr(femtoSettings_t * restrict self);
  * @return femtoErr_e femtoErr_ok -> everything is ok, femtoErr_unknown -> extra
  * information is necessary, get it via femtoSettings_getLastError()
  */
-femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar_t ** restrict argv);
+femtoErr_e femtoSettings_populate(femtoSettings_t * restrict self, int argc, const wchar ** restrict argv);
 
 /**
  * @brief Try to load settings from configured file
  * 
  * @param self Pointer to femtoSettings_t structure
- * @return const wchar_t* Error message, NULL if everything is OK
+ * @return const wchar* Error message, NULL if everything is OK
  */
-const wchar_t * femtoSettings_loadFromFile(femtoSettings_t * restrict self);
+const wchar * femtoSettings_loadFromFile(femtoSettings_t * restrict self);
 
 /**
  * @brief Destroy femtoSettings_t structure

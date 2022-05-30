@@ -26,14 +26,14 @@ typedef struct femtoData
 	{
 		HANDLE handle;
 		CHAR_INFO * mem;
-		uint32_t w, h;
+		u32 w, h;
 	} scrbuf;
 
-	uint32_t filesSize, filesMax;
+	u32 filesSize, filesMax;
 	femtoFile_t ** files;
 	COORD * cursorpos;
 
-	int32_t fileIdx;
+	i32 fileIdx;
 
 	femtoSettings_t settings;
 
@@ -83,7 +83,7 @@ void femtoData_refreshAll(femtoData_t * restrict self);
  * @param self Pointer to femtoData_t structure
  * @param message 
  */
-void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict message, const WORD * restrict colorData);
+void femtoData_statusDraw(femtoData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData);
 /**
  * @brief Refreshes status bar
  * 
@@ -99,7 +99,7 @@ void femtoData_statusRefresh(femtoData_t * restrict self);
  * @return true Success
  * @return false Failure
  */
-bool femtoData_openTab(femtoData_t * restrict self, const wchar_t * restrict fileName);
+bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileName);
 /**
  * @brief Closes the current active tab
  * 

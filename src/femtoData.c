@@ -63,8 +63,8 @@ bool femtoData_init(femtoData_t * restrict self)
 		return false;
 	}
 
-	self->scrbuf.w = (uint32_t)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
-	self->scrbuf.h = (uint32_t)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
+	self->scrbuf.w = (u32)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
+	self->scrbuf.h = (u32)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
 
 	writeProfiler("Screen buffer size: %u %u\n", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
@@ -80,13 +80,13 @@ bool femtoData_init(femtoData_t * restrict self)
 		return false;
 	}
 
-	self->scrbuf.mem = malloc((size_t)(self->scrbuf.w * self->scrbuf.h) * sizeof(CHAR_INFO));
+	self->scrbuf.mem = malloc((usize)(self->scrbuf.w * self->scrbuf.h) * sizeof(CHAR_INFO));
 	if (self->scrbuf.mem == NULL)
 	{
 		return false;
 	}
 
-	for (uint32_t i = 0, sz = self->scrbuf.w * self->scrbuf.h; i < sz; ++i)
+	for (u32 i = 0, sz = self->scrbuf.w * self->scrbuf.h; i < sz; ++i)
 	{
 		self->scrbuf.mem[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = L' ' },
@@ -189,7 +189,7 @@ void femtoData_refresh(femtoData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	uint32_t line;
+	u32 line;
 	if (femto_updateScrbuf(self, &line) == false)
 	{
 		WriteConsoleOutputW(
@@ -228,7 +228,7 @@ void femtoData_refreshAll(femtoData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	uint32_t line;	// Phantom variable
+	u32 line;	// Phantom variable
 	femto_updateScrbuf(self, &line);
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
@@ -238,15 +238,15 @@ void femtoData_refreshAll(femtoData_t * restrict self)
 		&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1) }
 	);
 }
-void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict message, const WORD * restrict colorData)
+void femtoData_statusDraw(femtoData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
 	assert(message != NULL);
 
-	uint32_t effLen = u32Min((uint32_t)wcslen(message), self->scrbuf.w);
+	u32 effLen = min_u32((u32)wcslen(message), self->scrbuf.w);
 	CHAR_INFO * restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
-	for (size_t i = 0; i < effLen; ++i)
+	for (usize i = 0; i < effLen; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = message[i] },
@@ -255,12 +255,12 @@ void femtoData_statusDraw(femtoData_t * restrict self, const wchar_t * restrict 
 	}
 	if (colorData != NULL)
 	{
-		for (size_t i = 0; i < effLen; ++i)
+		for (usize i = 0; i < effLen; ++i)
 		{
 			lastLine[i].Attributes = colorData[i];
 		}
 	}
-	for (size_t i = effLen; i < self->scrbuf.w; ++i)
+	for (usize i = effLen; i < self->scrbuf.w; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = L' ' },
@@ -282,7 +282,7 @@ void femtoData_statusRefresh(femtoData_t * restrict self)
 	);
 }
 
-bool femtoData_openTab(femtoData_t * restrict self, const wchar_t * restrict fileName)
+bool femtoData_openTab(femtoData_t * restrict self, const wchar * restrict fileName)
 {
 	assert(self != NULL);
 	assert(fileName != NULL);
@@ -290,8 +290,8 @@ bool femtoData_openTab(femtoData_t * restrict self, const wchar_t * restrict fil
 	// Reallocate tabs
 	if (self->filesSize >= self->filesMax)
 	{
-		const uint32_t newcap = (self->filesSize + 1) * 2;
-		void * mem = realloc(self->files, sizeof(femtoFile_t *) * newcap);
+		const u32 newcap = (self->filesSize + 1) * 2;
+		vptr mem = realloc(self->files, sizeof(femtoFile_t *) * newcap);
 		if (mem == NULL)
 		{
 			return false;
@@ -319,7 +319,7 @@ bool femtoData_openTab(femtoData_t * restrict self, const wchar_t * restrict fil
 		return false;
 	}
 
-	self->fileIdx = (int32_t)self->filesSize;
+	self->fileIdx = (i32)self->filesSize;
 	++self->filesSize;
 
 	self->cursorpos[self->fileIdx] = (COORD) { 0, 0 };
@@ -340,7 +340,7 @@ void femtoData_closeTab(femtoData_t * restrict self)
 	
 	// Remove file from tab list
 	--self->filesSize;
-	for (uint32_t i = (uint32_t)self->fileIdx; i < self->filesSize; ++i)
+	for (u32 i = (u32)self->fileIdx; i < self->filesSize; ++i)
 	{
 		self->files[i]     = self->files[i + 1];
 		self->cursorpos[i] = self->cursorpos[i + 1];
@@ -351,7 +351,7 @@ void femtoData_closeTab(femtoData_t * restrict self)
 	{
 		--self->fileIdx;
 	}
-	else if (!((uint32_t)self->fileIdx < self->filesSize))
+	else if (!((u32)self->fileIdx < self->filesSize))
 	{
 		self->fileIdx = -1;
 	}
@@ -388,7 +388,7 @@ void femtoData_destroy(femtoData_t * restrict self)
 	}
 
 	self->fileIdx = -1;
-	for (size_t i = 0; i < self->filesSize; ++i)
+	for (usize i = 0; i < self->filesSize; ++i)
 	{
 		femtoFile_destroy(self->files[i]);
 		free(self->files[i]);

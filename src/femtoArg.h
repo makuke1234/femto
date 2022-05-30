@@ -5,7 +5,7 @@
 
 typedef struct femtoArg
 {
-	const wchar_t * begin, * end;
+	const wchar * begin, * end;
 
 } femtoArg_t;
 
@@ -20,7 +20,7 @@ bool femtoArg_strToBool(femtoArg_t arg);
  * 
  * @param arg String wrapper
  */
-wchar_t femtoArg_strToCh(femtoArg_t arg);
+wchar femtoArg_strToCh(femtoArg_t arg);
 
 
 /**
@@ -31,9 +31,13 @@ wchar_t femtoArg_strToCh(femtoArg_t arg);
  * @param argMatch Argument to match against
  * @param maxParams Maximum number of variadic parameters to scan for
  * @param ... Variadic arguments, addresses of receiving femtoArgument_t structures
- * @return uint32_t Number of parameters matched, argument itself counts as 1, 0 if none were found or argMatch doesn't match
+ * @return u32 Number of parameters matched, argument itself counts as 1,
+ * 0 if none were found or argMatch doesn't match
  */
-uint32_t femtoArg_fetch(const wchar_t * restrict rawStr, int32_t maxStr, const wchar_t * restrict argMatch, uint32_t maxParams, ...);
+u32 femtoArg_fetch(
+	const wchar * restrict rawStr, i32 maxStr,
+	const wchar * restrict argMatch, u32 maxParams, ...
+);
 /**
  * @brief Fetches individual parameters from raw command-line argument, takes va_list
  * 
@@ -42,9 +46,13 @@ uint32_t femtoArg_fetch(const wchar_t * restrict rawStr, int32_t maxStr, const w
  * @param argMatch Argument to match against
  * @param maxParams Maximum number of variadic parameters to scan for
  * @param ap Variadic argument list
- * @return uint32_t Number of parameters matched, argument itself counts as 1, 0 if none were found or argMatch doesn't match
+ * @return u32 Number of parameters matched, argument itself counts as 1,
+ * 0 if none were found or argMatch doesn't match
  */
-uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const wchar_t * restrict argMatch, uint32_t maxParams, va_list ap);
+u32 femtoArg_vfetch(
+	const wchar * restrict rawStr, i32 maxStr,
+	const wchar * restrict argMatch, u32 maxParams, va_list ap
+);
 
 
 /**
@@ -55,11 +63,15 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
  * @param argMatch Argument to match against
  * @param matchedIndex Address of matched argument index in argv, filled by function,
  * will be set to 0, if argMatch doesn't match any arguments
- * @param maxParams Maximum number of variadic paramater to scan for
+ * @param maxParams Maximum number of variadic paramaters to scan for
  * @param ... Variadic arguments, addresses of receiving femtoArgument_t structures
- * @return uint32_t Number of parameters matched, argument itself counts as 1, 0 if none were found or argMatch doesn't match
+ * @return u32 Number of parameters matched, argument itself counts as 1,
+ * 0 if none were found or argMatch doesn't match
  */
-uint32_t femtoArg_fetchArgv(int argc, const wchar_t ** restrict argv, const wchar_t * restrict argMatch, int * restrict matchedIndex, uint32_t maxParams, ...);
+u32 femtoArg_fetchArgv(
+	int argc, const wchar ** restrict argv,
+	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, ...
+);
 /**
  * @brief Fetches individual parameters from argc and argv normally given to wmain(), takes va_list
  * 
@@ -68,10 +80,14 @@ uint32_t femtoArg_fetchArgv(int argc, const wchar_t ** restrict argv, const wcha
  * @param argMatch Argument to match against
  * @param matchedIndex Address of matched argument index in argv, filled by function,
  * will be set to 0, if argMatch doesn't match any arguments, CANNOT be NULL
- * @param maxParams Maximum number of variadic paramater to scan for
+ * @param maxParams Maximum number of variadic paramaters to scan for
  * @param ap Variadic argument list
- * @return uint32_t Number of parameters matched, argument itself counts as 1, 0 if none were found or argMatch doesn't match
+ * @return u32 Number of parameters matched, argument itself counts as 1,
+ * 0 if none were found or argMatch doesn't match
  */
-uint32_t femtoArg_vfetchArgv(int argc, const wchar_t ** restrict argv, const wchar_t * restrict argMatch, int * restrict mathedIndex, uint32_t maxParams, va_list ap);
+u32 femtoArg_vfetchArgv(
+	int argc, const wchar ** restrict argv,
+	const wchar * restrict argMatch, int * restrict mathedIndex, u32 maxParams, va_list ap
+);
 
 #endif

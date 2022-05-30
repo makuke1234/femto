@@ -5,7 +5,7 @@
 
 static femtoData_t editor;
 
-int wmain(int argc, const wchar_t * argv[])
+int wmain(int argc, const wchar * argv[])
 {
 	femto_exitHandlerSetVars(&editor);
 	if (!femtoData_reset(&editor))
@@ -25,7 +25,7 @@ int wmain(int argc, const wchar_t * argv[])
 			if (errCode == ferrUNKNOWN)
 			{
 				// Get last error
-				wchar_t errMsg[FEMTO_SETTINGS_ERR_MAX];
+				wchar errMsg[FEMTO_SETTINGS_ERR_MAX];
 				femtoSettings_getLastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
 				wprintf(L"[Settings]: %S\n", errMsg);
 				femto_printHelpClue(argv[0]);
@@ -58,8 +58,8 @@ int wmain(int argc, const wchar_t * argv[])
 	}
 
 	{
-		wchar_t tempstr[MAX_STATUS];
-		const wchar_t * res;
+		wchar tempstr[MAX_STATUS];
+		const wchar * res;
 		if ((res = femtoFile_read(editor.files[editor.fileIdx])) != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);

@@ -35,7 +35,7 @@ femtoFile_t * femtoFile_resetDyn(void)
 	femtoFile_reset(file);
 	return file;
 }
-HANDLE femtoFile_sopen(const wchar_t * restrict fileName, bool writemode)
+HANDLE femtoFile_sopen(const wchar * restrict fileName, bool writemode)
 {
 	assert(fileName != NULL);
 	HANDLE hfile = CreateFileW(
@@ -50,7 +50,7 @@ HANDLE femtoFile_sopen(const wchar_t * restrict fileName, bool writemode)
 
 	return hfile;
 }
-bool femtoFile_open(femtoFile_t * restrict self, const wchar_t * restrict fileName, bool writemode)
+bool femtoFile_open(femtoFile_t * restrict self, const wchar * restrict fileName, bool writemode)
 {
 	assert(self != NULL);
 	fileName = (fileName == NULL) ? self->fileName : fileName;
@@ -102,7 +102,7 @@ void femtoFile_clearLines(femtoFile_t * restrict self)
 		node = next;
 	}
 }
-const wchar_t * femtoFile_sreadBytes(HANDLE hfile, char ** restrict bytes, uint32_t * restrict bytesLen)
+const wchar * femtoFile_sreadBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen)
 {
 	assert(bytes    != NULL);
 	assert(bytesLen != NULL);
@@ -114,7 +114,7 @@ const wchar_t * femtoFile_sreadBytes(HANDLE hfile, char ** restrict bytes, uint3
 	DWORD fileSize = GetFileSize(hfile, NULL);
 	if ((fileSize >= *bytesLen) || (*bytes == NULL))
 	{
-		void * mem = realloc(*bytes, fileSize + 1);
+		vptr mem = realloc(*bytes, fileSize + 1);
 		if (mem == NULL)
 		{
 			return L"Memory error!";
@@ -139,7 +139,7 @@ const wchar_t * femtoFile_sreadBytes(HANDLE hfile, char ** restrict bytes, uint3
 
 	return NULL;
 }
-const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restrict bytes, uint32_t * restrict bytesLen)
+const wchar * femtoFile_readBytes(femtoFile_t * restrict self, char ** restrict bytes, u32 * restrict bytesLen)
 {
 	assert(self != NULL);
 	assert(bytes != NULL);
@@ -148,25 +148,25 @@ const wchar_t * femtoFile_readBytes(femtoFile_t * restrict self, char ** restric
 	{
 		return L"File opening error!";
 	}
-	const wchar_t * result = femtoFile_sreadBytes(self->hFile, bytes, bytesLen);
+	const wchar * result = femtoFile_sreadBytes(self->hFile, bytes, bytesLen);
 	femtoFile_close(self);
 	
 	return result;
 }
-const wchar_t * femtoFile_read(femtoFile_t * restrict self)
+const wchar * femtoFile_read(femtoFile_t * restrict self)
 {
 	assert(self != NULL);
 	char * bytes = NULL;
-	uint32_t size;
-	const wchar_t * res;
+	u32 size;
+	const wchar * res;
 	if ((res = femtoFile_readBytes(self, &bytes, &size)) != NULL)
 	{
 		return res;
 	}
 
 	// Convert to UTF-16
-	wchar_t * utf16 = NULL;
-	uint32_t chars = femto_convToUnicode(bytes, (int)size, &utf16, NULL);
+	wchar * utf16 = NULL;
+	u32 chars = femto_convToUnicode(bytes, (int)size, &utf16, NULL);
 	free(bytes);
 
 	if (utf16 == NULL)
@@ -177,8 +177,8 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 	writeProfiler("File UTF-16 contents \"%S\"", utf16);
 
 	// Save lines to structure
-	wchar_t ** lines = NULL;
-	uint32_t numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
+	wchar ** lines = NULL;
+	u32 numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
 	if (lines == NULL)
 	{
 		free(utf16);
@@ -208,7 +208,7 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 		}
 	}
 	self->data.currentNode = self->data.firstNode;
-	for (uint32_t i = 1; i < numLines; ++i)
+	for (u32 i = 1; i < numLines; ++i)
 	{
 		femtoLineNode_t * node = femtoLine_createText(self->data.currentNode, NULL, lines[i], -1, &self->data.noLen);
 		if (node == NULL)
@@ -224,12 +224,12 @@ const wchar_t * femtoFile_read(femtoFile_t * restrict self)
 
 	return NULL;
 }
-int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorContents, uint32_t * editorContLen)
+i32 femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorContents, u32 * editorContLen)
 {
 	assert(self != NULL);
 	// Generate lines
-	wchar_t * lines = NULL, * line = NULL;
-	uint32_t linesCap = 0, linesLen = 0, lineCap = 0;
+	wchar * lines = NULL, * line = NULL;
+	u32 linesCap = 0, linesLen = 0, lineCap = 0;
 
 	femtoLineNode_t * node = self->data.firstNode;
 
@@ -252,19 +252,19 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 			return checkRes_memError;
 		}
 
-		uint32_t lineLen = (uint32_t)wcsnlen(line, lineCap);
+		u32 lineLen = (u32)wcsnlen(line, lineCap);
 
-		uint32_t addnewline = (node->nextNode != NULL) ? 1 + isCRLF : 0;
-		uint32_t newLinesLen = linesLen + lineLen + addnewline;
+		u32 addnewline = (node->nextNode != NULL) ? 1 + isCRLF : 0;
+		u32 newLinesLen = linesLen + lineLen + addnewline;
 
 		// Add line to lines, concatenate \n character, if necessary
 
 		if (newLinesLen >= linesCap)
 		{
 			// Resize lines array
-			uint32_t newCap = (newLinesLen + 1) * 2;
+			u32 newCap = (newLinesLen + 1) * 2;
 
-			void * mem = realloc(lines, sizeof(wchar_t) * newCap);
+			vptr mem = realloc(lines, sizeof(wchar) * newCap);
 			if (mem == NULL)
 			{
 				if (line != NULL)
@@ -283,7 +283,7 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 		}
 
 		// Copy line
-		memcpy(lines + linesLen, line, sizeof(wchar_t) * lineLen);
+		memcpy(lines + linesLen, line, sizeof(wchar) * lineLen);
 		linesLen = newLinesLen;
 
 		if (addnewline)
@@ -310,7 +310,7 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 
 	// Try to convert lines string to UTF-8
 	char * utf8 = NULL;
-	uint32_t utf8sz = 0;
+	u32 utf8sz = 0;
 	femto_convFromUnicode(lines, (int)linesLen + 1, &utf8, &utf8sz);
 
 	// Free UTF-16 lines string
@@ -324,11 +324,11 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 
 	// Check if anything has changed, for that load original file again
 	char * compFile = NULL;
-	uint32_t compSize;
+	u32 compSize;
 	if (femtoFile_readBytes(self, &compFile, &compSize) == NULL)
 	{
 		// Reading was successful
-		bool areEqual = strncmp(utf8, compFile, (size_t)u32Min(utf8sz, compSize)) == 0;
+		bool areEqual = strncmp(utf8, compFile, (usize)min_u32(utf8sz, compSize)) == 0;
 		free(compFile);
 
 		if (areEqual)
@@ -353,12 +353,12 @@ int32_t femtoFile_checkUnsaved(femtoFile_t * restrict self, char ** editorConten
 	self->bUnsaved = true;
 	return checkRes_needsSaving;
 }
-int32_t femtoFile_write(femtoFile_t * restrict self)
+i32 femtoFile_write(femtoFile_t * restrict self)
 {
 	assert(self != NULL);
 	char * utf8 = NULL;
-	uint32_t utf8sz = 0;
-	int32_t checkres = femtoFile_checkUnsaved(self, &utf8, &utf8sz);
+	u32 utf8sz = 0;
+	i32 checkres = femtoFile_checkUnsaved(self, &utf8, &utf8sz);
 	switch (checkres)
 	{
 	case checkRes_memError:
@@ -409,21 +409,21 @@ int32_t femtoFile_write(femtoFile_t * restrict self)
 	else
 	{
 		self->bUnsaved = false;
-		return (int32_t)dwWritten;
+		return (i32)dwWritten;
 	}
 }
 void femtoFile_setConTitle(const femtoFile_t * restrict self)
 {
 	assert(self != NULL);
-	wchar_t wndName[MAX_PATH];
-	size_t fnamelen = wcslen(self->fileName);
-	memcpy(wndName, self->fileName, fnamelen * sizeof(wchar_t));
+	wchar wndName[MAX_PATH];
+	usize fnamelen = wcslen(self->fileName);
+	memcpy(wndName, self->fileName, fnamelen * sizeof(wchar));
 	wcscpy_s(wndName + fnamelen, MAX_PATH - fnamelen, L" - femto");
 	SetConsoleTitleW(wndName);
 }
 
 
-bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch, uint32_t tabWidth)
+bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar ch, u32 tabWidth)
 {
 	assert(self != NULL);
 	femtoLineNode_t * node = self->data.currentNode;
@@ -439,7 +439,7 @@ bool femtoFile_addNormalCh(femtoFile_t * restrict self, wchar_t ch, uint32_t tab
 	self->data.lastx = node->virtcurx;
 	return true;
 }
-bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_t ch, const femtoSettings_t * pset)
+bool femtoFile_addSpecialCh(femtoFile_t * restrict self, u32 height, wchar ch, const femtoSettings_t * pset)
 {
 	assert(self != NULL);
 	self->data.bTyped = true;
@@ -449,14 +449,14 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 	{
 	case VK_TAB:
 	{
-		wchar_t tch = pset->bTabsToSpaces ? L' ' : L'\t';
+		wchar tch = pset->bTabsToSpaces ? L' ' : L'\t';
 		if (!femtoFile_addNormalCh(self, tch, pset->tabWidth))
 		{
 			return false;
 		}
 		if (pset->bTabsToSpaces)
 		{
-			for (uint32_t i = 0, max = pset->tabWidth - (lastcurnode->virtcurx % pset->tabWidth); i < max; ++i)
+			for (u32 i = 0, max = pset->tabWidth - (lastcurnode->virtcurx % pset->tabWidth); i < max; ++i)
 			{
 				if (femtoFile_addNormalCh(self, tch, pset->tabWidth) == false)
 				{
@@ -474,10 +474,10 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		{
 			femtoFile_deleteBackward(self);
 			--lastcurnode->virtcurx;
-			uint32_t max = lastcurnode->virtcurx % pset->tabWidth;
-			if (femtoLine_checkAt(lastcurnode, -(int32_t)max, pset->tabSpaceStr1, max))
+			u32 max = lastcurnode->virtcurx % pset->tabWidth;
+			if (femtoLine_checkAt(lastcurnode, -(i32)max, pset->tabSpaceStr1, max))
 			{
-				for (uint32_t i = 0; i < max; ++i)
+				for (u32 i = 0; i < max; ++i)
 				{
 					femtoFile_deleteBackward(self);
 				}
@@ -587,7 +587,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		else if (lastcurnode->prevNode != NULL)
 		{
 			self->data.currentNode = lastcurnode->prevNode;
-			femtoLine_moveCursor(self->data.currentNode, (int32_t)self->data.currentNode->lineEndx);
+			femtoLine_moveCursor(self->data.currentNode, (i32)self->data.currentNode->lineEndx);
 		}
 		femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
@@ -600,7 +600,7 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		else if (lastcurnode->nextNode != NULL)
 		{
 			self->data.currentNode = self->data.currentNode->nextNode;
-			femtoLine_moveCursor(self->data.currentNode, -(int32_t)self->data.currentNode->lineEndx);
+			femtoLine_moveCursor(self->data.currentNode, -(i32)self->data.currentNode->lineEndx);
 		}
 		femtoLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
@@ -614,20 +614,20 @@ bool femtoFile_addSpecialCh(femtoFile_t * restrict self, uint32_t height, wchar_
 		femtoLine_moveCursorAbs(self->data.currentNode, femtoLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_PRIOR:	// Page up
-		femtoLine_moveCursorVert(&self->data.currentNode, -(int32_t)height);
+		femtoLine_moveCursorVert(&self->data.currentNode, -(i32)height);
 		femtoLine_moveCursorAbs(self->data.currentNode, femtoLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_NEXT:	// Page down
-		femtoLine_moveCursorVert(&self->data.currentNode, (int32_t)height);
+		femtoLine_moveCursorVert(&self->data.currentNode, (i32)height);
 		femtoLine_moveCursorAbs(self->data.currentNode, femtoLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_END:
-		femtoLine_moveCursor(lastcurnode, (int32_t)lastcurnode->lineEndx);
+		femtoLine_moveCursor(lastcurnode, (i32)lastcurnode->lineEndx);
 		femtoLine_calcVirtCursor(lastcurnode, pset->tabWidth);
 		self->data.lastx = lastcurnode->virtcurx;
 		break;
 	case VK_HOME:
-		femtoLine_moveCursor(lastcurnode, -(int32_t)lastcurnode->lineEndx);
+		femtoLine_moveCursor(lastcurnode, -(i32)lastcurnode->lineEndx);
 		femtoLine_calcVirtCursor(lastcurnode, pset->tabWidth);
 		self->data.lastx = lastcurnode->virtcurx;
 		break;
@@ -703,13 +703,13 @@ bool femtoFile_addNewLine(femtoFile_t * restrict self, bool tabsToSpaces, uint8_
 	return true;
 }
 
-void femtoFile_updateCury(femtoFile_t * restrict self, uint32_t height)
+void femtoFile_updateCury(femtoFile_t * restrict self, u32 height)
 {
 	assert(self != NULL);
 	if (self->data.pcury == NULL)
 	{
 		femtoLineNode_t * node = self->data.currentNode;
-		for (uint32_t i = 0; i < height && node->prevNode != NULL; ++i)
+		for (u32 i = 0; i < height && node->prevNode != NULL; ++i)
 		{
 			node = node->prevNode;
 		}
@@ -718,7 +718,7 @@ void femtoFile_updateCury(femtoFile_t * restrict self, uint32_t height)
 	else
 	{
 		femtoLineNode_t * node = self->data.currentNode;
-		for (uint32_t i = 0; i < height && node != NULL; ++i)
+		for (u32 i = 0; i < height && node != NULL; ++i)
 		{
 			if (node == self->data.pcury)
 			{
@@ -742,7 +742,7 @@ void femtoFile_updateCury(femtoFile_t * restrict self, uint32_t height)
 		femtoFile_updateCury(self, height);
 	}
 }
-void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t deltaLines)
+void femtoFile_scroll(femtoFile_t * restrict self, u32 height, i32 deltaLines)
 {
 	assert(self != NULL);
 	if (self->data.pcury == NULL)
@@ -756,16 +756,16 @@ void femtoFile_scroll(femtoFile_t * restrict self, uint32_t height, int32_t delt
 		self->data.bUpdateAll = true;
 	}
 }
-void femtoFile_scrollHor(femtoFile_t * restrict self, uint32_t width, int32_t deltaCh)
+void femtoFile_scrollHor(femtoFile_t * restrict self, u32 width, i32 deltaCh)
 {
 	assert(self != NULL);
-	if ((deltaCh < 0) && ((uint32_t)-deltaCh <= self->data.curx))
+	if ((deltaCh < 0) && ((u32)-deltaCh <= self->data.curx))
 	{
-		self->data.curx -= (uint32_t)-deltaCh;
+		self->data.curx -= (u32)-deltaCh;
 	}
 	else if (deltaCh > 0)
 	{
-		uint32_t curx = self->data.curx + (uint32_t)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
+		u32 curx = self->data.curx + (u32)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
 		--width;
 		if ((total >= width) && (curx <= (total - width)))
 		{

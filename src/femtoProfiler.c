@@ -5,24 +5,36 @@
 #include <time.h>
 #include <stdarg.h>
 
-static FILE * profilingFile = NULL;
+static FILE * s_profilingFile = NULL;
 
 void initProfiler(void)
 {
-	profilingFile = fopen("profiler.txt", "a+");
-	if (profilingFile == NULL)
+	s_profilingFile = fopen(FEMTO_PROFILER_FILE, "a+");	
+	if (s_profilingFile == NULL)
 	{
 		fputs("Error opening profiling file!\n", stderr);
 		exit(1);
 	}
-	fputs("\n", profilingFile);
-	writeProfiler("initProfiler", "Started application...");
+	fputc('\n', s_profilingFile);
+	writeProfiler_inner("initProfiler", "Started application...");
+}
+void closeProfiler(void)
+{
+	assert(s_profilingFile != NULL);
+	
+	fputc('\n', s_profilingFile);
+	writeProfiler_inner("closeProfiler", "Closing profiler session...");
+	
+	// Closing file actually
+	fclose(s_profilingFile);
+	s_profilingFile = NULL;
 }
 void writeProfiler_inner(const char * restrict function, const char * restrict format, ...)
 {
 	assert(function != NULL);
 	assert(format != NULL);
-	if (profilingFile == NULL)
+
+	if (s_profilingFile == NULL)
 	{
 		fputs("Profiling file not open!\n", stderr);
 		return;
@@ -33,7 +45,7 @@ void writeProfiler_inner(const char * restrict function, const char * restrict f
 	time(&rawtime);
 	struct tm * ti = localtime(&rawtime);
 	fprintf(
-		profilingFile,
+		s_profilingFile,
 		"[%.2d.%.2d.%d @%.2d:%.2d:%.2d] @%s<",
 		ti->tm_mday, ti->tm_mon + 1, ti->tm_year + 1900,
 		ti->tm_hour, ti->tm_min,     ti->tm_sec,
@@ -43,29 +55,33 @@ void writeProfiler_inner(const char * restrict function, const char * restrict f
 	va_list ap;
 	va_start(ap, format);
 
-	vfprintf(profilingFile, format, ap);
+	vfprintf(s_profilingFile, format, ap);
 
 	va_end(ap);
 
-	fprintf(profilingFile, ">\n");
-	fflush(profilingFile);
+	fputs(">\n", s_profilingFile);
+	fflush(s_profilingFile);
 }
 
-#define PROFILER_STACK_SIZE 256
-
-static clock_t profilerStack[PROFILER_STACK_SIZE];
-static int curStackLen = 0;
+static clock_t s_profilerStack[FEMTO_PROFILER_STACK_SIZE];
+static u32 s_curStackLen = 0;
 
 void profilerStart(void)
 {
-	assert(curStackLen < PROFILER_STACK_SIZE);
-	profilerStack[curStackLen++] = clock();
+	assert(s_curStackLen < FEMTO_PROFILER_STACK_SIZE);
+	s_profilerStack[s_curStackLen++] = clock();
 }
 void profilerEnd_inner(const char * funcName)
 {
-	assert(curStackLen > 0);
-	--curStackLen;
-	writeProfiler_inner(funcName, "Elapsed %.3f s", (double)(clock() - profilerStack[curStackLen]) / (double)CLOCKS_PER_SEC);
+	assert(funcName != NULL);
+	assert(s_curStackLen > 0);
+	
+	--s_curStackLen;
+	writeProfiler_inner(
+		funcName,
+		"Elapsed %.3f s",
+		(f64)(clock() - s_profilerStack[s_curStackLen]) / (f64)CLOCKS_PER_SEC
+	);
 }
 
 #endif

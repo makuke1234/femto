@@ -9,12 +9,12 @@
 
 typedef struct femtoLineNode
 {
-	wchar_t * line;
-	uint32_t lineEndx, curx, freeSpaceLen;
+	wchar * line;
+	u32 lineEndx, curx, freeSpaceLen;
 	struct femtoLineNode * prevNode, * nextNode;
-	uint32_t virtcurx;
+	u32 virtcurx;
 
-	uint32_t lineNumber;
+	u32 lineNumber;
 
 	WORD * syntax;
 	uint8_t userValue;
@@ -62,32 +62,32 @@ femtoLineNode_t * femtoLine_create(
 femtoLineNode_t * femtoLine_createText(
 	femtoLineNode_t * restrict curnode,
 	femtoLineNode_t * restrict nextnode,
-	const wchar_t * restrict lineText,
-	int32_t maxText,
+	const wchar * restrict lineText,
+	i32 maxText,
 	uint8_t * restrict noLen
 );
 
 /**
- * @brief Fetches text from given line node, copies it to wchar_t character array,
+ * @brief Fetches text from given line node, copies it to wchar character array,
  * allocates memory only if *text is too small or tarrsz == NULL
  * 
  * @param self Pointer to line node to fetch text from
- * @param text Address of wchar_t pointer to character array, wchar_t pointer
+ * @param text Address of wchar pointer to character array, wchar pointer
  * itself can be initally NULL
  * @param tarrsz Size of receiving character array, can be NULL
  * @return true Success
  * @return false Failure
  */
-bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restrict text, uint32_t * restrict tarrsz);
+bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar ** restrict text, u32 * restrict tarrsz);
 /**
- * @brief Fetches text from given line node, copies it to wchar_t character array
+ * @brief Fetches text from given line node, copies it to wchar character array
  * until the length reaches maxLen (including the null-terminator)
  * 
  * @param self Pointer to line node to fetch text from
- * @param text wchar_t pointer to character array
+ * @param text wchar pointer to character array
  * @param maxLen Maximum length of character array in characters (including the null-terminator)
  */
-void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar_t * restrict text, uint32_t maxLen);
+void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar * restrict text, u32 maxLen);
 /**
  * @brief Reallocates free space on given line node, guarantees
  * femto_LNODE_DEFAULT_FREE characters for space
@@ -107,7 +107,7 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self);
  * @return true Success
  * @return false Failure
  */
-bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar_t ch, uint32_t tabWidth);
+bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar ch, u32 tabWidth);
 
 /**
  * @brief Checks current line contents for matching string
@@ -119,7 +119,7 @@ bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar_t ch, uint32_t tab
  * @return true Found a match
  * @return false Didn't find any match
  */
-bool femtoLine_checkAt(const femtoLineNode_t * restrict node, int32_t maxdelta, const wchar_t * restrict string, uint32_t maxString);
+bool femtoLine_checkAt(const femtoLineNode_t * restrict node, i32 maxdelta, const wchar * restrict string, u32 maxString);
 
 /**
  * @brief Merges current line node with next line node, adjusts current
@@ -140,37 +140,37 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
  * @param delta Amount of characters to move, positive values to move right,
  * negative values to move left
  */
-void femtoLine_moveCursor(femtoLineNode_t * restrict self, int32_t delta);
+void femtoLine_moveCursor(femtoLineNode_t * restrict self, i32 delta);
 /**
  * @brief Moves (internal) cursor on current line node, clamps movement
  * 
  * @param self Pointer to current line node
  * @param curx Absolute cursor position to move to
  */
-void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx);
+void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, u32 curx);
 /**
  * @brief Moves active line node, clamps movement
  * 
  * @param self Address of pointer to current line node
  * @param delta Amount of lines to move, positive values move down, negative values move up
  */
-void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta);
+void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, i32 delta);
 /**
  * @brief Calculates virtual cursor location
  * 
  * @param self Pointer to current line node
  * @param tabWidth Tab character width in spaces equivalent
  */
-void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth);
+void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, u32 tabWidth);
 /**
  * @brief Calculates real cursor location from virtual cursor location
  * 
  * @param self Pointer to current line node
  * @param virtcur Virtual cursor position
  * @param tabWidth Tab character width in spaces equivalent
- * @return uint32_t Real cursor location
+ * @return u32 Real cursor location
  */
-uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t virtcur, uint32_t tabWidth);
+u32 femtoLine_calcCursor(const femtoLineNode_t * restrict self, u32 virtcur, u32 tabWidth);
 
 /**
  * @brief Swaps internally data between 2 nodes
@@ -187,7 +187,7 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
  * @param startLno Starting line number
  * @param noLen Pointer receiving last line number length in characters
  */
-void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen);
+void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, u32 startLno, uint8_t * restrict noLen);
 
 /**
  * @brief Updates the syntax highlighting of a given node

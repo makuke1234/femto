@@ -46,7 +46,7 @@ enum femtoSyntax
 };
 
 // Detects syntax from filename
-enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName);
+enum femtoSyntax fSyntaxDetect(const wchar * restrict fileName);
 
 // Returns const pointer to syntax name from syntax identifier
 const char * fSyntaxName(enum femtoSyntax fs);
@@ -54,15 +54,15 @@ const char * fSyntaxName(enum femtoSyntax fs);
 bool fSyntaxParseAutoAlloc(struct femtoLineNode * restrict node);
 
 // Tokeniser function signature for fSyntaxParseCLike
-typedef void (*tokeniserFunc_t)(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
+typedef void (*tokeniserFunc_t)(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
 
 // Token parsers
-void checkCToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkCPPToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkPyToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkJSToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkRustToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkGoToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
+void checkCToken(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
+void checkCPPToken(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
+void checkPyToken(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
+void checkJSToken(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
+void checkRustToken(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
+void checkGoToken(struct femtoLineNode * restrict node, u32 start, u32 lasti, WORD kwCol);
 
 // Syntax parsers
 

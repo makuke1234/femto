@@ -1,5 +1,5 @@
-#ifndef PROFILING_H
-#define PROFILING_H
+#ifndef FEMTO_PROFILER_H
+#define FEMTO_PROFILER_H
 
 #if PROFILING_ENABLE == 1
 
@@ -10,6 +10,11 @@
  * 
  */
 void initProfiler(void);
+/**
+ * @brief Closes profiler
+ * 
+ */
+void closeProfiler(void);
 /**
  * @brief Write a profiler log message
  * 
@@ -36,6 +41,7 @@ void profilerEnd_inner(const char * funcName);
 #else
 
 #define initProfiler()
+#define closeProfiler()
 #define writeProfiler(...)
 #define profilerStart()
 #define profilerEnd()

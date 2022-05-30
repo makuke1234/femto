@@ -35,14 +35,14 @@ femtoLineNode_t * femtoLine_create(
 		return NULL;
 	}
 
-	wchar_t tch = tabsToSpaces ? L' ' : L'\t';
+	wchar tch = tabsToSpaces ? L' ' : L'\t';
 
-	uint32_t space = 0;
+	u32 space = 0;
 	if (curnode != NULL)
 	{
 		if (autoIndent)
 		{
-			for (uint32_t i = 0; i < curnode->lineEndx;)
+			for (u32 i = 0; i < curnode->lineEndx;)
 			{
 				if ((i == curnode->curx) && (curnode->freeSpaceLen > 0))
 				{
@@ -72,14 +72,14 @@ femtoLineNode_t * femtoLine_create(
 		// Create normal empty line
 		if ((curnode->curx + curnode->freeSpaceLen) == curnode->lineEndx)
 		{
-			node->line = malloc(sizeof(wchar_t) * (FEMTO_LNODE_DEFAULT_FREE + space));
+			node->line = malloc(sizeof(wchar) * (FEMTO_LNODE_DEFAULT_FREE + space));
 			if (node->line == NULL)
 			{
 				free(node);
 				return NULL;
 			}
 			node->lineEndx = FEMTO_LNODE_DEFAULT_FREE + space;
-			for (uint32_t i = 0; i < space; ++i)
+			for (u32 i = 0; i < space; ++i)
 			{
 				node->line[i] = tch;
 			}
@@ -87,19 +87,19 @@ femtoLineNode_t * femtoLine_create(
 		// Copy contents after cursor to this line
 		else
 		{
-			uint32_t contStart = curnode->curx + curnode->freeSpaceLen, contLen = curnode->lineEndx - contStart;
+			u32 contStart = curnode->curx + curnode->freeSpaceLen, contLen = curnode->lineEndx - contStart;
 			node->lineEndx = contLen + FEMTO_LNODE_DEFAULT_FREE + space;
-			node->line = malloc(sizeof(wchar_t) * node->lineEndx);
+			node->line = malloc(sizeof(wchar) * node->lineEndx);
 			if (node->line == NULL)
 			{
 				free(node);
 				return NULL;
 			}
-			for (uint32_t i = 0; i < space; ++i)
+			for (u32 i = 0; i < space; ++i)
 			{
 				node->line[i] = tch;
 			}
-			memcpy(node->line + FEMTO_LNODE_DEFAULT_FREE + space, curnode->line + contStart, sizeof(wchar_t) * contLen);
+			memcpy(node->line + FEMTO_LNODE_DEFAULT_FREE + space, curnode->line + contStart, sizeof(wchar) * contLen);
 			curnode->freeSpaceLen += contLen;
 		}
 	}
@@ -130,14 +130,14 @@ femtoLineNode_t * femtoLine_create(
 femtoLineNode_t * femtoLine_createText(
 	femtoLineNode_t * restrict curnode,
 	femtoLineNode_t * restrict nextnode,
-	const wchar_t * restrict lineText,
-	int32_t mText,
+	const wchar * restrict lineText,
+	i32 mText,
 	uint8_t * restrict noLen
 )
 {
 	assert(noLen != NULL);
 
-	uint32_t maxText = (mText == -1) ? (uint32_t)wcslen(lineText) : (uint32_t)mText;
+	u32 maxText = (mText == -1) ? (u32)wcslen(lineText) : (u32)mText;
 
 	femtoLineNode_t * node = malloc(sizeof(femtoLineNode_t));
 	if (node == NULL)
@@ -146,14 +146,14 @@ femtoLineNode_t * femtoLine_createText(
 	}
 
 	node->lineEndx = maxText + FEMTO_LNODE_DEFAULT_FREE;
-	node->line = malloc(sizeof(wchar_t) * node->lineEndx);
+	node->line = malloc(sizeof(wchar) * node->lineEndx);
 	if (node->line == NULL)
 	{
 		free(node);
 		return NULL;
 	}
 	
-	memcpy(node->line, lineText, sizeof(wchar_t) * maxText);
+	memcpy(node->line, lineText, sizeof(wchar) * maxText);
 
 	node->curx = maxText;
 	node->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
@@ -179,17 +179,17 @@ femtoLineNode_t * femtoLine_createText(
 	return node;
 }
 
-bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restrict text, uint32_t * restrict tarrsz)
+bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar ** restrict text, u32 * restrict tarrsz)
 {
 	assert(self != NULL);
 	assert(text != NULL);
 
-	uint32_t totalLen = self->lineEndx - self->freeSpaceLen + 1;
+	u32 totalLen = self->lineEndx - self->freeSpaceLen + 1;
 	writeProfiler("Total length: %u characters", totalLen);
 
 	if (tarrsz != NULL && *tarrsz < totalLen)
 	{
-		wchar_t * mem = realloc(*text, sizeof(wchar_t) * totalLen);
+		wchar * mem = realloc(*text, sizeof(wchar) * totalLen);
 		if (mem == NULL)
 		{
 			return false;
@@ -199,15 +199,15 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restric
 	}
 	else if (tarrsz == NULL)
 	{
-		*text = malloc(sizeof(wchar_t) * totalLen);
+		*text = malloc(sizeof(wchar) * totalLen);
 		if (*text == NULL)
 		{
 			return false;
 		}
 	}
 
-	wchar_t * t = *text;
-	for (uint32_t i = 0; i < self->lineEndx;)
+	wchar * t = *text;
+	for (u32 i = 0; i < self->lineEndx;)
 	{
 		if ((i == self->curx) && (self->freeSpaceLen > 0))
 		{
@@ -223,14 +223,14 @@ bool femtoLine_getText(const femtoLineNode_t * restrict self, wchar_t ** restric
 
 	return true;
 }
-void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar_t * restrict text, uint32_t maxLen)
+void femtoLine_getTextLim(const femtoLineNode_t * restrict self, wchar * restrict text, u32 maxLen)
 {
 	assert(self != NULL);
 	assert(text != NULL);
 	assert(maxLen > 0);
 
-	uint32_t len = 0;
-	for (uint32_t i = 0; (i < self->lineEndx) && (len < (maxLen - 1));)
+	u32 len = 0;
+	for (u32 i = 0; (i < self->lineEndx) && (len < (maxLen - 1));)
 	{
 		if ((i == self->curx) && (self->freeSpaceLen > 0))
 		{
@@ -253,8 +253,8 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	{
 		return true;
 	}
-	uint32_t totalLen = self->lineEndx - self->freeSpaceLen;
-	void * newmem = realloc(self->line, sizeof(wchar_t) * (totalLen + FEMTO_LNODE_DEFAULT_FREE));
+	u32 totalLen = self->lineEndx - self->freeSpaceLen;
+	vptr newmem = realloc(self->line, sizeof(wchar) * (totalLen + FEMTO_LNODE_DEFAULT_FREE));
 	if (newmem == NULL)
 	{
 		return false;
@@ -265,7 +265,7 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 		memmove(
 			self->line + self->curx + FEMTO_LNODE_DEFAULT_FREE,
 			self->line + self->curx + self->freeSpaceLen,
-			sizeof(wchar_t) * (totalLen - self->curx)
+			sizeof(wchar) * (totalLen - self->curx)
 		);
 	}
 
@@ -278,7 +278,7 @@ bool femtoLine_realloc(femtoLineNode_t * restrict self)
 	return true;
 }
 
-bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar_t ch, uint32_t tabWidth)
+bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar ch, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(ch   != L'\0');
@@ -296,7 +296,7 @@ bool femtoLine_addChar(femtoLineNode_t * restrict self, wchar_t ch, uint32_t tab
 
 	return true;
 }
-bool femtoLine_checkAt(const femtoLineNode_t * restrict node, int32_t maxdelta, const wchar_t * restrict string, uint32_t maxString)
+bool femtoLine_checkAt(const femtoLineNode_t * restrict node, i32 maxdelta, const wchar * restrict string, u32 maxString)
 {
 	assert(string != NULL);
 	if (node == NULL)
@@ -304,16 +304,16 @@ bool femtoLine_checkAt(const femtoLineNode_t * restrict node, int32_t maxdelta, 
 		return false;
 	}
 
-	int32_t idx = (int32_t)node->curx + maxdelta, i = 0, m = (int32_t)maxString;
+	i32 idx = (i32)node->curx + maxdelta, i = 0, m = (i32)maxString;
 	if (idx < 0)
 	{
 		return false;
 	}
-	for (; idx < (int32_t)node->lineEndx && i < m && *string != '\0';)
+	for (; idx < (i32)node->lineEndx && i < m && *string != '\0';)
 	{
-		if (idx == (int32_t)node->curx)
+		if (idx == (i32)node->curx)
 		{
-			idx += (int32_t)node->freeSpaceLen;
+			idx += (i32)node->freeSpaceLen;
 			continue;
 		}
 		
@@ -347,9 +347,9 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	*ppcury = (*ppcury == n) ? self : *ppcury;
 
 	// Allocate more memory for first line
-	void * linemem = realloc(
+	vptr linemem = realloc(
 		self->line,
-		sizeof(wchar_t) * (self->lineEndx - self->freeSpaceLen + n->lineEndx - n->freeSpaceLen + FEMTO_LNODE_DEFAULT_FREE)
+		sizeof(wchar) * (self->lineEndx - self->freeSpaceLen + n->lineEndx - n->freeSpaceLen + FEMTO_LNODE_DEFAULT_FREE)
 	);
 	if (linemem == NULL)
 	{
@@ -358,13 +358,13 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	self->line = linemem;
 
 	// Move cursor to end, if needed
-	femtoLine_moveCursor(self, (int32_t)self->lineEndx);
-	femtoLine_moveCursor(n,    (int32_t)n->lineEndx);
+	femtoLine_moveCursor(self, (i32)self->lineEndx);
+	femtoLine_moveCursor(n,    (i32)n->lineEndx);
 
 	self->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
 	self->lineEndx     = self->curx + n->curx + FEMTO_LNODE_DEFAULT_FREE;
 
-	memcpy(self->line + self->curx + self->freeSpaceLen, n->line, sizeof(wchar_t) * n->curx);
+	memcpy(self->line + self->curx + self->freeSpaceLen, n->line, sizeof(wchar) * n->curx);
 	self->nextNode = n->nextNode;
 	if (self->nextNode != NULL)
 	{
@@ -380,12 +380,12 @@ bool femtoLine_mergeNext(femtoLineNode_t * restrict self, femtoLineNode_t ** res
 	return true;
 }
 
-void femtoLine_moveCursor(femtoLineNode_t * restrict self, int32_t delta)
+void femtoLine_moveCursor(femtoLineNode_t * restrict self, i32 delta)
 {
 	assert(self != NULL);
 	if (delta < 0)
 	{
-		for (uint32_t idx = self->curx + self->freeSpaceLen; delta < 0 && self->curx > 0; ++delta)
+		for (u32 idx = self->curx + self->freeSpaceLen; delta < 0 && self->curx > 0; ++delta)
 		{
 			--idx;
 			--self->curx;
@@ -394,7 +394,7 @@ void femtoLine_moveCursor(femtoLineNode_t * restrict self, int32_t delta)
 	}
 	else
 	{
-		for (uint32_t total = self->lineEndx - self->freeSpaceLen, idx = self->curx + self->freeSpaceLen; delta > 0 && self->curx < total; --delta)
+		for (u32 total = self->lineEndx - self->freeSpaceLen, idx = self->curx + self->freeSpaceLen; delta > 0 && self->curx < total; --delta)
 		{
 			self->line[self->curx] = self->line[idx];
 			++idx;
@@ -402,12 +402,12 @@ void femtoLine_moveCursor(femtoLineNode_t * restrict self, int32_t delta)
 		}
 	}
 }
-void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx)
+void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, u32 curx)
 {
 	assert(self != NULL);
 	if (curx < self->curx)
 	{
-		for (uint32_t idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx > 0;)
+		for (u32 idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx > 0;)
 		{
 			--idx;
 			--self->curx;
@@ -416,7 +416,7 @@ void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx)
 	}
 	else
 	{
-		for (uint32_t total = self->lineEndx - self->freeSpaceLen, idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx < total;)
+		for (u32 total = self->lineEndx - self->freeSpaceLen, idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx < total;)
 		{
 			self->line[self->curx] = self->line[idx];
 			++idx;
@@ -424,7 +424,7 @@ void femtoLine_moveCursorAbs(femtoLineNode_t * restrict self, uint32_t curx)
 		}
 	}
 }
-void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta)
+void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, i32 delta)
 {
 	assert(self != NULL);
 	assert(*self != NULL);
@@ -446,23 +446,23 @@ void femtoLine_moveCursorVert(femtoLineNode_t ** restrict self, int32_t delta)
 	}
 	*self = node;
 }
-void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, uint32_t tabWidth)
+void femtoLine_calcVirtCursor(femtoLineNode_t * restrict self, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(tabWidth > 0);
 	self->virtcurx = 0;
-	for (uint32_t i = 0; i < self->curx; ++i)
+	for (u32 i = 0; i < self->curx; ++i)
 	{
 		self->virtcurx += (self->line[i] == L'\t') ? tabWidth - (self->virtcurx % tabWidth) : 1;
 	}
 }
-uint32_t femtoLine_calcCursor(const femtoLineNode_t * restrict self, uint32_t virtcur, uint32_t tabWidth)
+u32 femtoLine_calcCursor(const femtoLineNode_t * restrict self, u32 virtcur, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(tabWidth > 0);
 
-	uint32_t realcurx = 0;
-	for (uint32_t i = 0, curx = 0; (curx < virtcur) && (i < self->lineEndx);)
+	u32 realcurx = 0;
+	for (u32 i = 0, curx = 0; (curx < virtcur) && (i < self->lineEndx);)
 	{
 		if ((i == self->curx) && (self->freeSpaceLen > 0))
 		{
@@ -498,7 +498,7 @@ void femtoLine_swap(femtoLineNode_t * restrict node1, femtoLineNode_t * restrict
 	node2->syntax       = temp.syntax;
 }
 
-void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t startLno, uint8_t * restrict noLen)
+void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, u32 startLno, uint8_t * restrict noLen)
 {
 	femtoLineNode_t * prevnode = NULL;
 	while (startnode != NULL)
@@ -511,7 +511,7 @@ void femtoLine_updateLineNumbers(femtoLineNode_t * restrict startnode, uint32_t 
 	}
 	if ((prevnode != NULL) && (prevnode->lineNumber > 0))
 	{
-		*noLen = (uint8_t)log10((double)prevnode->lineNumber) + 1;
+		*noLen = (uint8_t)log10((f64)prevnode->lineNumber) + 1;
 	}
 	else
 	{

@@ -36,7 +36,7 @@ int wmain(void)
 	free(str);
 
 	const char * testString = "aasdlfaksdlfhaklsdjfhalskdjfhalskdjfhaslkdjfh";
-	for (size_t i = 0, len = strlen(testString); i < len; ++i)
+	for (usize i = 0, len = strlen(testString); i < len; ++i)
 	{
 		str = strdup_s(testString, i);
 		test(strncmp(str, testString, i) == 0 && strncmp(str, testString, i + 1) < 0, "strings aren't equal!");

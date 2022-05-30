@@ -20,14 +20,14 @@ int wmain(void)
 	test(!stack_pop(&st), "still items to pop");
 	test(st.len == 0, "stack is not empty");
 
-	for (size_t i = 0; i < 256; ++i)
+	for (usize i = 0; i < 256; ++i)
 	{
 		test(stack_push(&st, &(uint8_t){ (uint8_t)i }), "pushing failed");
 		test(stack_top(&st) != NULL, "stack top is empty");
 		test(*(uint8_t *)stack_top(&st) == i, "stack has different value than was pushed");
 	}
 
-	for (size_t i = 0; i < 256; ++i)
+	for (usize i = 0; i < 256; ++i)
 	{
 		uint8_t expval = (uint8_t)(255 - i);
 		test(stack_top(&st) != NULL, "stack top is already empty");
