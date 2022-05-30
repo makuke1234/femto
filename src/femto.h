@@ -28,6 +28,16 @@ uint32_t u32Min(uint32_t a, uint32_t b);
 uint32_t u32Max(uint32_t a, uint32_t b);
 uint32_t u32Clamp(uint32_t value, uint32_t min, uint32_t max);
 
+/**
+ * @brief Concatenate Unicode code point at the end of the UTF-8 string, resizes if necessary,
+ * stores string capacity in psize and length (including null-terminator) in plen
+ * 
+ * @param pstr Address of pointer to string array
+ * @param psize Address of string capacity, can be NULL
+ * @param plen Aadress of string length, not including null-terminator
+ * @param cp 16-bit Unicode code point
+ * @return char* Pointer to string array, NULL on failure
+ */
 char * femto_cpcat_s(char ** restrict pstr, size_t * restrict psize, size_t * plen, wchar_t cp);
 
 /**

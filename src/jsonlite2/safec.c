@@ -78,7 +78,10 @@ wchar_t * wcsredup(wchar_t * restrict str, const wchar_t * restrict newstr)
 	return str;
 }
 
-char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr)
+char * dynstrcat_s(
+	char ** restrict pstr, size_t * restrict psize, size_t strLen,
+	const char * restrict addStr
+)
 {
 	assert(pstr   != NULL);
 	assert(addStr != NULL);
@@ -103,7 +106,10 @@ char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen
 
 	return *pstr;
 }
-char * dynstrncat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr, size_t addStrLen)
+char * dynstrncat_s(
+	char ** restrict pstr, size_t * restrict psize, size_t strLen,
+	const char * restrict addStr, size_t addStrLen
+)
 {
 	assert(pstr   != NULL);
 	assert(addStr != NULL);

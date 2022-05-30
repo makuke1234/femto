@@ -41,10 +41,68 @@ char * strredup(char * restrict str, const char * restrict newstr);
  */
 wchar_t * wcsredup(wchar_t * restrict str, const wchar_t * restrict newstr);
 
-char * dynstrcat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr);
-char * dynstrncat_s(char ** restrict pstr, size_t * restrict psize, size_t strLen, const char * restrict addStr, size_t addStrLen);
+/**
+ * @brief Dynamically allocated 'safe' version of strcat. Reallocates memory of *pstr if necessary.
+ * Copies null-terminated addStr to *pstr, also updates allocated memory size *psize and takes string length
+ * strLen
+ * 
+ * @param pstr Pointer to string array, *pstr can be NULL initially
+ * @param psize Pointer to memory size, can be NULL
+ * @param strLen String length, not including null-terminator
+ * @param addStr Null-terminated string to be concatenated
+ * @return char* *pstr, NULL on failure
+ */
+char * dynstrcat_s(
+	char ** restrict pstr, size_t * restrict psize, size_t strLen,
+	const char * restrict addStr
+);
+/**
+ * @brief Dynamically allocated 'safe' version of strcat. Reallocates memory of *pstr if necessary.
+ * Copies null-terminated addStr to *pstr, also updates allocated memory size *psize and takes string length
+ * strLen. Copies only limited amount of characters addStrLen from addStr to *pstr.
+ * 
+ * @param pstr Pointer to string array, *pstr can be NULL initially
+ * @param psize Pointer to memory size, can be NULL
+ * @param strLen String length, not including null-terminator
+ * @param addStr Null-terminated string to be concatenated
+ * @param addStrLen Number of characters to copy from addStr (not including null-terminator)
+ * @return char* *pstr, NULL on failure
+ */
+char * dynstrncat_s(
+	char ** restrict pstr, size_t * restrict psize, size_t strLen,
+	const char * restrict addStr, size_t addStrLen
+);
 
-wchar_t * dynwcscat_s(wchar_t ** restrict pstr, size_t * restrict psize, size_t strLen, const wchar_t * restrict addStr);
-wchar_t * dynwcsncat_s(wchar_t ** restrict pstr, size_t * restrict psize, size_t strLen, const wchar_t * restrict addStr, size_t addStrLen);
+/**
+ * @brief Dynamically allocated 'safe' version of wcscat. Reallocates memory of *pstr if necessary.
+ * Copies null-terminated addStr to *pstr, also updates allocated memory size *psize and takes string length
+ * strLen
+ * 
+ * @param pstr Pointer to string array, *pstr can be NULL initially
+ * @param psize Pointer to memory size in elements, can be NULL
+ * @param strLen String length in characters, not including null-terminator
+ * @param addStr Null-terminated string to be concatenated
+ * @return wchar_t* *pstr, NULL on failure
+ */
+wchar_t * dynwcscat_s(
+	wchar_t ** restrict pstr, size_t * restrict psize, size_t strLen,
+	const wchar_t * restrict addStr
+);
+/**
+ * @brief Dynamically allocated 'safe' version of wcscat. Reallocates memory of *pstr if necessary.
+ * Copies null-terminated addStr to *pstr, also updates allocated memory size *psize and takes string length
+ * strLen. Copies only limited amount of characters addStrLen from addStr to *pstr.
+ * 
+ * @param pstr Pointer to string array, *pstr can be NULL initially
+ * @param psize Pointer to memory size in elements, can be NULL
+ * @param strLen String length in characters, not including null-terminator
+ * @param addStr Null-terminated string to be concatenated
+ * @param addStrLen Number of characters to copy from addStr (not including null-terminator)
+ * @return wchar_t* *pstr, NULL on failure
+ */
+wchar_t * dynwcsncat_s(
+	wchar_t ** restrict pstr, size_t * restrict psize, size_t strLen,
+	const wchar_t * restrict addStr, size_t addStrLen
+);
 
 #endif
