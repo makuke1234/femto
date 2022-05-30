@@ -42,7 +42,7 @@ typedef struct fFile
 	bool bCanWrite:1;
 	bool bUnsaved:1;
 	bool bSyntaxByUser:1;
-	enum fSyntax syntax:4;
+	fStx_e syntax:4;
 
 } fFile_t;
 
@@ -135,13 +135,6 @@ typedef enum fFile_writeRes
  * represent number of bytes written to disc
  */
 i32 fFile_write(fFile_t * restrict self);
-/**
- * @brief Set console title according to last given filename, also shows
- * editor name on the titlebar
- * 
- * @param self Pointer to fFile_t structure
- */
-void fFile_setConTitle(const fFile_t * restrict self);
 
 /**
  * @brief Inserts a normal character to current line

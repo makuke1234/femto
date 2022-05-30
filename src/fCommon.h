@@ -66,6 +66,7 @@ typedef unsigned char uchar;
 #define FEMTO_SETTINGS_MAXCOLOR UINT8_MAX
 
 
+#define FEMTO_UNTITLED_NAME L"untitled"
 
 #define FEMTO_SHIFT_DEL 0x88
 

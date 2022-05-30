@@ -18,6 +18,7 @@ void fFile_reset(fFile_t * restrict self)
 			.bUpdateAll  = false
 		},
 		.eolSeq        = eolNOT,
+		.bExists       = false,
 		.bCanWrite     = false,
 		.bUnsaved      = false,
 		.bSyntaxByUser = false,
@@ -46,7 +47,7 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 		self->syntax = fStx_detect(fileName);
 	}
 
-	if ((self->bExists = femto_testFile(fileName)) || writemode)
+	if ((fileName != NULL) && ((self->bExists = femto_testFile(fileName)) || writemode))
 	{
 		// try to open file
 		self->hFile = femto_openFile(fileName, writemode);
@@ -58,12 +59,9 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 	}
 	
 	self->bCanWrite = writemode;
-	self->fileName = wcsredup(self->fileName, fileName);
-	if (self->fileName == NULL)
-	{
-		return false;
-	}
-	return true;
+	self->fileName  = (fileName != NULL) ? wcsredup(self->fileName, fileName) : NULL;
+
+	return !((fileName != NULL) && (self->fileName == NULL));
 }
 void fFile_close(fFile_t * restrict self)
 {
@@ -333,9 +331,6 @@ i32 fFile_write(fFile_t * restrict self)
 		return ffwrNOTHING_NEW;
 	}
 	
-	// Make sure that any bugs won't slip through
-	assert(utf8 != NULL);
-
 	// Try to open file for writing
 	if (fFile_open(self, NULL, true) == false)
 	{
@@ -354,7 +349,7 @@ i32 fFile_write(fFile_t * restrict self)
 	DWORD dwWritten = 0;
 
 	// Write everything except the null terminator
-	BOOL res = (utf8sz > 1) ? WriteFile(
+	BOOL res = (utf8 != NULL) ? WriteFile(
 		self->hFile,
 		utf8,
 		utf8sz - 1,
@@ -377,15 +372,6 @@ i32 fFile_write(fFile_t * restrict self)
 		self->bUnsaved = false;
 		return (i32)dwWritten;
 	}
-}
-void fFile_setConTitle(const fFile_t * restrict self)
-{
-	assert(self != NULL);
-	wchar wndName[MAX_PATH];
-	usize fnamelen = wcslen(self->fileName);
-	memcpy(wndName, self->fileName, fnamelen * sizeof(wchar));
-	wcscpy_s(wndName + fnamelen, MAX_PATH - fnamelen, L" - femto");
-	SetConsoleTitleW(wndName);
 }
 
 

@@ -7,6 +7,8 @@
 
 fStx_e fStx_detect(const wchar_t * restrict fileName)
 {
+	assert(fileName != NULL);
+	
 	fStx_e syntax = fstxNONE;
 	
 	const wchar_t * end = fileName + wcslen(fileName);

@@ -95,7 +95,7 @@ void fData_statusRefresh(fData_t * restrict self);
  * @brief Creates a new tab with desired fileName
  * 
  * @param self Pointer to fData_t structure
- * @param fileName File name
+ * @param fileName File name, can be NULL
  * @return true Success
  * @return false Failure
  */

@@ -210,4 +210,12 @@ HANDLE femto_openFile(const wchar * restrict fileName, bool writemode);
  */
 const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen);
 
+/**
+ * @brief Set console title according to last given filename, also shows
+ * editor name on the titlebar
+ * 
+ * @param fileName File name
+ */
+void femto_setConTitle(const wchar * restrict fileName);
+
 #endif

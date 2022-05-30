@@ -432,6 +432,58 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 	fData_refreshEdit(peditor);
 }
 
+static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * restrict tempstr)
+{
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+
+	wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
+	fData_statusMsg(peditor, tempstr, NULL);
+
+	wchar inp[MAX_STATUS];
+	if (femto_askInput(peditor, inp, MAX_STATUS))
+	{
+		wchar * oldfilename = pfile->fileName;
+		pfile->fileName = inp;
+		i32 saved = fFile_write(pfile);
+		switch (saved)
+		{
+		case ffwrNOTHING_NEW:
+			wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
+			break;
+		case ffwrOPEN_ERROR:
+			wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
+			break;
+		case ffwrWRITE_ERROR:
+			wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
+			break;
+		case ffwrMEM_ERROR:
+			wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
+			break;
+		default:
+			swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes to %s", saved, inp);
+			// Set console title
+			femto_setConTitle(inp);
+		}
+
+		switch (saved)
+		{
+		case ffwrOPEN_ERROR:
+		case ffwrWRITE_ERROR:
+		case ffwrMEM_ERROR:
+			// Revert back to old name
+			pfile->fileName = oldfilename;
+			break;
+		default:
+			// Switch to the new name
+			pfile->fileName = wcsredup(oldfilename, inp);
+		}
+	}
+	else
+	{
+		wcscpy_s(tempstr, MAX_STATUS, L"Saving canceled by user");
+	}
+}
+
 bool femto_loop(fData_t * restrict peditor)
 {
 	assert(peditor != NULL);
@@ -597,23 +649,30 @@ bool femto_loop(fData_t * restrict peditor)
 			}
 			else if ((key == sacCTRL_S) && (prevkey != sacCTRL_S))	// Save file
 			{
-				i32 saved = fFile_write(pfile);
-				switch (saved)
+				if (pfile->fileName == NULL)
 				{
-				case ffwrNOTHING_NEW:
-					wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
-					break;
-				case ffwrOPEN_ERROR:
-					wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
-					break;
-				case ffwrWRITE_ERROR:
-					wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
-					break;
-				case ffwrMEM_ERROR:
-					wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
-					break;
-				default:
-					swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
+					s_femto_inner_saveAs(peditor, tempstr);
+				}
+				else
+				{
+					i32 saved = fFile_write(pfile);
+					switch (saved)
+					{
+					case ffwrNOTHING_NEW:
+						wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
+						break;
+					case ffwrOPEN_ERROR:
+						wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
+						break;
+					case ffwrWRITE_ERROR:
+						wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
+						break;
+					case ffwrMEM_ERROR:
+						wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
+						break;
+					default:
+						swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
+					}
 				}
 			}
 			else if ((key == sacCTRL_E) && (prevkey != sacCTRL_E))
@@ -638,53 +697,11 @@ bool femto_loop(fData_t * restrict peditor)
 				{
 				// Save as...
 				case L'S':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && ((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S'))
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
+						((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S') )
 					{
 						send = false;
-						wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
-						fData_statusMsg(peditor, tempstr, NULL);
-
-						wchar inp[MAX_STATUS];
-						if (femto_askInput(peditor, inp, MAX_STATUS))
-						{
-							wchar * oldfilename = pfile->fileName;
-							pfile->fileName = inp;
-							i32 saved = fFile_write(pfile);
-							switch (saved)
-							{
-							case ffwrNOTHING_NEW:
-								wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
-								break;
-							case ffwrOPEN_ERROR:
-								wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
-								break;
-							case ffwrWRITE_ERROR:
-								wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
-								break;
-							case ffwrMEM_ERROR:
-								wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
-								break;
-							default:
-								swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes to %s", saved, inp);
-							}
-
-							switch (saved)
-							{
-							case ffwrOPEN_ERROR:
-							case ffwrWRITE_ERROR:
-							case ffwrMEM_ERROR:
-								// Revert back to old name
-								pfile->fileName = oldfilename;
-								break;
-							default:
-								// Switch to the new name
-								pfile->fileName = wcsredup(oldfilename, inp);
-							}
-						}
-						else
-						{
-							wcscpy_s(tempstr, MAX_STATUS, L"Saving canceled by user");
-						}
+						s_femto_inner_saveAs(peditor, tempstr);
 					}
 					break;
 				case L'W':
@@ -1476,4 +1493,15 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restri
 	(*bytes)[fileSize] = '\0';
 
 	return NULL;
+}
+
+void femto_setConTitle(const wchar * restrict fileName)
+{
+	fileName = (fileName == NULL) ? FEMTO_UNTITLED_NAME : fileName;
+
+	wchar wndName[MAX_PATH];
+	const usize fnamelen = wcslen(fileName);
+	memcpy(wndName, fileName, fnamelen * sizeof(wchar));
+	wcscpy_s(wndName + fnamelen, MAX_PATH - fnamelen, L" - femto");
+	SetConsoleTitleW(wndName);
 }

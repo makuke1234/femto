@@ -279,7 +279,6 @@ void fData_statusRefresh(fData_t * restrict self)
 bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 {
 	assert(self != NULL);
-	assert(fileName != NULL);
 
 	// Reallocate tabs
 	if (self->filesSize >= self->filesMax)
@@ -291,7 +290,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 			return false;
 		}
 
-		self->files    = mem;
+		self->files = mem;
 
 		mem = realloc(self->cursorpos, sizeof(COORD) * newcap);
 		if (mem == NULL)
@@ -321,7 +320,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 	fFile_close(self->files[self->fileIdx]);
 
 	// Set console title
-	fFile_setConTitle(self->files[self->fileIdx]);
+	femto_setConTitle(self->files[self->fileIdx]->fileName);
 
 	return true;
 }
@@ -356,7 +355,7 @@ void fData_closeTab(fData_t * restrict self)
 	// Set console title back
 	if (self->fileIdx != -1)
 	{
-		fFile_setConTitle(self->files[self->fileIdx]);
+		femto_setConTitle(self->files[self->fileIdx]->fileName);
 	}
 }
 

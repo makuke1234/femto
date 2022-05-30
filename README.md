@@ -193,7 +193,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 * 1.10 (planned)
 	* [x] More common C++ keywords
-	* [ ] Support for raw editing/saving later to a file
+	* [x] Support for raw editing/saving later to a file
 	* [ ] Search support, also search result highlighting
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
