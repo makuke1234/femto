@@ -1404,6 +1404,7 @@ u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict line
 bool femto_testFile(const wchar * filename)
 {
 	assert(filename != NULL);
+
 	HANDLE h = CreateFileW(
 		filename,
 		GENERIC_READ,
@@ -1426,6 +1427,7 @@ bool femto_testFile(const wchar * filename)
 HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 {
 	assert(fileName != NULL);
+
 	HANDLE hfile = CreateFileW(
 		fileName,
 		writemode ? GENERIC_WRITE : GENERIC_READ,
@@ -1437,4 +1439,41 @@ HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 	);
 
 	return hfile;
+}
+const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen)
+{
+	assert(bytes    != NULL);
+	assert(bytesLen != NULL);
+
+	if (hfile == INVALID_HANDLE_VALUE)
+	{
+		return L"File opening error!";
+	}
+	DWORD fileSize = GetFileSize(hfile, NULL);
+	if ((fileSize >= *bytesLen) || (*bytes == NULL))
+	{
+		vptr mem = realloc(*bytes, fileSize + 1);
+		if (mem == NULL)
+		{
+			return L"Memory error!";
+		}
+		*bytes    = mem;
+		*bytesLen = fileSize + 1;
+	}
+
+	BOOL readFileRes = ReadFile(
+		hfile,
+		*bytes,
+		fileSize,
+		NULL,
+		NULL
+	);
+	if (!readFileRes)
+	{
+		return L"File read error!";
+	}
+	// Add null terminator
+	(*bytes)[fileSize] = '\0';
+
+	return NULL;
 }

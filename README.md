@@ -192,6 +192,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 1.9 (planned)
+	* [x] Fix immediate empty file creation if file doesn't exist
 	* [x] Add Go syntax support
 	* [x] Add Rust syntax highlighting support
 	* [x] Fix weird syntax highlighting with numbers

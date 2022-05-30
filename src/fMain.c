@@ -30,13 +30,12 @@ int wmain(int argc, const wchar * argv[])
 				fSettings_lastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
 				wprintf(L"[Settings]: %S\n", errMsg);
 				femto_printHelpClue(argv[0]);
-				return 2;
 			}
 			else
 			{
 				fErr_print(errCode);
-				return 2;
 			}
+			return 2;
 		}
 		else if (editor.settings.bHelpRequest || (argc == 1))
 		{

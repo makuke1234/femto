@@ -38,6 +38,7 @@ typedef struct fFile
 	} data;
 
 	eolSeq_e eolSeq;
+	bool bExists:1;
 	bool bCanWrite:1;
 	bool bUnsaved:1;
 	bool bSyntaxByUser:1;
@@ -80,16 +81,6 @@ void fFile_close(fFile_t * restrict self);
  * @param self Pointer to fFile_t structure
  */
 void fFile_clearLines(fFile_t * restrict self);
-/**
- * @brief Reads bytes to an array from open file, allocates memory only if *bytes
- * is too small
- * 
- * @param hfile Handle to open file 
- * @param bytes Address of pointer to character array
- * @param bytesLen Address of array length in bytes
- * @return const wchar* Error message, NULL on success
- */
-const wchar * fFile_sreadBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen);
 /**
  * @brief Opens file with last given filename, reads bytes to an array, allocates
  * memory only if *bytes is too small

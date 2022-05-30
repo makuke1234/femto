@@ -46,23 +46,24 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 		self->syntax = fStx_detect(fileName);
 	}
 
-	// try to open file
-	self->hFile = femto_openFile(fileName, writemode);
-	if (self->hFile == INVALID_HANDLE_VALUE)
+	if ((self->bExists = femto_testFile(fileName)) || writemode)
 	{
-		self->bCanWrite = false;
-		return false;
-	}
-	else
-	{
-		self->bCanWrite = writemode;
-		self->fileName = wcsredup(self->fileName, fileName);
-		if (self->fileName == NULL)
+		// try to open file
+		self->hFile = femto_openFile(fileName, writemode);
+		if (self->hFile == INVALID_HANDLE_VALUE)
 		{
+			self->bCanWrite = false;
 			return false;
 		}
-		return true;
 	}
+	
+	self->bCanWrite = writemode;
+	self->fileName = wcsredup(self->fileName, fileName);
+	if (self->fileName == NULL)
+	{
+		return false;
+	}
+	return true;
 }
 void fFile_close(fFile_t * restrict self)
 {
@@ -87,56 +88,35 @@ void fFile_clearLines(fFile_t * restrict self)
 		node = next;
 	}
 }
-const wchar * fFile_sreadBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen)
-{
-	assert(bytes    != NULL);
-	assert(bytesLen != NULL);
-
-	if (hfile == INVALID_HANDLE_VALUE)
-	{
-		return L"File opening error!";
-	}
-	DWORD fileSize = GetFileSize(hfile, NULL);
-	if ((fileSize >= *bytesLen) || (*bytes == NULL))
-	{
-		vptr mem = realloc(*bytes, fileSize + 1);
-		if (mem == NULL)
-		{
-			return L"Memory error!";
-		}
-		*bytes    = mem;
-		*bytesLen = fileSize + 1;
-	}
-
-	BOOL readFileRes = ReadFile(
-		hfile,
-		*bytes,
-		fileSize,
-		NULL,
-		NULL
-	);
-	if (!readFileRes)
-	{
-		return L"File read error!";
-	}
-	// Add null terminator
-	(*bytes)[fileSize] = '\0';
-
-	return NULL;
-}
 const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u32 * restrict bytesLen)
 {
 	assert(self != NULL);
 	assert(bytes != NULL);
 	assert(bytesLen != NULL && "Pointer to length variable is mandatory!");
+	
 	if (fFile_open(self, NULL, false) == false)
 	{
 		return L"File opening error!";
 	}
-	const wchar * result = fFile_sreadBytes(self->hFile, bytes, bytesLen);
-	fFile_close(self);
 	
-	return result;
+	if (self->bExists)
+	{
+		const wchar * result = femto_readBytes(self->hFile, bytes, bytesLen);
+		fFile_close(self);
+		return result;
+	}
+	else
+	{
+		*bytes = malloc(1 * sizeof(char));
+		if (*bytes == NULL)
+		{
+			return L"Memory error!";
+		}
+
+		(*bytes)[0] = '\0';
+		*bytesLen = 1;
+		return NULL;
+	}
 }
 const wchar * fFile_read(fFile_t * restrict self)
 {
@@ -344,6 +324,7 @@ i32 fFile_write(fFile_t * restrict self)
 	char * utf8 = NULL;
 	u32 utf8sz = 0;
 	i32 checkres = fFile_checkUnsaved(self, &utf8, &utf8sz);
+	checkres = ((checkres == ffcrNOTHING_NEW) && !self->bExists) ? ffcrNEEDS_SAVING : checkres;
 	switch (checkres)
 	{
 	case ffcrMEM_ERROR:
@@ -370,16 +351,16 @@ i32 fFile_write(fFile_t * restrict self)
 	fProf_write("Opened file for writing");
 
 	// Try to write UTF-8 lines string to file
-	DWORD dwWritten;
+	DWORD dwWritten = 0;
 
 	// Write everything except the null terminator
-	BOOL res = WriteFile(
+	BOOL res = (utf8sz > 1) ? WriteFile(
 		self->hFile,
 		utf8,
 		utf8sz - 1,
 		&dwWritten,
 		NULL
-	);
+	) : TRUE;
 	// Close file
 	fFile_close(self);
 	// Free utf8 string

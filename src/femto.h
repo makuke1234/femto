@@ -199,5 +199,15 @@ bool femto_testFile(const wchar * filename);
  * CloseHandle() to close the file afterwards
  */
 HANDLE femto_openFile(const wchar * restrict fileName, bool writemode);
+/**
+ * @brief Reads bytes to an array from open file, allocates memory only if *bytes
+ * is too small
+ * 
+ * @param hfile Handle to open file 
+ * @param bytes Address of pointer to character array
+ * @param bytesLen Address of array length in bytes
+ * @return const wchar* Error message, NULL on success
+ */
+const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen);
 
 #endif
