@@ -152,7 +152,7 @@ bool fSettings_makeTabSpaceStr(fSettings_t * restrict self)
 		return false;
 	}
 	mem[self->tabWidth] = L'\0';
-	for (uint8_t i = 0; i < self->tabWidth; ++i)
+	for (u8 i = 0; i < self->tabWidth; ++i)
 	{
 		mem[i] = L' ';
 	}
@@ -241,7 +241,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	}
 	if (mi != 0)
 	{
-		self->tabWidth = (uint8_t)clamp_u32((u32)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINTAB, FEMTO_SETTINGS_MAXTAB);
+		self->tabWidth = (u8)clamp_u32((u32)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINTAB, FEMTO_SETTINGS_MAXTAB);
 		if (!fSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);
@@ -396,9 +396,9 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 	if (success && (value != NULL))
 	{
 		bool firstDone = false, secondDone = false;
-		uint8_t ret = 0;
+		u8 ret = 0;
 		// Search through colorNames
-		for (uint8_t i = 0; i < MAX_COLORS; ++i)
+		for (u8 i = 0; i < MAX_COLORS; ++i)
 		{
 			if (!firstDone && strncmp(value, colorNames[i], commaIdx) == 0)
 			{
@@ -411,7 +411,7 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 			}
 			else if ((charIdx != 0) && strcmp(&value[charIdx], colorNames[i]) == 0)
 			{
-				ret |= (uint8_t)(i << 4);
+				ret |= (u8)(i << 4);
 				secondDone = true;
 			}
 
@@ -443,9 +443,9 @@ static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const json
 		{
 			if ((r <= UINT8_MAX) && (g <= UINT8_MAX) && (b <= UINT8_MAX))
 			{
-				col->r = (uint8_t)r;
-				col->g = (uint8_t)g;
-				col->b = (uint8_t)b;
+				col->r = (u8)r;
+				col->g = (u8)g;
+				col->b = (u8)b;
 
 				return true;
 			}
@@ -524,7 +524,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		if ((attr = jsonObject_get(obj, "tabWidth")) != NULL)
 		{
 			const double value = jsonValue_getNumber(attr, &suc);
-			const uint8_t val8 = (uint8_t)value;
+			const u8 val8 = (u8)value;
 			if (suc && (value >= FEMTO_SETTINGS_MINTAB) && (value <= FEMTO_SETTINGS_MAXTAB) && (def.tabWidth != val8))
 			{
 				self->tabWidth = val8;
@@ -601,7 +601,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		if ( ((attr = jsonObject_get(obj, "palette")) != NULL) &&
 			((pObj = jsonValue_getObject(attr, &suc)) != NULL) && suc )
 		{
-			for (uint8_t i = 0; i < MAX_COLORS; ++i)
+			for (u8 i = 0; i < MAX_COLORS; ++i)
 			{
 				const char * color = self->palette.colorNames[i];
 				s_fSettings_checkRGBColor(&self->palette.colors[i], pObj, color);
@@ -619,7 +619,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 			const char ** tokenNames = self->syntaxTokens;
 			const char ** colorNames = self->palette.colorNames;
 
-			for (uint8_t i = 0; i < tcNUM_OF_TOKENS; ++i)
+			for (u8 i = 0; i < tcNUM_OF_TOKENS; ++i)
 			{
 				if ((val = s_fSettings_checkColor(hObj, tokenNames[i], colorNames)) != CHECK_ERR)
 				{

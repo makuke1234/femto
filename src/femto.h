@@ -109,7 +109,7 @@ bool femto_loop(fData_t * restrict pdata);
  * @param pdata Pointer to fData_t structure
  * @return DWORD Irrelevant return value
  */
-DWORD WINAPI femto_loopDraw(LPVOID pdata);
+DWORD WINAPI femto_asyncDraw(LPVOID pdata);
 /**
  * @brief Tries to create a loop-drawing thread
  * 
@@ -117,13 +117,13 @@ DWORD WINAPI femto_loopDraw(LPVOID pdata);
  * @return true Success
  * @return false Failure creating thread
  */
-bool femto_loopAyncDrawInit(fData_t * restrict pdata);
+bool femto_asyncDrawInit(fData_t * restrict pdata);
 /**
  * @brief Closes the loopDrawing thread
  * 
  * @param pdata Pointer to fData structure
  */
-void femto_loopAsyncDrawDestroy(fData_t * restrict pdata);
+void femto_asyncDrawStop(fData_t * restrict pdata);
 
 /**
  * @brief Update screen buffer

@@ -31,7 +31,7 @@ typedef struct fFile
 		fLine_t * pcury;
 		u32 curx, lastx;
 
-		uint8_t noLen;
+		u8 noLen;
 
 		bool bTyped:1;
 		bool bUpdateAll:1;
@@ -212,7 +212,7 @@ bool fFile_deleteBackward(fFile_t * restrict self);
  * @return true Success
  * @return false Failure
  */
-bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, uint8_t tabWidth, bool autoIndent);
+bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent);
 /**
  * @brief Updates current viewpoint if necessary
  * 
@@ -227,7 +227,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height);
  * @param height Editor window height
  * @param deltaLines Lines to scroll, positive values mean scrolling down, negative values mean scrolling up
  */
-void fFile_scroll(fFile_t * restrict self, u32 height, i32 deltaLines);
+void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines);
 /**
  * @brief Scrolls current viewpoint if possible, updates viewpoint if necessary
  * 
@@ -244,6 +244,12 @@ void fFile_scrollHor(fFile_t * restrict self, u32 width, i32 deltaCh);
  * @param self Pointer to fFile_t structure
  */
 void fFile_destroy(fFile_t * restrict self);
+/**
+ * @brief Frees heap-allocated fFile_t structure
+ * 
+ * @param self Pointer to dynamically allocated fFile_t structure
+ */
+void fFile_free(fFile_t * restrict self);
 
 
 #endif

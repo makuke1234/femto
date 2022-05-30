@@ -13,7 +13,7 @@ enum fSyntax fStx_detect(const wchar_t * restrict fileName)
 	if (fileName != end)
 	{
 		const wchar_t * dot = end - 1;
-		for (uint8_t i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
+		for (u8 i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
 		{
 			if (*dot == L'.')
 			{
@@ -2082,7 +2082,7 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
-	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)littleQuote << 1) & 0x02));
+	node->userValue = (u8)((u8)blockComment | (((u8)littleQuote << 1) & 0x02));
 
 	return true;
 }
@@ -2396,7 +2396,7 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		previ = i;
 	}
 
-	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)propertyMode << 1) & 0x02));
+	node->userValue = (u8)((u8)blockComment | (((u8)propertyMode << 1) & 0x02));
 
 	return true;
 }

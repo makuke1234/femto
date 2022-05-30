@@ -233,7 +233,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 
 	fLine_t * node = self->data.firstNode;
 
-	const uint8_t eolSeq = self->eolSeq;
+	const u8 eolSeq = self->eolSeq;
 	bool isCRLF = (self->eolSeq == eolCRLF);
 
 	while (node != NULL)
@@ -681,7 +681,7 @@ bool fFile_deleteBackward(fFile_t * restrict self)
 		return false;
 	}
 }
-bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, uint8_t tabWidth, bool autoIndent)
+bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
 {
 	assert(self != NULL);
 	fLine_t * node = fLine_create(
@@ -742,7 +742,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 		fFile_updateCury(self, height);
 	}
 }
-void fFile_scroll(fFile_t * restrict self, u32 height, i32 deltaLines)
+void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines)
 {
 	assert(self != NULL);
 	if (self->data.pcury == NULL)
@@ -791,4 +791,11 @@ void fFile_destroy(fFile_t * restrict self)
 		free(self->fileName);
 		self->fileName = NULL;
 	}
+}
+void fFile_free(fFile_t * restrict self)
+{
+	assert(self != NULL);
+
+	fFile_destroy(self);
+	free(self);
 }

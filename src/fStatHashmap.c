@@ -54,14 +54,14 @@ vptr fStatHash_malloc(fStatHash_t * restrict hash, u32 bytes)
 	}
 
 	vptr mem = hash->mem;
-	hash->mem = ((uint8_t *)hash->mem) + bytes;
+	hash->mem = ((u8 *)hash->mem) + bytes;
 	hash->memSize -= bytes;
 
 	return mem;
 }
 void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, u32 bytes)
 {
-	vptr newp = ((uint8_t *)hash->mem) - bytes;
+	vptr newp = ((u8 *)hash->mem) - bytes;
 	if (mem == newp)
 	{
 		hash->mem = newp;

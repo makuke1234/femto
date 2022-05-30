@@ -2,11 +2,12 @@
 #include "fArg.h"
 #include "fSyntax.h"
 
+// This variable has to be static because it is used by the exit handler
+// which is run after returning from wmain
+static fData_t editor;
 
 int wmain(int argc, const wchar * argv[])
 {
-	fData_t editor = { 0 };
-	
 	femto_exitHandlerSetVars(&editor);
 	if (!fData_reset(&editor))
 	{
@@ -80,7 +81,7 @@ int wmain(int argc, const wchar * argv[])
 
 	fData_refreshEdit(&editor);
 
-	if (!femto_loopAyncDrawInit(&editor))
+	if (!femto_asyncDrawInit(&editor))
 	{
 		fErr_print(ferrTHREAD);
 		return 5;
@@ -88,7 +89,7 @@ int wmain(int argc, const wchar * argv[])
 
 	while (femto_loop(&editor));
 
-	femto_loopAsyncDrawDestroy(&editor);
+	femto_asyncDrawStop(&editor);
 
 	return 0;
 }

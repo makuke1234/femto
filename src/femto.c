@@ -39,15 +39,15 @@ char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen
 	else if (cp <= 0x07FF)
 	{
 		len = 2;
-		conv[0] = (uint8_t)(0xC0 | ((cp >> 6) & 0x1F));
-		conv[1] = (uint8_t)(0x80 | ( cp       & 0x3F));
+		conv[0] = (u8)(0xC0 | ((cp >> 6) & 0x1F));
+		conv[1] = (u8)(0x80 | ( cp       & 0x3F));
 	}
 	else
 	{
 		len = 3;
-		conv[0] = (uint8_t)(0xE0 | ((cp >> 12) & 0x0F));
-		conv[1] = (uint8_t)(0x80 | ((cp >>  6) & 0x3F));
-		conv[2] = (uint8_t)(0x80 | ( cp        & 0x3F));
+		conv[0] = (u8)(0xE0 | ((cp >> 12) & 0x0F));
+		conv[1] = (u8)(0x80 | ((cp >>  6) & 0x3F));
+		conv[2] = (u8)(0x80 | ( cp        & 0x3F));
 	}
 
 	// Add converted string to original array
@@ -112,7 +112,7 @@ char * femto_escStr_s(const char * inp, usize len)
 								break;
 							}
 
-							uint8_t digit = (t >= 'A') ? (uint8_t)(t - 'A' + 10) : (uint8_t)(t - '0');
+							u8 digit = (t >= 'A') ? (u8)(t - 'A' + 10) : (u8)(t - '0');
 							value = (u16)(value * 16 + digit);
 						}
 
@@ -876,7 +876,7 @@ bool femto_loop(fData_t * restrict peditor)
 			if (lineDelta != 0)
 			{
 				s_delta -= lineDelta * WHEEL_DELTA / 2;
-				fFile_scroll(pfile, peditor->scrbuf.h, -lineDelta);
+				fFile_scrollVert(pfile, peditor->scrbuf.h, -lineDelta);
 				fData_refreshEditAsync(peditor);
 			}
 			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
@@ -956,7 +956,7 @@ bool femto_loop(fData_t * restrict peditor)
 
 	return true;
 }
-DWORD WINAPI femto_loopDraw(LPVOID pdataV)
+DWORD WINAPI femto_asyncDraw(LPVOID pdataV)
 {
 	fData_t * pdata = pdataV;
 	assert(pdata != NULL);
@@ -986,7 +986,7 @@ DWORD WINAPI femto_loopDraw(LPVOID pdataV)
 
 	return 0;
 }
-bool femto_loopAyncDrawInit(fData_t * restrict pdata)
+bool femto_asyncDrawInit(fData_t * restrict pdata)
 {
 	assert(pdata != NULL);
 
@@ -1004,7 +1004,7 @@ bool femto_loopAyncDrawInit(fData_t * restrict pdata)
 	dt->hthread = CreateThread(
 		NULL,
 		20 * sizeof(usize),
-		&femto_loopDraw,
+		&femto_asyncDraw,
 		pdata,
 		0,
 		NULL
@@ -1019,7 +1019,7 @@ bool femto_loopAyncDrawInit(fData_t * restrict pdata)
 
 	return true;
 }
-void femto_loopAsyncDrawDestroy(fData_t * restrict pdata)
+void femto_asyncDrawStop(fData_t * restrict pdata)
 {
 	assert(pdata != NULL);
 
@@ -1187,10 +1187,10 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
 	u32 number = (!peditor->settings.bRelLineNums || (node == curnode)) ? (u32)node->lineNumber : (u32)labs((long)curnode->lineNumber - (long)node->lineNumber);
-	uint8_t noLen = (uint8_t)log10((f64)number) + 1;
+	u8 noLen = (u8)log10((f64)number) + 1;
 	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
 	destination[pfile->data.noLen].Char.UnicodeChar = L'|';
-	for (int8_t j = (int8_t)pfile->data.noLen - 1; j >= 0; --j)
+	for (i8 j = (i8)pfile->data.noLen - 1; j >= 0; --j)
 	{
 		destination[j].Attributes = peditor->settings.lineNumCol;
 		if (j >= (pfile->data.noLen - noLen))

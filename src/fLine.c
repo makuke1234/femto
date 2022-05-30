@@ -23,9 +23,9 @@ fLine_t * fLine_create(
 	fLine_t * restrict curnode,
 	fLine_t * restrict nextnode,
 	bool tabsToSpaces,
-	uint8_t tabWidth,
+	u8 tabWidth,
 	bool autoIndent,
-	uint8_t * restrict noLen
+	u8 * restrict noLen
 )
 {
 	assert(noLen != NULL);
@@ -132,7 +132,7 @@ fLine_t * fLine_createText(
 	fLine_t * restrict nextnode,
 	const wchar * restrict lineText,
 	i32 mText,
-	uint8_t * restrict noLen
+	u8 * restrict noLen
 )
 {
 	assert(noLen != NULL);
@@ -334,7 +334,7 @@ bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * re
 	return true;
 }
 
-bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, uint8_t * restrict noLen)
+bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * restrict noLen)
 {
 	assert(self != NULL);
 	assert(ppcury != NULL);
@@ -498,7 +498,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 	node2->syntax       = temp.syntax;
 }
 
-void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, uint8_t * restrict noLen)
+void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * restrict noLen)
 {
 	fLine_t * prevnode = NULL;
 	while (startnode != NULL)
@@ -511,7 +511,7 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, uint8_t
 	}
 	if ((prevnode != NULL) && (prevnode->lineNumber > 0))
 	{
-		*noLen = (uint8_t)log10((f64)prevnode->lineNumber) + 1;
+		*noLen = (u8)log10((f64)prevnode->lineNumber) + 1;
 	}
 	else
 	{

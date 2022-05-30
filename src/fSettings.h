@@ -34,13 +34,14 @@ typedef enum fTokenColor
 
 
 	tcNUM_OF_TOKENS
+
 } fTokenColor_e, fTC_e;
 
 #define MAX_COLORS 16
 
 typedef struct fColor
 {
-	uint8_t r, g, b;
+	u8 r, g, b;
 
 } fColor_t;
 
@@ -60,7 +61,7 @@ typedef struct fSettings
 	wchar * settingsFileName;
 
 	bool bTabsToSpaces:1;
-	uint8_t tabWidth;
+	u8 tabWidth;
 	wchar * tabSpaceStr1;	// Contains space characters
 
 	bool bAutoIndent:1;

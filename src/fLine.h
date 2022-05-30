@@ -17,7 +17,7 @@ typedef struct fLine
 	u32 lineNumber;
 
 	WORD * syntax;
-	uint8_t userValue;
+	u8 userValue;
 
 } fLine_t;
 
@@ -43,9 +43,9 @@ fLine_t * fLine_create(
 	fLine_t * restrict curnode,
 	fLine_t * restrict nextnode,
 	bool tabsToSpaces,
-	uint8_t tabWidth,
+	u8 tabWidth,
 	bool autoIndent,
-	uint8_t * noLen
+	u8 * noLen
 );
 /**
  * @brief Creates new line in-between current line and next line
@@ -64,7 +64,7 @@ fLine_t * fLine_createText(
 	fLine_t * restrict nextnode,
 	const wchar * restrict lineText,
 	i32 maxText,
-	uint8_t * restrict noLen
+	u8 * restrict noLen
 );
 
 /**
@@ -131,7 +131,7 @@ bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * re
  * @return true Success
  * @return false Failure
  */
-bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, uint8_t * restrict noLen);
+bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * restrict noLen);
 
 /**
  * @brief Moves (internal) cursor on current line node, clamps movement
@@ -187,7 +187,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2);
  * @param startLno Starting line number
  * @param noLen Pointer receiving last line number length in characters
  */
-void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, uint8_t * restrict noLen);
+void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * restrict noLen);
 
 /**
  * @brief Updates the syntax highlighting of a given node

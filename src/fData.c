@@ -128,7 +128,7 @@ bool fData_loadPalette(fData_t * restrict self)
 	}
 
 	// Copy palette
-	for (uint8_t i = 0; i < MAX_COLORS; ++i)
+	for (u8 i = 0; i < MAX_COLORS; ++i)
 	{
 		const COLORREF old = csbiex.ColorTable[i];
 		fColor_t * oldCol = &self->settings.palette.oldColors[i];
@@ -143,16 +143,13 @@ bool fData_loadPalette(fData_t * restrict self)
 	// Apply new
 	++csbiex.srWindow.Right;
 	++csbiex.srWindow.Bottom;
-	if (!SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
-	{
-		return false;
-	}
-
-	return true;
+	return SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex) != 0;
 }
 bool fData_restorePalette(const fData_t * restrict self)
 {
 	assert(self != NULL);
+
+	fProf_write("Restoring palette...");
 
 	const fPalette_t * pal = &self->settings.palette;
 	if (!pal->bUsePalette)
@@ -169,7 +166,7 @@ bool fData_restorePalette(const fData_t * restrict self)
 		return false;
 	}
 
-	for (uint8_t i = 0; i < MAX_COLORS; ++i)
+	for (u8 i = 0; i < MAX_COLORS; ++i)
 	{
 		const fColor_t col = self->settings.palette.oldColors[i];
 		csbiex.ColorTable[i] = fRGB(col.r, col.g, col.b);
@@ -177,12 +174,9 @@ bool fData_restorePalette(const fData_t * restrict self)
 
 	++csbiex.srWindow.Right;
 	++csbiex.srWindow.Bottom;
-	if (!SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
-	{
-		return false;
-	}
 
-	return true;
+	fProf_write("Almost complete...");
+	return SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex) != 0;
 }
 
 void fData_refreshEdit(fData_t * restrict self)
@@ -357,8 +351,7 @@ void fData_closeTab(fData_t * restrict self)
 	}
 
 	// Delete "file"
-	fFile_destroy(file);
-	free(file);
+	fFile_free(file);
 
 	// Set console title back
 	if (self->fileIdx != -1)
@@ -378,6 +371,7 @@ void fData_destroy(fData_t * restrict self)
 	}
 	if (self->scrbuf.handle != INVALID_HANDLE_VALUE)
 	{
+		fProf_write("Restoring palette: %s", fData_restorePalette(self) ? "success" : "fail");
 		SetConsoleActiveScreenBuffer(self->conOut);
 	}
 
@@ -390,15 +384,12 @@ void fData_destroy(fData_t * restrict self)
 	self->fileIdx = -1;
 	for (usize i = 0; i < self->filesSize; ++i)
 	{
-		fFile_destroy(self->files[i]);
-		free(self->files[i]);
+		fFile_free(self->files[i]);
 	}
 	free(self->files);
 	self->files     = NULL;
 	self->filesSize = 0;
 	self->filesMax  = 0;
-
-	fData_restorePalette(self);
 
 	fSettings_destroy(&self->settings);
 }
