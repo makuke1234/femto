@@ -1,19 +1,19 @@
-#include "femtoSyntax.h"
-#include "femtoLine.h"
-#include "femtoSettings.h"
-#include "femtoFile.h"
-#include "femtoStatHashmap.h"
+#include "fSyntax.h"
+#include "fLine.h"
+#include "fSettings.h"
+#include "fFile.h"
+#include "fStatHashmap.h"
 
 
-enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
+enum fSyntax fStx_detect(const wchar_t * restrict fileName)
 {
-	enum femtoSyntax syntax = fstxNONE;
+	enum fSyntax syntax = fstxNONE;
 	
 	const wchar_t * end = fileName + wcslen(fileName);
 	if (fileName != end)
 	{
 		const wchar_t * dot = end - 1;
-		for (uint8_t i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
+		for (u8 i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
 		{
 			if (*dot == L'.')
 			{
@@ -89,7 +89,7 @@ enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName)
 	return syntax;
 }
 
-const char * fSyntaxName(enum femtoSyntax fs)
+const char * fStx_name(enum fSyntax fs)
 {
 	static const char * syntaxes[fstxSIZE] = {
 		[fstxNONE] = "None",
@@ -110,11 +110,11 @@ const char * fSyntaxName(enum femtoSyntax fs)
 	assert(fs < fstxSIZE);
 	return syntaxes[fs];
 }
-bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
+bool fStx_autoAlloc(fLine_t * restrict node)
 {
 	assert(node != NULL);
 
-	void * mem = realloc(node->syntax, sizeof(WORD) * node->lineEndx);
+	vptr mem = realloc(node->syntax, sizeof(WORD) * node->lineEndx);
 	if (mem == NULL)
 	{
 		free(node->syntax);
@@ -126,9 +126,9 @@ bool fSyntaxParseAutoAlloc(femtoLineNode_t * restrict node)
 	return true;
 }
 
-void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
-	static size_t memory[MAX_C_TOKEN_MEM];
+	static usize memory[MAX_C_TOKEN_MEM];
 
 	static const wchar_t * keyWords[] = {
 		L"do",
@@ -354,24 +354,24 @@ void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti
 		L"atan2l"
 
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(size_t) * MAX_C_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	u32 filled = 0;
+	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (int32_t)node->freeSpaceLen;
+			j -= (i32)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -380,17 +380,17 @@ void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < (MAX_C_TOKEN_WORD - 1); ++i)
+	for (u32 i = 0; i < (MAX_C_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = MAX_C_TOKEN_WORD - i;
+		const u32 n = MAX_C_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-			for (uint32_t k = 0; k < n; --l, ++k)
+			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
+			for (u32 k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -398,9 +398,9 @@ void checkCToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti
 		}
 	}
 }
-void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
-	static size_t memory[MAX_CPP_TOKEN_MEM];
+	static usize memory[MAX_CPP_TOKEN_MEM];
 
 	static const wchar_t * keyWords[] = {
 		L"do",
@@ -696,7 +696,7 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		L"atan2",
 		L"atan2l"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 
 
 	if ((lasti - start) < 1)
@@ -704,17 +704,17 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(size_t) * MAX_CPP_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	u32 filled = 0;
+	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (int32_t)node->freeSpaceLen;
+			j -= (i32)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -723,17 +723,17 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < (MAX_CPP_TOKEN_WORD - 1); ++i)
+	for (u32 i = 0; i < (MAX_CPP_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = MAX_CPP_TOKEN_WORD - i;
+		const u32 n = MAX_CPP_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-			for (uint32_t k = 0; k < n; --l, ++k)
+			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
+			for (u32 k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -741,9 +741,9 @@ void checkCPPToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t las
 		}
 	}
 }
-void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
-	static size_t memory[MAX_PY_TOKEN_MEM];
+	static usize memory[MAX_PY_TOKEN_MEM];
 
 	static const wchar_t * keyWords[] = {
 		L"and",
@@ -880,7 +880,7 @@ void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		L"ValueError",
 		L"ZeroDivisionError"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 
 
 	if ((lasti - start) < 1)
@@ -888,17 +888,17 @@ void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(size_t) * MAX_PY_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	u32 filled = 0;
+	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (int32_t)node->freeSpaceLen;
+			j -= (i32)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -907,17 +907,17 @@ void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < (MAX_PY_TOKEN_WORD - 1); ++i)
+	for (u32 i = 0; i < (MAX_PY_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = MAX_PY_TOKEN_WORD - i;
+		const u32 n = MAX_PY_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-			for (uint32_t k = 0; k < n; --l, ++k)
+			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
+			for (u32 k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -925,9 +925,9 @@ void checkPyToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		}
 	}
 }
-void checkJSToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
-	static size_t memory[MAX_JS_TOKEN_MEM];
+	static usize memory[MAX_JS_TOKEN_MEM];
 
 	static const wchar_t * keyWords[] = {
 		L"abstract",
@@ -1114,7 +1114,7 @@ void checkJSToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		L"onsubmit"
 	};
 
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 
 
 	if ((lasti - start) < 1)
@@ -1122,17 +1122,17 @@ void checkJSToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(size_t) * MAX_JS_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	u32 filled = 0;
+	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (int32_t)node->freeSpaceLen;
+			j -= (i32)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -1141,17 +1141,17 @@ void checkJSToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < (MAX_JS_TOKEN_WORD - 1); ++i)
+	for (u32 i = 0; i < (MAX_JS_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = MAX_JS_TOKEN_WORD - i;
+		const u32 n = MAX_JS_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 2))
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-			for (uint32_t k = 0; k < n; --l, ++k)
+			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
+			for (u32 k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -1159,9 +1159,9 @@ void checkJSToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		}
 	}
 }
-void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
-	static size_t memory[MAX_RUST_TOKEN_MEM];
+	static usize memory[MAX_RUST_TOKEN_MEM];
 
 	// Rust keywords
 	static const wchar_t * keyWords[] = {
@@ -1262,24 +1262,24 @@ void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t la
 		L"UnwindSafe",
 		L"Sized"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(size_t) * MAX_RUST_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	u32 filled = 0;
+	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (int32_t)node->freeSpaceLen;
+			j -= (i32)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -1288,17 +1288,17 @@ void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t la
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < (MAX_RUST_TOKEN_WORD - 1); ++i)
+	for (u32 i = 0; i < (MAX_RUST_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = MAX_RUST_TOKEN_WORD - i;
+		const u32 n = MAX_RUST_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-			for (uint32_t k = 0; k < n; --l, ++k)
+			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
+			for (u32 k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -1306,9 +1306,9 @@ void checkRustToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t la
 		}
 	}
 }
-void checkGoToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t lasti, WORD kwCol)
+void fStx_checkGoToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
-	static size_t memory[MAX_GO_TOKEN_MEM];
+	static usize memory[MAX_GO_TOKEN_MEM];
 
 	// Rust keywords
 	static const wchar_t * keyWords[] = {
@@ -1359,24 +1359,24 @@ void checkGoToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		L"complex64",
 		L"complex128"
 	};
-	static fHash_t map = { 0 };
+	static fStatHash_t map = { 0 };
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fHash_initData(&map, memory, sizeof(size_t) * MAX_GO_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
 	wchar_t kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	uint32_t filled = 0;
-	for (int32_t i = MAX_KWBUF - 2, j = (int32_t)lasti, starti = (int32_t)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	u32 filled = 0;
+	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (int32_t)node->freeSpaceLen) == ((int32_t)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (int32_t)node->freeSpaceLen;
+			j -= (i32)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -1385,17 +1385,17 @@ void checkGoToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 		++filled;
 	}
 
-	for (uint32_t i = 0; i < (MAX_GO_TOKEN_WORD - 1); ++i)
+	for (u32 i = 0; i < (MAX_GO_TOKEN_WORD - 1); ++i)
 	{
-		const uint32_t n = MAX_GO_TOKEN_WORD - i;
+		const u32 n = MAX_GO_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
-		else if (fHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			int32_t l = (lasti > node->curx) ? (int32_t)(lasti - node->freeSpaceLen) : (int32_t)lasti;
-			for (uint32_t k = 0; k < n; --l, ++k)
+			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
+			for (u32 k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -1404,14 +1404,14 @@ void checkGoToken(femtoLineNode_t * restrict node, uint32_t start, uint32_t last
 	}
 }
 
-bool fSyntaxParseNone(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
 
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1426,14 +1426,14 @@ bool fSyntaxParseNone(femtoLineNode_t * restrict node, const WORD * restrict col
 
 	return true;
 }
-bool fSyntaxParseCLike(
-	femtoLineNode_t * restrict node,
+bool fStx_parseCLike(
+	fLine_t * restrict node,
 	const WORD * restrict colors,
-	tokeniserFunc_t func,
-	enum femtoSyntax lang
+	fStx_tokeniserFunc_t func,
+	enum fSyntax lang
 )
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -1441,14 +1441,14 @@ bool fSyntaxParseCLike(
 	// Calculate feature allowances
 	bool bAllowPreproc = (lang == fstxC) | (lang == fstxCPP);
 
-	uint32_t tokenStart = 0;
+	u32 tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
 	
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue : false;
 
-	uint32_t previ = 0;
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	u32 previ = 0;
+	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1645,9 +1645,9 @@ bool fSyntaxParseCLike(
 
 	return true;
 }
-bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -1669,13 +1669,13 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 		
 	*/
 	
-	uint32_t firstChIdx = 0;
+	u32 firstChIdx = 0;
 	bool done = false, headingMode = false, valueMode = false, bracketMode = false,
 		extraBracketMode = false, italicsMode = false, boldMode = false,
 		containsStar = false, strikeMode = false, parenMode1 = false,
 		parenMode2 = false, enable = false, coneMode = false, codeMode = false;
 	
-	for (uint32_t i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
+	for (u32 i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1866,14 +1866,14 @@ bool fSyntaxParseMd(femtoLineNode_t * restrict node, const WORD * restrict color
 	return true;
 }
 
-bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
 
-	uint32_t tokenStart = 0;
+	u32 tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false,
 		preComment = false, firstQuote = false;
@@ -1881,8 +1881,8 @@ bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict color
 	littleQuote  = (node->prevNode != NULL) ? ((node->prevNode->userValue >> 1) & 1) : false;
 	blockComment = (node->prevNode != NULL) ? (node->prevNode->userValue & 1) : false;
 
-	uint32_t previ = 0, prevprevi = UINT32_MAX;
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	u32 previ = 0, prevprevi = UINT32_MAX;
+	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -2010,7 +2010,7 @@ bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict color
 			case L' ':
 			case L'\t':
 				letter = false;
-				checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+				fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
 				tokenStart = i;
 				break;
 			case L'\'':
@@ -2079,17 +2079,17 @@ bool fSyntaxParsePy(femtoLineNode_t * restrict node, const WORD * restrict color
 
 	if (!blockComment && !comment && !quoteMode)
 	{
-		checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+		fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
-	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)littleQuote << 1) & 0x02));
+	node->userValue = (u8)((u8)blockComment | (((u8)littleQuote << 1) & 0x02));
 
 	return true;
 }
 
-bool fSyntaxParseJSON(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -2097,7 +2097,7 @@ bool fSyntaxParseJSON(femtoLineNode_t * restrict node, const WORD * restrict col
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false;
 	
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -2217,9 +2217,9 @@ bool fSyntaxParseJSON(femtoLineNode_t * restrict node, const WORD * restrict col
 
 	return true;
 }
-bool fSyntaxParseCSS(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -2231,8 +2231,8 @@ bool fSyntaxParseCSS(femtoLineNode_t * restrict node, const WORD * restrict colo
 	propertyMode = (node->prevNode != NULL) ? ((node->prevNode->userValue >> 1) & 1) : false;
 	blockComment = (node->prevNode != NULL) ? (node->prevNode->userValue & 1) : false;
 
-	uint32_t previ = 0;
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	u32 previ = 0;
+	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -2396,14 +2396,14 @@ bool fSyntaxParseCSS(femtoLineNode_t * restrict node, const WORD * restrict colo
 		previ = i;
 	}
 
-	node->userValue = (uint8_t)((uint8_t)blockComment | (((uint8_t)propertyMode << 1) & 0x02));
+	node->userValue = (u8)((u8)blockComment | (((u8)propertyMode << 1) & 0x02));
 
 	return true;
 }
 
-bool fSyntaxParseXML(femtoLineNode_t * restrict node, const WORD * restrict colors)
+bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 {
-	if (!fSyntaxParseAutoAlloc(node))
+	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
@@ -2415,9 +2415,9 @@ bool fSyntaxParseXML(femtoLineNode_t * restrict node, const WORD * restrict colo
 
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue : false;
 
-	uint32_t comm[5] = { 0 };
+	u32 comm[5] = { 0 };
 	
-	for (uint32_t i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{

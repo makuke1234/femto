@@ -3,9 +3,9 @@
 
 #include <string.h>
 
-static inline void testInsert(hashMap_t * map, const char * key, intptr_t value, size_t newsize)
+static inline void testInsert(hashMap_t * map, const char * key, intptr_t value, usize newsize)
 {
-	hashMap_insert(map, key, (void *)value);
+	hashMap_insert(map, key, (vptr)value);
 	test(hashMap_get(map, key) != NULL, "insertion failed");
 
 	if (newsize)
@@ -19,7 +19,7 @@ static inline void testRemove(hashMap_t * map, const char * key, intptr_t value)
 	hashNode_t * node = hashMap_get(map, key);
 	test(node != NULL, "that key should exist!");
 	test(strcmp(node->key, key) == 0, "keys don't match");
-	test(node->value == (void *)value, "value doesn't match");
+	test(node->value == (vptr)value, "value doesn't match");
 	test(hashMap_remove(map, key), "removing element failed");
 	test(!hashMap_remove(map, key), "removing element again didn't fail");
 }

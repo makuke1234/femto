@@ -38,7 +38,7 @@ int wmain(void)
 		const jsonValue_t * val = jsonObject_get(obj, "key1");
 		test(val != NULL, "Retrieving key1 failed!");
 
-		double num = jsonValue_getNumber(val, &suc);
+		f64 num = jsonValue_getNumber(val, &suc);
 		test(num == 5.0 && suc, "Retrieving key's value failed!");
 
 		val = jsonObject_get(obj, "key2");

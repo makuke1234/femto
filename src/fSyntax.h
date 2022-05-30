@@ -1,7 +1,7 @@
 #ifndef FEMTO_SYNTAX_H
 #define FEMTO_SYNTAX_H
 
-#include "common.h"
+#include "fCommon.h"
 
 #define MAX_KWBUF 25
 
@@ -23,10 +23,10 @@
 #define MAX_GO_TOKEN_MEM  140
 #define MAX_GO_TOKEN_WORD  11
 
-struct femtoLineNode;
+struct fLine;
 
 // Enum that defines different supported language syntax codes
-enum femtoSyntax
+typedef enum fSyntax
 {
 	fstxNONE,
 	fstxC,
@@ -43,26 +43,26 @@ enum femtoSyntax
 	fstxGo,
 
 	fstxSIZE
-};
+} fSyntax_e, fStx_e;
 
 // Detects syntax from filename
-enum femtoSyntax fSyntaxDetect(const wchar_t * restrict fileName);
+fStx_e fStx_detect(const wchar * restrict fileName);
 
 // Returns const pointer to syntax name from syntax identifier
-const char * fSyntaxName(enum femtoSyntax fs);
+const char * fStx_name(fStx_e fs);
 // Automatically allocates memory for the syntax parser
-bool fSyntaxParseAutoAlloc(struct femtoLineNode * restrict node);
+bool fStx_autoAlloc(struct fLine * restrict node);
 
-// Tokeniser function signature for fSyntaxParseCLike
-typedef void (*tokeniserFunc_t)(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
+// Tokeniser function signature for fStx_parseCLike
+typedef void (*fStx_tokeniserFunc_t)(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
 
 // Token parsers
-void checkCToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkCPPToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkPyToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkJSToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkRustToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
-void checkGoToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t lasti, WORD kwCol);
+void fStx_checkCToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+void fStx_checkCPPToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+void fStx_checkPyToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+void fStx_checkJSToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+void fStx_checkRustToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+void fStx_checkGoToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
 
 // Syntax parsers
 
@@ -74,7 +74,7 @@ void checkGoToken(struct femtoLineNode * restrict node, uint32_t start, uint32_t
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restrict colors);
+bool fStx_parseNone(struct fLine * restrict node, const WORD * restrict colors);
 /**
  * @brief Doesn't parse any syntax, just enjoy the view...
  * 
@@ -85,11 +85,11 @@ bool fSyntaxParseNone(struct femtoLineNode * restrict node, const WORD * restric
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParseCLike(
-	struct femtoLineNode * restrict node,
+bool fStx_parseCLike(
+	struct fLine * restrict node,
 	const WORD * restrict colors,
-	tokeniserFunc_t func,
-	enum femtoSyntax lang
+	fStx_tokeniserFunc_t func,
+	fStx_e lang
 );
 /**
  * @brief Parses markdown.
@@ -99,7 +99,7 @@ bool fSyntaxParseCLike(
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParseMd(struct femtoLineNode * restrict node, const WORD * restrict colors);
+bool fStx_parseMd(struct fLine * restrict node, const WORD * restrict colors);
 
 /**
  * @brief Parses Python... Huh, who uses that?
@@ -109,7 +109,7 @@ bool fSyntaxParseMd(struct femtoLineNode * restrict node, const WORD * restrict 
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict colors);
+bool fStx_parsePy(struct fLine * restrict node, const WORD * restrict colors);
 
 /**
  * @brief Let's parse the ominous JSON syntax. Actually, it's not hard hard to do.
@@ -119,7 +119,7 @@ bool fSyntaxParsePy(struct femtoLineNode * restrict node, const WORD * restrict 
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restrict colors);
+bool fStx_parseJSON(struct fLine * restrict node, const WORD * restrict colors);
 /**
  * @brief Who doesn't need a little CSS here and there?!??
  * 
@@ -128,7 +128,7 @@ bool fSyntaxParseJSON(struct femtoLineNode * restrict node, const WORD * restric
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict colors);
+bool fStx_parseCSS(struct fLine * restrict node, const WORD * restrict colors);
 
 /**
  * @brief HTML is basically the same as XML
@@ -138,7 +138,7 @@ bool fSyntaxParseCSS(struct femtoLineNode * restrict node, const WORD * restrict
  * @return true Success
  * @return false Failure
  */
-bool fSyntaxParseXML(struct femtoLineNode * restrict node, const WORD * restrict colors);
+bool fStx_parseXML(struct fLine * restrict node, const WORD * restrict colors);
 
 
 #endif

@@ -1,7 +1,7 @@
-#ifndef FEMTOERR_H
-#define FEMTOERR_H
+#ifndef FEMTO_ERR_H
+#define FEMTO_ERR_H
 
-typedef enum femtoErr
+typedef enum fErr
 {
 	ferrOK,
 	ferrUNKNOWN,
@@ -12,13 +12,13 @@ typedef enum femtoErr
 
 	ferrNUM_OF_ELEMS
 
-} femtoErr_e;
+} fErr_e;
 /**
  * @brief Prints error message to stderr, adds newline character
  * 
  * @param errCode Error code, ferrOK on success
  */
-void femto_printErr(femtoErr_e errCode);
+void fErr_print(fErr_e errCode);
 
 
 #endif

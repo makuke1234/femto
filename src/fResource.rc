@@ -1,4 +1,4 @@
-#include "common.h"
+#include "fCommon.h"
 
 // Application icon
 IDI_APPLICATION ICON "assets/icon.ico"
@@ -6,8 +6,8 @@ IDI_APPLICATION ICON "assets/icon.ico"
 // Version info
 #include <winver.h>
 VS_VERSION_INFO		VERSIONINFO
-FILEVERSION			VERSION_SEQ
-PRODUCTVERSION		VERSION_SEQ
+FILEVERSION			FEMTO_VERSION_SEQ
+PRODUCTVERSION		FEMTO_VERSION_SEQ
 FILEFLAGSMASK		VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
 	FILEFLAGS		VS_FF_DEBUG | VS_FF_PRERELEASE
@@ -24,12 +24,12 @@ BEGIN
 		BEGIN
 			VALUE "CompanyName", "Maku Maku"
 			VALUE "FileDescription", "Fully Equipped Minimal Text editOr"
-			VALUE "FileVersion", VERSION_STR
+			VALUE "FileVersion", FEMTO_VERSION_STR
 			VALUE "InternalName", "Win32App"
 			VALUE "LegalCopyright", "\xA92022 Maku Maku"
 			VALUE "OriginalFileName", "femto.exe"
 			VALUE "ProductName", "femto"
-			VALUE "ProductVersion", VERSION_STR
+			VALUE "ProductVersion", FEMTO_VERSION_STR
 		END
 	END
 	BLOCK "VarFileInfo"

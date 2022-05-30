@@ -1,7 +1,7 @@
-#include "femtoErr.h"
-#include "common.h"
+#include "fErr.h"
+#include "fCommon.h"
 
-static const char * femto_errCodes[ferrNUM_OF_ELEMS] = {
+static const char * s_fErrCodes[ferrNUM_OF_ELEMS] = {
 	[ferrOK]      = "Everything OK",
 	[ferrUNKNOWN] = "Uknown error occurred!",
 	[ferrFILE]    = "Error reading file!",
@@ -10,11 +10,11 @@ static const char * femto_errCodes[ferrNUM_OF_ELEMS] = {
 	[ferrTHREAD]  = "Error creating thread!"
 };
 
-void femto_printErr(femtoErr_e errCode)
+void fErr_print(fErr_e errCode)
 {
 	if (errCode >= ferrNUM_OF_ELEMS)
 	{
 		errCode = ferrUNKNOWN;
 	}
-	fprintf(stderr, "%s\n", femto_errCodes[errCode]);
+	fprintf(stderr, "%s\n", s_fErrCodes[errCode]);
 }

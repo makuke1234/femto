@@ -1,8 +1,8 @@
-#include "femtoStatHashmap.h"
+#include "fStatHashmap.h"
 
 #include <hashmap.h>
 
-bool fHash_isPrime(uint32_t number)
+bool fStatHash_isPrime(u32 number)
 {
 	if (number <= 3)
 	{
@@ -10,7 +10,7 @@ bool fHash_isPrime(uint32_t number)
 	}
 	else
 	{
-		for (uint32_t i = 3, n = (uint32_t)sqrtf((float)number) + 1; i < n; i += 2)
+		for (u32 i = 3, n = (u32)sqrtf((f32)number) + 1; i < n; i += 2)
 		{
 			if ((number % i) == 0)
 			{
@@ -20,48 +20,48 @@ bool fHash_isPrime(uint32_t number)
 		return true;
 	}
 }
-uint32_t fHash_findNextPrime(uint32_t lowerBound)
+u32 fStatHash_findNextPrime(u32 lowerBound)
 {
 	assert(lowerBound > 0);
 
 	lowerBound += (lowerBound > 2) && ((lowerBound % 2) == 0);
 
-	while (!fHash_isPrime(lowerBound))
+	while (!fStatHash_isPrime(lowerBound))
 	{
 		lowerBound += 2;
 	}
 	return lowerBound;
 }
 
-uint32_t fHash_hash(const wchar_t * restrict key, uint32_t sz)
+u32 fStatHash_hash(const wchar * restrict key, u32 sz)
 {
 	assert(key != NULL);
 	assert(sz > 0);
 
-	uint32_t hash = 0;
+	u32 hash = 0;
 	for (; (*key) != L'\0'; ++key)
 	{
-		hash = (uint32_t)(hash * 37 + (uint32_t)*key);
+		hash = (u32)(hash * 37 + (u32)*key);
 	}
 	return hash % sz;
 }
 
-void * fHash_malloc(fHash_t * restrict hash, uint32_t bytes)
+vptr fStatHash_malloc(fStatHash_t * restrict hash, u32 bytes)
 {
 	if (hash->memSize < bytes)
 	{
 		return NULL;
 	}
 
-	void * mem = hash->mem;
-	hash->mem = ((uint8_t *)hash->mem) + bytes;
+	vptr mem = hash->mem;
+	hash->mem = ((u8 *)hash->mem) + bytes;
 	hash->memSize -= bytes;
 
 	return mem;
 }
-void fHash_free(fHash_t * restrict hash, void * restrict mem, uint32_t bytes)
+void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, u32 bytes)
 {
-	void * newp = ((uint8_t *)hash->mem) - bytes;
+	vptr newp = ((u8 *)hash->mem) - bytes;
 	if (mem == newp)
 	{
 		hash->mem = newp;
@@ -69,10 +69,10 @@ void fHash_free(fHash_t * restrict hash, void * restrict mem, uint32_t bytes)
 	}
 }
 
-void fHash_init(
-	fHash_t * restrict hash,
-	void * restrict memory, uint32_t memoryBytes,
-	uint32_t tableSize
+void fStatHash_init(
+	fStatHash_t * restrict hash,
+	vptr restrict memory, u32 memoryBytes,
+	u32 tableSize
 )
 {
 	assert(hash != NULL);
@@ -88,8 +88,8 @@ void fHash_init(
 	hash->mem     = memory;
 	hash->memSize = memoryBytes;
 
-	hash->mapSize = fHash_findNextPrime(tableSize) & 0x7FFFFFFF;
-	hash->nodes   = fHash_malloc(hash, sizeof(fHNode_t *) * hash->mapSize);
+	hash->mapSize = fStatHash_findNextPrime(tableSize) & 0x7FFFFFFF;
+	hash->nodes   = fStatHash_malloc(hash, sizeof(fHashNode_t *) * hash->mapSize);
 	
 	if (hash->nodes != NULL)
 	{
@@ -100,15 +100,15 @@ void fHash_init(
 		return;
 	}
 
-	for (uint32_t i = 0; i < hash->mapSize; ++i)
+	for (u32 i = 0; i < hash->mapSize; ++i)
 	{
 		hash->nodes[i] = NULL;
 	}
 }
-void fHash_initData(
-	fHash_t * restrict hash,
-	void * restrict memory, uint32_t memoryBytes,
-	const wchar_t ** data, uint32_t dataSize
+void fStatHash_initData(
+	fStatHash_t * restrict hash,
+	vptr restrict memory, u32 memoryBytes,
+	const wchar ** data, u32 dataSize
 )
 {
 	assert(hash != NULL);
@@ -121,25 +121,25 @@ void fHash_initData(
 	{
 		return;
 	}
-	fHash_init(hash, memory, memoryBytes, dataSize);
+	fStatHash_init(hash, memory, memoryBytes, dataSize);
 
-	for (uint32_t i = 0; i < dataSize; ++i)
+	for (u32 i = 0; i < dataSize; ++i)
 	{
-		if (!fHash_insert(hash, data[i]))
+		if (!fStatHash_insert(hash, data[i]))
 		{
-			writeProfiler("Failed on %S", data[i]);
+			fProf_write("Failed on %S", data[i]);
 			hash->init = false;
 			return;
 		}
 	}
 }
-bool fHash_insert(fHash_t * restrict hash, const wchar_t * restrict key)
+bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
 {
 	assert(hash != NULL);
 	assert(key != NULL);
 	assert(hash->init);
 
-	fHNode_t ** pnode = &hash->nodes[fHash_hash(key, hash->mapSize)];
+	fHashNode_t ** pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
 
 	while ((*pnode) != NULL)
 	{
@@ -150,7 +150,7 @@ bool fHash_insert(fHash_t * restrict hash, const wchar_t * restrict key)
 		pnode = &(*pnode)->next;
 	}
 
-	fHNode_t * node = fHash_malloc(hash, sizeof(fHNode_t));
+	fHashNode_t * node = fStatHash_malloc(hash, sizeof(fHashNode_t));
 	if (node == NULL)
 	{
 		return false;
@@ -161,13 +161,13 @@ bool fHash_insert(fHash_t * restrict hash, const wchar_t * restrict key)
 	*pnode = node;
 	return true;
 }
-bool fHash_get(const fHash_t * restrict hash, const wchar_t * restrict key)
+bool fStatHash_get(const fStatHash_t * restrict hash, const wchar * restrict key)
 {
 	assert(hash != NULL);
 	assert(key != NULL);
 	assert(hash->init);
 
-	fHNode_t * node = hash->nodes[fHash_hash(key, hash->mapSize)];
+	fHashNode_t * node = hash->nodes[fStatHash_hash(key, hash->mapSize)];
 
 	while (node != NULL)
 	{
@@ -180,21 +180,21 @@ bool fHash_get(const fHash_t * restrict hash, const wchar_t * restrict key)
 
 	return false;
 }
-bool fHash_remove(fHash_t * restrict hash, const wchar_t * restrict key)
+bool fStatHash_remove(fStatHash_t * restrict hash, const wchar * restrict key)
 {
 	assert(hash != NULL);
 	assert(key != NULL);
 	assert(hash->init);
 
-	fHNode_t ** pnode = &hash->nodes[fHash_hash(key, hash->mapSize)];
+	fHashNode_t ** pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
 	while ((*pnode) != NULL)
 	{
 		if (wcscmp((*pnode)->key, key) == 0)
 		{
-			fHNode_t * node = *pnode;
+			fHashNode_t * node = *pnode;
 			*pnode = node->next;
 
-			fHash_free(hash, node, sizeof(fHNode_t));
+			fStatHash_free(hash, node, sizeof(fHashNode_t));
 			return true;
 		}
 		pnode = &(*pnode)->next;

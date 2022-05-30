@@ -1,6 +1,6 @@
-#include "femtoArg.h"
+#include "fArg.h"
 
-bool femtoArg_strToBool(femtoArg_t arg)
+bool fArg_strToBool(fArg_t arg)
 {
 	if (((arg.end - arg.begin) >= 4) && (wcsncmp(arg.begin, L"true", 4) == 0))
 	{
@@ -16,36 +16,41 @@ bool femtoArg_strToBool(femtoArg_t arg)
 		return wcstol(arg.begin, NULL, 10) != 0;
 	}
 }
-wchar_t femtoArg_strToCh(femtoArg_t arg)
+wchar fArg_strToCh(fArg_t arg)
 {
-	if ((arg.end - arg.begin) >= 1)
-	{
-		return arg.begin[0];
-	}
-	else
-	{
-		return L'\0';
-	}	
+	assert(arg.begin != NULL);
+	assert(arg.end   != NULL);
+
+	return ((arg.end - arg.begin) >= 1) ? arg.begin[0] : L'\0';
 }
 
 
-uint32_t femtoArg_fetch(const wchar_t * restrict rawStr, int32_t maxStr, const wchar_t * restrict argMatch, uint32_t maxParams, ...)
+u32 fArg_fetch(
+	const wchar * restrict rawStr, i32 maxStr,
+	const wchar * restrict argMatch, u32 maxParams, ...
+)
 {
+	assert(rawStr != NULL);
+	assert(argMatch != NULL);
+
 	va_list ap;
 	va_start(ap, maxParams);
 
-	uint32_t result = femtoArg_vfetch(rawStr, maxStr, argMatch, maxParams, ap);
+	u32 result = fArg_vfetch(rawStr, maxStr, argMatch, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
-uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const wchar_t * restrict argMatch, uint32_t maxParams, va_list ap)
+u32 fArg_vfetch(
+	const wchar * restrict rawStr, i32 maxStr,
+	const wchar * restrict argMatch, u32 maxParams, va_list ap
+)
 {
 	assert(rawStr != NULL);
 	assert(argMatch != NULL);
 
 	// Get real rawStr length
-	uint32_t len = (maxStr == -1) ? (uint32_t)wcslen(rawStr) : (uint32_t)maxStr;
+	u32 len = (maxStr == -1) ? (u32)wcslen(rawStr) : (u32)maxStr;
 
 	/*
 	 * Pattern
@@ -59,8 +64,8 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 	 * --option=value1 value2 value3
 	 * 
 	 */
-	const wchar_t * restrict rawIt = rawStr;
-	const wchar_t * restrict endp = rawIt + len;
+	const wchar * restrict rawIt = rawStr;
+	const wchar * restrict endp = rawIt + len;
 	if ((len > 1) && ((*rawIt == '-') || (*rawIt == '/')))
 	{
 		++rawIt;
@@ -75,7 +80,7 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 	}
 
 	// Scan for a match
-	size_t matchLen = wcslen(argMatch);
+	usize matchLen = wcslen(argMatch);
 	if (wcsncmp(rawIt, argMatch, matchLen) != 0)
 	{
 		// Didn't find a match
@@ -89,9 +94,9 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 	{
 		++rawIt;
 		// Search for arguments
-		uint32_t numArgs = 0;
+		u32 numArgs = 0;
 
-		const wchar_t * restrict argStart = rawIt;
+		const wchar * restrict argStart = rawIt;
 
 		for (; rawIt != endp; ++rawIt)
 		{
@@ -104,7 +109,7 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 			{
 				if (numArgs < maxParams)
 				{
-					femtoArg_t * arg = va_arg(ap, femtoArg_t *);
+					fArg_t * arg = va_arg(ap, fArg_t *);
 					++numArgs;
 
 					// Set argument settings
@@ -135,17 +140,27 @@ uint32_t femtoArg_vfetch(const wchar_t * restrict rawStr, int32_t maxStr, const 
 }
 
 
-uint32_t femtoArg_fetchArgv(int argc, const wchar_t ** restrict argv, const wchar_t * restrict argMatch, int * restrict matchedIndex, uint32_t maxParams, ...)
+u32 fArg_fetchArgv(
+	int argc, const wchar ** restrict argv,
+	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, ...
+)
 {
+	assert(argv != NULL);
+	assert(argMatch != NULL);
+	assert(matchedIndex != NULL);
+	
 	va_list ap;
 	va_start(ap, maxParams);
 	
-	uint32_t result = femtoArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
+	u32 result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
-uint32_t femtoArg_vfetchArgv(int argc, const wchar_t ** restrict argv, const wchar_t * restrict argMatch, int * restrict matchedIndex, uint32_t maxParams, va_list ap)
+u32 fArg_vfetchArgv(
+	int argc, const wchar ** restrict argv,
+	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, va_list ap
+)
 {
 	assert(argv != NULL);
 	assert(argMatch != NULL);
@@ -153,7 +168,7 @@ uint32_t femtoArg_vfetchArgv(int argc, const wchar_t ** restrict argv, const wch
 
 	for (int i = 1; i < argc; ++i)
 	{
-		uint32_t result = femtoArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
+		u32 result = fArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
 		if (result != 0)
 		{
 			*matchedIndex = i;
