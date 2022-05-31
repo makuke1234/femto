@@ -66,7 +66,7 @@ char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen
  * @param inp Input null-terminated character array
  * @return char* Output character array
  */
-char * femto_escStr(const char * inp);
+char * femto_escStr(const char * restrict inp);
 /**
  * @brief Escapes the escape characters in given character array,
  * produces pointer to the new character array
@@ -75,14 +75,14 @@ char * femto_escStr(const char * inp);
  * @param len Input character array length in characters
  * @return char* Output character array
  */
-char * femto_escStr_s(const char * inp, usize len);
+char * femto_escStr_s(const char * restrict inp, usize len);
 
 /**
  * @brief Set exit handler data argument pointer
  * 
  * @param pdata Pointer to fData_t structure
  */
-void femto_exitHandlerSetVars(fData_t * pdata);
+void femto_exitHandlerSetVars(fData_t * restrict pdata);
 /**
  * @brief Specialised exit handler, executed after returning from main
  * 
@@ -206,7 +206,7 @@ u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict line
  * @return true File exists
  * @return false File doesn't exist/is inaccessible
  */
-bool femto_testFile(const wchar * filename);
+bool femto_testFile(const wchar * restrict filename);
 /**
  * @brief Opens new file with desired name and write access
  * 

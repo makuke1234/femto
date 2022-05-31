@@ -5,6 +5,7 @@
 bool fData_reset(fData_t * restrict self)
 {
 	assert(self != NULL);
+
 	*self = (fData_t){
 		.prevConsoleMode    = 0,
 		.bPrevConsoleModeSet = false,
@@ -116,7 +117,7 @@ bool fData_loadPalette(fData_t * restrict self)
 {
 	assert(self != NULL);
 
-	fPalette_t * pal = &self->settings.palette;
+	fPalette_t * restrict pal = &self->settings.palette;
 	if (!pal->bUsePalette)
 	{
 		return true;
@@ -134,7 +135,7 @@ bool fData_loadPalette(fData_t * restrict self)
 	for (u8 i = 0; i < MAX_COLORS; ++i)
 	{
 		const COLORREF old = csbiex.ColorTable[i];
-		fColor_t * oldCol = &self->settings.palette.oldColors[i];
+		fColor_t * restrict oldCol = &self->settings.palette.oldColors[i];
 		oldCol->r = GetRValue(old);
 		oldCol->g = GetGValue(old);
 		oldCol->b = GetBValue(old);
@@ -154,7 +155,7 @@ bool fData_restorePalette(const fData_t * restrict self)
 
 	fProf_write("Restoring palette...");
 
-	const fPalette_t * pal = &self->settings.palette;
+	const fPalette_t * restrict pal = &self->settings.palette;
 	if (!pal->bUsePalette)
 	{
 		return true;
@@ -186,6 +187,7 @@ void fData_refreshEdit(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
+	
 	u32 line;
 	if (femto_updateScrbuf(self, &line) == false)
 	{
@@ -194,7 +196,10 @@ void fData_refreshEdit(fData_t * restrict self)
 			self->scrbuf.mem,
 			(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 			(COORD){ 0, 0 },
-			&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2) }
+			&(SMALL_RECT){
+				.Left = 0, .Top = 0,
+				.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2)
+			}
 		);
 	}
 	else
@@ -205,13 +210,17 @@ void fData_refreshEdit(fData_t * restrict self)
 			self->scrbuf.mem,
 			(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 			(COORD){ .X = 0, .Y = (SHORT)line },
-			&(SMALL_RECT){ .Left = 0, .Top = (SHORT)line, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)line }
+			&(SMALL_RECT){
+				.Left = 0, .Top = (SHORT)line,
+				.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)line
+			}
 		);
 	}
 }
 void fData_refreshEditAsync(fData_t * restrict self)
 {
 	assert(self != NULL);
+
 	fDrawThreadData_t * dt = &self->drawThread;
 
 	EnterCriticalSection(&dt->crit);
@@ -225,6 +234,7 @@ void fData_refreshAll(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
+	
 	u32 line;	// Phantom variable
 	femto_updateScrbuf(self, &line);
 	WriteConsoleOutputW(
@@ -232,7 +242,10 @@ void fData_refreshAll(fData_t * restrict self)
 		self->scrbuf.mem,
 		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 		(COORD){ 0, 0 },
-		&(SMALL_RECT){ .Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1) }
+		&(SMALL_RECT){
+			.Left = 0, .Top = 0,
+			.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)
+		}
 	);
 }
 void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData)
@@ -241,9 +254,9 @@ void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, co
 	assert(self->scrbuf.mem != NULL);
 	assert(message != NULL);
 
-	u32 effLen = min_u32((u32)wcslen(message), self->scrbuf.w);
+	const u32 effLen = min_u32((u32)wcslen(message), self->scrbuf.w);
 	CHAR_INFO * restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
-	for (usize i = 0; i < effLen; ++i)
+	for (u32 i = 0; i < effLen; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = message[i] },
@@ -252,12 +265,12 @@ void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, co
 	}
 	if (colorData != NULL)
 	{
-		for (usize i = 0; i < effLen; ++i)
+		for (u32 i = 0; i < effLen; ++i)
 		{
 			lastLine[i].Attributes = colorData[i];
 		}
 	}
-	for (usize i = effLen; i < self->scrbuf.w; ++i)
+	for (u32 i = effLen; i < self->scrbuf.w; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = L' ' },
@@ -270,12 +283,16 @@ void fData_statusRefresh(fData_t * restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
+	
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
 		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
 		(COORD){ .X = 0, .Y = (SHORT)(self->scrbuf.h - 1) },
-		&(SMALL_RECT){ .Left = 0, .Top = (SHORT)(self->scrbuf.h - 1), .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1) }
+		&(SMALL_RECT){
+			.Left = 0, .Top = (SHORT)(self->scrbuf.h - 1),
+			.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)
+		}
 	);
 }
 
@@ -318,7 +335,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 	self->fileIdx = (i32)self->filesSize;
 	++self->filesSize;
 
-	self->cursorpos[self->fileIdx] = (COORD) { 0, 0 };
+	self->cursorpos[self->fileIdx] = (COORD){ 0, 0 };
 
 	fFile_close(self->files[self->fileIdx]);
 
@@ -332,7 +349,7 @@ void fData_closeTab(fData_t * restrict self)
 	assert(self != NULL);
 	assert(self->fileIdx != -1);
 
-	fFile_t * file = self->files[self->fileIdx];
+	fFile_t * restrict file = self->files[self->fileIdx];
 	
 	// Remove file from tab list
 	--self->filesSize;
@@ -366,6 +383,7 @@ void fData_closeTab(fData_t * restrict self)
 void fData_destroy(fData_t * restrict self)
 {
 	assert(self != NULL);
+
 	if (self->scrbuf.mem != NULL)
 	{
 		free(self->scrbuf.mem);
@@ -384,7 +402,7 @@ void fData_destroy(fData_t * restrict self)
 	}
 
 	self->fileIdx = -1;
-	for (usize i = 0; i < self->filesSize; ++i)
+	for (u32 i = 0; i < self->filesSize; ++i)
 	{
 		fFile_free(self->files[i]);
 	}

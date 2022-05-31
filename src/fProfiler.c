@@ -43,7 +43,7 @@ void fProf_write_inner(const char * restrict function, const char * restrict for
 	// Write timestamp
 	time_t rawtime;
 	time(&rawtime);
-	struct tm * ti = localtime(&rawtime);
+	const struct tm * restrict ti = localtime(&rawtime);
 	fprintf(
 		s_profilingFile,
 		"[%.2d.%.2d.%d @%.2d:%.2d:%.2d] @%s<",

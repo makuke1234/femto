@@ -75,13 +75,13 @@ void fFile_close(fFile_t * restrict self)
 void fFile_clearLines(fFile_t * restrict self)
 {
 	assert(self != NULL);
-	fLine_t * node = self->data.firstNode;
+	fLine_t * restrict node = self->data.firstNode;
 	self->data.firstNode   = NULL;
 	self->data.currentNode = NULL;
 	self->data.pcury       = NULL;
 	while (node != NULL)
 	{
-		fLine_t * next = node->nextNode;
+		fLine_t * restrict next = node->nextNode;
 		fLine_free(node);
 		node = next;
 	}
@@ -121,7 +121,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 	assert(self != NULL);
 	char * bytes = NULL;
 	u32 size;
-	const wchar * res;
+	const wchar * restrict res;
 	if ((res = fFile_readBytes(self, &bytes, &size)) != NULL)
 	{
 		return res;
@@ -129,7 +129,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 
 	// Convert to UTF-16
 	wchar * utf16 = NULL;
-	u32 chars = femto_toutf16(bytes, (int)size, &utf16, NULL);
+	const u32 chars = femto_toutf16(bytes, (int)size, &utf16, NULL);
 	free(bytes);
 
 	if (utf16 == NULL)
@@ -141,7 +141,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 
 	// Save lines to structure
 	wchar ** lines = NULL;
-	u32 numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
+	const u32 numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
 	if (lines == NULL)
 	{
 		free(utf16);
@@ -194,7 +194,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 	wchar * lines = NULL, * line = NULL;
 	u32 linesCap = 0, linesLen = 0, lineCap = 0;
 
-	fLine_t * node = self->data.firstNode;
+	const fLine_t * restrict node = self->data.firstNode;
 
 	const u8 eolSeq = self->eolSeq;
 	bool isCRLF = (self->eolSeq == eolCRLF);
@@ -215,17 +215,17 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 			return ffcrMEM_ERROR;
 		}
 
-		u32 lineLen = (u32)wcsnlen(line, lineCap);
+		const u32 lineLen = (u32)wcsnlen(line, lineCap);
 
-		u32 addnewline = (node->nextNode != NULL) ? 1 + isCRLF : 0;
-		u32 newLinesLen = linesLen + lineLen + addnewline;
+		const u32 addnewline = (node->nextNode != NULL) ? 1 + isCRLF : 0;
+		const u32 newLinesLen = linesLen + lineLen + addnewline;
 
 		// Add line to lines, concatenate \n character, if necessary
 
 		if (newLinesLen >= linesCap)
 		{
 			// Resize lines array
-			u32 newCap = (newLinesLen + 1) * 2;
+			const u32 newCap = (newLinesLen + 1) * 2;
 
 			vptr mem = realloc(lines, sizeof(wchar) * newCap);
 			if (mem == NULL)
@@ -291,7 +291,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 	if (fFile_readBytes(self, &compFile, &compSize) == NULL)
 	{
 		// Reading was successful
-		bool areEqual = strncmp(utf8, compFile, (usize)min_u32(utf8sz, compSize)) == 0;
+		const bool areEqual = strncmp(utf8, compFile, (usize)min_u32(utf8sz, compSize)) == 0;
 		free(compFile);
 
 		if (areEqual)
@@ -378,7 +378,7 @@ i32 fFile_write(fFile_t * restrict self)
 bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u32 tabWidth)
 {
 	assert(self != NULL);
-	fLine_t * node = self->data.currentNode;
+	fLine_t * restrict node = self->data.currentNode;
 	assert(node != NULL);
 	self->data.bTyped = true;
 	
@@ -394,14 +394,15 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u32 tabWidth)
 bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSettings_t * pset)
 {
 	assert(self != NULL);
+	
 	self->data.bTyped = true;
-	fLine_t * lastcurnode = self->data.currentNode;
+	fLine_t * restrict lastcurnode = self->data.currentNode;
 
 	switch (ch)
 	{
 	case VK_TAB:
 	{
-		wchar tch = pset->bTabsToSpaces ? L' ' : L'\t';
+		const wchar tch = pset->bTabsToSpaces ? L' ' : L'\t';
 		if (!fFile_addNormalCh(self, tch, pset->tabWidth))
 		{
 			return false;
@@ -426,7 +427,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		{
 			fFile_deleteBackward(self);
 			--lastcurnode->virtcurx;
-			u32 max = lastcurnode->virtcurx % pset->tabWidth;
+			const u32 max = lastcurnode->virtcurx % pset->tabWidth;
 			if (fLine_checkAt(lastcurnode, -(i32)max, pset->tabSpaceStr1, max))
 			{
 				for (u32 i = 0; i < max; ++i)
@@ -595,7 +596,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 bool fFile_deleteForward(fFile_t * restrict self)
 {
 	assert(self != NULL);
-	fLine_t * node = self->data.currentNode;
+	fLine_t * restrict node = self->data.currentNode;
 	if ((node->curx + node->freeSpaceLen) < node->lineEndx)
 	{
 		++node->freeSpaceLen;
@@ -614,7 +615,7 @@ bool fFile_deleteForward(fFile_t * restrict self)
 bool fFile_deleteBackward(fFile_t * restrict self)
 {
 	assert(self != NULL);
-	fLine_t * node = self->data.currentNode;
+	fLine_t * restrict node = self->data.currentNode;
 	if (node->curx > 0)
 	{
 		--node->curx;
@@ -651,16 +652,17 @@ bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, b
 
 	self->data.currentNode->nextNode = node;
 	self->data.currentNode = node;
-	self->data.bUpdateAll = true;
+	self->data.bUpdateAll  = true;
 	return true;
 }
 
 void fFile_updateCury(fFile_t * restrict self, u32 height)
 {
 	assert(self != NULL);
+
 	if (self->data.pcury == NULL)
 	{
-		fLine_t * node = self->data.currentNode;
+		fLine_t * restrict node = self->data.currentNode;
 		for (u32 i = 0; i < height && node->prevNode != NULL; ++i)
 		{
 			node = node->prevNode;
@@ -669,7 +671,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 	}
 	else
 	{
-		fLine_t * node = self->data.currentNode;
+		const fLine_t * restrict node = self->data.currentNode;
 		for (u32 i = 0; i < height && node != NULL; ++i)
 		{
 			if (node == self->data.pcury)
@@ -697,6 +699,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines)
 {
 	assert(self != NULL);
+
 	if (self->data.pcury == NULL)
 	{
 		fFile_updateCury(self, height);
@@ -711,13 +714,14 @@ void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines)
 void fFile_scrollHor(fFile_t * restrict self, u32 width, i32 deltaCh)
 {
 	assert(self != NULL);
+
 	if ((deltaCh < 0) && ((u32)-deltaCh <= self->data.curx))
 	{
 		self->data.curx -= (u32)-deltaCh;
 	}
 	else if (deltaCh > 0)
 	{
-		u32 curx = self->data.curx + (u32)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
+		const u32 curx = self->data.curx + (u32)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
 		--width;
 		if ((total >= width) && (curx <= (total - width)))
 		{
@@ -735,6 +739,7 @@ void fFile_scrollHor(fFile_t * restrict self, u32 width, i32 deltaCh)
 void fFile_destroy(fFile_t * restrict self)
 {
 	assert(self != NULL);
+
 	fFile_close(self);
 	fFile_clearLines(self);
 

@@ -135,12 +135,13 @@ bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u
 {
 	assert(self != NULL);
 	assert(errArr != NULL);
+
 	if (self->lastErr[0] == L'\0')
 	{
 		errArr[0] = L'\0';
 		return false;
 	}
-	u32 copyLen = min_u32((u32)wcslen(self->lastErr) + 1, errMax);
+	const u32 copyLen = min_u32((u32)wcslen(self->lastErr) + 1, errMax);
 	memcpy(errArr, self->lastErr, sizeof(wchar) * copyLen);
 	self->lastErr[copyLen - 1] = L'\0';
 	return true;
@@ -369,16 +370,16 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 
 static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, const char * restrict key, const char * colorNames[])
 {
-	const jsonValue_t * attr = jsonObject_get(obj, key);
+	const jsonValue_t * restrict attr = jsonObject_get(obj, key);
 	if (attr == NULL)
 	{
 		return CHECK_ERR;
 	}
 
 	bool success;
-	const char * value = jsonValue_getString(attr, &success);
+	const char * restrict value = jsonValue_getString(attr, &success);
 	// Check for comma
-	const char * comma = strchr(value, (char)',');
+	const char * restrict comma = strchr(value, (char)',');
 	const usize commaIdx = (comma == NULL) ? PTRDIFF_MAX : (usize)(comma - value);
 	usize charIdx = 0;
 	if (comma != NULL)
@@ -428,17 +429,17 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 }
 static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const jsonObject_t * restrict obj, const char * restrict key)
 {
-	const jsonValue_t * attr = jsonObject_get(obj, key);
+	const jsonValue_t * restrict attr = jsonObject_get(obj, key);
 	if (attr == NULL)
 	{
 		return CHECK_ERR;
 	}
 
 	bool success;
-	const char * value = jsonValue_getString(attr, &success);
+	const char * restrict value = jsonValue_getString(attr, &success);
 	if (success && (value != NULL))
 	{
-		const char * rgbBeg;
+		const char * restrict rgbBeg;
 		u16 r, g, b;
 		if ((((rgbBeg = strstr(value, "rgb(")) != NULL) && (sscanf(rgbBeg + 4, "%hu,%hu,%hu)", &r, &g, &b) == 3)) ||
 		( ((rgbBeg = strchr(value, (char)'#')) != NULL) && (sscanf(rgbBeg + 1, "%02hx%02hx%02hx", &r, &g, &b) == 3) ) )
@@ -461,6 +462,7 @@ static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const json
 const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 {
 	assert(self != NULL);
+
 	if (self->settingsFileName == NULL)
 	{
 		return NULL;
@@ -479,7 +481,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 	char * bytes = NULL;
 	u32 bytesLen = 0;
 	// Read bytes
-	const wchar * result = femto_readBytes(hset, &bytes, &bytesLen);
+	const wchar * restrict result = femto_readBytes(hset, &bytes, &bytesLen);
 	// Close file
 	CloseHandle(hset);
 	if (result != NULL)
@@ -507,16 +509,16 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 	// Browse JSON object
 	bool suc;
-	const jsonObject_t * obj = jsonValue_getObject(&json.value, &suc);
+	const jsonObject_t * restrict obj = jsonValue_getObject(&json.value, &suc);
 
 	if (suc)
 	{
-		const jsonValue_t * attr;
+		const jsonValue_t * restrict attr;
 		u16 val;
 
 		if ((attr = jsonObject_get(obj, "tabsToSpaces")) != NULL)
 		{
-			bool value = jsonValue_getBoolean(attr, &suc);
+			const bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.bTabsToSpaces != value))
 			{
 				self->bTabsToSpaces = value;
@@ -535,7 +537,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 		if ((attr = jsonObject_get(obj, "autoIndent")) != NULL)
 		{
-			bool value = jsonValue_getBoolean(attr, &suc);
+			const bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.bAutoIndent != value))
 			{
 				self->bAutoIndent = value;
@@ -544,7 +546,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 		if ((attr = jsonObject_get(obj, "whitespaceVisible")) != NULL)
 		{
-			bool value = jsonValue_getBoolean(attr, &suc);
+			const bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.bWhiteSpaceVis != value))
 			{
 				self->bWhiteSpaceVis = value;
@@ -554,7 +556,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		if ((attr = jsonObject_get(obj, "whitespaceCh")) != NULL)
 		{
 			const char * str = jsonValue_getString(attr, &suc);
-			usize len = strlen(str);
+			const usize len = strlen(str);
 			if (suc && (str != NULL) && len)
 			{
 				char * esc = femto_escStr_s(str, len);
@@ -586,7 +588,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 		if ((attr = jsonObject_get(obj, "lineNumRelative")) != NULL)
 		{
-			bool value = jsonValue_getBoolean(attr, &suc);
+			const bool value = jsonValue_getBoolean(attr, &suc);
 			if (suc && (def.bRelLineNums != value))
 			{
 				self->bRelLineNums = value;
@@ -599,7 +601,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		}
 
 		// Fill palette
-		const jsonObject_t * pObj;
+		const jsonObject_t * restrict pObj;
 		if ( ((attr = jsonObject_get(obj, "palette")) != NULL) &&
 			((pObj = jsonValue_getObject(attr, &suc)) != NULL) && suc )
 		{
@@ -612,14 +614,14 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 			self->palette.bUsePalette = true;
 		}
 
-		const jsonObject_t * hObj;
+		const jsonObject_t * restrict hObj;
 		if (((attr = jsonObject_get(obj, "highlighting")) != NULL) && 
 			(((hObj = jsonValue_getObject(attr, &suc)) != NULL) && suc) )
 		{
 			// If highlighting settings exist
-			WORD * colors = self->syntaxColors;
-			const char ** tokenNames = self->syntaxTokens;
-			const char ** colorNames = self->palette.colorNames;
+			WORD * restrict colors = self->syntaxColors;
+			const char ** restrict tokenNames = self->syntaxTokens;
+			const char ** restrict colorNames = self->palette.colorNames;
 
 			for (u8 i = 0; i < tcNUM_OF_TOKENS; ++i)
 			{
