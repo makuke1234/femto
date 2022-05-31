@@ -1,5 +1,6 @@
 #include "fLine.h"
 #include "fSyntax.h"
+#include "fSettings.h"
 
 void fLine_init(fLine_t * restrict self)
 {
@@ -16,7 +17,7 @@ void fLine_init(fLine_t * restrict self)
 		.lineNumber   = 1,
 
 		.syntax       = NULL,
-		.userValue = false
+		.userValue    = { 0 }
 	};
 }
 fLine_t * fLine_create(
@@ -122,7 +123,7 @@ fLine_t * fLine_create(
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
-	node->userValue = false;
+	node->userValue.val = 0;
 
 	return node;
 }
@@ -174,7 +175,7 @@ fLine_t * fLine_createText(
 	node->virtcurx = 0;
 
 	node->syntax = NULL;
-	node->userValue = false;
+	node->userValue.val = 0;
 
 	return node;
 }
@@ -309,15 +310,14 @@ bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * re
 	{
 		return false;
 	}
-	for (; idx < (i32)node->lineEndx && i < m && *string != '\0';)
+	for (; idx < (i32)node->lineEndx && i < m && *string != L'\0';)
 	{
-		if (idx == (i32)node->curx)
+		if ((idx == (i32)node->curx) && (node->freeSpaceLen > 0))
 		{
 			idx += (i32)node->freeSpaceLen;
 			continue;
 		}
-		
-		if (node->line[idx] != *string)
+		else if (node->line[idx] != *string)
 		{
 			return false;
 		}
@@ -326,12 +326,56 @@ bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * re
 		++i;
 		++idx;
 	}
-	if (*string != '\0' && i < m)
+	if ((i < m) && (*string != L'\0'))
 	{
 		return false;
 	}
 
 	return true;
+}
+u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restrict string, u32 maxString)
+{
+	assert(node != NULL);
+	assert(string != NULL);
+
+	// Clamp startIdx
+	const u32 cur2 = node->curx + node->freeSpaceLen;
+	startIdx = ((startIdx >= node->curx) && (startIdx < cur2)) ? cur2 : startIdx;
+
+	for (u32 i = startIdx; i < node->lineEndx; ++i)
+	{
+		if ((i == node->curx) && (node->freeSpaceLen > 0))
+		{
+			i = cur2;
+			continue;
+		}
+		else if (node->line[i] == string[0])
+		{
+			const wchar * str = string;
+			u32 k = 0;
+			for (u32 j = i; (j < node->lineEndx) && (k < maxString); ++j)
+			{
+				if ((j == node->curx) && (node->freeSpaceLen > 0))
+				{
+					j = cur2;
+					continue;
+				}
+				else if ((*str == L'\0') || (node->line[j] != *str))
+				{
+					break;
+				}
+				++str;
+				++k;
+			}
+
+			if ((k == maxString) || (*str == L'\0'))
+			{
+				return i;
+			}
+		}
+	}
+
+	return UINT32_MAX;
 }
 
 bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * restrict noLen)
@@ -489,6 +533,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 	node1->freeSpaceLen = node2->freeSpaceLen;
 	node1->virtcurx     = node2->virtcurx;
 	node1->syntax       = node2->syntax;
+	node1->userValue    = node2->userValue;
 
 	node2->line         = temp.line;
 	node2->lineEndx     = temp.lineEndx;
@@ -496,6 +541,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 	node2->freeSpaceLen = temp.freeSpaceLen;
 	node2->virtcurx     = temp.virtcurx;
 	node2->syntax       = temp.syntax;
+	node2->userValue    = temp.userValue;
 }
 
 void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * restrict noLen)
@@ -520,42 +566,96 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * re
 }
 
 bool fLine_updateSyntax(
-	fLine_t * restrict node,
-	enum fSyntax fs,
-	const WORD * colors
+	fLine_t * restrict node, fStx_e fs, const WORD * colors,
+	const wchar * restrict searchTerm
 )
 {
 	assert(node != NULL);
 
+	bool ret;
+
 	switch (fs)
 	{
 	case fstxC:
-		return fStx_parseCLike(node, colors, &fStx_checkCToken, fstxC);
+		ret = fStx_parseCLike(node, colors, &fStx_checkCToken, fstxC);
+		break;
 	case fstxCPP:
-		return fStx_parseCLike(node, colors, &fStx_checkCPPToken, fstxCPP);
+		ret = fStx_parseCLike(node, colors, &fStx_checkCPPToken, fstxCPP);
+		break;
 	case fstxMD:
-		return fStx_parseMd(node, colors);
+		ret = fStx_parseMd(node, colors);
+		break;
 	case fstxPY:
-		return fStx_parsePy(node, colors);
+		ret = fStx_parsePy(node, colors);
+		break;
 	case fstxJS:
-		return fStx_parseCLike(node, colors, &fStx_checkJSToken, fstxJS);
+		ret = fStx_parseCLike(node, colors, &fStx_checkJSToken, fstxJS);
+		break;
 	case fstxJSON:
-		return fStx_parseJSON(node, colors);
+		ret = fStx_parseJSON(node, colors);
+		break;
 	case fstxCSS:
-		return fStx_parseCSS(node, colors);
+		ret = fStx_parseCSS(node, colors);
+		break;
 	case fstxXML:
 	case fstxSVG:
-		return fStx_parseXML(node, colors);
+		ret = fStx_parseXML(node, colors);
+		break;
 	case fstxHTML:
-		return fStx_parseXML(node, colors);
+		ret = fStx_parseXML(node, colors);
+		break;
 	case fstxRust:
-		return fStx_parseCLike(node, colors, &fStx_checkRustToken, fstxRust);
+		ret = fStx_parseCLike(node, colors, &fStx_checkRustToken, fstxRust);
+		break;
 	case fstxGo:
-		return fStx_parseCLike(node, colors, &fStx_checkGoToken, fstxGo);
+		ret = fStx_parseCLike(node, colors, &fStx_checkGoToken, fstxGo);
+		break;
 
 	default:
-		return fStx_parseNone(node, colors);
+		ret = fStx_parseNone(node, colors);
 	}
+	
+	if (!ret)
+	{
+		return false;
+	}
+
+	node->userValue.bits.b8 = false;
+	// Find term
+	if (searchTerm != NULL)
+	{
+		u32 termLen = (u32)wcslen(searchTerm), idx = 0, firstidx = 0;
+		bool first = true;
+		while (1)
+		{
+			idx = fLine_find(node, idx, searchTerm, termLen);
+			if (idx == UINT32_MAX)
+			{
+				break;
+			}
+
+			firstidx = first ? idx : firstidx;
+			first = false;
+			// Found
+			node->userValue.bits.b8 = true;
+
+			// Highlighting index
+			for (u32 hidx = (idx > node->curx) ? (idx - node->freeSpaceLen) : idx, stop = hidx + termLen; hidx < stop; ++hidx)
+			{
+				node->syntax[hidx] = colors[tcSEARCH_RESULT];
+			}
+
+			idx += ((idx < node->curx) && ((idx + termLen) >= node->curx) && (node->freeSpaceLen > 0)) ? termLen + node->freeSpaceLen : termLen;
+		}
+		// Move cursor to term if found
+		if (!first && node->userValue.bits.b7)
+		{
+			fLine_moveCursorAbs(node, firstidx);
+		}
+		node->userValue.bits.b7 = false;
+	}
+
+	return true;
 }
 
 void fLine_destroy(fLine_t * restrict self)
@@ -571,6 +671,7 @@ void fLine_destroy(fLine_t * restrict self)
 void fLine_free(fLine_t * restrict self)
 {
 	assert(self != NULL);
+
 	fLine_destroy(self);
 	free(self);
 }

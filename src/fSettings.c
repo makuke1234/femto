@@ -65,6 +65,7 @@ void fSettings_reset(fSettings_t * restrict self)
 		},
 		.syntaxColors = {
 			[tcTEXT]            = FEMTO_DEFAULT_COLOR,
+			[tcSEARCH_RESULT]   = BACKGROUND_RED | FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
 			[tcCOMMENT_LINE]    = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
 			[tcCOMMENT_BLOCK]   = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY,
 			[tcKEYWORD]         = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED,
@@ -93,6 +94,7 @@ void fSettings_reset(fSettings_t * restrict self)
 		},
 		.syntaxTokens = {
 			[tcTEXT]            = "text",
+			[tcSEARCH_RESULT]   = "searchResult",
 			[tcCOMMENT_LINE]    = "lineComment",
 			[tcCOMMENT_BLOCK]   = "blockComment",
 			[tcKEYWORD]         = "keyword",

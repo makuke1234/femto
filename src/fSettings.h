@@ -6,6 +6,7 @@
 typedef enum fTokenColor
 {
 	tcTEXT,
+	tcSEARCH_RESULT,
 	tcCOMMENT_LINE,
 	tcCOMMENT_BLOCK,
 	tcKEYWORD,

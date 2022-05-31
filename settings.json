@@ -51,6 +51,7 @@
 	"highlighting":
 	{
 		"text": 			"",
+		"searchResult":     "",
 		"lineComment": 		"bright_black",
 		"blockComment": 	"dark_blue",
 		"keyword": 			"bright_green",

@@ -68,6 +68,8 @@ typedef unsigned char uchar;
 
 #define FEMTO_UNTITLED_NAME L"untitled"
 
+#define MAX_STATUS 256
+
 #define FEMTO_SHIFT_DEL 0x88
 
 #define FEMTO_MOVELINE_UP   0x89

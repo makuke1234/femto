@@ -39,6 +39,10 @@ typedef struct fData
 
 	fDrawThreadData_t drawThread;
 
+	wchar searchBuf[MAX_STATUS];
+	const wchar * psearchTerm;
+	bool bDirBack;
+
 } fData_t;
 
 /**

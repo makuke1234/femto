@@ -1519,7 +1519,7 @@ bool fStx_parseCLike(
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
 	
-	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
 	u32 previ = 0;
 	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
@@ -1715,7 +1715,7 @@ bool fStx_parseCLike(
 		func(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
-	node->userValue = blockComment;
+	node->userValue.bits.b1 = blockComment;
 
 	return true;
 }
@@ -1952,8 +1952,8 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false,
 		preComment = false, firstQuote = false;
 	
-	littleQuote  = (node->prevNode != NULL) ? ((node->prevNode->userValue >> 1) & 1) : false;
-	blockComment = (node->prevNode != NULL) ? (node->prevNode->userValue & 1) : false;
+	littleQuote  = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
 	u32 previ = 0, prevprevi = UINT32_MAX;
 	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
@@ -2156,7 +2156,8 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
-	node->userValue = (u8)((u8)blockComment | (((u8)littleQuote << 1) & 0x02));
+	node->userValue.bits.b1 = blockComment;
+	node->userValue.bits.b2 = littleQuote;
 
 	return true;
 }
@@ -2302,8 +2303,8 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		isZero = false, hex = false, octal = false, propertyMode = false,
 		valueMode = false, blockComment = false;
 	
-	propertyMode = (node->prevNode != NULL) ? ((node->prevNode->userValue >> 1) & 1) : false;
-	blockComment = (node->prevNode != NULL) ? (node->prevNode->userValue & 1) : false;
+	propertyMode = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
 	u32 previ = 0;
 	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
@@ -2470,7 +2471,8 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		previ = i;
 	}
 
-	node->userValue = (u8)((u8)blockComment | (((u8)propertyMode << 1) & 0x02));
+	node->userValue.bits.b1 = blockComment;
+	node->userValue.bits.b2 = propertyMode;
 
 	return true;
 }
@@ -2487,7 +2489,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		tagEnd = false, blockComment = false, specialTag = false, value = false,
 		escapeChar = false;
 
-	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue : false;
+	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
 	u32 comm[5] = { 0 };
 	
@@ -2721,7 +2723,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		}
 	}
 
-	node->userValue = blockComment;
+	node->userValue.bits.b1 = blockComment;
 
 	return true;
 }

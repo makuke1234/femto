@@ -17,7 +17,21 @@ typedef struct fLine
 	u32 lineNumber;
 
 	WORD * syntax;
-	u8 userValue;
+	union
+	{
+		u8 val;
+		struct
+		{
+			u8 b1:1;
+			u8 b2:1;
+			u8 b3:1;
+			u8 b4:1;
+			u8 b5:1;
+			u8 b6:1;
+			u8 b7:1;
+			u8 b8:1;
+		} bits;
+	} userValue;
 
 } fLine_t;
 
@@ -120,6 +134,16 @@ bool fLine_addChar(fLine_t * restrict self, wchar ch, u32 tabWidth);
  * @return false Didn't find any match
  */
 bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * restrict string, u32 maxString);
+/**
+ * @brief Finds the string location on current line
+ * 
+ * @param node Pointer to line node
+ * @param startIdx Starting index, value is clamped
+ * @param string Matchable string
+ * @param maxString Absolute maximum number of character to check, stops anyway on null-terminator
+ * @return u32 Index location of string, UINT32_MAX on failure
+ */
+u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restrict string, u32 maxString);
 
 /**
  * @brief Merges current line node with next line node, adjusts current
@@ -195,13 +219,13 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * re
  * @param node Pointer to node
  * @param fs Syntax identifier
  * @param colors Syntax token coloring palette
+ * @param searchTerm Phrase to be searched, can be NULL
  * @return true Success
  * @return false Failure, usually when allocating memory
  */
 bool fLine_updateSyntax(
-	fLine_t * restrict node,
-	enum fSyntax fs,
-	const WORD * colors
+	fLine_t * restrict node, fStx_e fs, const WORD * colors,
+	const wchar * restrict searchTerm
 );
 
 /**

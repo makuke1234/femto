@@ -8,7 +8,7 @@
 #define MAX_C_TOKEN_MEM  600
 #define MAX_C_TOKEN_WORD  14
 
-#define MAX_CPP_TOKEN_MEM  1020
+#define MAX_CPP_TOKEN_MEM  1025
 #define MAX_CPP_TOKEN_WORD  17
 
 #define MAX_PY_TOKEN_MEM  393

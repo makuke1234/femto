@@ -511,6 +511,74 @@ static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * rest
 		wcscpy_s(tempstr, MAX_STATUS, L"Saving canceled by user");
 	}
 }
+static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * tempstr, bool first)
+{
+	if (peditor->psearchTerm == NULL)
+	{
+		wcscpy_s(tempstr, MAX_STATUS, L"No search term entered");
+		return;
+	}
+	else
+	{
+		// Move cursor to the next result according to direction
+		i32 delta = (peditor->bDirBack) ? -1 : 1;
+
+		fLine_t * node = peditor->files[peditor->fileIdx]->data.currentNode;
+		if (node == NULL)
+		{
+			wcscpy_s(tempstr, MAX_STATUS, L"No lines to be searched");
+			return;
+		}
+		//
+		node = !first ? ((peditor->bDirBack) ? node->prevNode : node->nextNode) : node;
+		i32 deltaLines = first ? 0 : delta;
+
+		peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+		fData_refreshEdit(peditor);
+
+		while (node != NULL)
+		{
+			if (node->userValue.bits.b8)
+			{
+				// Go to line
+				if (deltaLines > 0)
+				{
+					fLine_moveCursorVert(&peditor->files[peditor->fileIdx]->data.currentNode, deltaLines);
+					deltaLines = 0;
+				}
+				node->userValue.bits.b7 = true;
+				peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+				fData_refreshEdit(peditor);
+				swprintf_s(tempstr, MAX_STATUS, L"Found at line %u", node->lineNumber);
+
+				return;
+			}
+
+			node = (peditor->bDirBack) ? node->prevNode : node->nextNode;
+			deltaLines += delta;
+		}
+	}
+	wcscpy_s(tempstr, MAX_STATUS, L"No more search results");
+}
+static inline void s_femto_inner_find(fData_t * restrict peditor, wchar * tempstr, bool backward)
+{
+	wcscpy_s(tempstr, MAX_STATUS, backward ? L"Search backward: " : L"Search forward: ");
+	fData_statusMsg(peditor, tempstr, NULL);
+
+	if (femto_askInput(peditor, peditor->searchBuf, MAX_STATUS))
+	{
+		peditor->psearchTerm = (peditor->searchBuf[0] == L'\0') ? NULL : peditor->searchBuf;
+		peditor->bDirBack    = backward;
+		s_femto_inner_searchTerm(peditor, tempstr, true);
+	}
+	else
+	{
+		peditor->psearchTerm = NULL;
+		wcscpy_s(tempstr, MAX_STATUS, L"Search cancelled by user");
+		peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+		fData_refreshEdit(peditor);
+	}
+}
 
 bool femto_loop(fData_t * restrict peditor)
 {
@@ -545,7 +613,14 @@ bool femto_loop(fData_t * restrict peditor)
 
 			if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sacCTRL_Q) && (key != sacCTRL_Q)))	// Exit on Escape or Ctrl+Q
 			{
-				if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
+				if (peditor->psearchTerm != NULL)
+				{
+					peditor->psearchTerm = NULL;
+					wcscpy_s(tempstr, MAX_STATUS, L"Exited from search!");
+					pfile->data.bUpdateAll = true;
+					fData_refreshEdit(peditor);
+				}
+				else if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 				{
 					return false;
 				}
@@ -683,6 +758,10 @@ bool femto_loop(fData_t * restrict peditor)
 				waitingEnc = true;
 				wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
 			}
+			else if (key == sacCTRL_F)
+			{
+				s_femto_inner_find(peditor, tempstr, false);
+			}
 			// Normal keys
 			else if (key > sacLAST_CODE)
 			{
@@ -785,6 +864,16 @@ bool femto_loop(fData_t * restrict peditor)
 					}
 					break;
 				}
+				case VK_F2:
+					send = false;
+					peditor->bDirBack = true;
+					s_femto_inner_searchTerm(peditor, tempstr, false);
+					break;
+				case VK_F3:
+					send = false;
+					peditor->bDirBack = false;
+					s_femto_inner_searchTerm(peditor, tempstr, false);
+					break;
 				case VK_DELETE:
 				{
 					bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
@@ -841,7 +930,7 @@ bool femto_loop(fData_t * restrict peditor)
 						[VK_PRIOR]  = L"'PGUP'",
 						[VK_NEXT]   = L"'PGDOWN'",
 						[VK_END]	= L"'END'",
-						[VK_HOME]   = L"'HOME'",
+						[VK_HOME]   = L"'HOME'"
 					};
 					swprintf_s(tempstr, MAX_STATUS, L"%s #%u", buf[wVirtKey], keyCount);
 					break;
@@ -1221,7 +1310,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		}
 	}
 
-	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors))
+	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm))
 	{
 		fData_statusMsg(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}

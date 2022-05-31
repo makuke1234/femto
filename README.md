@@ -66,10 +66,14 @@ reports ~7000 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	| <kbd>Ctrl+Shift+S</kbd>        | Save file as...                               |
 	| <kbd>Ctrl+Tab</kbd>            | Switch forwards between open files            |
 	| <kbd>Ctrl+Shift+Tab</kbd>      | Switch backwards between open files           |
-	| <kbd>Ctrl+W</kbd>              | Close current tab                             |
+	| <kbd>Ctrl+W</kbd>              | Close current tab, ask to save any changes    |
 	| <kbd>Ctrl+Shift+W</kbd>        | Force close current tab                       |
 	| <kbd>Ctrl+R</kbd>              | Reload current file, ask to save changes      |
 	| <kbd>Ctrl+Shift+R</kbd>        | Force reload current file                     |
+	| <kbd>Ctrl+F</kbd>              | Find a phrase from cursor forward             |
+	| <kbd>F2</kbd>                  | Highlight another phrase backward             |
+	| <kbd>F3</kbd>                  | Highlight another phrase forward              |
+	| <kbd>Shift+ARROW</kbd>         | Highlight text                                |
 	| <kbd>Ctrl+E</kbd> <kbd>F</kbd> | Switch to CRLF EOL sequence                   |
 	| <kbd>Ctrl+E</kbd> <kbd>L</kbd> | Switch to LF EOL sequence                     |
 	| <kbd>Ctrl+E</kbd> <kbd>C</kbd> | Switch to CR EOL sequence                     |
@@ -191,14 +195,16 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
+* 2.1 (planned, planned)
+	* [ ] Proper text copying/pasting support
+		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+
 * 2.0 (planned)
 	* [x] More common C++ keywords
 	* [x] Support for raw editing/saving later to a file
 	* [x] Proper new tab creation with <kbd>Ctrl+N</kbd>
 	* [x] Now titlebar name also changes while switching between tabs
 	* [ ] Search support, also search result highlighting
-	* [ ] Proper text copying/pasting support
-		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 
 * 1.9
 	* [x] Fix immediate empty file creation if file doesn't exist

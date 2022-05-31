@@ -5,17 +5,34 @@
 #include "fData.h"
 #include "fSyntax.h"
 
-#define MAX_STATUS 256
-
 typedef enum specialASCIIcodes
 {
+	sacCTRL_A = 1,
+	sacCTRL_B = 2,
+	sacCTRL_C = 3,
+	sacCTRL_D = 4,
 	sacCTRL_E = 5,
+	sacCTRL_F = 6,
+	sacCTRL_G = 7,
+	sacCTRL_H = 8,
+	sacCTRL_I = 9,
+	sacCTRL_J = 10,
+	sacCTRL_K = 11,
+	sacCTRL_L = 12,
+	sacCTRL_M = 13,
 	sacCTRL_N = 14,
 	sacCTRL_O = 15,
+	sacCTRL_P = 16,
 	sacCTRL_Q = 17,
 	sacCTRL_R = 18,
 	sacCTRL_S = 19,
+	sacCTRL_T = 20,
+	sacCTRL_U = 21,
+	sacCTRL_V = 22,
 	sacCTRL_W = 23,
+	sacCTRL_X = 24,
+	sacCTRL_Y = 25,
+	sacCTRL_Z = 26,
 
 	sacLAST_CODE = 31
 

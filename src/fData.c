@@ -16,11 +16,14 @@ bool fData_reset(fData_t * restrict self)
 			.w      = 0,
 			.h      = 0
 		},
-		.filesSize = 0,
-		.filesMax  = 1,
-		.files     = malloc(sizeof(fFile_t *)),
-		.cursorpos = malloc(sizeof(COORD)),
-		.fileIdx   = -1
+		.filesSize   = 0,
+		.filesMax    = 1,
+		.files       = malloc(sizeof(fFile_t *)),
+		.cursorpos   = malloc(sizeof(COORD)),
+		.fileIdx     = -1,
+		.searchBuf   = { [0] = L'\0' },
+		.psearchTerm = NULL,
+		.bDirBack    = false
 	};
 
 	if ((self->files == NULL) || (self->cursorpos == NULL))
