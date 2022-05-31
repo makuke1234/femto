@@ -342,7 +342,7 @@ u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restri
 	const u32 cur2 = node->curx + node->freeSpaceLen;
 	startIdx = ((startIdx >= node->curx) && (startIdx < cur2)) ? cur2 : startIdx;
 
-	for (u32 i = startIdx; i < node->lineEndx; ++i)
+	for (u32 i = startIdx; i < node->lineEndx;)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -353,7 +353,7 @@ u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restri
 		{
 			const wchar * str = string;
 			u32 k = 0;
-			for (u32 j = i; (j < node->lineEndx) && (k < maxString); ++j)
+			for (u32 j = i; (j < node->lineEndx) && (k < maxString);)
 			{
 				if ((j == node->curx) && (node->freeSpaceLen > 0))
 				{
@@ -366,6 +366,7 @@ u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restri
 				}
 				++str;
 				++k;
+				++j;
 			}
 
 			if ((k == maxString) || (*str == L'\0'))
@@ -373,6 +374,8 @@ u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restri
 				return i;
 			}
 		}
+
+		++i;
 	}
 
 	return UINT32_MAX;
