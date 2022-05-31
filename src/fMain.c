@@ -59,7 +59,7 @@ int wmain(int argc, const wchar * argv[])
 
 	{
 		wchar tempstr[MAX_STATUS];
-		const wchar * res;
+		const wchar * restrict res;
 		if ((res = fFile_read(editor.files[editor.fileIdx])) != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);

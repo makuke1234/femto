@@ -50,7 +50,7 @@ u32 fArg_vfetch(
 	assert(argMatch != NULL);
 
 	// Get real rawStr length
-	u32 len = (maxStr == -1) ? (u32)wcslen(rawStr) : (u32)maxStr;
+	const usize len = (maxStr == -1) ? wcslen(rawStr) : (usize)maxStr;
 
 	/*
 	 * Pattern
@@ -80,7 +80,7 @@ u32 fArg_vfetch(
 	}
 
 	// Scan for a match
-	usize matchLen = wcslen(argMatch);
+	const usize matchLen = wcslen(argMatch);
 	if (wcsncmp(rawIt, argMatch, matchLen) != 0)
 	{
 		// Didn't find a match
@@ -152,7 +152,7 @@ u32 fArg_fetchArgv(
 	va_list ap;
 	va_start(ap, maxParams);
 	
-	u32 result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
+	const u32 result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
 
 	va_end(ap);
 	return result;
@@ -168,7 +168,7 @@ u32 fArg_vfetchArgv(
 
 	for (int i = 1; i < argc; ++i)
 	{
-		u32 result = fArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
+		const u32 result = fArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
 		if (result != 0)
 		{
 			*matchedIndex = i;

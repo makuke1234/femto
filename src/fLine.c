@@ -30,13 +30,13 @@ fLine_t * fLine_create(
 )
 {
 	assert(noLen != NULL);
-	fLine_t * node = malloc(sizeof(fLine_t));
+	fLine_t * restrict node = malloc(sizeof(fLine_t));
 	if (node == NULL)
 	{
 		return NULL;
 	}
 
-	wchar tch = tabsToSpaces ? L' ' : L'\t';
+	const wchar tch = tabsToSpaces ? L' ' : L'\t';
 
 	u32 space = 0;
 	if (curnode != NULL)
@@ -88,7 +88,7 @@ fLine_t * fLine_create(
 		// Copy contents after cursor to this line
 		else
 		{
-			u32 contStart = curnode->curx + curnode->freeSpaceLen, contLen = curnode->lineEndx - contStart;
+			const u32 contStart = curnode->curx + curnode->freeSpaceLen, contLen = curnode->lineEndx - contStart;
 			node->lineEndx = contLen + FEMTO_LNODE_DEFAULT_FREE + space;
 			node->line = malloc(sizeof(wchar) * node->lineEndx);
 			if (node->line == NULL)
@@ -138,9 +138,9 @@ fLine_t * fLine_createText(
 {
 	assert(noLen != NULL);
 
-	u32 maxText = (mText == -1) ? (u32)wcslen(lineText) : (u32)mText;
+	const u32 maxText = (mText == -1) ? (u32)wcslen(lineText) : (u32)mText;
 
-	fLine_t * node = malloc(sizeof(fLine_t));
+	fLine_t * restrict node = malloc(sizeof(fLine_t));
 	if (node == NULL)
 	{
 		return NULL;
@@ -185,7 +185,7 @@ bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, u32 * 
 	assert(self != NULL);
 	assert(text != NULL);
 
-	u32 totalLen = self->lineEndx - self->freeSpaceLen + 1;
+	const u32 totalLen = self->lineEndx - self->freeSpaceLen + 1;
 	fProf_write("Total length: %u characters", totalLen);
 
 	if (tarrsz != NULL && *tarrsz < totalLen)
@@ -207,7 +207,7 @@ bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, u32 * 
 		}
 	}
 
-	wchar * t = *text;
+	wchar * restrict t = *text;
 	for (u32 i = 0; i < self->lineEndx;)
 	{
 		if ((i == self->curx) && (self->freeSpaceLen > 0))
@@ -254,7 +254,7 @@ bool fLine_realloc(fLine_t * restrict self)
 	{
 		return true;
 	}
-	u32 totalLen = self->lineEndx - self->freeSpaceLen;
+	const u32 totalLen = self->lineEndx - self->freeSpaceLen;
 	vptr newmem = realloc(self->line, sizeof(wchar) * (totalLen + FEMTO_LNODE_DEFAULT_FREE));
 	if (newmem == NULL)
 	{
@@ -305,7 +305,8 @@ bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * re
 		return false;
 	}
 
-	i32 idx = (i32)node->curx + maxdelta, i = 0, m = (i32)maxString;
+	i32 idx = (i32)node->curx + maxdelta, i = 0;
+	const i32 m = (i32)maxString;
 	if (idx < 0)
 	{
 		return false;
@@ -430,6 +431,7 @@ bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * r
 void fLine_moveCursor(fLine_t * restrict self, i32 delta)
 {
 	assert(self != NULL);
+
 	if (delta < 0)
 	{
 		for (u32 idx = self->curx + self->freeSpaceLen; delta < 0 && self->curx > 0; ++delta)
@@ -452,6 +454,7 @@ void fLine_moveCursor(fLine_t * restrict self, i32 delta)
 void fLine_moveCursorAbs(fLine_t * restrict self, u32 curx)
 {
 	assert(self != NULL);
+
 	if (curx < self->curx)
 	{
 		for (u32 idx = self->curx + self->freeSpaceLen; curx != self->curx && self->curx > 0;)
@@ -476,7 +479,7 @@ void fLine_moveCursorVert(fLine_t ** restrict self, i32 delta)
 	assert(self != NULL);
 	assert(*self != NULL);
 
-	fLine_t * node = *self;
+	fLine_t * restrict node = *self;
 	if (delta < 0)
 	{
 		for (; delta != 0 && node->prevNode != NULL; ++delta)
@@ -497,6 +500,7 @@ void fLine_calcVirtCursor(fLine_t * restrict self, u32 tabWidth)
 {
 	assert(self != NULL);
 	assert(tabWidth > 0);
+
 	self->virtcurx = 0;
 	for (u32 i = 0; i < self->curx; ++i)
 	{
@@ -549,7 +553,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 
 void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * restrict noLen)
 {
-	fLine_t * prevnode = NULL;
+	const fLine_t * restrict prevnode = NULL;
 	while (startnode != NULL)
 	{
 		startnode->lineNumber = startLno;
@@ -628,7 +632,8 @@ bool fLine_updateSyntax(
 	// Find term
 	if (searchTerm != NULL)
 	{
-		u32 termLen = (u32)wcslen(searchTerm), idx = 0, firstidx = 0;
+		const u32 termLen = (u32)wcslen(searchTerm);
+		u32 idx = 0, firstidx = 0;
 		bool first = true;
 		while (1)
 		{

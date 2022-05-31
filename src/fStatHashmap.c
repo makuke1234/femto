@@ -139,7 +139,7 @@ bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
 	assert(key != NULL);
 	assert(hash->init);
 
-	fHashNode_t ** pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
+	fHashNode_t ** restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
 
 	while ((*pnode) != NULL)
 	{
@@ -150,7 +150,7 @@ bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
 		pnode = &(*pnode)->next;
 	}
 
-	fHashNode_t * node = fStatHash_malloc(hash, sizeof(fHashNode_t));
+	fHashNode_t * restrict node = fStatHash_malloc(hash, sizeof(fHashNode_t));
 	if (node == NULL)
 	{
 		return false;
@@ -167,7 +167,7 @@ bool fStatHash_get(const fStatHash_t * restrict hash, const wchar * restrict key
 	assert(key != NULL);
 	assert(hash->init);
 
-	fHashNode_t * node = hash->nodes[fStatHash_hash(key, hash->mapSize)];
+	const fHashNode_t * restrict node = hash->nodes[fStatHash_hash(key, hash->mapSize)];
 
 	while (node != NULL)
 	{
@@ -186,12 +186,12 @@ bool fStatHash_remove(fStatHash_t * restrict hash, const wchar * restrict key)
 	assert(key != NULL);
 	assert(hash->init);
 
-	fHashNode_t ** pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
+	fHashNode_t ** restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
 	while ((*pnode) != NULL)
 	{
 		if (wcscmp((*pnode)->key, key) == 0)
 		{
-			fHashNode_t * node = *pnode;
+			fHashNode_t * restrict node = *pnode;
 			*pnode = node->next;
 
 			fStatHash_free(hash, node, sizeof(fHashNode_t));

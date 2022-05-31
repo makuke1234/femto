@@ -5,16 +5,16 @@
 #include "fStatHashmap.h"
 
 
-fStx_e fStx_detect(const wchar_t * restrict fileName)
+fStx_e fStx_detect(const wchar * restrict fileName)
 {
 	assert(fileName != NULL);
 	
 	fStx_e syntax = fstxNONE;
 	
-	const wchar_t * end = fileName + wcslen(fileName);
+	const wchar * restrict end = fileName + wcslen(fileName);
 	if (fileName != end)
 	{
-		const wchar_t * dot = end - 1;
+		const wchar * restrict dot = end - 1;
 		for (u8 i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
 		{
 			if (*dot == L'.')
@@ -27,11 +27,11 @@ fStx_e fStx_detect(const wchar_t * restrict fileName)
 		{
 			++dot;
 
-			wchar_t suffix[MAX_SUFFIX];
+			wchar suffix[MAX_SUFFIX];
 			++end;
-			for (wchar_t * suf = suffix; dot != end; ++dot, ++suf)
+			for (wchar * suf = suffix; dot != end; ++dot, ++suf)
 			{
-				*suf = (wchar_t)towlower(*dot);
+				*suf = (wchar)towlower(*dot);
 			}
 
 			if ((wcscmp(suffix, L"c") == 0) || (wcscmp(suffix, L"h") == 0))
@@ -132,7 +132,7 @@ void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_C_TOKEN_MEM];
 
-	static const wchar_t * keyWords[] = {
+	static const wchar * keyWords[] = {
 		L"do",
 		L"if",
 		L"for",
@@ -365,7 +365,7 @@ void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
-	wchar_t kwBuf[MAX_KWBUF];
+	wchar kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -404,7 +404,7 @@ void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCo
 {
 	static usize memory[MAX_CPP_TOKEN_MEM];
 
-	static const wchar_t * keyWords[] = {
+	static const wchar * keyWords[] = {
 		L"do",
 		L"if",
 		L"or",
@@ -780,7 +780,7 @@ void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCo
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
-	wchar_t kwBuf[MAX_KWBUF];
+	wchar kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -819,7 +819,7 @@ void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 {
 	static usize memory[MAX_PY_TOKEN_MEM];
 
-	static const wchar_t * keyWords[] = {
+	static const wchar * keyWords[] = {
 		L"and",
 		L"as",
 		L"assert",
@@ -964,7 +964,7 @@ void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
-	wchar_t kwBuf[MAX_KWBUF];
+	wchar kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -1003,7 +1003,7 @@ void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 {
 	static usize memory[MAX_JS_TOKEN_MEM];
 
-	static const wchar_t * keyWords[] = {
+	static const wchar * keyWords[] = {
 		L"abstract",
 		L"arguments",
 		L"await",
@@ -1198,7 +1198,7 @@ void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
-	wchar_t kwBuf[MAX_KWBUF];
+	wchar kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -1238,7 +1238,7 @@ void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwC
 	static usize memory[MAX_RUST_TOKEN_MEM];
 
 	// Rust keywords
-	static const wchar_t * keyWords[] = {
+	static const wchar * keyWords[] = {
 		L"as",
 		L"break",
 		L"const",
@@ -1345,7 +1345,7 @@ void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwC
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
-	wchar_t kwBuf[MAX_KWBUF];
+	wchar kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -1385,7 +1385,7 @@ void fStx_checkGoToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 	static usize memory[MAX_GO_TOKEN_MEM];
 
 	// Rust keywords
-	static const wchar_t * keyWords[] = {
+	static const wchar * keyWords[] = {
 		L"break",
 		L"case",
 		L"chan",
@@ -1442,7 +1442,7 @@ void fStx_checkGoToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, keyWords, ARRAYSIZE(keyWords));
 
-	wchar_t kwBuf[MAX_KWBUF];
+	wchar kwBuf[MAX_KWBUF];
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -1513,7 +1513,7 @@ bool fStx_parseCLike(
 	}
 
 	// Calculate feature allowances
-	bool bAllowPreproc = (lang == fstxC) | (lang == fstxCPP);
+	const bool bAllowPreproc = (lang == fstxC) | (lang == fstxCPP);
 
 	u32 tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
@@ -1534,7 +1534,7 @@ bool fStx_parseCLike(
 		node->syntax[j] = colors[tcTEXT];
 
 
-		const wchar_t ch = node->line[i];
+		const wchar ch = node->line[i];
 		
 		if (blockComment)
 		{
@@ -1662,7 +1662,7 @@ bool fStx_parseCLike(
 			default:
 				if (hex)
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 					{
 						node->syntax[j] = colors[tcNUMBER];
@@ -1698,7 +1698,7 @@ bool fStx_parseCLike(
 				}
 				else
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
 					if (!letter)
 					{
@@ -1760,7 +1760,7 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		node->syntax[j] = colors[tcTEXT];
 
-		const wchar_t ch = node->line[i];
+		const wchar ch = node->line[i];
 		
 		if (valueMode)
 		{
@@ -1968,7 +1968,7 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		node->syntax[j] = colors[tcTEXT];
 
 
-		const wchar_t ch = node->line[i];
+		const wchar ch = node->line[i];
 		
 		if (blockComment)
 		{
@@ -2103,7 +2103,7 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 			default:
 				if (hex)
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 					{
 						node->syntax[j] = colors[tcNUMBER];
@@ -2139,7 +2139,7 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 				}
 				else
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
 					if (!letter)
 					{
@@ -2184,7 +2184,7 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 		node->syntax[j] = colors[tcTEXT];
 
 
-		const wchar_t ch = node->line[i];
+		const wchar ch = node->line[i];
 		
 		if (quoteMode)
 		{
@@ -2251,7 +2251,7 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 			default:
 				if (hex)
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 					{
 						node->syntax[j] = colors[tcNUMBER];
@@ -2284,7 +2284,7 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 				}
 				else
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
 				}
 		}
@@ -2319,7 +2319,7 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		node->syntax[j] = colors[tcCSS_SELECTOR];
 
 
-		const wchar_t ch = node->line[i];
+		const wchar ch = node->line[i];
 		
 		if (blockComment)
 		{
@@ -2430,7 +2430,7 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 			default:
 				if (hex)
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 					{
 						node->syntax[j] = colors[tcNUMBER];
@@ -2463,7 +2463,7 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 				}
 				else
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
 				}
 		}
@@ -2505,7 +2505,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		node->syntax[j] = colors[tcTEXT];
 
 
-		const wchar_t ch = node->line[i];
+		const wchar ch = node->line[i];
 		
 		if (quoteMode)
 		{
@@ -2684,7 +2684,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 			default:
 				if (hex)
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 					{
 						node->syntax[j] = colors[tcNUMBER];
@@ -2717,7 +2717,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 				}
 				else
 				{
-					const wchar_t lch = (wchar_t)towlower(ch);
+					const wchar lch = (wchar)towlower(ch);
 					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
 				}
 		}
