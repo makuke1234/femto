@@ -570,7 +570,8 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * re
 
 bool fLine_updateSyntax(
 	fLine_t * restrict node, fStx_e fs, const WORD * colors,
-	const wchar * restrict searchTerm
+	const wchar * restrict searchTerm,
+	u8 tabWidth
 )
 {
 	assert(node != NULL);
@@ -653,7 +654,8 @@ bool fLine_updateSyntax(
 		// Move cursor to term if found
 		if (!first && node->userValue.bits.b7)
 		{
-			fLine_moveCursorAbs(node, firstidx);
+			fLine_moveCursorAbs(node, (firstidx > node->curx) ? (firstidx - node->freeSpaceLen) : firstidx);
+			fLine_calcVirtCursor(node, tabWidth);
 		}
 		node->userValue.bits.b7 = false;
 	}

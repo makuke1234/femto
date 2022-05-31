@@ -541,13 +541,16 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 			if (node->userValue.bits.b8)
 			{
 				// Go to line
-				if (deltaLines > 0)
+				if (deltaLines != 0)
 				{
 					fLine_moveCursorVert(&peditor->files[peditor->fileIdx]->data.currentNode, deltaLines);
 					deltaLines = 0;
 				}
 				node->userValue.bits.b7 = true;
 				peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+				// Refresh search result highlighting, move cursor in place, calculate virtual cursor position
+				fData_refreshEdit(peditor);
+				// Update cursor horizontal position correctly
 				fData_refreshEdit(peditor);
 				swprintf_s(tempstr, MAX_STATUS, L"Found at line %u", node->lineNumber);
 
@@ -1310,7 +1313,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		}
 	}
 
-	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm))
+	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm, peditor->settings.tabWidth))
 	{
 		fData_statusMsg(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}

@@ -220,12 +220,14 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * re
  * @param fs Syntax identifier
  * @param colors Syntax token coloring palette
  * @param searchTerm Phrase to be searched, can be NULL
+ * @param tabWidth Tab width in characters
  * @return true Success
  * @return false Failure, usually when allocating memory
  */
 bool fLine_updateSyntax(
 	fLine_t * restrict node, fStx_e fs, const WORD * colors,
-	const wchar * restrict searchTerm
+	const wchar * restrict searchTerm,
+	u8 tabWidth
 );
 
 /**

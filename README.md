@@ -33,8 +33,12 @@ reports ~7000 source code lines (excluding whitespace, comments & [jsonlite2](ht
 	* *You can see **exactly** what's going on*
 - [x] Warns about any unsaved work
 	* *Never lose your edits again*
-- [ ] Search support & search results highlighting
+- [x] Search support & result highlighting
+	* *Use F2 & F3 to go backwards or forwards between results*
 - [x] Syntax highlighting
+	* *Every token configurable*
+	* *Configurable color palette*
+	* *Foreground and background*
 - [x] Mouse scrolling, also horizontal scrolling
 	* *Ever used a laptop's touchpad in the terminal **properly**?*
 - [x] Mouse operated text cursor
@@ -156,55 +160,55 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 ![Key frequency](./images/keyFreq.png)
 
 ## Saving was successful, file size is now 151 bytes
-![!Saving success](./images/savingSuc.png)
+![Saving success](./images/savingSuc.png)
 
 ## Syntax highlighting, solarized theme, included in `settings.json`
 ### C
-![!C syntax](./images/syntaxC.png)
+![C syntax](./images/syntaxC.png)
 
 ### C++
-![!C++ syntax](./images/syntaxCPP.png)
+![C++ syntax](./images/syntaxCPP.png)
 
 ### Rust
-![!Rust syntax](./images/syntaxRust.png)
+![Rust syntax](./images/syntaxRust.png)
 
 ### Go (Golang)
-![!Go syntax](./images/syntaxGo.png)
+![Go syntax](./images/syntaxGo.png)
 
 ### ECMAScript (JavaScript)
-![!JS syntax](./images/syntaxJS.png)
+![JS syntax](./images/syntaxJS.png)
 
 ### Python
-![!PY syntax](./images/syntaxPY.png)
+![PY syntax](./images/syntaxPY.png)
 
 ### Markdown
-![!MD syntax](./images/syntaxMD.png)
+![MD syntax](./images/syntaxMD.png)
 
 ### XML
-![!XML syntax](./images/syntaxXML.png)
+![XML syntax](./images/syntaxXML.png)
 
 ### HTML
-![!HTML syntax](./images/syntaxHTML.png)
+![HTML syntax](./images/syntaxHTML.png)
 
 ### JSON
-![!JSON syntax](./images/syntaxJSON.png)
+![JSON syntax](./images/syntaxJSON.png)
 
 ### CSS
-![!CSS syntax](./images/syntaxCSS.png)
+![CSS syntax](./images/syntaxCSS.png)
 
 
 # Changelog
 
-* 2.1 (planned, planned)
+* 2.1 (planned)
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 
-* 2.0 (planned)
+* 2.0
 	* [x] More common C++ keywords
 	* [x] Support for raw editing/saving later to a file
 	* [x] Proper new tab creation with <kbd>Ctrl+N</kbd>
 	* [x] Now titlebar name also changes while switching between tabs
-	* [ ] Search support, also search result highlighting
+	* [x] Search support, also search result highlighting
 
 * 1.9
 	* [x] Fix immediate empty file creation if file doesn't exist
