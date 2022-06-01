@@ -12,9 +12,6 @@ static const char * s_fErrCodes[ferrNUM_OF_ELEMS] = {
 
 void fErr_print(fErr_e errCode)
 {
-	if (errCode >= ferrNUM_OF_ELEMS)
-	{
-		errCode = ferrUNKNOWN;
-	}
+	errCode = (errCode >= ferrNUM_OF_ELEMS) ? ferrUNKNOWN : errCode;
 	fprintf(stderr, "%s\n", s_fErrCodes[errCode]);
 }

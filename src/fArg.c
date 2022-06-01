@@ -66,10 +66,10 @@ u32 fArg_vfetch(
 	 */
 	const wchar * restrict rawIt = rawStr;
 	const wchar * restrict endp = rawIt + len;
-	if ((len > 1) && ((*rawIt == '-') || (*rawIt == '/')))
+	if ((len > 1) && ((*rawIt == L'-') || (*rawIt == L'/')))
 	{
 		++rawIt;
-		if ((len > 2) || (*rawIt == '-'))
+		if ((len > 2) || (*rawIt == L'-'))
 		{
 			++rawIt;
 		}
@@ -90,7 +90,7 @@ u32 fArg_vfetch(
 	// Advance search location
 	rawIt += matchLen;
 
-	if (*rawIt == '=')
+	if (*rawIt == L'=')
 	{
 		++rawIt;
 		// Search for arguments
@@ -100,7 +100,7 @@ u32 fArg_vfetch(
 
 		for (; rawIt != endp; ++rawIt)
 		{
-			if ((*rawIt == '\\') && ((rawIt + 1) != endp))
+			if ((*rawIt == L'\\') && ((rawIt + 1) != endp))
 			{
 				++rawIt;
 				continue;

@@ -141,7 +141,7 @@ bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u
 		errArr[0] = L'\0';
 		return false;
 	}
-	const u32 copyLen = min_u32((u32)wcslen(self->lastErr) + 1, errMax);
+	const usize copyLen = min_usize(wcslen(self->lastErr) + 1, (usize)errMax);
 	memcpy(errArr, self->lastErr, sizeof(wchar) * copyLen);
 	self->lastErr[copyLen - 1] = L'\0';
 	return true;
@@ -149,7 +149,7 @@ bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u
 
 bool fSettings_makeTabSpaceStr(fSettings_t * restrict self)
 {
-	wchar * mem = realloc(self->tabSpaceStr1, sizeof(wchar) * (self->tabWidth + 1));
+	wchar * mem = realloc(self->tabSpaceStr1, sizeof(wchar) * (usize)(self->tabWidth + 1));
 	if (mem == NULL)
 	{
 		return false;
@@ -362,7 +362,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	// Everything is OK
 	free(argumentsUsed);
 
-	return result == NULL ? ferrOK : ferrUNKNOWN;
+	return (result == NULL) ? ferrOK : ferrUNKNOWN;
 }
 
 
@@ -379,7 +379,7 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 	bool success;
 	const char * restrict value = jsonValue_getString(attr, &success);
 	// Check for comma
-	const char * restrict comma = strchr(value, (char)',');
+	const char * restrict comma = strchr(value, (int)',');
 	const usize commaIdx = (comma == NULL) ? PTRDIFF_MAX : (usize)(comma - value);
 	usize charIdx = 0;
 	if (comma != NULL)
@@ -442,7 +442,7 @@ static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const json
 		const char * restrict rgbBeg;
 		u16 r, g, b;
 		if ((((rgbBeg = strstr(value, "rgb(")) != NULL) && (sscanf(rgbBeg + 4, "%hu,%hu,%hu)", &r, &g, &b) == 3)) ||
-		( ((rgbBeg = strchr(value, (char)'#')) != NULL) && (sscanf(rgbBeg + 1, "%02hx%02hx%02hx", &r, &g, &b) == 3) ) )
+		( ((rgbBeg = strchr(value, (int)'#')) != NULL) && (sscanf(rgbBeg + 1, "%02hx%02hx%02hx", &r, &g, &b) == 3) ) )
 		{
 			if ((r <= UINT8_MAX) && (g <= UINT8_MAX) && (b <= UINT8_MAX))
 			{
