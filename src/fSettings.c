@@ -244,7 +244,11 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	}
 	if (mi != 0)
 	{
-		self->tabWidth = (u8)clamp_u32((u32)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINTAB, FEMTO_SETTINGS_MAXTAB);
+		self->tabWidth = (u8)clamp_u64(
+			(u64)wcstoul(farg.begin, NULL, 10),
+			(u64)FEMTO_SETTINGS_MINTAB,
+			(u64)FEMTO_SETTINGS_MAXTAB
+		);
 		if (!fSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);

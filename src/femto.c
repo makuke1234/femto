@@ -28,6 +28,33 @@ u32 clamp_u32(u32 value, u32 min, u32 max)
 	return (value < min) ? min : (value > max) ? max : value;
 }
 
+i64 min_i64(i64 a, i64 b)
+{
+	return (a < b) ? a : b;
+}
+i64 max_i64(i64 a, i64 b)
+{
+	return (a < b) ? b : a;
+}
+i64 clamp_i64(i64 value, i64 min, i64 max)
+{
+	return (value < min) ? min : (value > max) ? max : value;
+}
+
+u64 min_u64(u64 a, u64 b)
+{
+	return (a < b) ? a : b;
+}
+u64 max_u64(u64 a, u64 b)
+{
+	return (a < b) ? b : a;
+}
+u64 clamp_u64(u64 value, u64 min, u64 max)
+{
+	return (value < min) ? min : (value > max) ? max : value;
+}
+
+
 usize min_usize(usize a, usize b)
 {
 	return (a < b) ? a : b;

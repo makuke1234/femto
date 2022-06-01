@@ -47,9 +47,19 @@ u32 min_u32(u32 a, u32 b);
 u32 max_u32(u32 a, u32 b);
 u32 clamp_u32(u32 value, u32 min, u32 max);
 
+i64 min_i64(i64 a, i64 b);
+i64 max_i64(i64 a, i64 b);
+i64 clamp_i64(i64 value, i64 min, i64 max);
+
+u64 min_u64(u64 a, u64 b);
+u64 max_u64(u64 a, u64 b);
+u64 clamp_u64(u64 value, u64 min, u64 max);
+
 usize min_usize(usize a, usize b);
 usize max_usize(usize a, usize b);
 usize clamp_usize(usize value, usize min, usize max);
+
+
 
 /**
  * @brief Concatenate Unicode code point at the end of the UTF-8 string, resizes if necessary,
