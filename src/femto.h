@@ -47,6 +47,10 @@ u32 min_u32(u32 a, u32 b);
 u32 max_u32(u32 a, u32 b);
 u32 clamp_u32(u32 value, u32 min, u32 max);
 
+usize min_usize(usize a, usize b);
+usize max_usize(usize a, usize b);
+usize clamp_usize(usize value, usize min, usize max);
+
 /**
  * @brief Concatenate Unicode code point at the end of the UTF-8 string, resizes if necessary,
  * stores string capacity in psize and length (including null-terminator) in plen

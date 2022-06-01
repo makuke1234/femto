@@ -36,7 +36,8 @@ fLine_t * fLine_create(
 		return NULL;
 	}
 
-	const wchar tch = tabsToSpaces ? L' ' : L'\t';
+	// Select space when tabs must be converted to spaces
+	const wchar tch = L"\t "[tabsToSpaces];
 
 	u32 space = 0;
 	if (curnode != NULL)

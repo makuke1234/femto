@@ -14,6 +14,7 @@ i32 clamp_i32(i32 value, i32 min, i32 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+
 u32 min_u32(u32 a, u32 b)
 {
 	return (a < b) ? a : b;
@@ -26,6 +27,20 @@ u32 clamp_u32(u32 value, u32 min, u32 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+
+usize min_usize(usize a, usize b)
+{
+	return (a < b) ? a : b;
+}
+usize max_usize(usize a, usize b)
+{
+	return (a < b) ? b : a;
+}
+usize clamp_usize(usize value, usize min, usize max)
+{
+	return (value < min) ? min : (value > max) ? max : value;
+}
+
 
 char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen, wchar cp)
 {
@@ -113,7 +128,7 @@ char * femto_escStr_s(const char * restrict inp, usize len)
 								break;
 							}
 
-							u8 digit = (t >= 'A') ? (u8)(t - 'A' + 10) : (u8)(t - '0');
+							const u8 digit = (t >= 'A') ? (u8)(t - 'A' + 10) : (u8)(t - '0');
 							value = (u16)(value * 16 + digit);
 						}
 
@@ -534,7 +549,7 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 			return;
 		}
 		//
-		node = !first ? ((peditor->bDirBack) ? node->prevNode : node->nextNode) : node;
+		node = first ? node : ((peditor->bDirBack) ? node->prevNode : node->nextNode);
 		i32 deltaLines = first ? 0 : delta;
 
 		peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
@@ -811,7 +826,8 @@ bool femto_loop(fData_t * restrict peditor)
 					}
 					break;
 				case L'R':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && (GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
+					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
+						(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
 					{
 						send = false;
 						const wchar * restrict res;

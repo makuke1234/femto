@@ -402,7 +402,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 	{
 	case VK_TAB:
 	{
-		const wchar tch = pset->bTabsToSpaces ? L' ' : L'\t';
+		const wchar tch = L"\t "[pset->bTabsToSpaces];
 		if (!fFile_addNormalCh(self, tch, pset->tabWidth))
 		{
 			return false;

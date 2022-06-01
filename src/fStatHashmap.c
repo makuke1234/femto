@@ -38,12 +38,12 @@ u32 fStatHash_hash(const wchar * restrict key, u32 sz)
 	assert(key != NULL);
 	assert(sz > 0);
 
-	u32 hash = 0;
+	usize hash = 0;
 	for (; (*key) != L'\0'; ++key)
 	{
-		hash = (u32)(hash * 37 + (u32)*key);
+		hash = (usize)(hash * (usize)37 + (usize)*key);
 	}
-	return hash % sz;
+	return (u32)(hash % (usize)sz);
 }
 
 vptr fStatHash_malloc(fStatHash_t * restrict hash, u32 bytes)

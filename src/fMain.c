@@ -86,7 +86,9 @@ int wmain(int argc, const wchar * argv[])
 		return 5;
 	}
 
-	while (femto_loop(&editor));
+	while (femto_loop(&editor))
+	{
+	}
 
 	femto_asyncDrawStop(&editor);
 

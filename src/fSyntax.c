@@ -348,7 +348,7 @@ bool fStx_parseCLike(
 		else if (isZero)
 		{
 			isZero = false;
-			if (ch == L'x')
+			if ((wchar)towlower(ch) == L'x')
 			{
 				letter = false;
 				hex = true;
@@ -798,7 +798,7 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		else if (isZero)
 		{
 			isZero = false;
-			if (ch == L'x')
+			if ((wchar)towlower(ch) == L'x')
 			{
 				letter = false;
 				hex = true;
@@ -963,7 +963,7 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 		else if (isZero)
 		{
 			isZero = false;
-			if (ch == L'x')
+			if ((wchar)towlower(ch) == L'x')
 			{
 				letter = false;
 				hex = true;
@@ -1116,7 +1116,7 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		else if (isZero)
 		{
 			isZero = false;
-			if (ch == L'x')
+			if ((wchar)towlower(ch) == L'x')
 			{
 				letter = false;
 				hex = true;
@@ -1284,7 +1284,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		else if (isZero)
 		{
 			isZero = false;
-			if (ch == L'x')
+			if ((wchar)towlower(ch) == L'x')
 			{
 				letter = false;
 				hex = true;
@@ -1334,15 +1334,12 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		else if (specialTag)
 		{
 			node->syntax[j] = colors[tcKEYWORD];
-			if (ch == L'?')
-			{
-				specialTag = false;
-			}
+			specialTag = (ch == L'?') ? false : specialTag;
 		}
 		else if (tagEnd)
 		{
 			node->syntax[j] = colors[tcKEYWORD];
-			if (ch == '>')
+			if (ch == L'>')
 			{
 				tagEnd = false;
 				tagMode = false;
