@@ -194,6 +194,7 @@ void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 		L"int16_t",
 		L"int32_t",
 		L"int64_t",
+		L"wchar_t",
 		
 		L"uint8_t",
 		L"uint16_t",
