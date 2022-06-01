@@ -24,6 +24,7 @@
 #define MAX_GO_TOKEN_WORD  11
 
 struct fLine;
+struct fStatHash;
 
 // Enum that defines different supported language syntax codes
 typedef enum fSyntax
@@ -57,6 +58,21 @@ bool fStx_autoAlloc(struct fLine * restrict node);
 typedef void (*fStx_tokeniserFunc_t)(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
 
 // Token parsers
+/**
+ * @brief Generic token parses, uses prefilled hashmap as look-up table
+ * 
+ * @param node Pointer to line node
+ * @param start Start index
+ * @param lasti Stop index
+ * @param kwCol Keyword color
+ * @param map Pointer to hashmap
+ */
+void fStx_checkGenericToken(
+	struct fLine * restrict node, u32 start, u32 lasti,
+	WORD kwCol,
+	const struct fStatHash * restrict map
+);
+
 void fStx_checkCToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
 void fStx_checkCPPToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
 void fStx_checkPyToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);

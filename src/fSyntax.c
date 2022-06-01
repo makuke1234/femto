@@ -134,19 +134,21 @@ bool fStx_autoAlloc(fLine_t * restrict node)
 	return true;
 }
 
-void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkGenericToken(
+	fLine_t * restrict node, u32 start, u32 lasti,
+	WORD kwCol,
+	const fStatHash_t * restrict map
+)
 {
-	static usize memory[MAX_C_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
+	assert(node != NULL);
 	
 	if ((lasti - start) < 1)
 	{
 		return;
 	}
 
-	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, s_keyWordsC, ARRAYSIZE(s_keyWordsC));
-
 	wchar kwBuf[MAX_KWBUF];
+	// Null-temrinate for safety
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
 	u32 filled = 0;
@@ -170,7 +172,7 @@ void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 		{
 			continue;
 		}
-		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
+		else if (fStatHash_get(map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
 			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
 			for (u32 k = 0; k < n; --l, ++k)
@@ -180,242 +182,54 @@ void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 			return;
 		}
 	}
+}
+void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+{
+	static usize memory[MAX_C_TOKEN_MEM];
+	static fStatHash_t map = { 0 };
+	
+	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, s_keyWordsC, ARRAYSIZE(s_keyWordsC));
+	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_CPP_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 
-
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
-
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, s_keyWordsCPP, ARRAYSIZE(s_keyWordsCPP));
-
-	wchar kwBuf[MAX_KWBUF];
-	kwBuf[MAX_KWBUF - 1] = L'\0';
-
-	u32 filled = 0;
-	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
-	{
-		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
-		{
-			j -= (i32)node->freeSpaceLen;
-			continue;
-		}
-		kwBuf[i] = node->line[j];
-		--i;
-		--j;
-		++filled;
-	}
-
-	for (u32 i = 0; i < (MAX_CPP_TOKEN_WORD - 1); ++i)
-	{
-		const u32 n = MAX_CPP_TOKEN_WORD - i;
-		if ((n > filled) || ((filled - n) > 1))
-		{
-			continue;
-		}
-		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
-		{
-			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
-			for (u32 k = 0; k < n; --l, ++k)
-			{
-				node->syntax[l] = kwCol;
-			}
-			return;
-		}
-	}
+	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_PY_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
-
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, s_keyWordsPy, ARRAYSIZE(s_keyWordsPy));
-
-	wchar kwBuf[MAX_KWBUF];
-	kwBuf[MAX_KWBUF - 1] = L'\0';
-
-	u32 filled = 0;
-	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
-	{
-		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
-		{
-			j -= (i32)node->freeSpaceLen;
-			continue;
-		}
-		kwBuf[i] = node->line[j];
-		--i;
-		--j;
-		++filled;
-	}
-
-	for (u32 i = 0; i < (MAX_PY_TOKEN_WORD - 1); ++i)
-	{
-		const u32 n = MAX_PY_TOKEN_WORD - i;
-		if ((n > filled) || ((filled - n) > 1))
-		{
-			continue;
-		}
-		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
-		{
-			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
-			for (u32 k = 0; k < n; --l, ++k)
-			{
-				node->syntax[l] = kwCol;
-			}
-			return;
-		}
-	}
+	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_JS_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
-
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, s_keyWordsJS, ARRAYSIZE(s_keyWordsJS));
-
-	wchar kwBuf[MAX_KWBUF];
-	kwBuf[MAX_KWBUF - 1] = L'\0';
-
-	u32 filled = 0;
-	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
-	{
-		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
-		{
-			j -= (i32)node->freeSpaceLen;
-			continue;
-		}
-		kwBuf[i] = node->line[j];
-		--i;
-		--j;
-		++filled;
-	}
-
-	for (u32 i = 0; i < (MAX_JS_TOKEN_WORD - 1); ++i)
-	{
-		const u32 n = MAX_JS_TOKEN_WORD - i;
-		if ((n > filled) || ((filled - n) > 2))
-		{
-			continue;
-		}
-		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
-		{
-			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
-			for (u32 k = 0; k < n; --l, ++k)
-			{
-				node->syntax[l] = kwCol;
-			}
-			return;
-		}
-	}
+	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_RUST_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 	
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
-
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, s_keyWordsRust, ARRAYSIZE(s_keyWordsRust));
-
-	wchar kwBuf[MAX_KWBUF];
-	kwBuf[MAX_KWBUF - 1] = L'\0';
-
-	u32 filled = 0;
-	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
-	{
-		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
-		{
-			j -= (i32)node->freeSpaceLen;
-			continue;
-		}
-		kwBuf[i] = node->line[j];
-		--i;
-		--j;
-		++filled;
-	}
-
-	for (u32 i = 0; i < (MAX_RUST_TOKEN_WORD - 1); ++i)
-	{
-		const u32 n = MAX_RUST_TOKEN_WORD - i;
-		if ((n > filled) || ((filled - n) > 1))
-		{
-			continue;
-		}
-		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
-		{
-			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
-			for (u32 k = 0; k < n; --l, ++k)
-			{
-				node->syntax[l] = kwCol;
-			}
-			return;
-		}
-	}
+	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 void fStx_checkGoToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 {
 	static usize memory[MAX_GO_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 	
-	if ((lasti - start) < 1)
-	{
-		return;
-	}
-
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, s_keyWordsGo, ARRAYSIZE(s_keyWordsGo));
-
-	wchar kwBuf[MAX_KWBUF];
-	kwBuf[MAX_KWBUF - 1] = L'\0';
-
-	u32 filled = 0;
-	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
-	{
-		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
-		{
-			j -= (i32)node->freeSpaceLen;
-			continue;
-		}
-		kwBuf[i] = node->line[j];
-		--i;
-		--j;
-		++filled;
-	}
-
-	for (u32 i = 0; i < (MAX_GO_TOKEN_WORD - 1); ++i)
-	{
-		const u32 n = MAX_GO_TOKEN_WORD - i;
-		if ((n > filled) || ((filled - n) > 1))
-		{
-			continue;
-		}
-		else if (fStatHash_get(&map, kwBuf + (MAX_KWBUF - 1) - n))
-		{
-			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
-			for (u32 k = 0; k < n; --l, ++k)
-			{
-				node->syntax[l] = kwCol;
-			}
-			return;
-		}
-	}
+	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 
 bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
