@@ -64,12 +64,13 @@ void fProf_write_inner(const char * restrict function, const char * restrict for
 }
 
 static clock_t s_profilerStack[FEMTO_PROFILER_STACK_SIZE];
-static u32 s_curStackLen = 0;
+static usize s_curStackLen = 0;
 
 void fProf_start(void)
 {
 	assert(s_curStackLen < FEMTO_PROFILER_STACK_SIZE);
-	s_profilerStack[s_curStackLen++] = clock();
+	s_profilerStack[s_curStackLen] = clock();
+	++s_curStackLen;
 }
 void fProf_end_inner(const char * funcName)
 {
