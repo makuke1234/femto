@@ -47,6 +47,20 @@ u32 min_u32(u32 a, u32 b);
 u32 max_u32(u32 a, u32 b);
 u32 clamp_u32(u32 value, u32 min, u32 max);
 
+i64 min_i64(i64 a, i64 b);
+i64 max_i64(i64 a, i64 b);
+i64 clamp_i64(i64 value, i64 min, i64 max);
+
+u64 min_u64(u64 a, u64 b);
+u64 max_u64(u64 a, u64 b);
+u64 clamp_u64(u64 value, u64 min, u64 max);
+
+usize min_usize(usize a, usize b);
+usize max_usize(usize a, usize b);
+usize clamp_usize(usize value, usize min, usize max);
+
+
+
 /**
  * @brief Concatenate Unicode code point at the end of the UTF-8 string, resizes if necessary,
  * stores string capacity in psize and length (including null-terminator) in plen
@@ -150,7 +164,7 @@ void femto_asyncDrawStop(fData_t * restrict pdata);
  * @return true Only current line needs redrawing
  * @return false Whole buffer needs redrawing
  */
-bool femto_updateScrbuf(fData_t * restrict peditor, u32 * line);
+bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict line);
 /**
  * @brief Update one line in screen buffer
  * 
@@ -172,7 +186,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, struct fLine * restrict 
  * @param sz Address of UTF-16 array size, can be NULL
  * @return u32 Number of characters converted
  */
-u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, u32 * restrict sz);
+u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, usize * restrict sz);
 /**
  * @brief Convert UTF-16 string to UTF-8 string, allocates memory only if
  * *putf8 is too small or sz == NULL
@@ -183,7 +197,7 @@ u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict pu
  * @param sz Address of UTF-8 array size, can be NULL
  * @return u32 Number of characters converted
  */
-u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, u32 * restrict sz);
+u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, usize * restrict sz);
 /**
  * @brief Convert UTF-16 string to lines array, modifies original string. After
  * creation the double-pointer's "lines" can be safely freed with a single free.
@@ -195,9 +209,9 @@ u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict pu
  * pointer array, where each pointer is a character array representing line in the text file.
  * Initial value of double-pointer is irrelevant
  * @param eolSeq Address of eolSequence enumerator, receives the EOL format used
- * @return u32 Number of lines found
+ * @return usize Number of lines found
  */
-u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq);
+usize femto_strnToLines(wchar * restrict utf16, usize chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq);
 
 /**
  * @brief Tests if file with designated filename exists
@@ -225,7 +239,7 @@ HANDLE femto_openFile(const wchar * restrict fileName, bool writemode);
  * @param bytesLen Address of array length in bytes
  * @return const wchar* Error message, NULL on success
  */
-const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen);
+const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * restrict bytesLen);
 
 /**
  * @brief Set console title according to last given filename, also shows

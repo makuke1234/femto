@@ -98,7 +98,7 @@ void fSettings_reset(fSettings_t * restrict self);
  * @return true Getting last error succeeded
  * @return false No last error set
  */
-bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u32 errMax);
+bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, usize errMax);
 
 /**
  * @brief Generate tabs to spaces string, consisting of spaces to represent the tab

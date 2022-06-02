@@ -2,7 +2,7 @@
 
 #include <hashmap.h>
 
-bool fStatHash_isPrime(u32 number)
+bool fStatHash_isPrime(usize number)
 {
 	if (number <= 3)
 	{
@@ -10,7 +10,7 @@ bool fStatHash_isPrime(u32 number)
 	}
 	else
 	{
-		for (u32 i = 3, n = (u32)sqrtf((f32)number) + 1; i < n; i += 2)
+		for (usize i = 3, n = (usize)sqrtf((f32)number) + 1; i < n; i += 2)
 		{
 			if ((number % i) == 0)
 			{
@@ -20,7 +20,7 @@ bool fStatHash_isPrime(u32 number)
 		return true;
 	}
 }
-u32 fStatHash_findNextPrime(u32 lowerBound)
+usize fStatHash_findNextPrime(usize lowerBound)
 {
 	assert(lowerBound > 0);
 
@@ -33,20 +33,20 @@ u32 fStatHash_findNextPrime(u32 lowerBound)
 	return lowerBound;
 }
 
-u32 fStatHash_hash(const wchar * restrict key, u32 sz)
+usize fStatHash_hash(const wchar * restrict key, usize sz)
 {
 	assert(key != NULL);
 	assert(sz > 0);
 
-	u32 hash = 0;
+	usize hash = 0;
 	for (; (*key) != L'\0'; ++key)
 	{
-		hash = (u32)(hash * 37 + (u32)*key);
+		hash = hash * (usize)37 + (usize)*key;
 	}
 	return hash % sz;
 }
 
-vptr fStatHash_malloc(fStatHash_t * restrict hash, u32 bytes)
+vptr fStatHash_malloc(fStatHash_t * restrict hash, usize bytes)
 {
 	if (hash->memSize < bytes)
 	{
@@ -59,7 +59,7 @@ vptr fStatHash_malloc(fStatHash_t * restrict hash, u32 bytes)
 
 	return mem;
 }
-void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, u32 bytes)
+void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, usize bytes)
 {
 	vptr newp = ((u8 *)hash->mem) - bytes;
 	if (mem == newp)
@@ -71,8 +71,8 @@ void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, u32 bytes)
 
 void fStatHash_init(
 	fStatHash_t * restrict hash,
-	vptr restrict memory, u32 memoryBytes,
-	u32 tableSize
+	vptr restrict memory, usize memoryBytes,
+	usize tableSize
 )
 {
 	assert(hash != NULL);
@@ -100,15 +100,15 @@ void fStatHash_init(
 		return;
 	}
 
-	for (u32 i = 0; i < hash->mapSize; ++i)
+	for (usize i = 0; i < hash->mapSize; ++i)
 	{
 		hash->nodes[i] = NULL;
 	}
 }
 void fStatHash_initData(
 	fStatHash_t * restrict hash,
-	vptr restrict memory, u32 memoryBytes,
-	const wchar ** data, u32 dataSize
+	vptr restrict memory, usize memoryBytes,
+	const wchar ** data, usize dataSize
 )
 {
 	assert(hash != NULL);
@@ -123,7 +123,7 @@ void fStatHash_initData(
 	}
 	fStatHash_init(hash, memory, memoryBytes, dataSize);
 
-	for (u32 i = 0; i < dataSize; ++i)
+	for (usize i = 0; i < dataSize; ++i)
 	{
 		if (!fStatHash_insert(hash, data[i]))
 		{

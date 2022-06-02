@@ -25,9 +25,9 @@ wchar fArg_strToCh(fArg_t arg)
 }
 
 
-u32 fArg_fetch(
-	const wchar * restrict rawStr, i32 maxStr,
-	const wchar * restrict argMatch, u32 maxParams, ...
+usize fArg_fetch(
+	const wchar * restrict rawStr, isize maxStr,
+	const wchar * restrict argMatch, usize maxParams, ...
 )
 {
 	assert(rawStr != NULL);
@@ -36,14 +36,14 @@ u32 fArg_fetch(
 	va_list ap;
 	va_start(ap, maxParams);
 
-	u32 result = fArg_vfetch(rawStr, maxStr, argMatch, maxParams, ap);
+	const usize result = fArg_vfetch(rawStr, maxStr, argMatch, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
-u32 fArg_vfetch(
-	const wchar * restrict rawStr, i32 maxStr,
-	const wchar * restrict argMatch, u32 maxParams, va_list ap
+usize fArg_vfetch(
+	const wchar * restrict rawStr, isize maxStr,
+	const wchar * restrict argMatch, usize maxParams, va_list ap
 )
 {
 	assert(rawStr != NULL);
@@ -66,10 +66,10 @@ u32 fArg_vfetch(
 	 */
 	const wchar * restrict rawIt = rawStr;
 	const wchar * restrict endp = rawIt + len;
-	if ((len > 1) && ((*rawIt == '-') || (*rawIt == '/')))
+	if ((len > 1) && ((*rawIt == L'-') || (*rawIt == L'/')))
 	{
 		++rawIt;
-		if ((len > 2) || (*rawIt == '-'))
+		if ((len > 2) || (*rawIt == L'-'))
 		{
 			++rawIt;
 		}
@@ -90,17 +90,17 @@ u32 fArg_vfetch(
 	// Advance search location
 	rawIt += matchLen;
 
-	if (*rawIt == '=')
+	if (*rawIt == L'=')
 	{
 		++rawIt;
 		// Search for arguments
-		u32 numArgs = 0;
+		usize numArgs = 0;
 
 		const wchar * restrict argStart = rawIt;
 
 		for (; rawIt != endp; ++rawIt)
 		{
-			if ((*rawIt == '\\') && ((rawIt + 1) != endp))
+			if ((*rawIt == L'\\') && ((rawIt + 1) != endp))
 			{
 				++rawIt;
 				continue;
@@ -140,9 +140,9 @@ u32 fArg_vfetch(
 }
 
 
-u32 fArg_fetchArgv(
+usize fArg_fetchArgv(
 	int argc, const wchar ** restrict argv,
-	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, ...
+	const wchar * restrict argMatch, int * restrict matchedIndex, usize maxParams, ...
 )
 {
 	assert(argv != NULL);
@@ -152,14 +152,14 @@ u32 fArg_fetchArgv(
 	va_list ap;
 	va_start(ap, maxParams);
 	
-	const u32 result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
+	const usize result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
-u32 fArg_vfetchArgv(
+usize fArg_vfetchArgv(
 	int argc, const wchar ** restrict argv,
-	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, va_list ap
+	const wchar * restrict argMatch, int * restrict matchedIndex, usize maxParams, va_list ap
 )
 {
 	assert(argv != NULL);
@@ -168,7 +168,7 @@ u32 fArg_vfetchArgv(
 
 	for (int i = 1; i < argc; ++i)
 	{
-		const u32 result = fArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
+		const usize result = fArg_vfetch(argv[i], -1, argMatch, maxParams, ap);
 		if (result != 0)
 		{
 			*matchedIndex = i;

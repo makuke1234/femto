@@ -31,12 +31,12 @@ wchar fArg_strToCh(fArg_t arg);
  * @param argMatch Argument to match against
  * @param maxParams Maximum number of variadic parameters to scan for
  * @param ... Variadic arguments, addresses of receiving femtoArgument_t structures
- * @return u32 Number of parameters matched, argument itself counts as 1,
+ * @return usize Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 fArg_fetch(
-	const wchar * restrict rawStr, i32 maxStr,
-	const wchar * restrict argMatch, u32 maxParams, ...
+usize fArg_fetch(
+	const wchar * restrict rawStr, isize maxStr,
+	const wchar * restrict argMatch, usize maxParams, ...
 );
 /**
  * @brief Fetches individual parameters from raw command-line argument, takes va_list
@@ -46,12 +46,12 @@ u32 fArg_fetch(
  * @param argMatch Argument to match against
  * @param maxParams Maximum number of variadic parameters to scan for
  * @param ap Variadic argument list
- * @return u32 Number of parameters matched, argument itself counts as 1,
+ * @return usize Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 fArg_vfetch(
-	const wchar * restrict rawStr, i32 maxStr,
-	const wchar * restrict argMatch, u32 maxParams, va_list ap
+usize fArg_vfetch(
+	const wchar * restrict rawStr, isize maxStr,
+	const wchar * restrict argMatch, usize maxParams, va_list ap
 );
 
 
@@ -65,12 +65,12 @@ u32 fArg_vfetch(
  * will be set to 0, if argMatch doesn't match any arguments
  * @param maxParams Maximum number of variadic paramaters to scan for
  * @param ... Variadic arguments, addresses of receiving femtoArgument_t structures
- * @return u32 Number of parameters matched, argument itself counts as 1,
+ * @return usize Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 fArg_fetchArgv(
+usize fArg_fetchArgv(
 	int argc, const wchar ** restrict argv,
-	const wchar * restrict argMatch, int * restrict matchedIndex, u32 maxParams, ...
+	const wchar * restrict argMatch, int * restrict matchedIndex, usize maxParams, ...
 );
 /**
  * @brief Fetches individual parameters from argc and argv normally given to wmain(), takes va_list
@@ -82,12 +82,12 @@ u32 fArg_fetchArgv(
  * will be set to 0, if argMatch doesn't match any arguments, CANNOT be NULL
  * @param maxParams Maximum number of variadic paramaters to scan for
  * @param ap Variadic argument list
- * @return u32 Number of parameters matched, argument itself counts as 1,
+ * @return usize Number of parameters matched, argument itself counts as 1,
  * 0 if none were found or argMatch doesn't match
  */
-u32 fArg_vfetchArgv(
+usize fArg_vfetchArgv(
 	int argc, const wchar ** restrict argv,
-	const wchar * restrict argMatch, int * restrict mathedIndex, u32 maxParams, va_list ap
+	const wchar * restrict argMatch, int * restrict mathedIndex, usize maxParams, va_list ap
 );
 
 #endif
