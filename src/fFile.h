@@ -131,10 +131,10 @@ typedef enum fFile_writeRes
  * file if anything has been changed
  * 
  * @param self Pointer to fFile_t structure
- * @return i32 Negative values represent error code, positive values (0 inclusive)
+ * @return isize Negative values represent error code, positive values (0 inclusive)
  * represent number of bytes written to disc
  */
-i32 fFile_write(fFile_t * restrict self);
+isize fFile_write(fFile_t * restrict self);
 
 /**
  * @brief Inserts a normal character to current line

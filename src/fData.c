@@ -332,7 +332,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 		return false;
 	}
 
-	self->fileIdx = (i32)self->filesSize;
+	self->fileIdx = (isize)self->filesSize;
 	++self->filesSize;
 
 	self->cursorpos[self->fileIdx] = (COORD){ 0, 0 };

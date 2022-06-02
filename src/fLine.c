@@ -407,8 +407,8 @@ bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * r
 	self->line = linemem;
 
 	// Move cursor to end, if needed
-	fLine_moveCursor(self, (i32)self->lineEndx);
-	fLine_moveCursor(n,    (i32)n->lineEndx);
+	fLine_moveCursor(self, (isize)self->lineEndx);
+	fLine_moveCursor(n,    (isize)n->lineEndx);
 
 	self->freeSpaceLen = FEMTO_LNODE_DEFAULT_FREE;
 	self->lineEndx     = self->curx + n->curx + FEMTO_LNODE_DEFAULT_FREE;

@@ -286,9 +286,9 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 	fLine_init(&temp);
 
 	// Find first non-space on the last line
-	CHAR_INFO * restrict lastline = &peditor->scrbuf.mem[peditor->scrbuf.w * (peditor->scrbuf.h - 1)];
+	CHAR_INFO * restrict lastline = &peditor->scrbuf.mem[(usize)peditor->scrbuf.w * (usize)(peditor->scrbuf.h - 1)];
 
-	i16 sidx = (i16)(peditor->scrbuf.w - 1);
+	u32 sidx = peditor->scrbuf.w - 1;
 	for (; sidx > 0; --sidx)
 	{
 		if (lastline[sidx].Char.UnicodeChar != L' ')
@@ -299,7 +299,7 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 	}
 
 	// Start asking input
-	COORD cur = { .X = sidx, .Y = (SHORT)(peditor->scrbuf.h - 1) };
+	COORD cur = { .X = (SHORT)sidx, .Y = (SHORT)(peditor->scrbuf.h - 1) };
 	SetConsoleCursorPosition(peditor->scrbuf.handle, cur);
 
 	line[0] = L'\0';
@@ -318,8 +318,8 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 		{
 			update    = false;
 			updateCur = false;
-			wchar key      = ir.Event.KeyEvent.uChar.UnicodeChar;
-			wchar wVirtKey = ir.Event.KeyEvent.wVirtualKeyCode;
+			const wchar key      = ir.Event.KeyEvent.uChar.UnicodeChar;
+			const wchar wVirtKey = ir.Event.KeyEvent.wVirtualKeyCode;
 
 			if ((wVirtKey == VK_ESCAPE) || (wVirtKey == VK_RETURN))
 			{
@@ -381,12 +381,12 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 					}
 					break;
 				case VK_HOME:
-					fLine_moveCursor(&temp, -(i32)temp.lineEndx);
+					fLine_moveCursor(&temp, -(isize)temp.lineEndx);
 					fLine_calcVirtCursor(&temp, pset->tabWidth);
 					updateCur = true;
 					break;
 				case VK_END:
-					fLine_moveCursor(&temp, (i32)temp.lineEndx);
+					fLine_moveCursor(&temp, (isize)temp.lineEndx);
 					fLine_calcVirtCursor(&temp, pset->tabWidth);
 					updateCur = true;
 					break;
@@ -396,7 +396,7 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 			// Update last line
 			if (update)
 			{
-				fLine_getTextLim(&temp, line, maxLen);
+				fLine_getTextLim(&temp, line, (usize)maxLen);
 				fData_statusMsg(peditor, line, NULL);
 			}
 			if (update | updateCur)
@@ -518,7 +518,7 @@ static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * rest
 	{
 		wchar * restrict oldfilename = pfile->fileName;
 		pfile->fileName = inp;
-		i32 saved = fFile_write(pfile);
+		const isize saved = fFile_write(pfile);
 		switch (saved)
 		{
 		case ffwrNOTHING_NEW:
@@ -534,7 +534,7 @@ static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * rest
 			wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
 			break;
 		default:
-			swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes to %s", saved, inp);
+			swprintf_s(tempstr, MAX_STATUS, L"Wrote %zd bytes to %s", saved, inp);
 			// Set console title
 			femto_setConTitle(inp);
 		}
@@ -567,7 +567,7 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 	else
 	{
 		// Move cursor to the next result according to direction
-		const i32 delta = (peditor->bDirBack) ? -1 : 1;
+		const isize delta = (peditor->bDirBack) ? -1 : 1;
 
 		fLine_t * restrict node = peditor->files[peditor->fileIdx]->data.currentNode;
 		if (node == NULL)
@@ -577,7 +577,7 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 		}
 		//
 		node = first ? node : ((peditor->bDirBack) ? node->prevNode : node->nextNode);
-		i32 deltaLines = first ? 0 : delta;
+		isize deltaLines = first ? 0 : delta;
 
 		peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
 		fData_refreshEdit(peditor);
@@ -782,7 +782,7 @@ bool femto_loop(fData_t * restrict peditor)
 				}
 				else
 				{
-					const i32 saved = fFile_write(pfile);
+					const isize saved = fFile_write(pfile);
 					switch (saved)
 					{
 					case ffwrNOTHING_NEW:
@@ -798,7 +798,7 @@ bool femto_loop(fData_t * restrict peditor)
 						wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
 						break;
 					default:
-						swprintf_s(tempstr, MAX_STATUS, L"Wrote %d bytes", saved);
+						swprintf_s(tempstr, MAX_STATUS, L"Wrote %zd bytes", saved);
 					}
 				}
 			}
@@ -887,13 +887,13 @@ bool femto_loop(fData_t * restrict peditor)
 						{
 							swprintf_s(tempstr, MAX_STATUS, L"Previous tab #%u", keyCount);
 							--peditor->fileIdx;
-							peditor->fileIdx = (peditor->fileIdx < 0) ? (i32)peditor->filesSize - 1 : peditor->fileIdx;
+							peditor->fileIdx = (peditor->fileIdx < 0) ? (isize)peditor->filesSize - 1 : peditor->fileIdx;
 						}
 						else
 						{
 							swprintf_s(tempstr, MAX_STATUS, L"Next tab #%u", keyCount);
 							++peditor->fileIdx;
-							peditor->fileIdx = (peditor->fileIdx >= (i32)peditor->filesSize) ? 0 : peditor->fileIdx;
+							peditor->fileIdx = (peditor->fileIdx >= (isize)peditor->filesSize) ? 0 : peditor->fileIdx;
 						}
 						
 						if (peditor->filesSize > 1)
@@ -1087,7 +1087,7 @@ bool femto_loop(fData_t * restrict peditor)
 					{
 						pfile->data.currentNode = pfile->data.pcury;
 						const fLine_t * lastcurnode = pfile->data.currentNode;
-						fLine_moveCursorVert(&pfile->data.currentNode, (i32)pos.Y);
+						fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
 						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
 						// Now move the cursor to correct X position
 						fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
@@ -1287,7 +1287,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		return false;
 	}
 
-	CHAR_INFO * restrict destination = &peditor->scrbuf.mem[line * peditor->scrbuf.w];
+	CHAR_INFO * restrict destination = &peditor->scrbuf.mem[(usize)line * (usize)peditor->scrbuf.w];
 	for (u32 i = 0; i < peditor->scrbuf.w; ++i)
 	{
 		destination[i] = (CHAR_INFO){
@@ -1344,7 +1344,9 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	// Check to include tab character
 	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
-	usize number = (!peditor->settings.bRelLineNums || (node == curnode)) ? (usize)node->lineNumber : (usize)labs((long)curnode->lineNumber - (long)node->lineNumber);
+	usize number = (!peditor->settings.bRelLineNums || (node == curnode)) ?
+		(usize)node->lineNumber :
+		(usize)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	const u8 noLen = (u8)log10((f64)number) + 1;
 	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
 	destination[pfile->data.noLen].Char.UnicodeChar = L'|';

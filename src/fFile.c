@@ -171,7 +171,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 		}
 	}
 	self->data.currentNode = self->data.firstNode;
-	for (u32 i = 1; i < numLines; ++i)
+	for (usize i = 1; i < numLines; ++i)
 	{
 		fLine_t * node = fLine_createText(self->data.currentNode, NULL, lines[i], -1, &self->data.noLen);
 		if (node == NULL)
@@ -319,7 +319,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 	self->bUnsaved = true;
 	return ffcrNEEDS_SAVING;
 }
-i32 fFile_write(fFile_t * restrict self)
+isize fFile_write(fFile_t * restrict self)
 {
 	assert(self != NULL);
 	char * utf8 = NULL;
@@ -375,7 +375,7 @@ i32 fFile_write(fFile_t * restrict self)
 	else
 	{
 		self->bUnsaved = false;
-		return (i32)dwWritten;
+		return (isize)dwWritten;
 	}
 }
 
@@ -433,7 +433,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 			fFile_deleteBackward(self);
 			--lastcurnode->virtcurx;
 			const usize max = lastcurnode->virtcurx % pset->tabWidth;
-			if (fLine_checkAt(lastcurnode, -(i32)max, pset->tabSpaceStr1, max))
+			if (fLine_checkAt(lastcurnode, -(isize)max, pset->tabSpaceStr1, max))
 			{
 				for (usize i = 0; i < max; ++i)
 				{
@@ -545,7 +545,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		else if (lastcurnode->prevNode != NULL)
 		{
 			self->data.currentNode = lastcurnode->prevNode;
-			fLine_moveCursor(self->data.currentNode, (i32)self->data.currentNode->lineEndx);
+			fLine_moveCursor(self->data.currentNode, (isize)self->data.currentNode->lineEndx);
 		}
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
@@ -558,7 +558,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		else if (lastcurnode->nextNode != NULL)
 		{
 			self->data.currentNode = self->data.currentNode->nextNode;
-			fLine_moveCursor(self->data.currentNode, -(i32)self->data.currentNode->lineEndx);
+			fLine_moveCursor(self->data.currentNode, -(isize)self->data.currentNode->lineEndx);
 		}
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
@@ -572,20 +572,20 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_PRIOR:	// Page up
-		fLine_moveCursorVert(&self->data.currentNode, -(i32)height);
+		fLine_moveCursorVert(&self->data.currentNode, -(isize)height);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_NEXT:	// Page down
-		fLine_moveCursorVert(&self->data.currentNode, (i32)height);
+		fLine_moveCursorVert(&self->data.currentNode, (isize)height);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_END:
-		fLine_moveCursor(lastcurnode, (i32)lastcurnode->lineEndx);
+		fLine_moveCursor(lastcurnode, (isize)lastcurnode->lineEndx);
 		fLine_calcVirtCursor(lastcurnode, pset->tabWidth);
 		self->data.lastx = lastcurnode->virtcurx;
 		break;
 	case VK_HOME:
-		fLine_moveCursor(lastcurnode, -(i32)lastcurnode->lineEndx);
+		fLine_moveCursor(lastcurnode, -(isize)lastcurnode->lineEndx);
 		fLine_calcVirtCursor(lastcurnode, pset->tabWidth);
 		self->data.lastx = lastcurnode->virtcurx;
 		break;
