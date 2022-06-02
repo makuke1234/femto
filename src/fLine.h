@@ -10,11 +10,11 @@
 typedef struct fLine
 {
 	wchar * line;
-	u32 lineEndx, curx, freeSpaceLen;
+	usize lineEndx, curx, freeSpaceLen;
 	struct fLine * prevNode, * nextNode;
-	u32 virtcurx;
+	usize virtcurx;
 
-	u32 lineNumber;
+	usize lineNumber;
 
 	WORD * syntax;
 	union
@@ -77,7 +77,7 @@ fLine_t * fLine_createText(
 	fLine_t * restrict curnode,
 	fLine_t * restrict nextnode,
 	const wchar * restrict lineText,
-	i32 maxText,
+	isize maxText,
 	u8 * restrict noLen
 );
 
@@ -92,7 +92,7 @@ fLine_t * fLine_createText(
  * @return true Success
  * @return false Failure
  */
-bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, u32 * restrict tarrsz);
+bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, usize * restrict tarrsz);
 /**
  * @brief Fetches text from given line node, copies it to wchar character array
  * until the length reaches maxLen (including the null-terminator)
@@ -101,7 +101,7 @@ bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, u32 * 
  * @param text wchar pointer to character array
  * @param maxLen Maximum length of character array in characters (including the null-terminator)
  */
-void fLine_getTextLim(const fLine_t * restrict self, wchar * restrict text, u32 maxLen);
+void fLine_getTextLim(const fLine_t * restrict self, wchar * restrict text, usize maxLen);
 /**
  * @brief Reallocates free space on given line node, guarantees
  * femto_LNODE_DEFAULT_FREE characters for space
@@ -121,7 +121,7 @@ bool fLine_realloc(fLine_t * restrict self);
  * @return true Success
  * @return false Failure
  */
-bool fLine_addChar(fLine_t * restrict self, wchar ch, u32 tabWidth);
+bool fLine_addChar(fLine_t * restrict self, wchar ch, u8 tabWidth);
 
 /**
  * @brief Checks current line contents for matching string
@@ -133,7 +133,7 @@ bool fLine_addChar(fLine_t * restrict self, wchar ch, u32 tabWidth);
  * @return true Found a match
  * @return false Didn't find any match
  */
-bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * restrict string, u32 maxString);
+bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * restrict string, usize maxString);
 /**
  * @brief Finds the string location on current line
  * 
@@ -141,9 +141,9 @@ bool fLine_checkAt(const fLine_t * restrict node, i32 maxdelta, const wchar * re
  * @param startIdx Starting index, value is clamped
  * @param string Matchable string
  * @param maxString Absolute maximum number of character to check, stops anyway on null-terminator
- * @return u32 Index location of string, UINT32_MAX on failure
+ * @return usize Index location of string, UINT32_MAX on failure
  */
-u32 fLine_find(const fLine_t * restrict node, u32 startIdx, const wchar * restrict string, u32 maxString);
+usize fLine_find(const fLine_t * restrict node, usize startIdx, const wchar * restrict string, usize maxString);
 
 /**
  * @brief Merges current line node with next line node, adjusts current
@@ -164,37 +164,37 @@ bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * r
  * @param delta Amount of characters to move, positive values to move right,
  * negative values to move left
  */
-void fLine_moveCursor(fLine_t * restrict self, i32 delta);
+void fLine_moveCursor(fLine_t * restrict self, isize delta);
 /**
  * @brief Moves (internal) cursor on current line node, clamps movement
  * 
  * @param self Pointer to current line node
  * @param curx Absolute cursor position to move to
  */
-void fLine_moveCursorAbs(fLine_t * restrict self, u32 curx);
+void fLine_moveCursorAbs(fLine_t * restrict self, usize curx);
 /**
  * @brief Moves active line node, clamps movement
  * 
  * @param self Address of pointer to current line node
  * @param delta Amount of lines to move, positive values move down, negative values move up
  */
-void fLine_moveCursorVert(fLine_t ** restrict self, i32 delta);
+void fLine_moveCursorVert(fLine_t ** restrict self, isize delta);
 /**
  * @brief Calculates virtual cursor location
  * 
  * @param self Pointer to current line node
  * @param tabWidth Tab character width in spaces equivalent
  */
-void fLine_calcVirtCursor(fLine_t * restrict self, u32 tabWidth);
+void fLine_calcVirtCursor(fLine_t * restrict self, usize tabWidth);
 /**
  * @brief Calculates real cursor location from virtual cursor location
  * 
  * @param self Pointer to current line node
  * @param virtcur Virtual cursor position
  * @param tabWidth Tab character width in spaces equivalent
- * @return u32 Real cursor location
+ * @return usize Real cursor location
  */
-u32 fLine_calcCursor(const fLine_t * restrict self, u32 virtcur, u32 tabWidth);
+usize fLine_calcCursor(const fLine_t * restrict self, usize virtcur, u8 tabWidth);
 
 /**
  * @brief Swaps internally data between 2 nodes
@@ -211,7 +211,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2);
  * @param startLno Starting line number
  * @param noLen Pointer receiving last line number length in characters
  */
-void fLine_updateLineNumbers(fLine_t * restrict startnode, u32 startLno, u8 * restrict noLen);
+void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * restrict noLen);
 
 /**
  * @brief Updates the syntax highlighting of a given node

@@ -29,11 +29,11 @@ typedef struct fData
 		u32 w, h;
 	} scrbuf;
 
-	u32 filesSize, filesMax;
+	usize filesSize, filesMax;
 	fFile_t ** files;
 	COORD * cursorpos;
 
-	i32 fileIdx;
+	isize fileIdx;
 
 	fSettings_t settings;
 

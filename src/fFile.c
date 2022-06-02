@@ -86,7 +86,7 @@ void fFile_clearLines(fFile_t * restrict self)
 		node = next;
 	}
 }
-const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u32 * restrict bytesLen)
+const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, usize * restrict bytesLen)
 {
 	assert(self != NULL);
 	assert(bytes != NULL);
@@ -120,7 +120,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 {
 	assert(self != NULL);
 	char * bytes = NULL;
-	u32 size;
+	usize size;
 	const wchar * restrict res;
 	if ((res = fFile_readBytes(self, &bytes, &size)) != NULL)
 	{
@@ -141,13 +141,13 @@ const wchar * fFile_read(fFile_t * restrict self)
 
 	// Save lines to structure
 	wchar ** lines = NULL;
-	const u32 numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
+	const usize numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
 	if (lines == NULL)
 	{
 		free(utf16);
 		return L"Line reading error!";
 	}
-	fProf_write("Total of %u lines", numLines);
+	fProf_write("Total of %zu lines", numLines);
 
 	fFile_clearLines(self);
 	if (numLines == 0)
@@ -171,7 +171,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 		}
 	}
 	self->data.currentNode = self->data.firstNode;
-	for (u32 i = 1; i < numLines; ++i)
+	for (usize i = 1; i < numLines; ++i)
 	{
 		fLine_t * node = fLine_createText(self->data.currentNode, NULL, lines[i], -1, &self->data.noLen);
 		if (node == NULL)
@@ -187,16 +187,16 @@ const wchar * fFile_read(fFile_t * restrict self)
 
 	return NULL;
 }
-ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 * editorContLen)
+ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize * editorContLen)
 {
 	assert(self != NULL);
 	// Generate lines
 	wchar * lines = NULL, * line = NULL;
-	u32 linesCap = 0, linesLen = 0, lineCap = 0;
+	usize linesCap = 0, linesLen = 0, lineCap = 0;
 
 	const fLine_t * restrict node = self->data.firstNode;
 
-	const u8 eolSeq = self->eolSeq;
+	const eolSeq_e eolSeq = self->eolSeq;
 	bool isCRLF = (self->eolSeq == eolCRLF);
 
 	while (node != NULL)
@@ -215,17 +215,17 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 			return ffcrMEM_ERROR;
 		}
 
-		const u32 lineLen = (u32)wcsnlen(line, lineCap);
+		const usize lineLen = wcsnlen(line, lineCap);
 
-		const u32 addnewline = (node->nextNode != NULL) ? 1 + isCRLF : 0;
-		const u32 newLinesLen = linesLen + lineLen + addnewline;
+		const usize addnewline = (node->nextNode != NULL) ? (usize)(1 + (usize)isCRLF) : 0;
+		const usize newLinesLen = linesLen + lineLen + addnewline;
 
 		// Add line to lines, concatenate \n character, if necessary
 
 		if (newLinesLen >= linesCap)
 		{
 			// Resize lines array
-			const u32 newCap = (newLinesLen + 1) * 2;
+			const usize newCap = (newLinesLen + 1) * 2;
 
 			vptr mem = realloc(lines, sizeof(wchar) * newCap);
 			if (mem == NULL)
@@ -263,6 +263,9 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 				lines[linesLen - 2] = L'\r';
 				lines[linesLen - 1] = L'\n';
 				break;
+			case eolNOT:
+				assert(!"EOL sequence not selected!");
+				break;
 			}
 		}
 		lines[linesLen] = L'\0';
@@ -273,7 +276,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 
 	// Try to convert lines string to UTF-8
 	char * utf8 = NULL;
-	u32 utf8sz = 0;
+	usize utf8sz = 0;
 	femto_toutf8(lines, (int)linesLen + 1, &utf8, &utf8sz);
 
 	// Free UTF-16 lines string
@@ -287,11 +290,11 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 
 	// Check if anything has changed, for that load original file again
 	char * compFile = NULL;
-	u32 compSize;
+	usize compSize;
 	if (fFile_readBytes(self, &compFile, &compSize) == NULL)
 	{
 		// Reading was successful
-		const bool areEqual = strncmp(utf8, compFile, (usize)min_u32(utf8sz, compSize)) == 0;
+		const bool areEqual = strncmp(utf8, compFile, min_usize(utf8sz, compSize)) == 0;
 		free(compFile);
 
 		if (areEqual)
@@ -316,12 +319,12 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 *
 	self->bUnsaved = true;
 	return ffcrNEEDS_SAVING;
 }
-i32 fFile_write(fFile_t * restrict self)
+isize fFile_write(fFile_t * restrict self)
 {
 	assert(self != NULL);
 	char * utf8 = NULL;
-	u32 utf8sz = 0;
-	i32 checkres = fFile_checkUnsaved(self, &utf8, &utf8sz);
+	usize utf8sz = 0;
+	ffcr_e checkres = fFile_checkUnsaved(self, &utf8, &utf8sz);
 	checkres = ((checkres == ffcrNOTHING_NEW) && !self->bExists) ? ffcrNEEDS_SAVING : checkres;
 	switch (checkres)
 	{
@@ -329,6 +332,8 @@ i32 fFile_write(fFile_t * restrict self)
 		return ffwrMEM_ERROR;
 	case ffcrNOTHING_NEW:
 		return ffwrNOTHING_NEW;
+	case ffcrNEEDS_SAVING:
+		break;
 	}
 	
 	// Try to open file for writing
@@ -352,7 +357,7 @@ i32 fFile_write(fFile_t * restrict self)
 	BOOL res = (utf8 != NULL) ? WriteFile(
 		self->hFile,
 		utf8,
-		utf8sz - 1,
+		(DWORD)(utf8sz - (usize)1),
 		&dwWritten,
 		NULL
 	) : TRUE;
@@ -370,12 +375,12 @@ i32 fFile_write(fFile_t * restrict self)
 	else
 	{
 		self->bUnsaved = false;
-		return (i32)dwWritten;
+		return (isize)dwWritten;
 	}
 }
 
 
-bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u32 tabWidth)
+bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 {
 	assert(self != NULL);
 	fLine_t * restrict node = self->data.currentNode;
@@ -409,7 +414,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		}
 		if (pset->bTabsToSpaces)
 		{
-			for (u32 i = 0, max = pset->tabWidth - (lastcurnode->virtcurx % pset->tabWidth); i < max; ++i)
+			for (usize i = 0, max = pset->tabWidth - (lastcurnode->virtcurx % pset->tabWidth); i < max; ++i)
 			{
 				if (fFile_addNormalCh(self, tch, pset->tabWidth) == false)
 				{
@@ -427,10 +432,10 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		{
 			fFile_deleteBackward(self);
 			--lastcurnode->virtcurx;
-			const u32 max = lastcurnode->virtcurx % pset->tabWidth;
-			if (fLine_checkAt(lastcurnode, -(i32)max, pset->tabSpaceStr1, max))
+			const usize max = lastcurnode->virtcurx % pset->tabWidth;
+			if (fLine_checkAt(lastcurnode, -(isize)max, pset->tabSpaceStr1, max))
 			{
-				for (u32 i = 0; i < max; ++i)
+				for (usize i = 0; i < max; ++i)
 				{
 					fFile_deleteBackward(self);
 				}
@@ -443,7 +448,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		// If there isn't, check if there's 4 spaces after the caret
 		else if (fLine_checkAt(lastcurnode, 0, pset->tabSpaceStr1, pset->tabWidth))
 		{
-			for (int i = 0; i < pset->tabWidth; ++i)
+			for (u8 i = 0; i < pset->tabWidth; ++i)
 			{
 				fFile_deleteForward(self);
 			}
@@ -540,7 +545,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		else if (lastcurnode->prevNode != NULL)
 		{
 			self->data.currentNode = lastcurnode->prevNode;
-			fLine_moveCursor(self->data.currentNode, (i32)self->data.currentNode->lineEndx);
+			fLine_moveCursor(self->data.currentNode, (isize)self->data.currentNode->lineEndx);
 		}
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
@@ -553,7 +558,7 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		else if (lastcurnode->nextNode != NULL)
 		{
 			self->data.currentNode = self->data.currentNode->nextNode;
-			fLine_moveCursor(self->data.currentNode, -(i32)self->data.currentNode->lineEndx);
+			fLine_moveCursor(self->data.currentNode, -(isize)self->data.currentNode->lineEndx);
 		}
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
@@ -567,20 +572,20 @@ bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSe
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_PRIOR:	// Page up
-		fLine_moveCursorVert(&self->data.currentNode, -(i32)height);
+		fLine_moveCursorVert(&self->data.currentNode, -(isize)height);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_NEXT:	// Page down
-		fLine_moveCursorVert(&self->data.currentNode, (i32)height);
+		fLine_moveCursorVert(&self->data.currentNode, (isize)height);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_END:
-		fLine_moveCursor(lastcurnode, (i32)lastcurnode->lineEndx);
+		fLine_moveCursor(lastcurnode, (isize)lastcurnode->lineEndx);
 		fLine_calcVirtCursor(lastcurnode, pset->tabWidth);
 		self->data.lastx = lastcurnode->virtcurx;
 		break;
 	case VK_HOME:
-		fLine_moveCursor(lastcurnode, -(i32)lastcurnode->lineEndx);
+		fLine_moveCursor(lastcurnode, -(isize)lastcurnode->lineEndx);
 		fLine_calcVirtCursor(lastcurnode, pset->tabWidth);
 		self->data.lastx = lastcurnode->virtcurx;
 		break;
@@ -696,7 +701,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 		fFile_updateCury(self, height);
 	}
 }
-void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines)
+void fFile_scrollVert(fFile_t * restrict self, u32 height, isize deltaLines)
 {
 	assert(self != NULL);
 
@@ -711,17 +716,17 @@ void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines)
 		self->data.bUpdateAll = true;
 	}
 }
-void fFile_scrollHor(fFile_t * restrict self, u32 width, i32 deltaCh)
+void fFile_scrollHor(fFile_t * restrict self, u32 width, isize deltaCh)
 {
 	assert(self != NULL);
 
-	if ((deltaCh < 0) && ((u32)-deltaCh <= self->data.curx))
+	if ((deltaCh < 0) && ((usize)-deltaCh <= self->data.curx))
 	{
-		self->data.curx -= (u32)-deltaCh;
+		self->data.curx -= (usize)-deltaCh;
 	}
 	else if (deltaCh > 0)
 	{
-		const u32 curx = self->data.curx + (u32)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
+		const usize curx = self->data.curx + (usize)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
 		--width;
 		if ((total >= width) && (curx <= (total - width)))
 		{

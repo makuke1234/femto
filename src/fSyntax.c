@@ -135,7 +135,7 @@ bool fStx_autoAlloc(fLine_t * restrict node)
 }
 
 void fStx_checkGenericToken(
-	fLine_t * restrict node, u32 start, u32 lasti,
+	fLine_t * restrict node, usize start, usize lasti,
 	WORD kwCol,
 	const fStatHash_t * restrict map
 )
@@ -151,12 +151,12 @@ void fStx_checkGenericToken(
 	// Null-temrinate for safety
 	kwBuf[MAX_KWBUF - 1] = L'\0';
 
-	u32 filled = 0;
-	for (i32 i = MAX_KWBUF - 2, j = (i32)lasti, starti = (i32)start; (i >= 0) && (j >= 0) && (j >= starti);)
+	usize filled = 0;
+	for (isize i = MAX_KWBUF - 2, j = (isize)lasti, starti = (isize)start; (i >= 0) && (j >= 0) && (j >= starti);)
 	{
-		if (((j - (i32)node->freeSpaceLen) == ((i32)node->curx - 1)) && (node->freeSpaceLen > 0))
+		if (((j - (isize)node->freeSpaceLen) == ((isize)node->curx - 1)) && (node->freeSpaceLen > 0))
 		{
-			j -= (i32)node->freeSpaceLen;
+			j -= (isize)node->freeSpaceLen;
 			continue;
 		}
 		kwBuf[i] = node->line[j];
@@ -165,17 +165,17 @@ void fStx_checkGenericToken(
 		++filled;
 	}
 
-	for (u32 i = 0; i < (MAX_C_TOKEN_WORD - 1); ++i)
+	for (usize i = 0; i < (MAX_C_TOKEN_WORD - 1); ++i)
 	{
-		const u32 n = MAX_C_TOKEN_WORD - i;
+		const usize n = MAX_C_TOKEN_WORD - i;
 		if ((n > filled) || ((filled - n) > 1))
 		{
 			continue;
 		}
 		else if (fStatHash_get(map, kwBuf + (MAX_KWBUF - 1) - n))
 		{
-			i32 l = (lasti > node->curx) ? (i32)(lasti - node->freeSpaceLen) : (i32)lasti;
-			for (u32 k = 0; k < n; --l, ++k)
+			isize l = (lasti > node->curx) ? (isize)(lasti - node->freeSpaceLen) : (isize)lasti;
+			for (usize k = 0; k < n; --l, ++k)
 			{
 				node->syntax[l] = kwCol;
 			}
@@ -183,7 +183,7 @@ void fStx_checkGenericToken(
 		}
 	}
 }
-void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkCToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_C_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
@@ -191,7 +191,7 @@ void fStx_checkCToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, s_keyWordsC, ARRAYSIZE(s_keyWordsC));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkCPPToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_CPP_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
@@ -199,7 +199,7 @@ void fStx_checkCPPToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCo
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, s_keyWordsCPP, ARRAYSIZE(s_keyWordsCPP));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkPyToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_PY_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
@@ -207,7 +207,7 @@ void fStx_checkPyToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, s_keyWordsPy, ARRAYSIZE(s_keyWordsPy));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkJSToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_JS_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
@@ -215,7 +215,7 @@ void fStx_checkJSToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, s_keyWordsJS, ARRAYSIZE(s_keyWordsJS));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkRustToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_RUST_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
@@ -223,7 +223,7 @@ void fStx_checkRustToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwC
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, s_keyWordsRust, ARRAYSIZE(s_keyWordsRust));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkGoToken(fLine_t * restrict node, u32 start, u32 lasti, WORD kwCol)
+void fStx_checkGoToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_GO_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
@@ -239,7 +239,7 @@ bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
 		return false;
 	}
 
-	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -269,14 +269,14 @@ bool fStx_parseCLike(
 	// Calculate feature allowances
 	const bool bAllowPreproc = (lang == fstxC) | (lang == fstxCPP);
 
-	u32 tokenStart = 0;
+	usize tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
 	
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
-	u32 previ = 0;
-	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	usize previ = 0;
+	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -497,13 +497,13 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 		
 	*/
 	
-	u32 firstChIdx = 0;
+	usize firstChIdx = 0;
 	bool done = false, headingMode = false, valueMode = false, bracketMode = false,
 		extraBracketMode = false, italicsMode = false, boldMode = false,
 		containsStar = false, strikeMode = false, parenMode1 = false,
 		parenMode2 = false, enable = false, coneMode = false, codeMode = false;
 	
-	for (u32 i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
+	for (usize i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -701,7 +701,7 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		return false;
 	}
 
-	u32 tokenStart = 0;
+	usize tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false, comment = false, blockComment = false,
 		preComment = false, firstQuote = false;
@@ -709,8 +709,8 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 	littleQuote  = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
-	u32 previ = 0, prevprevi = UINT32_MAX;
-	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	usize previ = 0, prevprevi = UINT32_MAX;
+	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -926,7 +926,7 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
 		isZero = false, hex = false, octal = false;
 	
-	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1060,8 +1060,8 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 	propertyMode = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
-	u32 previ = 0;
-	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	usize previ = 0;
+	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1245,9 +1245,9 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
-	u32 comm[5] = { 0 };
+	usize comm[5] = { 0 };
 	
-	for (u32 i = 0, j = 0; i < node->lineEndx; ++i, ++j)
+	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
 		{

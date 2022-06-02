@@ -131,7 +131,7 @@ void fSettings_reset(fSettings_t * restrict self)
 	}
 }
 
-bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u32 errMax)
+bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, usize errMax)
 {
 	assert(self != NULL);
 	assert(errArr != NULL);
@@ -141,7 +141,7 @@ bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u
 		errArr[0] = L'\0';
 		return false;
 	}
-	const usize copyLen = min_usize(wcslen(self->lastErr) + 1, (usize)errMax);
+	const usize copyLen = min_usize(wcslen(self->lastErr) + 1, errMax);
 	memcpy(errArr, self->lastErr, sizeof(wchar) * copyLen);
 	self->lastErr[copyLen - 1] = L'\0';
 	return true;
@@ -244,7 +244,11 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	}
 	if (mi != 0)
 	{
-		self->tabWidth = (u8)clamp_u32((u32)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINTAB, FEMTO_SETTINGS_MAXTAB);
+		self->tabWidth = (u8)clamp_u64(
+			(u64)wcstoul(farg.begin, NULL, 10),
+			(u64)FEMTO_SETTINGS_MINTAB,
+			(u64)FEMTO_SETTINGS_MAXTAB
+		);
 		if (!fSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);
@@ -294,7 +298,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	}
 	if (mi != 0)
 	{
-		self->whitespaceCol = (u16)clamp_u32((u32)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
+		self->whitespaceCol = (WORD)clamp_usize((usize)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -312,7 +316,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	}
 	if (mi != 0)
 	{
-		self->lineNumCol = (u16)clamp_u32((u32)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
+		self->lineNumCol = (WORD)clamp_usize((usize)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
 		argumentsUsed[mi - 1] = true;
 	}
 
@@ -479,7 +483,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 	}
 
 	char * bytes = NULL;
-	u32 bytesLen = 0;
+	usize bytesLen = 0;
 	// Read bytes
 	const wchar * restrict result = femto_readBytes(hset, &bytes, &bytesLen);
 	// Close file
