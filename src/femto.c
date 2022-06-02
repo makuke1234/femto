@@ -450,7 +450,7 @@ static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restri
 static inline void s_femto_inner_openTab(fData_t * restrict peditor, wchar * restrict tempstr, const wchar * restrict inp)
 {
 	const wchar * restrict res = NULL;
-	const i32 oldIdx = peditor->fileIdx;
+	const isize oldIdx = peditor->fileIdx;
 	if (fData_openTab(peditor, inp) && ((res = fFile_read(peditor->files[peditor->fileIdx])) == NULL) )
 	{
 		swprintf_s(
@@ -1090,7 +1090,7 @@ bool femto_loop(fData_t * restrict peditor)
 						fLine_moveCursorVert(&pfile->data.currentNode, (i32)pos.Y);
 						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
 						// Now move the cursor to correct X position
-						fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (u32)pos.X + pfile->data.curx, peditor->settings.tabWidth));
+						fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
 						fLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
 						pfile->data.lastx = pfile->data.currentNode->virtcurx;
 						fData_refreshEdit(peditor);
@@ -1197,7 +1197,7 @@ void femto_asyncDrawStop(fData_t * restrict pdata)
 	DeleteCriticalSection(&dt->crit);
 }
 
-bool femto_updateScrbuf(fData_t * restrict peditor, u32 * curline)
+bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict curline)
 {
 	assert(peditor != NULL);
 	assert(curline != NULL);
@@ -1260,19 +1260,19 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	
 	if (pfile->data.bTyped || (pfile->data.pcury == NULL))
 	{
-		const u32 prevcurx = pfile->data.curx;
+		const usize prevcurx = pfile->data.curx;
 		const fLine_t * restrict prevcury = pfile->data.pcury;
 
 		pfile->data.bTyped = false;
 		fFile_updateCury(pfile, peditor->scrbuf.h - 2);
-		const i32 delta = (i32)curnode->virtcurx - (i32)peditor->scrbuf.w - (i32)pfile->data.curx + (i32)pfile->data.noLen + 1;
+		const isize delta = (isize)curnode->virtcurx - (isize)peditor->scrbuf.w - (isize)pfile->data.curx + (isize)pfile->data.noLen + 1;
 		if (delta >= 0)
 		{
-			pfile->data.curx += (u32)(delta + 1);
+			pfile->data.curx += (usize)(delta + 1);
 		}
 		else if (pfile->data.curx > curnode->virtcurx)
 		{
-			pfile->data.curx = max_u32(1, curnode->curx) - 1;
+			pfile->data.curx = max_usize(1, curnode->curx) - 1;
 		}
 
 		if ((prevcurx != pfile->data.curx) || (prevcury != pfile->data.pcury))
@@ -1306,7 +1306,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	
 	// if line is active line and cursor fits
 	fLine_calcVirtCursor(node, peditor->settings.tabWidth);
-	const u32 curx = node->virtcurx - pfile->data.curx + pfile->data.noLen + 1;
+	const usize curx = node->virtcurx - pfile->data.curx + pfile->data.noLen + 1;
 	if ((node == pfile->data.currentNode) && (curx < peditor->scrbuf.w))
 	{
 		// Get cursor information
@@ -1328,8 +1328,8 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	// Drawing
 
 	// Advance idx by file.data.curx
-	u32 idx = 0;
-	for (u32 j = 0; (j < pfile->data.curx) && (idx < node->lineEndx);)
+	usize idx = 0;
+	for (usize j = 0; (j < pfile->data.curx) && (idx < node->lineEndx);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1344,7 +1344,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	// Check to include tab character
 	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
-	u32 number = (!peditor->settings.bRelLineNums || (node == curnode)) ? (u32)node->lineNumber : (u32)labs((long)curnode->lineNumber - (long)node->lineNumber);
+	usize number = (!peditor->settings.bRelLineNums || (node == curnode)) ? (usize)node->lineNumber : (usize)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	const u8 noLen = (u8)log10((f64)number) + 1;
 	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
 	destination[pfile->data.noLen].Char.UnicodeChar = L'|';
@@ -1363,7 +1363,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		fData_statusMsg(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}
 
-	for (u32 startj = (u32)pfile->data.noLen + 1, j = startj; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
+	for (usize startj = (usize)pfile->data.noLen + 1, j = startj; (idx < node->lineEndx) && (j < peditor->scrbuf.w);)
 	{
 		if ((idx == node->curx) && (node->freeSpaceLen > 0))
 		{
@@ -1374,11 +1374,11 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		destination[j].Attributes = FEMTO_DEFAULT_COLOR;
 		if (node->line[idx] == L'\t')
 		{
-			u32 realIdx = j - startj + pfile->data.curx;
+			const usize realIdx = j - startj + pfile->data.curx;
 			destination[j].Char.UnicodeChar = peditor->settings.bWhiteSpaceVis ? peditor->settings.whitespaceCh  : L' ';
 			destination[j].Attributes       = peditor->settings.bWhiteSpaceVis ? peditor->settings.whitespaceCol : destination[j].Attributes;
 			++j;
-			for (u32 end = j + peditor->settings.tabWidth - ((realIdx) % peditor->settings.tabWidth) - 1; (j < end) && (j < peditor->scrbuf.w); ++j)
+			for (usize end = j + peditor->settings.tabWidth - ((realIdx) % peditor->settings.tabWidth) - 1; (j < end) && (j < peditor->scrbuf.w); ++j)
 			{
 				destination[j].Char.UnicodeChar = L' ';
 			} 
@@ -1386,7 +1386,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		else
 		{
 			destination[j].Char.UnicodeChar = node->line[idx];
-			const u32 stxIdx = (idx > node->curx) ? (idx - node->freeSpaceLen) : idx;
+			const usize stxIdx = (idx > node->curx) ? (idx - node->freeSpaceLen) : idx;
 			destination[j].Attributes = (node->syntax != NULL) ? node->syntax[stxIdx] : destination[j].Attributes;
 			++j;
 		}
@@ -1404,7 +1404,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	return true;
 }
 
-u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, u32 * restrict sz)
+u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, usize * restrict sz)
 {
 	assert(utf8 != NULL);
 	assert(putf16 != NULL);
@@ -1418,19 +1418,19 @@ u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict pu
 		0
 	);
 	// Try to allocate memory
-	if ((sz != NULL) && (*sz < size))
+	if ((sz != NULL) && (*sz < (usize)size))
 	{
-		vptr mem = realloc(*putf16, size * sizeof(wchar));
+		vptr mem = realloc(*putf16, (usize)size * sizeof(wchar));
 		if (mem == NULL)
 		{
 			return 0;
 		}
 		*putf16 = mem;
-		*sz     = size;
+		*sz     = (usize)size;
 	}
 	else if ((*putf16 == NULL) || (sz == NULL))
 	{
-		*putf16 = malloc(size * sizeof(wchar));
+		*putf16 = malloc((usize)size * sizeof(wchar));
 		if (*putf16 == NULL)
 		{
 			return 0;
@@ -1455,7 +1455,7 @@ u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict pu
 	}
 	return size;
 }
-u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, u32 * restrict sz)
+u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, usize * restrict sz)
 {
 	assert(utf16 != NULL);
 	assert(putf8 != NULL);
@@ -1471,19 +1471,19 @@ u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict pu
 	);
 
 	// Alloc mem
-	if ((sz != NULL) && (*sz < size))
+	if ((sz != NULL) && (*sz < (usize)size))
 	{
-		vptr mem = realloc(*putf8, size * sizeof(char));
+		vptr mem = realloc(*putf8, (usize)size * sizeof(char));
 		if (mem == NULL)
 		{
 			return 0;
 		}
 		*putf8 = mem;
-		*sz    = size;
+		*sz    = (usize)size;
 	}
 	else if ((*putf8 == NULL) || (sz == NULL))
 	{
-		*putf8 = malloc(size * sizeof(char));
+		*putf8 = malloc((usize)size * sizeof(char));
 		if (*putf8 == NULL)
 		{
 			return 0;
@@ -1510,18 +1510,18 @@ u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict pu
 	}
 	return size;
 }
-u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq)
+usize femto_strnToLines(wchar * restrict utf16, usize chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq)
 {
-	assert(utf16 != NULL);
-	assert(lines != NULL);
+	assert(utf16  != NULL);
+	assert(lines  != NULL);
 	assert(eolSeq != NULL);
 
 	// Count number of newline characters (to count number of lines - 1)
-	u32 newlines = 1;
+	usize newlines = 1;
 	
 	// Set default EOL sequence
 	*eolSeq = eolDEF;
-	for (u32 i = 0; i < chars; ++i)
+	for (usize i = 0; i < chars; ++i)
 	{
 		if (utf16[i] == L'\r')
 		{
@@ -1542,8 +1542,8 @@ u32 femto_strnToLines(wchar * restrict utf16, u32 chars, wchar *** restrict line
 	}
 
 	const bool isCRLF = (*eolSeq == eolCRLF);
-	u32 starti = 0, j = 0;
-	for (u32 i = 0; i < chars; ++i)
+	usize starti = 0, j = 0;
+	for (usize i = 0; i < chars; ++i)
 	{
 		if ((utf16[i] == L'\n') || (utf16[i] == L'\r'))
 		{
@@ -1598,7 +1598,7 @@ HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 
 	return hfile;
 }
-const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restrict bytesLen)
+const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * restrict bytesLen)
 {
 	assert(bytes    != NULL);
 	assert(bytesLen != NULL);
@@ -1607,7 +1607,13 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restri
 	{
 		return L"File opening error!";
 	}
-	DWORD fileSize = GetFileSize(hfile, NULL);
+
+	usize fileSize;
+	{
+		LARGE_INTEGER li;
+		fileSize = GetFileSizeEx(hfile, &li) ? (usize)li.QuadPart : 0;
+	}
+
 	if ((fileSize >= *bytesLen) || (*bytes == NULL))
 	{
 		vptr mem = realloc(*bytes, fileSize + 1);
@@ -1619,10 +1625,10 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, u32 * restri
 		*bytesLen = fileSize + 1;
 	}
 
-	BOOL readFileRes = ReadFile(
+	const BOOL readFileRes = ReadFile(
 		hfile,
 		*bytes,
-		fileSize,
+		(DWORD)fileSize,
 		NULL,
 		NULL
 	);

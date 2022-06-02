@@ -202,6 +202,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 * 2.1 (planned)
 	* [ ] Proper text copying/pasting support
 		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
+	* [x] Port codebase to use universal integer sizes `size_t` & `ssize_t` (signed)
 
 * 2.0
 	* [x] More common C++ keywords

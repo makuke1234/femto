@@ -483,7 +483,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 	}
 
 	char * bytes = NULL;
-	u32 bytesLen = 0;
+	usize bytesLen = 0;
 	// Read bytes
 	const wchar * restrict result = femto_readBytes(hset, &bytes, &bytesLen);
 	// Close file

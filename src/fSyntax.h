@@ -44,6 +44,7 @@ typedef enum fSyntax
 	fstxGo,
 
 	fstxSIZE
+
 } fSyntax_e, fStx_e;
 
 // Detects syntax from filename
@@ -55,7 +56,7 @@ const char * fStx_name(fStx_e fs);
 bool fStx_autoAlloc(struct fLine * restrict node);
 
 // Tokeniser function signature for fStx_parseCLike
-typedef void (*fStx_tokeniserFunc_t)(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+typedef void (*fStx_tokeniserFunc_t)(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
 
 // Token parsers
 /**
@@ -68,17 +69,17 @@ typedef void (*fStx_tokeniserFunc_t)(struct fLine * restrict node, u32 start, u3
  * @param map Pointer to hashmap
  */
 void fStx_checkGenericToken(
-	struct fLine * restrict node, u32 start, u32 lasti,
+	struct fLine * restrict node, usize start, usize lasti,
 	WORD kwCol,
 	const struct fStatHash * restrict map
 );
 
-void fStx_checkCToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
-void fStx_checkCPPToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
-void fStx_checkPyToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
-void fStx_checkJSToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
-void fStx_checkRustToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
-void fStx_checkGoToken(struct fLine * restrict node, u32 start, u32 lasti, WORD kwCol);
+void fStx_checkCToken(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
+void fStx_checkCPPToken(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
+void fStx_checkPyToken(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
+void fStx_checkJSToken(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
+void fStx_checkRustToken(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
+void fStx_checkGoToken(struct fLine * restrict node, usize start, usize lasti, WORD kwCol);
 
 // Syntax parsers
 

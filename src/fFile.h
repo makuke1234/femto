@@ -29,7 +29,7 @@ typedef struct fFile
 		fLine_t * firstNode;
 		fLine_t * currentNode;
 		fLine_t * pcury;
-		u32 curx, lastx;
+		usize curx, lastx;
 
 		u8 noLen;
 
@@ -90,7 +90,7 @@ void fFile_clearLines(fFile_t * restrict self);
  * @param bytesLen Address of array length in bytes
  * @return const wchar* Error message, NULL on success
  */
-const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u32 * restrict bytesLen);
+const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, usize * restrict bytesLen);
 /**
  * @brief Opens file with last given filename, reads file contents to internal
  * structure, ready to be shown on screen
@@ -113,9 +113,9 @@ typedef enum fFile_checkRes
  * @param self Pointer to fFile_t structure
  * @param editorContents Address of pointer receiving data from editor's screen, can be NULL
  * @param editorContLen Address of variable receiving size of editor's screen data, can be NULL
- * @return i32 Error code
+ * @return ffcr_e Error code
  */
-ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, u32 * editorContLen);
+ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize * editorContLen);
 
 typedef enum fFile_writeRes
 {
@@ -145,7 +145,7 @@ i32 fFile_write(fFile_t * restrict self);
  * @return true Success
  * @return false Failure
  */
-bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u32 tabWidth);
+bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth);
 /**
  * @brief Inserts a special character to current line
  * 
@@ -202,7 +202,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height);
  * @param height Editor window height
  * @param deltaLines Lines to scroll, positive values mean scrolling down, negative values mean scrolling up
  */
-void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines);
+void fFile_scrollVert(fFile_t * restrict self, u32 height, isize deltaLines);
 /**
  * @brief Scrolls current viewpoint if possible, updates viewpoint if necessary
  * 
@@ -210,7 +210,7 @@ void fFile_scrollVert(fFile_t * restrict self, u32 height, i32 deltaLines);
  * @param width Editor window width
  * @param deltaCh Characters to scroll, positive values mean scrolling right, negative values mean scrolling left
  */
-void fFile_scrollHor(fFile_t * restrict self, u32 width, i32 deltaCh);
+void fFile_scrollHor(fFile_t * restrict self, u32 width, isize deltaCh);
 
 
 /**

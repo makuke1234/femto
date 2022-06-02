@@ -84,13 +84,13 @@ bool fData_init(fData_t * restrict self)
 		return false;
 	}
 
-	self->scrbuf.mem = malloc((usize)(self->scrbuf.w * self->scrbuf.h) * sizeof(CHAR_INFO));
+	self->scrbuf.mem = malloc((usize)self->scrbuf.w * (usize)self->scrbuf.h * sizeof(CHAR_INFO));
 	if (self->scrbuf.mem == NULL)
 	{
 		return false;
 	}
 
-	for (u32 i = 0, sz = self->scrbuf.w * self->scrbuf.h; i < sz; ++i)
+	for (usize i = 0, sz = (usize)self->scrbuf.w * (usize)self->scrbuf.h; i < sz; ++i)
 	{
 		self->scrbuf.mem[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = L' ' },
@@ -254,9 +254,9 @@ void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, co
 	assert(self->scrbuf.mem != NULL);
 	assert(message != NULL);
 
-	const u32 effLen = min_u32((u32)wcslen(message), self->scrbuf.w);
+	const usize effLen = min_usize(wcslen(message), (usize)self->scrbuf.w);
 	CHAR_INFO * restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
-	for (u32 i = 0; i < effLen; ++i)
+	for (usize i = 0; i < effLen; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = message[i] },
@@ -265,12 +265,12 @@ void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, co
 	}
 	if (colorData != NULL)
 	{
-		for (u32 i = 0; i < effLen; ++i)
+		for (usize i = 0; i < effLen; ++i)
 		{
 			lastLine[i].Attributes = colorData[i];
 		}
 	}
-	for (u32 i = effLen; i < self->scrbuf.w; ++i)
+	for (usize i = effLen; i < self->scrbuf.w; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
 			.Char       = { .UnicodeChar = L' ' },
@@ -303,7 +303,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 	// Reallocate tabs
 	if (self->filesSize >= self->filesMax)
 	{
-		const u32 newcap = (self->filesSize + 1) * 2;
+		const usize newcap = (self->filesSize + 1) * 2;
 		vptr mem = realloc(self->files, sizeof(fFile_t *) * newcap);
 		if (mem == NULL)
 		{
@@ -353,7 +353,7 @@ void fData_closeTab(fData_t * restrict self)
 	
 	// Remove file from tab list
 	--self->filesSize;
-	for (u32 i = (u32)self->fileIdx; i < self->filesSize; ++i)
+	for (usize i = (usize)self->fileIdx; i < self->filesSize; ++i)
 	{
 		self->files[i]     = self->files[i + 1];
 		self->cursorpos[i] = self->cursorpos[i + 1];
