@@ -629,133 +629,231 @@ static inline void s_femto_inner_find(fData_t * restrict peditor, wchar * restri
 	}
 }
 
-bool femto_loop(fData_t * restrict peditor)
+static inline bool s_femto_inner_kbdHandle(
+	fData_t * restrict peditor,
+	const KEY_EVENT_RECORD * restrict ir
+)
 {
 	assert(peditor != NULL);
+	assert(ir != NULL);
+	
 	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
 	assert(pfile != NULL);
+	
+	static wchar prevkey, prevwVirtKey;
 
-	INPUT_RECORD ir;
-	DWORD evRead;
-	if (!ReadConsoleInputW(peditor->conIn, &ir, 1, &evRead) || !evRead)
+	static u32 keyCount = 1;
+	static bool waitingEnc = false;
+
+	wchar key      = ir->uChar.UnicodeChar;
+	wchar wVirtKey = ir->wVirtualKeyCode;
+	const bool keydown = ir->bKeyDown != 0;
+
+	if (keydown)
 	{
-		return true;
-	}
+		keyCount = ((key == prevkey) && (wVirtKey == prevwVirtKey)) ? (keyCount + 1) : 1;
+		
+		wchar tempstr[MAX_STATUS];
+		bool draw = true;
 
-	if (ir.EventType == KEY_EVENT)
-	{
-		static wchar prevkey, prevwVirtKey;
-
-		static u32 keyCount = 1;
-		static bool waitingEnc = false;
-
-		wchar key      = ir.Event.KeyEvent.uChar.UnicodeChar;
-		wchar wVirtKey = ir.Event.KeyEvent.wVirtualKeyCode;
-		const bool keydown = ir.Event.KeyEvent.bKeyDown != 0;
-
-		if (keydown)
+		if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sacCTRL_Q) && (key != sacCTRL_Q)))	// Exit on Escape or Ctrl+Q
 		{
-			keyCount = ((key == prevkey) && (wVirtKey == prevwVirtKey)) ? (keyCount + 1) : 1;
-			
-			wchar tempstr[MAX_STATUS];
-			bool draw = true;
-
-			if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sacCTRL_Q) && (key != sacCTRL_Q)))	// Exit on Escape or Ctrl+Q
+			if (peditor->psearchTerm != NULL)
 			{
-				if (peditor->psearchTerm != NULL)
-				{
-					peditor->psearchTerm = NULL;
-					wcscpy_s(tempstr, MAX_STATUS, L"Exited from search!");
-					pfile->data.bUpdateAll = true;
-					fData_refreshEdit(peditor);
-				}
-				else if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
+				peditor->psearchTerm = NULL;
+				wcscpy_s(tempstr, MAX_STATUS, L"Exited from search!");
+				pfile->data.bUpdateAll = true;
+				fData_refreshEdit(peditor);
+			}
+			else if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
+			{
+				return false;
+			}
+		}
+		else if (waitingEnc && (key != sacCTRL_E))
+		{
+			bool done = true;
+			switch (wVirtKey)
+			{
+			// CRLF
+			case L'F':
+				pfile->eolSeq = eolCRLF;
+				break;
+			// LF
+			case L'L':
+				pfile->eolSeq = eolLF;
+				break;
+			// CR
+			case L'C':
+				pfile->eolSeq = eolCR;
+				break;
+			default:
+				wcscpy_s(tempstr, MAX_STATUS, L"Unknown EOL combination!");
+				done = false;
+			}
+			if (done)
+			{
+				swprintf_s(
+					tempstr,
+					MAX_STATUS,
+					L"Using %s%s EOL sequences",
+					(pfile->eolSeq & eolCR) ? L"CR" : L"",
+					(pfile->eolSeq & eolLF) ? L"LF" : L""
+				);
+			}
+
+			waitingEnc = false;
+		}
+		else if ((key == sacCTRL_N) && (prevkey != sacCTRL_N))
+		{
+			s_femto_inner_openTab(peditor, tempstr, NULL);
+		}
+		else if (key == sacCTRL_O)
+		{
+			wcscpy_s(tempstr, MAX_STATUS, L"Open :");
+			fData_statusMsg(peditor, tempstr, NULL);
+
+			wchar inp[MAX_STATUS];
+			if (femto_askInput(peditor, inp, MAX_STATUS))
+			{
+				// Try to create new tab and open file
+				s_femto_inner_openTab(peditor, tempstr, inp);
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Open canceled by user");
+			}
+		}
+		else if ((key == sacCTRL_W) && (prevkey != sacCTRL_W))
+		{
+			if (peditor->filesSize == 1)
+			{
+				if (!s_femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
 				{
 					return false;
 				}
 			}
-			else if (waitingEnc && (key != sacCTRL_E))
+			else
 			{
-				bool done = true;
-				switch (wVirtKey)
+				s_femto_inner_closeTab(peditor, tempstr, false);
+			}
+		}
+		else if ((key == sacCTRL_R) && (prevkey != sacCTRL_R))	// Reload file
+		{
+			bool reload = true;
+			if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
+			{
+				// Check for changes
+				if (fFile_checkUnsaved(pfile, NULL, NULL) != ffcrNOTHING_NEW)
 				{
-				// CRLF
-				case L'F':
-					pfile->eolSeq = eolCRLF;
-					break;
-				// LF
-				case L'L':
-					pfile->eolSeq = eolLF;
-					break;
-				// CR
-				case L'C':
-					pfile->eolSeq = eolCR;
-					break;
-				default:
-					wcscpy_s(tempstr, MAX_STATUS, L"Unknown EOL combination!");
-					done = false;
+					reload = false;
+					wcscpy_s(tempstr, MAX_STATUS, L"Unsaved work detected. Press Ctrl+Shift+R to confirm reload");
 				}
-				if (done)
+			}
+			if (reload)
+			{
+				const wchar * restrict res;
+				if ((res = fFile_read(pfile)) != NULL)
+				{
+					wcscpy_s(tempstr, MAX_STATUS, res);
+				}
+				else
 				{
 					swprintf_s(
 						tempstr,
 						MAX_STATUS,
-						L"Using %s%s EOL sequences",
+						L"File reloaded successfully! %s%s EOL sequences",
 						(pfile->eolSeq & eolCR) ? L"CR" : L"",
 						(pfile->eolSeq & eolLF) ? L"LF" : L""
 					);
 				}
-
-				waitingEnc = false;
+				fData_refreshEdit(peditor);
 			}
-			else if ((key == sacCTRL_N) && (prevkey != sacCTRL_N))
+		}
+		else if ((key == sacCTRL_S) && (prevkey != sacCTRL_S))	// Save file
+		{
+			if (pfile->fileName == NULL)
 			{
-				s_femto_inner_openTab(peditor, tempstr, NULL);
+				s_femto_inner_saveAs(peditor, tempstr);
 			}
-			else if (key == sacCTRL_O)
+			else
 			{
-				wcscpy_s(tempstr, MAX_STATUS, L"Open :");
-				fData_statusMsg(peditor, tempstr, NULL);
-
-				wchar inp[MAX_STATUS];
-				if (femto_askInput(peditor, inp, MAX_STATUS))
+				const isize saved = fFile_write(pfile);
+				switch (saved)
 				{
-					// Try to create new tab and open file
-					s_femto_inner_openTab(peditor, tempstr, inp);
+				case ffwrNOTHING_NEW:
+					wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
+					break;
+				case ffwrOPEN_ERROR:
+					wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
+					break;
+				case ffwrWRITE_ERROR:
+					wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
+					break;
+				case ffwrMEM_ERROR:
+					wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
+					break;
+				default:
+					swprintf_s(tempstr, MAX_STATUS, L"Wrote %zd bytes", saved);
 				}
-				else
-				{
-					wcscpy_s(tempstr, MAX_STATUS, L"Open canceled by user");
-				}
 			}
-			else if ((key == sacCTRL_W) && (prevkey != sacCTRL_W))
+		}
+		else if ((key == sacCTRL_E) && (prevkey != sacCTRL_E))
+		{
+			waitingEnc = true;
+			wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
+		}
+		else if (key == sacCTRL_F)
+		{
+			s_femto_inner_find(peditor, tempstr, false);
+		}
+		// Normal keys
+		else if (key > sacLAST_CODE)
+		{
+			swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
+			if (fFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 			{
-				if (peditor->filesSize == 1)
+				fData_refreshEditAsync(peditor);
+			}
+		}
+		// Special keys
+		else
+		{
+			bool send = true;
+			switch (wVirtKey)
+			{
+			// Save as...
+			case L'S':
+				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
+					((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S') )
 				{
-					if (!s_femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
+					send = false;
+					s_femto_inner_saveAs(peditor, tempstr);
+				}
+				break;
+			case L'W':
+				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
+					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'W') )
+				{
+					send = false;
+					if (peditor->filesSize == 1)
 					{
-						return false;
+						if (!s_femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
+						{
+							return false;
+						}
+					}
+					else
+					{
+						s_femto_inner_closeTab(peditor, tempstr, true);
 					}
 				}
-				else
+				break;
+			case L'R':
+				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
+					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
 				{
-					s_femto_inner_closeTab(peditor, tempstr, false);
-				}
-			}
-			else if ((key == sacCTRL_R) && (prevkey != sacCTRL_R))	// Reload file
-			{
-				bool reload = true;
-				if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
-				{
-					// Check for changes
-					if (fFile_checkUnsaved(pfile, NULL, NULL) != ffcrNOTHING_NEW)
-					{
-						reload = false;
-						wcscpy_s(tempstr, MAX_STATUS, L"Unsaved work detected. Press Ctrl+Shift+R to confirm reload");
-					}
-				}
-				if (reload)
-				{
+					send = false;
 					const wchar * restrict res;
 					if ((res = fFile_read(pfile)) != NULL)
 					{
@@ -773,341 +871,326 @@ bool femto_loop(fData_t * restrict peditor)
 					}
 					fData_refreshEdit(peditor);
 				}
-			}
-			else if ((key == sacCTRL_S) && (prevkey != sacCTRL_S))	// Save file
+				break;
+			case VK_TAB:
 			{
-				if (pfile->fileName == NULL)
+				const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+				
+				// Shuffle between tabs
+				if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
 				{
-					s_femto_inner_saveAs(peditor, tempstr);
-				}
-				else
-				{
-					const isize saved = fFile_write(pfile);
-					switch (saved)
-					{
-					case ffwrNOTHING_NEW:
-						wcscpy_s(tempstr, MAX_STATUS, L"Nothing new to save");
-						break;
-					case ffwrOPEN_ERROR:
-						wcscpy_s(tempstr, MAX_STATUS, L"File open error!");
-						break;
-					case ffwrWRITE_ERROR:
-						wcscpy_s(tempstr, MAX_STATUS, L"File is write-protected!");
-						break;
-					case ffwrMEM_ERROR:
-						wcscpy_s(tempstr, MAX_STATUS, L"Memory allocation error!");
-						break;
-					default:
-						swprintf_s(tempstr, MAX_STATUS, L"Wrote %zd bytes", saved);
-					}
-				}
-			}
-			else if ((key == sacCTRL_E) && (prevkey != sacCTRL_E))
-			{
-				waitingEnc = true;
-				wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
-			}
-			else if (key == sacCTRL_F)
-			{
-				s_femto_inner_find(peditor, tempstr, false);
-			}
-			// Normal keys
-			else if (key > sacLAST_CODE)
-			{
-				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
-				if (fFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
-				{
-					fData_refreshEditAsync(peditor);
-				}
-			}
-			// Special keys
-			else
-			{
-				bool send = true;
-				switch (wVirtKey)
-				{
-				// Save as...
-				case L'S':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-						((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S') )
-					{
-						send = false;
-						s_femto_inner_saveAs(peditor, tempstr);
-					}
-					break;
-				case L'W':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) && (GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'W'))
-					{
-						send = false;
-						if (peditor->filesSize == 1)
-						{
-							if (!s_femto_inner_quit(peditor, tempstr, key, L"Ctrl+Shift+W"))
-							{
-								return false;
-							}
-						}
-						else
-						{
-							s_femto_inner_closeTab(peditor, tempstr, true);
-						}
-					}
-					break;
-				case L'R':
-					if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-						(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
-					{
-						send = false;
-						const wchar * restrict res;
-						if ((res = fFile_read(pfile)) != NULL)
-						{
-							wcscpy_s(tempstr, MAX_STATUS, res);
-						}
-						else
-						{
-							swprintf_s(
-								tempstr,
-								MAX_STATUS,
-								L"File reloaded successfully! %s%s EOL sequences",
-								(pfile->eolSeq & eolCR) ? L"CR" : L"",
-								(pfile->eolSeq & eolLF) ? L"LF" : L""
-							);
-						}
-						fData_refreshEdit(peditor);
-					}
-					break;
-				case VK_TAB:
-				{
-					const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-					
-					// Shuffle between tabs
-					if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
-					{
-						send = false;
-						if (shift)
-						{
-							swprintf_s(tempstr, MAX_STATUS, L"Previous tab #%u", keyCount);
-							--peditor->fileIdx;
-							peditor->fileIdx = (peditor->fileIdx < 0) ? (isize)peditor->filesSize - 1 : peditor->fileIdx;
-						}
-						else
-						{
-							swprintf_s(tempstr, MAX_STATUS, L"Next tab #%u", keyCount);
-							++peditor->fileIdx;
-							peditor->fileIdx = (peditor->fileIdx >= (isize)peditor->filesSize) ? 0 : peditor->fileIdx;
-						}
-						
-						if (peditor->filesSize > 1)
-						{
-							peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
-							fData_refreshEdit(peditor);
-							femto_setConTitle(peditor->files[peditor->fileIdx]->fileName);
-						}
-					}
-					else if (shift)
-					{
-						swprintf_s(tempstr, MAX_STATUS, L"\u2191 + 'TAB' #%u", keyCount);
-						wVirtKey = VK_OEM_BACKTAB;
-					}
-					else
-					{
-						swprintf_s(tempstr, MAX_STATUS, L"'TAB' #%u", keyCount);
-					}
-					break;
-				}
-				case VK_F2:
-				case VK_F3:
 					send = false;
-					peditor->bDirBack = (wVirtKey == VK_F2);
-					s_femto_inner_searchTerm(peditor, tempstr, false);
-					break;
-				case VK_DELETE:
-				{
-					const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-					// Check for shift to alt key
-					if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
+					if (shift)
 					{
-						swprintf_s(tempstr, MAX_STATUS, L"%s + 'DEL' #%u", shift ? L"\u2191" : L"'ALT'", keyCount);
-						wVirtKey = FEMTO_SHIFT_DEL;
+						swprintf_s(tempstr, MAX_STATUS, L"Previous tab #%u", keyCount);
+						--peditor->fileIdx;
+						peditor->fileIdx = (peditor->fileIdx < 0) ? (isize)peditor->filesSize - 1 : peditor->fileIdx;
 					}
 					else
 					{
-						swprintf_s(tempstr, MAX_STATUS, L"'DEL' #%u", keyCount);
+						swprintf_s(tempstr, MAX_STATUS, L"Next tab #%u", keyCount);
+						++peditor->fileIdx;
+						peditor->fileIdx = (peditor->fileIdx >= (isize)peditor->filesSize) ? 0 : peditor->fileIdx;
 					}
-					break;
-				}
-				case VK_UP:		// Up arrow
-					// Check for alt key
-					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+					pfile = peditor->files[peditor->fileIdx];
+					
+					if (peditor->filesSize > 1)
 					{
-						swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2191 #%u", keyCount);
-						wVirtKey = FEMTO_MOVELINE_UP;
-					}
-					else
-					{
-						swprintf_s(tempstr, MAX_STATUS, L"\u2191 #%u", keyCount);
-					}
-					break;
-				case VK_DOWN:	// Down arrow
-					// Check for alt key
-					if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
-					{
-						swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2193 #%u", keyCount);
-						wVirtKey = FEMTO_MOVELINE_DOWN;
-					}
-					else
-					{
-						swprintf_s(tempstr, MAX_STATUS, L"\u2193 #%u", keyCount);
-					}
-					break;
-				case VK_RETURN:	// Enter key
-				case VK_BACK:	// Backspace
-				case VK_LEFT:	// Left arrow
-				case VK_RIGHT:	// Right arrow
-				case VK_PRIOR:	// Page up
-				case VK_NEXT:	// Page down
-				case VK_END:
-				case VK_HOME:
-				{
-					static const wchar * buf[] = {
-						[VK_RETURN] = L"'RET'",
-						[VK_BACK]   = L"'BS'",
-						[VK_LEFT]   = L"\u2190",
-						[VK_RIGHT]  = L"\u2192",
-						[VK_PRIOR]  = L"'PGUP'",
-						[VK_NEXT]   = L"'PGDOWN'",
-						[VK_END]	= L"'END'",
-						[VK_HOME]   = L"'HOME'"
-					};
-					swprintf_s(tempstr, MAX_STATUS, L"%s #%u", buf[wVirtKey], keyCount);
-					break;
-				}
-				case VK_CAPITAL:
-					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off");
-					break;
-				case VK_NUMLOCK:
-					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_NUMLOCK) & 0x0001) ? L"'NUMLOCK' On" : L"'NUMLOCK' Off");
-					break;
-				case VK_SCROLL:
-					wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_SCROLL) & 0x0001) ? L"'SCRLOCK' On" : L"'SCRLOCK' Off");
-					break;
-				default:
-					//draw = false;
-					wcscpy_s(tempstr, MAX_STATUS, L"Unkown key combination!");
-				}
-
-				if (send && fFile_addSpecialCh(pfile, peditor->scrbuf.h, wVirtKey, &peditor->settings))
-				{
-					fData_refreshEdit(peditor);
-				}
-			}
-			if (draw)
-			{
-				fData_statusMsg(peditor, tempstr, NULL);
-			}
-		}
-		else
-		{
-			key = wVirtKey = 0;
-		}
-
-		prevkey = key;
-		prevwVirtKey = wVirtKey;
-	}
-	// Mouse wheel was used
-	else if (ir.EventType == MOUSE_EVENT)
-	{
-		wchar tempstr[MAX_STATUS];
-		bool draw = true;
-		const bool shift = (GetAsyncKeyState(VK_LSHIFT) & 0x8000) || (GetAsyncKeyState(VK_RSHIFT) & 0x8000);
-
-		if ((ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED) && !shift)
-		{
-			static i32 s_delta = 0;
-			const i32 delta = (i32)(i16)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			fProf_write("Mouse wheel was used, delta: %d", delta);
-
-			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
-
-			i32 lineDelta = 2 * s_delta / WHEEL_DELTA;
-			if (lineDelta != 0)
-			{
-				s_delta -= lineDelta * WHEEL_DELTA / 2;
-				fFile_scrollVert(pfile, peditor->scrbuf.h, -lineDelta);
-				fData_refreshEditAsync(peditor);
-			}
-			swprintf_s(tempstr, MAX_STATUS, L"'WHEEL-%s' %d, %d lines", (delta > 0) ? L"UP" : L"DOWN", delta, lineDelta);
-		}
-		else if ((ir.Event.MouseEvent.dwEventFlags & MOUSE_HWHEELED) || ((ir.Event.MouseEvent.dwEventFlags & MOUSE_WHEELED) && shift))
-		{
-			static i32 s_delta = 0;
-			const i32 delta = (i32)(i16)HIWORD(ir.Event.MouseEvent.dwButtonState);
-			fProf_write("Mouse hwheel was used, delta %d", delta);
-
-			s_delta = ((s_delta > 0 && delta < 0) || (s_delta < 0 && delta > 0)) ? delta : (s_delta + delta);
-
-			i32 chDelta = s_delta / WHEEL_DELTA;
-			if (chDelta != 0)
-			{
-				s_delta -= chDelta * WHEEL_DELTA;
-				fFile_scrollHor(pfile, peditor->scrbuf.w, -2 * chDelta);
-				fData_refreshEditAsync(peditor);
-			}
-			swprintf_s(tempstr, MAX_STATUS, L"'HWHEEL-%s' %d, %d character", (delta > 0) ? L"RIGHT" : L"LEFT", delta, chDelta);
-		}
-		// Mouse click
-		else if (ir.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
-		{
-			// Check if mouse is moving
-			if (ir.Event.MouseEvent.dwEventFlags & MOUSE_MOVED)
-			{
-				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if ((pos.Y == (SHORT)peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
-				{
-					draw = false;
-				}
-				else
-				{
-					pos.X -= (SHORT)(pfile->data.noLen + 1);
-					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
-				}
-			}
-			else
-			{
-				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if ((pos.Y == (SHORT)peditor->scrbuf.h) || pos.X < (pfile->data.noLen + 1))
-				{
-					draw = false;
-				}
-				else
-				{
-					pos.X -= (SHORT)(pfile->data.noLen + 1);
-					fProf_write("Mouse click @%hd, %hd", pos.X, pos.Y);
-
-					if (pfile->data.pcury != NULL)
-					{
-						pfile->data.currentNode = pfile->data.pcury;
-						const fLine_t * lastcurnode = pfile->data.currentNode;
-						fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
-						pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
-						// Now move the cursor to correct X position
-						fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
-						fLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
-						pfile->data.lastx = pfile->data.currentNode->virtcurx;
+						pfile->data.bUpdateAll = true;
 						fData_refreshEdit(peditor);
+						femto_setConTitle(pfile->fileName);
 					}
-					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
 				}
+				else if (shift)
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"\u2191 + 'TAB' #%u", keyCount);
+					wVirtKey = VK_OEM_BACKTAB;
+				}
+				else
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"'TAB' #%u", keyCount);
+				}
+				break;
+			}
+			case VK_F2:
+			case VK_F3:
+				send = false;
+				peditor->bDirBack = (wVirtKey == VK_F2);
+				s_femto_inner_searchTerm(peditor, tempstr, false);
+				break;
+			case VK_DELETE:
+			{
+				const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+				// Check for shift to alt key
+				if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"%s + 'DEL' #%u", shift ? L"\u2191" : L"'ALT'", keyCount);
+					wVirtKey = FEMTO_SHIFT_DEL;
+				}
+				else
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"'DEL' #%u", keyCount);
+				}
+				break;
+			}
+			case VK_UP:		// Up arrow
+				// Check for alt key
+				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2191 #%u", keyCount);
+					wVirtKey = FEMTO_MOVELINE_UP;
+				}
+				else
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"\u2191 #%u", keyCount);
+				}
+				break;
+			case VK_DOWN:	// Down arrow
+				// Check for alt key
+				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2193 #%u", keyCount);
+					wVirtKey = FEMTO_MOVELINE_DOWN;
+				}
+				else
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"\u2193 #%u", keyCount);
+				}
+				break;
+			case VK_RETURN:	// Enter key
+			case VK_BACK:	// Backspace
+			case VK_LEFT:	// Left arrow
+			case VK_RIGHT:	// Right arrow
+			case VK_PRIOR:	// Page up
+			case VK_NEXT:	// Page down
+			case VK_END:
+			case VK_HOME:
+			{
+				static const wchar * buf[] = {
+					[VK_RETURN] = L"'RET'",
+					[VK_BACK]   = L"'BS'",
+					[VK_LEFT]   = L"\u2190",
+					[VK_RIGHT]  = L"\u2192",
+					[VK_PRIOR]  = L"'PGUP'",
+					[VK_NEXT]   = L"'PGDOWN'",
+					[VK_END]	= L"'END'",
+					[VK_HOME]   = L"'HOME'"
+				};
+				swprintf_s(tempstr, MAX_STATUS, L"%s #%u", buf[wVirtKey], keyCount);
+				break;
+			}
+			case VK_CAPITAL:
+				wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off");
+				break;
+			case VK_NUMLOCK:
+				wcscpy_s(
+					tempstr, MAX_STATUS,
+					(GetKeyState(VK_NUMLOCK) & 0x0001) ? L"'NUMLOCK' On" : L"'NUMLOCK' Off"
+				);
+				break;
+			case VK_SCROLL:
+				wcscpy_s(
+					tempstr, MAX_STATUS,
+					(GetKeyState(VK_SCROLL) & 0x0001) ? L"'SCRLOCK' On" : L"'SCRLOCK' Off"
+				);
+				break;
+			default:
+				//draw = false;
+				wcscpy_s(tempstr, MAX_STATUS, L"Unkown key combination!");
+			}
+
+			if (send && fFile_addSpecialCh(
+				pfile, peditor->scrbuf.h,
+				wVirtKey, (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0,
+				&peditor->settings
+			))
+			{
+				fData_refreshEdit(peditor);
 			}
 		}
-		else
-		{
-			draw = false;
-		}
-		
 		if (draw)
 		{
 			fData_statusMsg(peditor, tempstr, NULL);
 		}
+	}
+	else
+	{
+		key = wVirtKey = 0;
+	}
+
+	prevkey      = key;
+	prevwVirtKey = wVirtKey;
+
+	return true;
+}
+
+static inline bool s_femto_inner_calcMousePos(
+	const fData_t * restrict peditor,
+	const MOUSE_EVENT_RECORD * restrict ir,
+	COORD * restrict ppos
+)
+{
+	assert(peditor != NULL);
+	assert(ir != NULL);
+	assert(ppos != NULL);
+
+	const fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
+
+	COORD pos = ir->dwMousePosition;
+	const SHORT nolen = (SHORT)(pfile->data.noLen + 1);
+
+	if ((pos.Y == (SHORT)peditor->scrbuf.h) || (pos.X < nolen))
+	{
+		return false;
+	}
+
+	pos.X -= nolen;
+	*ppos = pos;
+	return true;
+}
+static inline i32 s_femto_inner_calcMouseScroll(
+	i32 * restrict s_delta,
+	const MOUSE_EVENT_RECORD * restrict ir,
+	bool * restrict deltaPositive
+)
+{
+	assert(s_delta != NULL);
+	assert(ir != NULL);
+	assert(deltaPositive != NULL);
+
+	const i32 delta = (i32)(i16)HIWORD(ir->dwButtonState);
+	fProf_write("Mouse wheel was used, delta: %d", delta);
+	*deltaPositive = (delta > 0);
+
+	*s_delta = (((*s_delta > 0) && (delta < 0)) || ((*s_delta < 0) && (delta > 0))) ? delta : (*s_delta + delta);
+
+	const i32 lineDelta = *s_delta / WHEEL_DELTA;
+	*s_delta -= lineDelta * WHEEL_DELTA;
+
+	return -2 * lineDelta;
+}
+static inline bool s_femto_inner_mouseHandle(
+	fData_t * restrict peditor,
+	const MOUSE_EVENT_RECORD * restrict ir
+)
+{
+	assert(peditor != NULL);
+	assert(ir != NULL);
+
+	fFile_t * pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
+
+	wchar tempstr[MAX_STATUS];
+	bool draw = true;
+	const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000);
+
+	if ((ir->dwEventFlags & MOUSE_WHEELED) && !shift)
+	{
+		static i32 s_delta = 0;
+		bool deltaPositive;
+		const isize lineDelta = (isize)s_femto_inner_calcMouseScroll(&s_delta, ir, &deltaPositive);
+		draw = (lineDelta != 0);
+
+		if (draw)
+		{
+			fFile_scrollVert(pfile, peditor->scrbuf.h, lineDelta);
+			fData_refreshEditAsync(peditor);
+			swprintf_s(
+				tempstr, MAX_STATUS,
+				L"'WHEEL-%s', %d lines",
+				deltaPositive ? L"UP" : L"DOWN", lineDelta
+			);
+		}
+	}
+	else if ((ir->dwEventFlags & MOUSE_HWHEELED) || ((ir->dwEventFlags & MOUSE_WHEELED) && shift))
+	{
+		static i32 s_delta = 0;
+		bool deltaPositive;
+		const isize chDelta = (isize)s_femto_inner_calcMouseScroll(&s_delta, ir, &deltaPositive);
+		draw = (chDelta != 0);
+		
+		if (draw)
+		{
+			fFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
+			fData_refreshEditAsync(peditor);
+			swprintf_s(
+				tempstr, MAX_STATUS,
+				L"'HWHEEL-%s', %d characters",
+				deltaPositive ? L"RIGHT" : L"LEFT", chDelta
+			);
+		}
+	}
+	// Mouse click
+	else if (ir->dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
+	{
+		COORD pos;
+		// Check whether the mouse is in the right portion of the window or not
+		// If not, don't draw anything on the statusbar
+		draw = s_femto_inner_calcMousePos(peditor, ir, &pos);
+
+		// Check if mouse is moving
+		if (ir->dwEventFlags & MOUSE_MOVED)
+		{
+			if (draw)
+			{
+				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
+			}
+		}
+		else
+		{
+			if (draw)
+			{
+				fProf_write("Mouse click @%hd, %hd", pos.X, pos.Y);
+
+				if (pfile->data.pcury != NULL)
+				{
+					pfile->data.currentNode = pfile->data.pcury;
+					const fLine_t * restrict lastcurnode = pfile->data.currentNode;
+					fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
+					pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
+					// Now move the cursor to correct X position
+					fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
+					fLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
+					pfile->data.lastx = pfile->data.currentNode->virtcurx;
+					fData_refreshEditAsync(peditor);
+				}
+				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
+			}
+		}
+	}
+	else
+	{
+		draw = false;
+	}
+	
+	if (draw)
+	{
+		fData_statusMsg(peditor, tempstr, NULL);
+	}
+
+	return true;
+}
+
+bool femto_loop(fData_t * restrict peditor)
+{
+	assert(peditor != NULL);
+
+	INPUT_RECORD ir;
+	DWORD evRead;
+	if (!ReadConsoleInputW(peditor->conIn, &ir, 1, &evRead) || !evRead)
+	{
+		return true;
+	}
+
+	if (ir.EventType == KEY_EVENT)
+	{
+		return s_femto_inner_kbdHandle(peditor, &ir.Event.KeyEvent);
+	}
+	// Mouse wheel was used
+	else if (ir.EventType == MOUSE_EVENT)
+	{
+		return s_femto_inner_mouseHandle(peditor, &ir.Event.MouseEvent);
 	}
 
 	return true;

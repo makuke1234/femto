@@ -396,7 +396,11 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 	self->data.lastx = node->virtcurx;
 	return true;
 }
-bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSettings_t * pset)
+bool fFile_addSpecialCh(
+	fFile_t * restrict self, u32 height,
+	wchar ch, bool shift,
+	const fSettings_t * pset
+)
 {
 	assert(self != NULL);
 	

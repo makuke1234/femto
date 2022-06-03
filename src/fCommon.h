@@ -65,6 +65,9 @@ typedef unsigned char uchar;
 #define FEMTO_SETTINGS_MINCOLOR 0
 #define FEMTO_SETTINGS_MAXCOLOR UINT8_MAX
 
+#define MAX_CONSOLE_COLORS 16
+
+
 
 #define FEMTO_UNTITLED_NAME L"untitled"
 
