@@ -651,7 +651,7 @@ bool femto_loop(fData_t * restrict peditor)
 
 		wchar key      = ir.Event.KeyEvent.uChar.UnicodeChar;
 		wchar wVirtKey = ir.Event.KeyEvent.wVirtualKeyCode;
-		const bool keydown   = ir.Event.KeyEvent.bKeyDown != 0;
+		const bool keydown = ir.Event.KeyEvent.bKeyDown != 0;
 
 		if (keydown)
 		{
