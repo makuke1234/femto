@@ -152,11 +152,16 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth);
  * @param self Pointer to fFile_t structure
  * @param height Screenbuffer height in lines
  * @param ch Character to insert
+ * @param shift Determines whether the shift key is pressed down
  * @param pset Pointer to fSettings_t structure
  * @return true Success
  * @return false Failure
  */
-bool fFile_addSpecialCh(fFile_t * restrict self, u32 height, wchar ch, const fSettings_t * pset);
+bool fFile_addSpecialCh(
+	fFile_t * restrict self, u32 height,
+	wchar ch, bool shift,
+	const fSettings_t * pset
+);
 
 /**
  * @brief Deletes a character on current line going forward (right, cursor stationary),

@@ -1,6 +1,7 @@
 #include "fSettings.h"
 #include "fArg.h"
 #include "femto.h"
+#include "fSyntax.h"
 
 #include <jsonParser.h>
 
@@ -66,6 +67,7 @@ void fSettings_reset(fSettings_t * restrict self)
 		.syntaxColors = {
 			[tcTEXT]            = FEMTO_DEFAULT_COLOR,
 			[tcSEARCH_RESULT]   = BACKGROUND_RED | FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
+			[tcHIGHLIGHT]       = BACKGROUND_INTENSITY | BACKGROUND_BLUE | FEMTO_DEFAULT_COLOR,
 			[tcCOMMENT_LINE]    = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
 			[tcCOMMENT_BLOCK]   = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY,
 			[tcKEYWORD]         = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED,
@@ -95,6 +97,7 @@ void fSettings_reset(fSettings_t * restrict self)
 		.syntaxTokens = {
 			[tcTEXT]            = "text",
 			[tcSEARCH_RESULT]   = "searchResult",
+			[tcHIGHLIGHT]       = "highlight",
 			[tcCOMMENT_LINE]    = "lineComment",
 			[tcCOMMENT_BLOCK]   = "blockComment",
 			[tcKEYWORD]         = "keyword",
@@ -405,7 +408,7 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 		bool firstDone = false, secondDone = false;
 		u8 ret = 0;
 		// Search through colorNames
-		for (u8 i = 0; i < MAX_COLORS; ++i)
+		for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 		{
 			if (!firstDone && strncmp(value, colorNames[i], commaIdx) == 0)
 			{
@@ -609,7 +612,7 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		if ( ((attr = jsonObject_get(obj, "palette")) != NULL) &&
 			((pObj = jsonValue_getObject(attr, &suc)) != NULL) && suc )
 		{
-			for (u8 i = 0; i < MAX_COLORS; ++i)
+			for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 			{
 				const char * color = self->palette.colorNames[i];
 				s_fSettings_checkRGBColor(&self->palette.colors[i], pObj, color);

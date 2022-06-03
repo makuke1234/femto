@@ -3,43 +3,6 @@
 
 #include "fCommon.h"
 
-typedef enum fTokenColor
-{
-	tcTEXT,
-	tcSEARCH_RESULT,
-	tcCOMMENT_LINE,
-	tcCOMMENT_BLOCK,
-	tcKEYWORD,
-	tcSTRING,
-	tcSTRING_QUOTE,
-	tcCHARACTER,
-	tcCHARACTER_QUOTE,
-	tcESCAPE,
-	tcPREPROC,
-	tcNUMBER,
-	tcHEX,
-	tcOCT,
-	tcPUNCTUATION,
-	tcMD_HEADING,
-	tcMD_ITALIC,
-	tcMD_BOLD,
-	tcMD_STRIKE,
-	tcMD_VALUE,
-	tcMD_CONETEXT,
-	tcMD_BRACKET,
-	tcMD_BRACKETPIC,
-	tcMD_LINK,
-	tcXML_ID,
-	tcCSS_SELECTOR,
-	tcCSS_PROPERTY,
-
-
-	tcNUM_OF_TOKENS
-
-} fTokenColor_e, fTC_e;
-
-#define MAX_COLORS 16
-
 typedef struct fColor
 {
 	u8 r, g, b;
@@ -48,9 +11,9 @@ typedef struct fColor
 
 typedef struct fPalette
 {
-	const char * colorNames[MAX_COLORS];
-	fColor_t colors[MAX_COLORS];
-	fColor_t oldColors[MAX_COLORS];
+	const char * colorNames[MAX_CONSOLE_COLORS];
+	fColor_t colors[MAX_CONSOLE_COLORS];
+	fColor_t oldColors[MAX_CONSOLE_COLORS];
 	bool bUsePalette;
 
 } fPalette_t;

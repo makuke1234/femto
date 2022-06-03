@@ -132,7 +132,7 @@ bool fData_loadPalette(fData_t * restrict self)
 	}
 
 	// Copy palette
-	for (u8 i = 0; i < MAX_COLORS; ++i)
+	for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 	{
 		const COLORREF old = csbiex.ColorTable[i];
 		fColor_t * restrict oldCol = &self->settings.palette.oldColors[i];
@@ -170,7 +170,7 @@ bool fData_restorePalette(const fData_t * restrict self)
 		return false;
 	}
 
-	for (u8 i = 0; i < MAX_COLORS; ++i)
+	for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 	{
 		const fColor_t col = self->settings.palette.oldColors[i];
 		csbiex.ColorTable[i] = fRGB(col.r, col.g, col.b);

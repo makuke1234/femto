@@ -52,6 +52,7 @@
 	{
 		"text": 			"",
 		"searchResult":     "",
+		"highlight":        "",
 		"lineComment": 		"bright_black",
 		"blockComment": 	"dark_blue",
 		"keyword": 			"bright_green",

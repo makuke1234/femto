@@ -26,6 +26,42 @@
 struct fLine;
 struct fStatHash;
 
+typedef enum fTokenColor
+{
+	tcTEXT,
+	tcSEARCH_RESULT,
+	tcHIGHLIGHT,
+	tcCOMMENT_LINE,
+	tcCOMMENT_BLOCK,
+	tcKEYWORD,
+	tcSTRING,
+	tcSTRING_QUOTE,
+	tcCHARACTER,
+	tcCHARACTER_QUOTE,
+	tcESCAPE,
+	tcPREPROC,
+	tcNUMBER,
+	tcHEX,
+	tcOCT,
+	tcPUNCTUATION,
+	tcMD_HEADING,
+	tcMD_ITALIC,
+	tcMD_BOLD,
+	tcMD_STRIKE,
+	tcMD_VALUE,
+	tcMD_CONETEXT,
+	tcMD_BRACKET,
+	tcMD_BRACKETPIC,
+	tcMD_LINK,
+	tcXML_ID,
+	tcCSS_SELECTOR,
+	tcCSS_PROPERTY,
+
+
+	tcNUM_OF_TOKENS
+
+} fTokenColor_e, fTC_e;
+
 // Enum that defines different supported language syntax codes
 typedef enum fSyntax
 {
