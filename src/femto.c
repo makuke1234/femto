@@ -598,7 +598,7 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 					fLine_moveCursorVert(&pfile->data.currentNode, deltaLines);
 				}
 				node->userValue.bits.b7 = true;
-				pfile->data.bUpdateAll = true;
+				pfile->data.bTyped = true;
 				// Refresh search result highlighting, move cursor in place, calculate virtual cursor position
 				fData_refreshEdit(peditor);
 				// Update cursor horizontal position correctly
@@ -1018,6 +1018,10 @@ static inline bool s_femto_inner_kbdHandle(
 		{
 			fData_statusMsg(peditor, tempstr, NULL);
 		}
+	}
+	else
+	{
+		key = wVirtKey = 0;
 	}
 
 	prevkey      = key;
