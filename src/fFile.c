@@ -121,8 +121,8 @@ const wchar * fFile_read(fFile_t * restrict self)
 	assert(self != NULL);
 	char * bytes = NULL;
 	usize size;
-	const wchar * restrict res;
-	if ((res = fFile_readBytes(self, &bytes, &size)) != NULL)
+	const wchar * restrict res = fFile_readBytes(self, &bytes, &size);
+	if (res != NULL)
 	{
 		return res;
 	}

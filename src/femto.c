@@ -582,8 +582,11 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 		node = first ? node : ((peditor->bDirBack) ? node->prevNode : node->nextNode);
 		isize deltaLines = first ? 0 : delta;
 
-		pfile->data.bUpdateAll = true;
-		fData_refreshEdit(peditor);
+		if (first)
+		{
+			pfile->data.bUpdateAll = true;
+			fData_refreshEdit(peditor);
+		}
 
 		while (node != NULL)
 		{
@@ -593,7 +596,6 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 				if (deltaLines != 0)
 				{
 					fLine_moveCursorVert(&pfile->data.currentNode, deltaLines);
-					deltaLines = 0;
 				}
 				node->userValue.bits.b7 = true;
 				pfile->data.bUpdateAll = true;
@@ -756,8 +758,8 @@ static inline bool s_femto_inner_kbdHandle(
 			}
 			if (reload)
 			{
-				const wchar * restrict res;
-				if ((res = fFile_read(pfile)) != NULL)
+				const wchar * restrict res = fFile_read(pfile);
+				if (res != NULL)
 				{
 					wcscpy_s(tempstr, MAX_STATUS, res);
 				}
@@ -858,8 +860,8 @@ static inline bool s_femto_inner_kbdHandle(
 					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
 				{
 					send = false;
-					const wchar * restrict res;
-					if ((res = fFile_read(pfile)) != NULL)
+					const wchar * restrict res = fFile_read(pfile);
+					if (res != NULL)
 					{
 						wcscpy_s(tempstr, MAX_STATUS, res);
 					}
@@ -1314,6 +1316,14 @@ bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict curline)
 			{
 				node = node->nextNode;
 			}
+		}
+		// Update syntax for all lines
+		node = pfile->data.firstNode;
+		while (node != NULL)
+		{
+			fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm, peditor->settings.tabWidth);
+
+			node = node->nextNode;
 		}
 
 		CONSOLE_CURSOR_INFO cci = { 0 };
