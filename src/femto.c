@@ -566,10 +566,13 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 	}
 	else
 	{
+		fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+		assert(pfile != NULL);
+
 		// Move cursor to the next result according to direction
 		const isize delta = (peditor->bDirBack) ? -1 : 1;
 
-		fLine_t * restrict node = peditor->files[peditor->fileIdx]->data.currentNode;
+		fLine_t * restrict node = pfile->data.currentNode;
 		if (node == NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, L"No lines to be searched");
@@ -579,7 +582,7 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 		node = first ? node : ((peditor->bDirBack) ? node->prevNode : node->nextNode);
 		isize deltaLines = first ? 0 : delta;
 
-		peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+		pfile->data.bUpdateAll = true;
 		fData_refreshEdit(peditor);
 
 		while (node != NULL)
@@ -589,11 +592,11 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 				// Go to line
 				if (deltaLines != 0)
 				{
-					fLine_moveCursorVert(&peditor->files[peditor->fileIdx]->data.currentNode, deltaLines);
+					fLine_moveCursorVert(&pfile->data.currentNode, deltaLines);
 					deltaLines = 0;
 				}
 				node->userValue.bits.b7 = true;
-				peditor->files[peditor->fileIdx]->data.bUpdateAll = true;
+				pfile->data.bUpdateAll = true;
 				// Refresh search result highlighting, move cursor in place, calculate virtual cursor position
 				fData_refreshEdit(peditor);
 				// Update cursor horizontal position correctly
@@ -656,7 +659,8 @@ static inline bool s_femto_inner_kbdHandle(
 		wchar tempstr[MAX_STATUS];
 		bool draw = true;
 
-		if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) || ((key == sacCTRL_Q) && (key != sacCTRL_Q)))	// Exit on Escape or Ctrl+Q
+		if (((wVirtKey == VK_ESCAPE) && (prevwVirtKey != VK_ESCAPE)) ||
+			((key == sacCTRL_Q) && (key != sacCTRL_Q)) )	// Exit on Escape or Ctrl+Q
 		{
 			if (peditor->psearchTerm != NULL)
 			{
@@ -1012,10 +1016,6 @@ static inline bool s_femto_inner_kbdHandle(
 		{
 			fData_statusMsg(peditor, tempstr, NULL);
 		}
-	}
-	else
-	{
-		key = wVirtKey = 0;
 	}
 
 	prevkey      = key;
