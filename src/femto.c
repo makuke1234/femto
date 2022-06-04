@@ -1681,6 +1681,11 @@ bool femto_testFile(const wchar * restrict filename)
 		return true;
 	}
 }
+isize femto_fileSize(HANDLE hfile)
+{
+	LARGE_INTEGER li;
+	return GetFileSizeEx(hfile, &li) ? (isize)li.QuadPart : -1;
+}
 HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 {
 	assert(fileName != NULL);
@@ -1707,11 +1712,12 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * rest
 		return L"File opening error!";
 	}
 
-	usize fileSize;
+	const isize fileSize_i = femto_fileSize(hfile);
+	if (fileSize_i == -1)
 	{
-		LARGE_INTEGER li;
-		fileSize = GetFileSizeEx(hfile, &li) ? (usize)li.QuadPart : 0;
+		return L"File size error!";
 	}
+	const usize fileSize = (usize)fileSize_i;
 
 	if ((fileSize >= *bytesLen) || (*bytes == NULL))
 	{

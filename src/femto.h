@@ -222,6 +222,13 @@ usize femto_strnToLines(wchar * restrict utf16, usize chars, wchar *** restrict 
  */
 bool femto_testFile(const wchar * restrict filename);
 /**
+ * @brief Retrieves the size of the desired filename
+ * 
+ * @param hfile Open file handle
+ * @return isize File size in bytes, -1 on error of some kind
+ */
+isize femto_fileSize(HANDLE hfile);
+/**
  * @brief Opens new file with desired name and write access
  * 
  * @param fileName Desired file name, CANNOT be NULL
