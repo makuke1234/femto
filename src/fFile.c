@@ -14,6 +14,11 @@ void fFile_reset(fFile_t * restrict self)
 			.curx        = 0,
 			.lastx       = 0,
 			.noLen       = 0,
+			.hl = {
+				.beg       = NULL,
+				.begx      = 0,
+				.backwards = false
+			},
 			.bTyped      = false,
 			.bUpdateAll  = false
 		},

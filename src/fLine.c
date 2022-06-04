@@ -2,6 +2,7 @@
 #include "fSyntax.h"
 #include "fSettings.h"
 #include "fFile.h"
+#include "femto.h"
 
 void fLine_init(fLine_t * restrict self)
 {
