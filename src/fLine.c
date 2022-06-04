@@ -666,7 +666,7 @@ bool fLine_updateSyntax(
 		}
 		node->userValue.bits.b7 = false;
 	}
-	else if (hl->beg != NULL)
+	if (hl->beg != NULL)
 	{
 		// Be picky about what to highlight
 		usize begCur, endCur;

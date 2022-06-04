@@ -296,6 +296,29 @@ void fData_statusRefresh(fData_t * restrict self)
 	);
 }
 
+void fData_cancelSearch(fData_t * restrict self)
+{
+	assert(self != NULL);
+
+	fFile_t * restrict pfile = self->files[self->fileIdx];
+	assert(pfile != NULL);
+
+	self->psearchTerm = NULL;
+	pfile->data.bUpdateAll = true;
+	fData_refreshEdit(self);
+}
+void fData_cancelHighlight(fData_t * restrict self)
+{
+	assert(self != NULL);
+
+	fFile_t * restrict pfile = self->files[self->fileIdx];
+	assert(pfile != NULL);
+
+	pfile->data.hl.beg = NULL;
+	pfile->data.bUpdateAll = true;
+	fData_refreshEdit(self);
+}
+
 bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 {
 	assert(self != NULL);

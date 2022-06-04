@@ -686,17 +686,11 @@ static inline bool s_femto_inner_kbdHandle(
 		{
 			if (peditor->psearchTerm != NULL)
 			{
-				peditor->psearchTerm = NULL;
-				wcscpy_s(tempstr, MAX_STATUS, L"Exited from search!");
-				pfile->data.bUpdateAll = true;
-				fData_refreshEdit(peditor);
+				fData_cancelSearch(peditor);
 			}
 			else if (pfile->data.hl.beg != NULL)
 			{
-				pfile->data.hl.beg = NULL;
-				wcscpy_s(tempstr, MAX_STATUS, L"Canceled highlighting");
-				pfile->data.bUpdateAll = true;
-				fData_refreshEdit(peditor);
+				fData_cancelHighlight(peditor);
 			}
 			else if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 			{
@@ -773,6 +767,7 @@ static inline bool s_femto_inner_kbdHandle(
 		}
 		else if ((key == sacCTRL_R) && (prevkey != sacCTRL_R))	// Reload file
 		{
+			fData_cancelHighlight(peditor);
 			bool reload = true;
 			if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
 			{
@@ -838,11 +833,13 @@ static inline bool s_femto_inner_kbdHandle(
 		}
 		else if (key == sacCTRL_F)
 		{
+			fData_cancelHighlight(peditor);
 			s_femto_inner_find(peditor, tempstr, false);
 		}
 		// Normal keys
 		else if (key > sacLAST_CODE)
 		{
+			fData_cancelHighlight(peditor);
 			swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 			if (fFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 			{

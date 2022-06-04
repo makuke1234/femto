@@ -96,6 +96,19 @@ void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, co
 void fData_statusRefresh(fData_t * restrict self);
 
 /**
+ * @brief Cancels searching in file
+ * 
+ * @param self Pointer to fData_t structure
+ */
+void fData_cancelSearch(fData_t * restrict self);
+/**
+ * @brief Cancels highlighting text in file
+ * 
+ * @param self Pointer to fData_t structure
+ */
+void fData_cancelHighlight(fData_t * restrict self);
+
+/**
  * @brief Creates a new tab with desired fileName
  * 
  * @param self Pointer to fData_t structure
