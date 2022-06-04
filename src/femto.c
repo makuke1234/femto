@@ -118,7 +118,7 @@ char * femto_escStr_s(const char * restrict inp, usize len)
 		switch (inp[i])
 		{
 		case '\\':
-			if (i < (len - 1))
+			if ((i + 1) < len)
 			{
 				++i;
 				char ch = '\0';
@@ -141,7 +141,7 @@ char * femto_escStr_s(const char * restrict inp, usize len)
 					break;
 				case 'u':
 					// 4-wide unicode code point
-					if (i < (len - 4))
+					if ((i + 4) < len)
 					{
 						++i;
 
