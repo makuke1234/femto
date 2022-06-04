@@ -14,6 +14,10 @@ i32 clamp_i32(i32 value, i32 min, i32 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+i32 clampdc_i32(i32 value, i32 range1, i32 range2)
+{
+	return (range1 < range2) ? clamp_i32(value, range1, range2) : clamp_i32(value, range2, range1);
+}
 
 u32 min_u32(u32 a, u32 b)
 {
@@ -26,6 +30,10 @@ u32 max_u32(u32 a, u32 b)
 u32 clamp_u32(u32 value, u32 min, u32 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
+}
+u32 clampdc_u32(u32 value, u32 range1, u32 range2)
+{
+	return (range1 < range2) ? clamp_u32(value, range1, range2) : clamp_u32(value, range2, range1);
 }
 
 i64 min_i64(i64 a, i64 b)
@@ -40,6 +48,10 @@ i64 clamp_i64(i64 value, i64 min, i64 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+i64 clampdc_i64(i64 value, i64 range1, i64 range2)
+{
+	return (range1 < range2) ? clamp_i64(value, range1, range2) : clamp_i64(value, range2, range1);
+}
 
 u64 min_u64(u64 a, u64 b)
 {
@@ -53,7 +65,10 @@ u64 clamp_u64(u64 value, u64 min, u64 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
-
+u64 clampdc_u64(u64 value, u64 range1, u64 range2)
+{
+	return (range1 < range2) ? clamp_u64(value, range1, range2) : clamp_u64(value, range2, range1);
+}
 
 usize min_usize(usize a, usize b)
 {
@@ -67,6 +82,11 @@ usize clamp_usize(usize value, usize min, usize max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+usize clampdc_usize(usize value, usize range1, usize range2)
+{
+	return (range1 < range2) ? clamp_usize(value, range1, range2) : clamp_usize(value, range2, range1);
+}
+
 
 
 char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen, wchar cp)
@@ -671,6 +691,13 @@ static inline bool s_femto_inner_kbdHandle(
 				pfile->data.bUpdateAll = true;
 				fData_refreshEdit(peditor);
 			}
+			else if (pfile->data.hl.beg != NULL)
+			{
+				pfile->data.hl.beg = NULL;
+				wcscpy_s(tempstr, MAX_STATUS, L"Canceled highlighting");
+				pfile->data.bUpdateAll = true;
+				fData_refreshEdit(peditor);
+			}
 			else if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 			{
 				return false;
@@ -826,12 +853,14 @@ static inline bool s_femto_inner_kbdHandle(
 		else
 		{
 			bool send = true;
+			const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+
 			switch (wVirtKey)
 			{
 			// Save as...
 			case L'S':
 				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S') )
+					shift && (prevwVirtKey != L'S') )
 				{
 					send = false;
 					s_femto_inner_saveAs(peditor, tempstr);
@@ -839,7 +868,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case L'W':
 				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'W') )
+					shift && (prevwVirtKey != L'W') )
 				{
 					send = false;
 					if (peditor->filesSize == 1)
@@ -857,7 +886,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case L'R':
 				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
+					shift && (prevwVirtKey != L'R'))
 				{
 					send = false;
 					const wchar * restrict res = fFile_read(pfile);
@@ -880,8 +909,6 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_TAB:
 			{
-				const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-				
 				// Shuffle between tabs
 				if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
 				{
@@ -926,7 +953,6 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_DELETE:
 			{
-				const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 				// Check for shift to alt key
 				if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
 				{
@@ -986,7 +1012,10 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			}
 			case VK_CAPITAL:
-				wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off");
+				wcscpy_s(
+					tempstr, MAX_STATUS,
+					(GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off"
+				);
 				break;
 			case VK_NUMLOCK:
 				wcscpy_s(
@@ -1007,7 +1036,7 @@ static inline bool s_femto_inner_kbdHandle(
 
 			if (send && fFile_addSpecialCh(
 				pfile, peditor->scrbuf.h,
-				wVirtKey, (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0,
+				wVirtKey, shift,
 				&peditor->settings
 			))
 			{
@@ -1325,7 +1354,10 @@ bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict curline)
 		node = pfile->data.firstNode;
 		while (node != NULL)
 		{
-			fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm, peditor->settings.tabWidth);
+			fLine_updateSyntax(
+				node, pfile->syntax, peditor->settings.syntaxColors,
+				peditor->psearchTerm, &pfile->data.hl,
+				pfile->data.currentNode->lineNumber, peditor->settings.tabWidth);
 
 			node = node->nextNode;
 		}
@@ -1457,7 +1489,11 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		}
 	}
 
-	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm, peditor->settings.tabWidth))
+	if (!fLine_updateSyntax(
+		node, pfile->syntax, peditor->settings.syntaxColors,
+		peditor->psearchTerm, &pfile->data.hl,
+		pfile->data.currentNode->lineNumber, peditor->settings.tabWidth
+	))
 	{
 		fData_statusMsg(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}

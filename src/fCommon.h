@@ -74,7 +74,6 @@ typedef unsigned char uchar;
 #define MAX_STATUS 256
 
 #define FEMTO_SHIFT_DEL 0x88
-
 #define FEMTO_MOVELINE_UP   0x89
 #define FEMTO_MOVELINE_DOWN 0x8A
 

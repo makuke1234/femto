@@ -396,6 +396,50 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 	self->data.lastx = node->virtcurx;
 	return true;
 }
+
+#if SSIZE_MAX == INT64_MAX
+	#define USIZE_BIT_MASK 0x7fffffffffffffff
+#else
+	#define USIZE_BIT_MASK 0x7fffffff
+#endif
+
+bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
+{
+	assert(self != NULL);
+	
+	struct fFileHighLight * restrict hl = &self->data.hl;
+	assert(hl != NULL);
+	
+	if ( (ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN) )
+	{
+
+		const fLine_t * restrict node = self->data.currentNode;
+		assert(node != NULL);
+
+		// Cancel highlighting
+		if (!shift)
+		{
+			hl->beg = NULL;
+		}
+		else
+		{
+			// Save cursor position for highlighting
+			if (hl->beg == NULL)
+			{
+				hl->beg  = node;
+				hl->begx = node->curx & USIZE_BIT_MASK;
+			}
+
+			hl->backwards = ((hl->beg == node) && ((ch == VK_UP) || ((hl->begx > node->curx) || ((hl->begx == node->curx) && (ch == VK_LEFT)))) ) ||
+				(hl->beg->lineNumber > node->lineNumber);
+		}
+	}
+
+	return hl->beg != NULL;
+}
+#undef USIZE_BIT_MASK
+
+
 bool fFile_addSpecialCh(
 	fFile_t * restrict self, u32 height,
 	wchar ch, bool shift,
@@ -406,6 +450,9 @@ bool fFile_addSpecialCh(
 	
 	self->data.bTyped = true;
 	fLine_t * restrict lastcurnode = self->data.currentNode;
+	
+	const fLine_t * restrict prevbeg = self->data.hl.beg;
+	fFile_startHighlighting(self, ch, shift);
 
 	switch (ch)
 	{
@@ -597,7 +644,9 @@ bool fFile_addSpecialCh(
 		return false;
 	}
 
-	self->data.bUpdateAll |= (self->data.currentNode != lastcurnode) & pset->bRelLineNums;
+	self->data.bUpdateAll |= ((self->data.currentNode != lastcurnode) & pset->bRelLineNums) || 
+		((self->data.hl.beg != NULL) && (self->data.hl.beg != self->data.currentNode)) ||
+		(self->data.hl.beg != prevbeg);
 
 	return true;
 }

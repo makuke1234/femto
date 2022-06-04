@@ -1,6 +1,7 @@
 #include "fLine.h"
 #include "fSyntax.h"
 #include "fSettings.h"
+#include "fFile.h"
 
 void fLine_init(fLine_t * restrict self)
 {
@@ -575,8 +576,8 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * 
 
 bool fLine_updateSyntax(
 	fLine_t * restrict node, fStx_e fs, const WORD * colors,
-	const wchar * restrict searchTerm,
-	u8 tabWidth
+	const wchar * restrict searchTerm, const struct fFileHighLight * restrict hl,
+	usize curLineNum, u8 tabWidth
 )
 {
 	assert(node != NULL);
@@ -664,6 +665,59 @@ bool fLine_updateSyntax(
 			fLine_calcVirtCursor(node, tabWidth);
 		}
 		node->userValue.bits.b7 = false;
+	}
+	else if (hl->beg != NULL)
+	{
+		// Be picky about what to highlight
+		usize begCur, endCur;
+		if (hl->beg == node)
+		{
+			// We are on the current line, whole selection is limited to 1 line
+			if (curLineNum == node->lineNumber)
+			{
+				// Only highlight what's between cursors
+				begCur = hl->backwards ? node->curx : hl->begx;
+				endCur = hl->backwards ? hl->begx   : node->curx;
+			}
+			else
+			{
+				// Highlighting everything from/to cursor
+				begCur = hl->backwards ? 0        : hl->begx;
+				endCur = hl->backwards ? hl->begx : node->lineEndx - node->freeSpaceLen;
+			}
+
+			for (; begCur < endCur; ++begCur)
+			{
+				node->syntax[begCur] = colors[tcHIGHLIGHT];
+			}
+		}
+		// Highlight whole line, go haywire d: ;P :b B-)
+		else if (node->lineNumber == clampdc_usize(node->lineNumber, hl->beg->lineNumber, curLineNum))
+		{
+			
+			// Detect "edge" line
+			if (node->lineNumber == hl->beg->lineNumber)
+			{
+				begCur = hl->backwards ? 0        : hl->begx;
+				endCur = hl->backwards ? hl->begx : node->lineEndx - node->freeSpaceLen;
+			}
+			else if (node->lineNumber == curLineNum)
+			{
+				begCur = hl->backwards ? node->curx                          : 0;
+				endCur = hl->backwards ? node->lineEndx - node->freeSpaceLen : node->curx;
+			}
+			else
+			{
+				begCur = 0;
+				endCur = node->lineEndx - node->freeSpaceLen;
+			}
+			
+			for (; begCur < endCur; ++begCur)
+			{
+				node->syntax[begCur] = colors[tcHIGHLIGHT];
+			}
+		}
+		// Otherwise highlight nothing
 	}
 
 	return true;

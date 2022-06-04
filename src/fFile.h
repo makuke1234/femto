@@ -19,12 +19,18 @@ typedef enum eolSequence
 
 } eolSequence_e, eolSeq_e;
 
+#if SSIZE_MAX == INT64_MAX
+	#define MAX_USIZE_BITS_1 63
+#else
+	#define MAX_USIZE_BITS_1 31
+#endif
+
 typedef struct fFile
 {
 	wchar * fileName;
 	HANDLE hFile;
 
-	struct
+	struct fFileData
 	{
 		fLine_t * firstNode;
 		fLine_t * currentNode;
@@ -32,6 +38,20 @@ typedef struct fFile
 		usize curx, lastx;
 
 		u8 noLen;
+
+		// Highlighting info
+		struct fFileHighLight
+		{
+			// Store pointer to highlighting beginning line, when highlighting
+			// the current cursor always moves, so that is stored in currentNode
+			// If no highlighting is present, the value should be NULL
+			const fLine_t * beg;
+			// Also store the beginning cursor of beginning line, if the index
+			// is after beg->curx, beg->freeSpaceLen will be subtracted
+			usize begx:MAX_USIZE_BITS_1;
+			// Indicates whether the highlighting is backwards or forwards
+			usize backwards:1;
+		} hl;
 
 		bool bTyped:1;
 		bool bUpdateAll:1;
@@ -45,6 +65,8 @@ typedef struct fFile
 	fStx_e syntax:4;
 
 } fFile_t;
+
+#undef MAX_USIZE_BITS_1
 
 /**
  * @brief Resets fFile_t structure memory layout, zeroes all members
@@ -146,6 +168,16 @@ isize fFile_write(fFile_t * restrict self);
  * @return false Failure
  */
 bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth);
+/**
+ * @brief Handles highlighting starting/stopping depending on typed character
+ * 
+ * @param self Pointer to fFile_t structure
+ * @param ch Character inserted
+ * @param shift Determines whether the shift key is pressed down
+ * @return true Highlighting is turned on
+ * @return false Highlighting is turned off
+ */
+bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift);
 /**
  * @brief Inserts a special character to current line
  * 
