@@ -316,7 +316,7 @@ void fData_cancelHighlight(fData_t * restrict self)
 
 	pfile->data.hl.beg = NULL;
 	pfile->data.bUpdateAll = true;
-	fData_refreshEdit(self);
+	fData_refreshEditAsync(self);
 }
 
 bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)

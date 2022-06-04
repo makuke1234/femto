@@ -20,9 +20,15 @@ typedef enum eolSequence
 } eolSequence_e, eolSeq_e;
 
 #if SSIZE_MAX == INT64_MAX
-	#define MAX_USIZE_BITS_1 63
+	#define USIZE_BITS_1 63
 #else
-	#define MAX_USIZE_BITS_1 31
+	#define USIZE_BITS_1 31
+#endif
+
+#if SSIZE_MAX == INT64_MAX
+	#define USIZE_BIT_1_MASK 0x7fffffffffffffff
+#else
+	#define USIZE_BIT_1_MASK 0x7fffffff
 #endif
 
 typedef struct fFile
@@ -48,7 +54,7 @@ typedef struct fFile
 			const fLine_t * beg;
 			// Also store the beginning cursor of beginning line, if the index
 			// is after beg->curx, beg->freeSpaceLen will be subtracted
-			usize begx:MAX_USIZE_BITS_1;
+			usize begx:USIZE_BITS_1;
 			// Indicates whether the highlighting is backwards or forwards
 			usize backwards:1;
 		} hl;
@@ -66,7 +72,7 @@ typedef struct fFile
 
 } fFile_t;
 
-#undef MAX_USIZE_BITS_1
+#undef USIZE_BITS_1
 
 /**
  * @brief Resets fFile_t structure memory layout, zeroes all members

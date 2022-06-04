@@ -25,6 +25,7 @@ reports ~6400 source code lines (excluding whitespace, comments, language keywor
 
 # Features
 
+- [ ] Built-in copy-pasting support
 - [x] All saved files use CRLF line-ending format by default, LF and CR are also supported
 	* *Editing text files is sublime*
 - [x] The femto editor utilizes the whole command prompt window, window is as big as your console currently is
@@ -64,6 +65,9 @@ reports ~6400 source code lines (excluding whitespace, comments, language keywor
 	| <kbd>Ctrl+Q</kbd>              | Same as above                                 |
 	| <kbd>Shift+ESC</kbd>           | Force exit editor                             |
 	| <kbd>Ctrl+Shift+Q</kbd>        | Same as above                                 |
+	| <kbd>Ctrl+X</kbd>              | Cut                                           |
+	| <kbd>Ctrl+C</kbd>              | Copy                                          |
+	| <kbd>Ctrl+V</kbd>              | Paste                                         |
 	| <kbd>Ctrl+N</kbd>              | Create new blank file                         |
 	| <kbd>Ctrl+O</kbd>              | Open file                                     |
 	| <kbd>Ctrl+S</kbd>              | Save file                                     |
@@ -200,8 +204,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 2.1 (planned)
+	* [x] Text highlighting using keyboard & mouse
 	* [ ] Proper text copying/pasting support
-		* *Copying is already implicitly supported by the console itself, although limited to only 1 screenbuffer at a time*
 	* [x] Port codebase to use universal integer sizes `size_t` & `ssize_t` (signed)
 	* [x] Properly fixed search functionality
 

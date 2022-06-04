@@ -906,6 +906,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_TAB:
 			{
+				fData_cancelHighlight(peditor);
 				// Shuffle between tabs
 				if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
 				{
@@ -944,12 +945,14 @@ static inline bool s_femto_inner_kbdHandle(
 			}
 			case VK_F2:
 			case VK_F3:
+				fData_cancelHighlight(peditor);
 				send = false;
 				peditor->bDirBack = (wVirtKey == VK_F2);
 				s_femto_inner_searchTerm(peditor, tempstr, false);
 				break;
 			case VK_DELETE:
 			{
+				fData_cancelHighlight(peditor);
 				// Check for shift to alt key
 				if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
 				{
@@ -966,6 +969,7 @@ static inline bool s_femto_inner_kbdHandle(
 				// Check for alt key
 				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 				{
+					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2191 #%u", keyCount);
 					wVirtKey = FEMTO_MOVELINE_UP;
 				}
@@ -978,6 +982,7 @@ static inline bool s_femto_inner_kbdHandle(
 				// Check for alt key
 				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 				{
+					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2193 #%u", keyCount);
 					wVirtKey = FEMTO_MOVELINE_DOWN;
 				}
@@ -988,12 +993,14 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_RETURN:	// Enter key
 			case VK_BACK:	// Backspace
-			case VK_LEFT:	// Left arrow
-			case VK_RIGHT:	// Right arrow
 			case VK_PRIOR:	// Page up
 			case VK_NEXT:	// Page down
 			case VK_END:
 			case VK_HOME:
+				fData_cancelHighlight(peditor);
+				/* fall through */
+			case VK_LEFT:	// Left arrow
+			case VK_RIGHT:	// Right arrow
 			{
 				static const wchar * buf[] = {
 					[VK_RETURN] = L"'RET'",
@@ -1161,11 +1168,17 @@ static inline bool s_femto_inner_mouseHandle(
 		// If not, don't draw anything on the statusbar
 		draw = s_femto_inner_calcMousePos(peditor, ir, &pos);
 
+		struct fFileHighLight * restrict hl = &pfile->data.hl;
+		assert(hl != NULL);
+
+		bool moved = false;
+
 		// Check if mouse is moving
 		if (ir->dwEventFlags & MOUSE_MOVED)
 		{
 			if (draw)
 			{
+				moved = true;
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
 			}
 		}
@@ -1175,19 +1188,37 @@ static inline bool s_femto_inner_mouseHandle(
 			{
 				fProf_write("Mouse click @%hd, %hd", pos.X, pos.Y);
 
-				if (pfile->data.pcury != NULL)
-				{
-					pfile->data.currentNode = pfile->data.pcury;
-					const fLine_t * restrict lastcurnode = pfile->data.currentNode;
-					fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
-					pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
-					// Now move the cursor to correct X position
-					fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
-					fLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
-					pfile->data.lastx = pfile->data.currentNode->virtcurx;
-					fData_refreshEditAsync(peditor);
-				}
+				fData_cancelHighlight(peditor);
+
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
+			}
+		}
+
+		if (draw)
+		{
+			if (pfile->data.pcury != NULL)
+			{
+				pfile->data.currentNode = pfile->data.pcury;
+				const fLine_t * restrict lastcurnode = pfile->data.currentNode;
+				fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
+				fLine_t * restrict curNode = pfile->data.currentNode;
+				pfile->data.bUpdateAll |= (curNode != lastcurnode) & peditor->settings.bRelLineNums;
+				// Now move the cursor to correct X position
+				fLine_moveCursorAbs(curNode, fLine_calcCursor(curNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
+				fLine_calcVirtCursor(curNode, peditor->settings.tabWidth);
+				pfile->data.lastx = curNode->virtcurx;
+
+				if (moved && (hl->beg == NULL))
+				{
+					hl->beg  = pfile->data.currentNode;
+					hl->begx = pfile->data.currentNode->curx & USIZE_BIT_1_MASK;
+				}
+				if (hl->beg != NULL)
+				{
+					hl->backwards = (hl->beg->lineNumber > curNode->lineNumber) || 
+						((hl->beg == curNode) && (hl->begx > curNode->curx));
+				}
+				fData_refreshEditAsync(peditor);
 			}
 		}
 	}

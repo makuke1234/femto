@@ -402,11 +402,6 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 	return true;
 }
 
-#if SSIZE_MAX == INT64_MAX
-	#define USIZE_BIT_MASK 0x7fffffffffffffff
-#else
-	#define USIZE_BIT_MASK 0x7fffffff
-#endif
 
 bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
 {
@@ -432,7 +427,7 @@ bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
 			if (hl->beg == NULL)
 			{
 				hl->beg  = node;
-				hl->begx = node->curx & USIZE_BIT_MASK;
+				hl->begx = node->curx & USIZE_BIT_1_MASK;
 			}
 
 			hl->backwards = ((hl->beg == node) && ((ch == VK_UP) || ((hl->begx > node->curx) || ((hl->begx == node->curx) && (ch == VK_LEFT)))) ) ||
@@ -442,7 +437,6 @@ bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
 
 	return hl->beg != NULL;
 }
-#undef USIZE_BIT_MASK
 
 
 bool fFile_addSpecialCh(
