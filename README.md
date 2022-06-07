@@ -204,6 +204,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 2.1 (planned)
+	* [x] Pointer checking in every function
 	* [x] Text highlighting using keyboard & mouse
 	* [ ] Proper text copying/pasting support
 	* [x] Port codebase to use universal integer sizes `size_t` & `ssize_t` (signed)
