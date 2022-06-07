@@ -863,17 +863,17 @@ static inline bool s_femto_inner_kbdHandle(
 		// Cut
 		else if ((key == sacCTRL_X) && (prevkey != sacCTRL_X))
 		{
-
+			wcscpy_s(tempstr, MAX_STATUS, L"Cut");
 		}
 		// Copy
 		else if ((key == sacCTRL_C) && (prevkey != sacCTRL_C))
 		{
-
+			wcscpy_s(tempstr, MAX_STATUS, L"Copy");
 		}
 		// Paste
 		else if ((key == sacCTRL_V) && (prevkey != sacCTRL_V))
 		{
-			
+			wcscpy_s(tempstr, MAX_STATUS, L"Paste");
 		}
 		else if (key == sacCTRL_F)
 		{
