@@ -4,6 +4,7 @@
 void fFile_reset(fFile_t * restrict self)
 {
 	assert(self != NULL);
+
 	(*self) = (fFile_t){
 		.fileName = NULL,
 		.hFile    = INVALID_HANDLE_VALUE,
@@ -44,6 +45,7 @@ fFile_t * fFile_resetDyn(void)
 bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool writemode)
 {
 	assert(self != NULL);
+	
 	fileName = (fileName == NULL) ? self->fileName : fileName;
 
 	// Get syntax type from file suffix
@@ -71,6 +73,7 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 void fFile_close(fFile_t * restrict self)
 {
 	assert(self != NULL);
+	
 	if (self->hFile != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(self->hFile);
@@ -80,6 +83,7 @@ void fFile_close(fFile_t * restrict self)
 void fFile_clearLines(fFile_t * restrict self)
 {
 	assert(self != NULL);
+	
 	fLine_t * restrict node = self->data.firstNode;
 	self->data.firstNode   = NULL;
 	self->data.currentNode = NULL;
@@ -93,9 +97,9 @@ void fFile_clearLines(fFile_t * restrict self)
 }
 const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, usize * restrict bytesLen)
 {
-	assert(self != NULL);
-	assert(bytes != NULL);
-	assert(bytesLen != NULL && "Pointer to length variable is mandatory!");
+	assert(self      != NULL);
+	assert(bytes     != NULL);
+	assert((bytesLen != NULL) && "Pointer to length variable is mandatory!");
 	
 	if (fFile_open(self, NULL, false) == false)
 	{
@@ -124,6 +128,7 @@ const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u
 const wchar * fFile_read(fFile_t * restrict self)
 {
 	assert(self != NULL);
+
 	char * bytes = NULL;
 	usize size;
 	const wchar * restrict res = fFile_readBytes(self, &bytes, &size);
@@ -195,6 +200,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize * editorContLen)
 {
 	assert(self != NULL);
+
 	// Generate lines
 	wchar * lines = NULL, * line = NULL;
 	usize linesCap = 0, linesLen = 0, lineCap = 0;
@@ -327,6 +333,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 isize fFile_write(fFile_t * restrict self)
 {
 	assert(self != NULL);
+
 	char * utf8 = NULL;
 	usize utf8sz = 0;
 	ffcr_e checkres = fFile_checkUnsaved(self, &utf8, &utf8sz);
@@ -387,7 +394,9 @@ isize fFile_write(fFile_t * restrict self)
 
 bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 {
-	assert(self != NULL);
+	assert(self     != NULL);
+	assert(tabWidth > 0);
+
 	fLine_t * restrict node = self->data.currentNode;
 	assert(node != NULL);
 	self->data.bTyped = true;
@@ -445,10 +454,13 @@ bool fFile_addSpecialCh(
 	const fSettings_t * pset
 )
 {
-	assert(self != NULL);
+	assert(self   != NULL);
+	assert(height > 0);
+	assert(pset   != NULL);
 	
 	self->data.bTyped = true;
 	fLine_t * restrict lastcurnode = self->data.currentNode;
+	assert(lastcurnode != NULL);
 	
 	const fLine_t * restrict prevbeg = self->data.hl.beg;
 	fFile_startHighlighting(self, ch, shift);
@@ -653,7 +665,10 @@ bool fFile_addSpecialCh(
 bool fFile_deleteForward(fFile_t * restrict self)
 {
 	assert(self != NULL);
+
 	fLine_t * restrict node = self->data.currentNode;
+	assert(node != NULL);
+
 	if ((node->curx + node->freeSpaceLen) < node->lineEndx)
 	{
 		++node->freeSpaceLen;
@@ -672,7 +687,10 @@ bool fFile_deleteForward(fFile_t * restrict self)
 bool fFile_deleteBackward(fFile_t * restrict self)
 {
 	assert(self != NULL);
+
 	fLine_t * restrict node = self->data.currentNode;
+	assert(node != NULL);
+
 	if (node->curx > 0)
 	{
 		--node->curx;
@@ -693,7 +711,9 @@ bool fFile_deleteBackward(fFile_t * restrict self)
 }
 bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
 {
-	assert(self != NULL);
+	assert(self     != NULL);
+	assert(tabWidth > 0);
+
 	fLine_t * node = fLine_create(
 		self->data.currentNode,
 		self->data.currentNode->nextNode,
@@ -715,7 +735,8 @@ bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, b
 
 void fFile_updateCury(fFile_t * restrict self, u32 height)
 {
-	assert(self != NULL);
+	assert(self   != NULL);
+	assert(height > 0);
 
 	if (self->data.pcury == NULL)
 	{
@@ -755,7 +776,8 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 }
 void fFile_scrollVert(fFile_t * restrict self, u32 height, isize deltaLines)
 {
-	assert(self != NULL);
+	assert(self   != NULL);
+	assert(height > 0);
 
 	if (self->data.pcury == NULL)
 	{
@@ -770,7 +792,8 @@ void fFile_scrollVert(fFile_t * restrict self, u32 height, isize deltaLines)
 }
 void fFile_scrollHor(fFile_t * restrict self, u32 width, isize deltaCh)
 {
-	assert(self != NULL);
+	assert(self  != NULL);
+	assert(width > 0);
 
 	if ((deltaCh < 0) && ((usize)-deltaCh <= self->data.curx))
 	{

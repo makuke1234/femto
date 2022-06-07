@@ -8,6 +8,7 @@
 void fSettings_reset(fSettings_t * restrict self)
 {
 	assert(self != NULL);
+
 	*self = (fSettings_t){
 		.bHelpRequest     = false,
 		.fileName         = NULL,
@@ -136,8 +137,9 @@ void fSettings_reset(fSettings_t * restrict self)
 
 bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, usize errMax)
 {
-	assert(self != NULL);
+	assert(self   != NULL);
 	assert(errArr != NULL);
+	assert(errMax > 0);
 
 	if (self->lastErr[0] == L'\0')
 	{
@@ -152,6 +154,8 @@ bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u
 
 bool fSettings_makeTabSpaceStr(fSettings_t * restrict self)
 {
+	assert(self != NULL);
+	
 	wchar * mem = realloc(self->tabSpaceStr1, sizeof(wchar) * (usize)(self->tabWidth + 1));
 	if (mem == NULL)
 	{
@@ -377,6 +381,10 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 
 static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, const char * restrict key, const char * colorNames[])
 {
+	assert(obj        != NULL);
+	assert(key        != NULL);
+	assert(colorNames != NULL);
+
 	const jsonValue_t * restrict attr = jsonObject_get(obj, key);
 	if (attr == NULL)
 	{
@@ -436,6 +444,10 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 }
 static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const jsonObject_t * restrict obj, const char * restrict key)
 {
+	assert(col != NULL);
+	assert(obj != NULL);
+	assert(key != NULL);
+	
 	const jsonValue_t * restrict attr = jsonObject_get(obj, key);
 	if (attr == NULL)
 	{
@@ -649,6 +661,8 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 void fSettings_destroy(fSettings_t * restrict self)
 {
+	assert(self != NULL);
+	
 	if (self->fileName != NULL)
 	{
 		free(self->fileName);

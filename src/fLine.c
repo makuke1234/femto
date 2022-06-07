@@ -7,6 +7,7 @@
 void fLine_init(fLine_t * restrict self)
 {
 	assert(self != NULL);
+
 	*self = (fLine_t){
 		.line         = NULL,
 		.lineEndx     = 0,
@@ -31,7 +32,9 @@ fLine_t * fLine_create(
 	u8 * restrict noLen
 )
 {
-	assert(noLen != NULL);
+	assert(tabWidth > 0);
+	assert(noLen    != NULL);
+
 	fLine_t * restrict node = malloc(sizeof(fLine_t));
 	if (node == NULL)
 	{
@@ -139,7 +142,8 @@ fLine_t * fLine_createText(
 	u8 * restrict noLen
 )
 {
-	assert(noLen != NULL);
+	assert(lineText != NULL);
+	assert(noLen    != NULL);
 
 	const usize maxText = (mText == -1) ? wcslen(lineText) : (usize)mText;
 
@@ -191,7 +195,7 @@ bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, usize 
 	const usize totalLen = self->lineEndx - self->freeSpaceLen + 1;
 	fProf_write("Total length: %zu characters", totalLen);
 
-	if (tarrsz != NULL && *tarrsz < totalLen)
+	if ((tarrsz != NULL) && (*tarrsz < totalLen))
 	{
 		wchar * mem = realloc(*text, sizeof(wchar) * totalLen);
 		if (mem == NULL)
@@ -229,8 +233,8 @@ bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, usize 
 }
 void fLine_getTextLim(const fLine_t * restrict self, wchar * restrict text, usize maxLen)
 {
-	assert(self != NULL);
-	assert(text != NULL);
+	assert(self   != NULL);
+	assert(text   != NULL);
 	assert(maxLen > 0);
 
 	usize len = 0;
@@ -253,6 +257,7 @@ void fLine_getTextLim(const fLine_t * restrict self, wchar * restrict text, usiz
 bool fLine_realloc(fLine_t * restrict self)
 {
 	assert(self != NULL);
+
 	if (self->freeSpaceLen == FEMTO_LNODE_DEFAULT_FREE)
 	{
 		return true;
@@ -284,8 +289,9 @@ bool fLine_realloc(fLine_t * restrict self)
 
 bool fLine_addChar(fLine_t * restrict self, wchar ch, u8 tabWidth)
 {
-	assert(self != NULL);
-	assert(ch   != L'\0');
+	assert(self     != NULL);
+	assert(ch       != L'\0');
+	assert(tabWidth > 0);
 
 	if ((self->freeSpaceLen == 0) && !fLine_realloc(self))
 	{
@@ -302,7 +308,9 @@ bool fLine_addChar(fLine_t * restrict self, wchar ch, u8 tabWidth)
 }
 bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * restrict string, usize maxString)
 {
-	assert(string != NULL);
+	assert(string    != NULL);
+	assert(maxString > 0);
+
 	if (node == NULL)
 	{
 		return false;
@@ -339,8 +347,9 @@ bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * 
 }
 usize fLine_find(const fLine_t * restrict node, usize startIdx, const wchar * restrict string, usize maxString)
 {
-	assert(node != NULL);
-	assert(string != NULL);
+	assert(node      != NULL);
+	assert(string    != NULL);
+	assert(maxString > 0);
 
 	// Clamp startIdx
 	const usize cur2 = node->curx + node->freeSpaceLen;
@@ -387,8 +396,10 @@ usize fLine_find(const fLine_t * restrict node, usize startIdx, const wchar * re
 
 bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * restrict noLen)
 {
-	assert(self != NULL);
+	assert(self   != NULL);
 	assert(ppcury != NULL);
+	assert(noLen  != NULL);
+
 	if (self->nextNode == NULL)
 	{
 		return false;
@@ -444,7 +455,7 @@ void fLine_moveCursor(fLine_t * restrict self, isize delta)
 			self->line[idx] = self->line[self->curx];
 		}
 	}
-	else
+	else if (delta > 0)
 	{
 		for (usize total = self->lineEndx - self->freeSpaceLen, idx = self->curx + self->freeSpaceLen; delta > 0 && self->curx < total; --delta)
 		{
@@ -479,7 +490,7 @@ void fLine_moveCursorAbs(fLine_t * restrict self, usize curx)
 }
 void fLine_moveCursorVert(fLine_t ** restrict self, isize delta)
 {
-	assert(self != NULL);
+	assert(self  != NULL);
 	assert(*self != NULL);
 
 	fLine_t * restrict node = *self;
@@ -490,7 +501,7 @@ void fLine_moveCursorVert(fLine_t ** restrict self, isize delta)
 			node = node->prevNode;
 		}
 	}
-	else
+	else if (delta > 0)
 	{
 		for (; delta != 0 && node->nextNode != NULL; --delta)
 		{
@@ -501,7 +512,7 @@ void fLine_moveCursorVert(fLine_t ** restrict self, isize delta)
 }
 void fLine_calcVirtCursor(fLine_t * restrict self, usize tabWidth)
 {
-	assert(self != NULL);
+	assert(self     != NULL);
 	assert(tabWidth > 0);
 
 	self->virtcurx = 0;
@@ -512,7 +523,7 @@ void fLine_calcVirtCursor(fLine_t * restrict self, usize tabWidth)
 }
 usize fLine_calcCursor(const fLine_t * restrict self, usize virtcur, u8 tabWidth)
 {
-	assert(self != NULL);
+	assert(self     != NULL);
 	assert(tabWidth > 0);
 
 	usize realcurx = 0;
@@ -556,6 +567,9 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 
 void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * restrict noLen)
 {
+	assert(startnode != NULL);
+	assert(noLen     != NULL);
+	
 	const fLine_t * restrict prevnode = NULL;
 	while (startnode != NULL)
 	{
@@ -581,7 +595,11 @@ bool fLine_updateSyntax(
 	usize curLineNum, u8 tabWidth
 )
 {
-	assert(node != NULL);
+	assert(node       != NULL);
+	assert(colors     != NULL);
+	assert(hl         != NULL);
+	assert(curLineNum > 0);
+	assert(tabWidth   > 0);
 
 	bool ret;
 

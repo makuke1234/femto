@@ -43,6 +43,7 @@ bool fData_reset(fData_t * restrict self)
 bool fData_init(fData_t * restrict self)
 {
 	assert(self != NULL);
+
 	self->conIn  = GetStdHandle(STD_INPUT_HANDLE);
 	self->conOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Set exit handler

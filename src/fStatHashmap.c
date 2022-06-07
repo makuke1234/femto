@@ -36,7 +36,7 @@ usize fStatHash_findNextPrime(usize lowerBound)
 usize fStatHash_hash(const wchar * restrict key, usize sz)
 {
 	assert(key != NULL);
-	assert(sz > 0);
+	assert(sz  > 0);
 
 	usize hash = 0;
 	for (; (*key) != L'\0'; ++key)
@@ -48,6 +48,9 @@ usize fStatHash_hash(const wchar * restrict key, usize sz)
 
 vptr fStatHash_malloc(fStatHash_t * restrict hash, usize bytes)
 {
+	assert(hash  != NULL);
+	assert(bytes > 0);
+	
 	if (hash->memSize < bytes)
 	{
 		return NULL;
@@ -61,6 +64,10 @@ vptr fStatHash_malloc(fStatHash_t * restrict hash, usize bytes)
 }
 void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, usize bytes)
 {
+	assert(hash  != NULL);
+	assert(mem   != NULL);
+	assert(bytes > 0);
+
 	vptr newp = ((u8 *)hash->mem) - bytes;
 	if (mem == newp)
 	{
@@ -75,10 +82,10 @@ void fStatHash_init(
 	usize tableSize
 )
 {
-	assert(hash != NULL);
-	assert(memory != NULL);
+	assert(hash        != NULL);
+	assert(memory      != NULL);
 	assert(memoryBytes > 0);
-	assert(tableSize > 0);
+	assert(tableSize   > 0);
 
 	if (hash->init)
 	{
@@ -111,11 +118,11 @@ void fStatHash_initData(
 	const wchar ** data, usize dataSize
 )
 {
-	assert(hash != NULL);
-	assert(memory != NULL);
+	assert(hash        != NULL);
+	assert(memory      != NULL);
 	assert(memoryBytes > 0);
-	assert(data != NULL);
-	assert(dataSize > 0);
+	assert(data        != NULL);
+	assert(dataSize    > 0);
 
 	if (hash->init)
 	{
@@ -136,7 +143,7 @@ void fStatHash_initData(
 bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
 {
 	assert(hash != NULL);
-	assert(key != NULL);
+	assert(key  != NULL);
 	assert(hash->init);
 
 	fHashNode_t ** restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
@@ -164,7 +171,7 @@ bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
 bool fStatHash_get(const fStatHash_t * restrict hash, const wchar * restrict key)
 {
 	assert(hash != NULL);
-	assert(key != NULL);
+	assert(key  != NULL);
 	assert(hash->init);
 
 	const fHashNode_t * restrict node = hash->nodes[fStatHash_hash(key, hash->mapSize)];
@@ -183,7 +190,7 @@ bool fStatHash_get(const fStatHash_t * restrict hash, const wchar * restrict key
 bool fStatHash_remove(fStatHash_t * restrict hash, const wchar * restrict key)
 {
 	assert(hash != NULL);
-	assert(key != NULL);
+	assert(key  != NULL);
 	assert(hash->init);
 
 	fHashNode_t ** restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];

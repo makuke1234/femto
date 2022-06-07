@@ -91,6 +91,9 @@ usize clampdc_usize(usize value, usize range1, usize range2)
 
 char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen, wchar cp)
 {
+	assert(pstr != NULL);
+	assert(plen != NULL);
+	
 	uchar conv[3];
 	usize len = 0;
 	if (cp <= 0x7F)
@@ -276,6 +279,7 @@ void femto_exitHandlerSetVars(fData_t * restrict pdata)
 }
 void femto_exitHandler(void)
 {
+	assert(s_atExitData != NULL);
 	// Clear resources
 	fData_destroy(s_atExitData);
 }
@@ -436,6 +440,10 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 
 static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restrict tempstr, wchar key, const wchar * restrict normMsg)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+	assert(normMsg != NULL);
+
 	if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
 	{
 		return false;
@@ -469,17 +477,25 @@ static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restri
 }
 static inline void s_femto_inner_openTab(fData_t * restrict peditor, wchar * restrict tempstr, const wchar * restrict inp)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+	assert(inp != NULL);
+
 	const wchar * restrict res = NULL;
 	const isize oldIdx = peditor->fileIdx;
-	if (fData_openTab(peditor, inp) && ((res = fFile_read(peditor->files[peditor->fileIdx])) == NULL) )
+
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
+
+	if (fData_openTab(peditor, inp) && ((res = fFile_read(pfile)) == NULL) )
 	{
 		swprintf_s(
 			tempstr, MAX_STATUS,
 			L"Opened %s successfully; %s%s EOL sequences; Syntax: %S",
 			(inp == NULL) ? L"new tab" : inp,
-			(peditor->files[peditor->fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
-			(peditor->files[peditor->fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
-			fStx_name(peditor->files[peditor->fileIdx]->syntax)
+			(pfile->eolSeq & eolCR) ? L"CR" : L"",
+			(pfile->eolSeq & eolLF) ? L"LF" : L"",
+			fStx_name(pfile->syntax)
 		);
 		fData_refreshEdit(peditor);
 	}
@@ -499,6 +515,9 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 	assert(peditor != NULL);
 	assert(tempstr != NULL);
 
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
+
 	if (!forceClose)
 	{
 		u32 realLen = 0;
@@ -506,10 +525,10 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 		realLen += (u32)swprintf_s(tempstr, MAX_STATUS, L"File ");
 
 		// Scan for any unsaved work
-		fFile_checkUnsaved(peditor->files[peditor->fileIdx], NULL, NULL);
-		if (peditor->files[peditor->fileIdx]->bUnsaved && (realLen < MAX_STATUS))
+		fFile_checkUnsaved(pfile, NULL, NULL);
+		if (pfile->bUnsaved && (realLen < MAX_STATUS))
 		{
-			realLen += (u32)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s is unsaved; ", peditor->files[peditor->fileIdx]->fileName);
+			realLen += (u32)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s is unsaved; ", pfile->fileName);
 			if (realLen < MAX_STATUS)
 			{
 				swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm closing", L"Ctrl+Shift+W");
@@ -518,7 +537,7 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 		}
 	}
 
-	const wchar * restrict fname = peditor->files[peditor->fileIdx]->fileName;
+	const wchar * restrict fname = pfile->fileName;
 	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", (fname == NULL) ? L"untitled" : fname);
 	fData_closeTab(peditor);
 	
@@ -528,7 +547,11 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 
 static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * restrict tempstr)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+
 	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
 
 	wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
 	fData_statusMsg(peditor, tempstr, NULL);
@@ -579,6 +602,9 @@ static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * rest
 }
 static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * restrict tempstr, bool first)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+
 	if (peditor->psearchTerm == NULL)
 	{
 		wcscpy_s(tempstr, MAX_STATUS, L"No search term entered");
@@ -636,6 +662,9 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 }
 static inline void s_femto_inner_find(fData_t * restrict peditor, wchar * restrict tempstr, bool backward)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+	
 	wcscpy_s(tempstr, MAX_STATUS, backward ? L"Search backward: " : L"Search forward: ");
 	fData_statusMsg(peditor, tempstr, NULL);
 
@@ -831,6 +860,21 @@ static inline bool s_femto_inner_kbdHandle(
 			waitingEnc = true;
 			wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
 		}
+		// Cut
+		else if ((key == sacCTRL_X) && (prevkey != sacCTRL_X))
+		{
+
+		}
+		// Copy
+		else if ((key == sacCTRL_C) && (prevkey != sacCTRL_C))
+		{
+
+		}
+		// Paste
+		else if ((key == sacCTRL_V) && (prevkey != sacCTRL_V))
+		{
+			
+		}
 		else if (key == sacCTRL_F)
 		{
 			fData_cancelHighlight(peditor);
@@ -924,6 +968,7 @@ static inline bool s_femto_inner_kbdHandle(
 						peditor->fileIdx = (peditor->fileIdx >= (isize)peditor->filesSize) ? 0 : peditor->fileIdx;
 					}
 					pfile = peditor->files[peditor->fileIdx];
+					assert(pfile != NULL);
 					
 					if (peditor->filesSize > 1)
 					{
@@ -1262,6 +1307,7 @@ DWORD WINAPI femto_asyncDraw(LPVOID pdataV)
 {
 	fData_t * restrict pdata = pdataV;
 	assert(pdata != NULL);
+	
 	fDrawThreadData_t * dt = &pdata->drawThread;
 	assert(dt != NULL);
 
@@ -1571,6 +1617,7 @@ u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict pu
 {
 	assert(utf8 != NULL);
 	assert(putf16 != NULL);
+
 	// Query the needed size
 	const u32 size = (numBytes == 0) ? 1 : (u32)MultiByteToWideChar(
 		CP_UTF8,
@@ -1747,6 +1794,8 @@ bool femto_testFile(const wchar * restrict filename)
 }
 isize femto_fileSize(HANDLE hfile)
 {
+	assert((hfile != INVALID_HANDLE_VALUE) && (hfile != NULL));
+	
 	LARGE_INTEGER li;
 	return GetFileSizeEx(hfile, &li) ? (isize)li.QuadPart : -1;
 }
@@ -1768,6 +1817,7 @@ HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 }
 const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * restrict bytesLen)
 {
+	assert(hfile    != NULL);
 	assert(bytes    != NULL);
 	assert(bytesLen != NULL);
 
