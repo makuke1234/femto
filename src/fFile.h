@@ -221,6 +221,22 @@ bool fFile_deleteForward(fFile_t * restrict self);
  */
 bool fFile_deleteBackward(fFile_t * restrict self);
 /**
+ * @brief Deletes current active line
+ * 
+ * @param self Pointer to fFile_t structure
+ * @return true Success
+ * @return false Failure
+ */
+bool fFile_deleteLine(fFile_t * restrict self);
+/**
+ * @brief Deletes selected text from file and also disables highlighting
+ * 
+ * @param self Poitner to fFile_t structure
+ * @return true Success
+ * @return false Failure
+ */
+bool fFile_deleteSelection(fFile_t * restrict self);
+/**
  * @brief Adds a new line after current active line
  * 
  * @param self Pointer to fFile_t structure

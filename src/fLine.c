@@ -193,7 +193,6 @@ bool fLine_getText(const fLine_t * restrict self, wchar ** restrict text, usize 
 	assert(text != NULL);
 
 	const usize totalLen = self->lineEndx - self->freeSpaceLen + 1;
-	fProf_write("Total length: %zu characters", totalLen);
 
 	if ((tarrsz != NULL) && (*tarrsz < totalLen))
 	{
@@ -308,10 +307,9 @@ bool fLine_addChar(fLine_t * restrict self, wchar ch, u8 tabWidth)
 }
 bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * restrict string, usize maxString)
 {
-	assert(string    != NULL);
-	assert(maxString > 0);
-
-	if (node == NULL)
+	assert(string != NULL);
+	
+	if ((node == NULL) || (maxString == 0))
 	{
 		return false;
 	}
@@ -567,8 +565,7 @@ void fLine_swap(fLine_t * restrict node1, fLine_t * restrict node2)
 
 void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * restrict noLen)
 {
-	assert(startnode != NULL);
-	assert(noLen     != NULL);
+	assert(noLen != NULL);
 	
 	const fLine_t * restrict prevnode = NULL;
 	while (startnode != NULL)

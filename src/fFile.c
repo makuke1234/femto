@@ -147,7 +147,6 @@ const wchar * fFile_read(fFile_t * restrict self)
 		return L"Unicode conversion error!";
 	}
 	fProf_write("Converted %u bytes of character to %u UTF-16 characters.", size, chars);
-	fProf_write("File UTF-16 contents \"%S\"", utf16);
 
 	// Save lines to structure
 	wchar ** lines = NULL;
@@ -415,11 +414,15 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
 {
 	assert(self != NULL);
-	
+
 	struct fFileHighLight * restrict hl = &self->data.hl;
 	assert(hl != NULL);
 	
-	if ( (ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN) )
+	if ((ch == VK_DELETE) || (ch == FEMTO_SEL_DELETE) || (ch == VK_BACK))
+	{
+		return hl->beg != NULL;
+	}
+	else if ( (ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN) )
 	{
 
 		const fLine_t * restrict node = self->data.currentNode;
@@ -528,54 +531,40 @@ bool fFile_addSpecialCh(
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case VK_BACK:	// Backspace
-		fFile_deleteBackward(self);
-		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
-		self->data.lastx = self->data.currentNode->virtcurx;
+		if (self->data.hl.beg != NULL)
+		{
+			return fFile_addSpecialCh(self, height, FEMTO_SEL_DELETE, shift, pset);
+		}
+		else
+		{
+			fFile_deleteBackward(self);
+			fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
+			self->data.lastx = self->data.currentNode->virtcurx;
+		}
 		break;
 	case VK_DELETE:	// Delete
-		fFile_deleteForward(self);
+		if (self->data.hl.beg != NULL)
+		{
+			return fFile_addSpecialCh(self, height, FEMTO_SEL_DELETE, shift, pset);
+		}
+		else
+		{
+			fFile_deleteForward(self);
+		}
+		break;
+	case FEMTO_SHIFT_DEL:	// Shift+Delete
+		fFile_deleteLine(self);
+		break;
+	case FEMTO_SEL_DELETE:	// Delete selection
+		fFile_deleteSelection(self);
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
-	case FEMTO_SHIFT_DEL:	// Shift+Delete
-		if (lastcurnode->nextNode != NULL)
-		{
-			if (self->data.pcury == lastcurnode)
-			{
-				self->data.pcury = self->data.pcury->nextNode;
-			}
-			self->data.currentNode = lastcurnode->nextNode;
-			self->data.currentNode->prevNode = lastcurnode->prevNode;
-			if (lastcurnode->prevNode != NULL)
-			{
-				lastcurnode->prevNode->nextNode = self->data.currentNode;
-			}
-			else if (lastcurnode == self->data.firstNode)
-			{
-				self->data.firstNode = self->data.currentNode;
-			}
-			--self->data.currentNode->lineNumber;
+	case FEMTO_COPY:	 // Copy selection to clipboard
 
-			// Destroy current line
-			fLine_free(lastcurnode);
-			self->data.bUpdateAll = true;
-		}
-		else if (lastcurnode->prevNode != NULL)
-		{
-			if (self->data.pcury == lastcurnode)
-			{
-				self->data.pcury = self->data.pcury->prevNode;
-			}
-			self->data.currentNode = lastcurnode->prevNode;
-			self->data.currentNode->nextNode = NULL;
+		break;
+	case FEMTO_PASTE:	// Paste from clipboard
 
-			fLine_free(lastcurnode);
-			self->data.bUpdateAll = true;
-		}
-		if (self->data.bUpdateAll)
-		{
-			fLine_updateLineNumbers(self->data.currentNode, self->data.currentNode->lineNumber, &self->data.noLen);
-		}
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
@@ -596,7 +585,7 @@ bool fFile_addSpecialCh(
 			self->data.currentNode = self->data.currentNode->nextNode;
 			fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 			self->data.lastx       = self->data.currentNode->virtcurx;
-			self->data.bUpdateAll   = true;
+			self->data.bUpdateAll  = true;
 		}
 		break;
 	case VK_LEFT:	// Left arrow
@@ -701,13 +690,161 @@ bool fFile_deleteBackward(fFile_t * restrict self)
 	{
 		// Add current node data to previous node data
 		self->data.currentNode = node->prevNode;
-		self->data.bUpdateAll = true;
+		self->data.bUpdateAll  = true;
 		return fLine_mergeNext(self->data.currentNode, &self->data.pcury, &self->data.noLen);
 	}
 	else
 	{
 		return false;
 	}
+}
+bool fFile_deleteLine(fFile_t * restrict self)
+{
+	assert(self != NULL);
+	
+	fLine_t * restrict node = self->data.currentNode;
+	assert(node != NULL);
+
+	if (node->nextNode != NULL)
+	{
+		if (self->data.pcury == node)
+		{
+			self->data.pcury = self->data.pcury->nextNode;
+		}
+		self->data.currentNode = node->nextNode;
+		self->data.currentNode->prevNode = node->prevNode;
+		if (node->prevNode != NULL)
+		{
+			node->prevNode->nextNode = self->data.currentNode;
+		}
+		else if (node == self->data.firstNode)
+		{
+			self->data.firstNode = self->data.currentNode;
+		}
+		--self->data.currentNode->lineNumber;
+
+		// Destroy current line
+		fLine_free(node);
+		self->data.bUpdateAll = true;
+	}
+	else if (node->prevNode != NULL)
+	{
+		if (self->data.pcury == node)
+		{
+			self->data.pcury = self->data.pcury->prevNode;
+		}
+		self->data.currentNode = node->prevNode;
+		self->data.currentNode->nextNode = NULL;
+
+		fLine_free(node);
+		self->data.bUpdateAll = true;
+	}
+	if (self->data.bUpdateAll)
+	{
+		fLine_updateLineNumbers(self->data.currentNode, self->data.currentNode->lineNumber, &self->data.noLen);
+	}
+	return true;
+}
+bool fFile_deleteSelection(fFile_t * restrict self)
+{
+	assert(self != NULL);
+
+	struct fFileHighLight * restrict hl = &self->data.hl;
+	assert(hl != NULL);
+
+	const fLine_t * restrict begNode = hl->beg;
+	const usize begNodex = hl->begx + ((hl->begx > hl->beg->curx) ? hl->beg->freeSpaceLen : 0);
+
+	assert(begNode != NULL);
+
+	const fLine_t * restrict node = self->data.currentNode;
+	assert(node != NULL);
+
+	if (hl->backwards)
+	{
+		fProf_write("Backwards selection delete");
+		// Use delete
+		// Calculate how many times to hit delete
+		usize rep = 0;
+	
+		usize idx = node->curx;
+		usize curx = idx;
+	
+		while ((node != begNode) || (idx < begNodex))
+		{
+			
+			if (idx == node->lineEndx)
+			{
+				node = node->nextNode;
+				assert(node != NULL);
+				idx = 0;
+				curx = node->curx;
+			}
+			else
+			{
+				++rep;
+				if ((idx == curx) && (node->freeSpaceLen > 0))
+				{
+					idx += node->freeSpaceLen;
+				}
+				else
+				{
+					++idx;
+				}
+			}
+			
+		}
+		fProf_write("%zu deletions", rep);
+		for (usize i = 0; i < rep; ++i)
+		{
+			if (!fFile_deleteForward(self))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		// Use delete
+		// Calculate how many times to hit delete
+		usize rep = 0;
+		usize curx = node->curx + node->freeSpaceLen;
+		usize idx = node->curx;
+		
+		while ((node != begNode) || (idx > begNodex))
+		{
+			if (idx == 0)
+			{
+				node = node->prevNode;
+				assert(node != NULL);
+				idx = node->lineEndx;
+				curx = node->curx + node->freeSpaceLen;
+			}
+			else
+			{
+				++rep;
+				if ((idx == curx) && (node->freeSpaceLen > 0))
+				{
+					idx -= node->freeSpaceLen;
+				}
+				else
+				{
+					--idx;
+				}
+			}
+		}
+		fProf_write("%zu deletions", rep);
+		for (usize i = 0; i < rep; ++i)
+		{
+			if (!fFile_deleteBackward(self))
+			{
+				return false;
+			}
+		}
+	}
+
+	hl->beg = NULL;
+	return true;
 }
 bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
 {

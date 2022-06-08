@@ -863,17 +863,88 @@ static inline bool s_femto_inner_kbdHandle(
 		// Cut
 		else if ((key == sacCTRL_X) && (prevkey != sacCTRL_X))
 		{
-			wcscpy_s(tempstr, MAX_STATUS, L"Cut");
+			// Same as copy and then delete
+			// If selected copy first, then delete
+			if (pfile->data.hl.beg != NULL)
+			{
+				if (!fFile_addSpecialCh(
+					pfile, peditor->scrbuf.h,
+					FEMTO_COPY, false,
+					&peditor->settings
+				))
+				{
+					wcscpy_s(tempstr, MAX_STATUS, L"Cut error!");
+				}
+				else
+				{
+					// Now delete
+					fFile_addSpecialCh(
+						pfile, peditor->scrbuf.h,
+						VK_DELETE, false,
+						&peditor->settings
+					);
+					// Refresh
+					fData_refreshEdit(peditor);
+					wcscpy_s(tempstr, MAX_STATUS, L"Cut");
+				}
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Nothing to cut");
+			}
 		}
 		// Copy
 		else if ((key == sacCTRL_C) && (prevkey != sacCTRL_C))
 		{
-			wcscpy_s(tempstr, MAX_STATUS, L"Copy");
+			if (pfile->data.hl.beg != NULL)
+			{
+				if (!fFile_addSpecialCh(
+					pfile, peditor->scrbuf.h,
+					FEMTO_COPY, false,
+					&peditor->settings
+				))
+				{
+					wcscpy_s(tempstr, MAX_STATUS, L"Copy error!");
+				}
+				else
+				{
+					wcscpy_s(tempstr, MAX_STATUS, L"Copy");
+				}
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Nothing to copy");
+			}
 		}
 		// Paste
 		else if ((key == sacCTRL_V) && (prevkey != sacCTRL_V))
 		{
-			wcscpy_s(tempstr, MAX_STATUS, L"Paste");
+			// Check for anything pasteable
+
+			// If selected, delete first
+			if (pfile->data.hl.beg != NULL)
+			{
+				fFile_addSpecialCh(
+					pfile, peditor->scrbuf.h,
+					VK_DELETE, false,
+					&peditor->settings
+				);
+			}
+
+			if (!fFile_addSpecialCh(
+				pfile, peditor->scrbuf.h,
+				FEMTO_PASTE, false,
+				&peditor->settings
+			))
+			{
+				// Paste
+				fData_refreshEdit(peditor);
+				wcscpy_s(tempstr, MAX_STATUS, L"Paste");
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Paste error!");
+			}
 		}
 		else if (key == sacCTRL_F)
 		{
@@ -997,10 +1068,10 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_DELETE:
 			{
-				fData_cancelHighlight(peditor);
 				// Check for shift to alt key
 				if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
 				{
+					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + 'DEL' #%u", shift ? L"\u2191" : L"'ALT'", keyCount);
 					wVirtKey = FEMTO_SHIFT_DEL;
 				}
@@ -1037,13 +1108,13 @@ static inline bool s_femto_inner_kbdHandle(
 				}
 				break;
 			case VK_RETURN:	// Enter key
-			case VK_BACK:	// Backspace
 			case VK_PRIOR:	// Page up
 			case VK_NEXT:	// Page down
 			case VK_END:
 			case VK_HOME:
 				fData_cancelHighlight(peditor);
 				/* fall through */
+			case VK_BACK:	// Backspace
 			case VK_LEFT:	// Left arrow
 			case VK_RIGHT:	// Right arrow
 			{
@@ -1144,7 +1215,6 @@ static inline i32 s_femto_inner_calcMouseScroll(
 	assert(deltaPositive != NULL);
 
 	const i32 delta = (i32)(i16)HIWORD(ir->dwButtonState);
-	fProf_write("Mouse wheel was used, delta: %d", delta);
 	*deltaPositive = (delta > 0);
 
 	*s_delta = (((*s_delta > 0) && (delta < 0)) || ((*s_delta < 0) && (delta > 0))) ? delta : (*s_delta + delta);
