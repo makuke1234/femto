@@ -14,6 +14,10 @@ i32 clamp_i32(i32 value, i32 min, i32 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+i32 clampdc_i32(i32 value, i32 range1, i32 range2)
+{
+	return (range1 < range2) ? clamp_i32(value, range1, range2) : clamp_i32(value, range2, range1);
+}
 
 u32 min_u32(u32 a, u32 b)
 {
@@ -26,6 +30,10 @@ u32 max_u32(u32 a, u32 b)
 u32 clamp_u32(u32 value, u32 min, u32 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
+}
+u32 clampdc_u32(u32 value, u32 range1, u32 range2)
+{
+	return (range1 < range2) ? clamp_u32(value, range1, range2) : clamp_u32(value, range2, range1);
 }
 
 i64 min_i64(i64 a, i64 b)
@@ -40,6 +48,10 @@ i64 clamp_i64(i64 value, i64 min, i64 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+i64 clampdc_i64(i64 value, i64 range1, i64 range2)
+{
+	return (range1 < range2) ? clamp_i64(value, range1, range2) : clamp_i64(value, range2, range1);
+}
 
 u64 min_u64(u64 a, u64 b)
 {
@@ -53,7 +65,10 @@ u64 clamp_u64(u64 value, u64 min, u64 max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
-
+u64 clampdc_u64(u64 value, u64 range1, u64 range2)
+{
+	return (range1 < range2) ? clamp_u64(value, range1, range2) : clamp_u64(value, range2, range1);
+}
 
 usize min_usize(usize a, usize b)
 {
@@ -67,10 +82,18 @@ usize clamp_usize(usize value, usize min, usize max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
 }
+usize clampdc_usize(usize value, usize range1, usize range2)
+{
+	return (range1 < range2) ? clamp_usize(value, range1, range2) : clamp_usize(value, range2, range1);
+}
+
 
 
 char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen, wchar cp)
 {
+	assert(pstr != NULL);
+	assert(plen != NULL);
+	
 	uchar conv[3];
 	usize len = 0;
 	if (cp <= 0x7F)
@@ -118,7 +141,7 @@ char * femto_escStr_s(const char * restrict inp, usize len)
 		switch (inp[i])
 		{
 		case '\\':
-			if (i < (len - 1))
+			if ((i + 1) < len)
 			{
 				++i;
 				char ch = '\0';
@@ -141,7 +164,7 @@ char * femto_escStr_s(const char * restrict inp, usize len)
 					break;
 				case 'u':
 					// 4-wide unicode code point
-					if (i < (len - 4))
+					if ((i + 4) < len)
 					{
 						++i;
 
@@ -256,6 +279,7 @@ void femto_exitHandlerSetVars(fData_t * restrict pdata)
 }
 void femto_exitHandler(void)
 {
+	assert(s_atExitData != NULL);
 	// Clear resources
 	fData_destroy(s_atExitData);
 }
@@ -416,6 +440,10 @@ bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLe
 
 static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restrict tempstr, wchar key, const wchar * restrict normMsg)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+	assert(normMsg != NULL);
+
 	if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
 	{
 		return false;
@@ -449,17 +477,25 @@ static inline bool s_femto_inner_quit(fData_t * restrict peditor, wchar * restri
 }
 static inline void s_femto_inner_openTab(fData_t * restrict peditor, wchar * restrict tempstr, const wchar * restrict inp)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+	assert(inp != NULL);
+
 	const wchar * restrict res = NULL;
 	const isize oldIdx = peditor->fileIdx;
-	if (fData_openTab(peditor, inp) && ((res = fFile_read(peditor->files[peditor->fileIdx])) == NULL) )
+
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
+
+	if (fData_openTab(peditor, inp) && ((res = fFile_read(pfile)) == NULL) )
 	{
 		swprintf_s(
 			tempstr, MAX_STATUS,
 			L"Opened %s successfully; %s%s EOL sequences; Syntax: %S",
 			(inp == NULL) ? L"new tab" : inp,
-			(peditor->files[peditor->fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
-			(peditor->files[peditor->fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
-			fStx_name(peditor->files[peditor->fileIdx]->syntax)
+			(pfile->eolSeq & eolCR) ? L"CR" : L"",
+			(pfile->eolSeq & eolLF) ? L"LF" : L"",
+			fStx_name(pfile->syntax)
 		);
 		fData_refreshEdit(peditor);
 	}
@@ -479,6 +515,9 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 	assert(peditor != NULL);
 	assert(tempstr != NULL);
 
+	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
+
 	if (!forceClose)
 	{
 		u32 realLen = 0;
@@ -486,10 +525,10 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 		realLen += (u32)swprintf_s(tempstr, MAX_STATUS, L"File ");
 
 		// Scan for any unsaved work
-		fFile_checkUnsaved(peditor->files[peditor->fileIdx], NULL, NULL);
-		if (peditor->files[peditor->fileIdx]->bUnsaved && (realLen < MAX_STATUS))
+		fFile_checkUnsaved(pfile, NULL, NULL);
+		if (pfile->bUnsaved && (realLen < MAX_STATUS))
 		{
-			realLen += (u32)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s is unsaved; ", peditor->files[peditor->fileIdx]->fileName);
+			realLen += (u32)swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"%s is unsaved; ", pfile->fileName);
 			if (realLen < MAX_STATUS)
 			{
 				swprintf_s(tempstr + realLen, MAX_STATUS - realLen, L"Press %s to confirm closing", L"Ctrl+Shift+W");
@@ -498,7 +537,7 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 		}
 	}
 
-	const wchar * restrict fname = peditor->files[peditor->fileIdx]->fileName;
+	const wchar * restrict fname = pfile->fileName;
 	swprintf_s(tempstr, MAX_STATUS, L"Closed tab %s", (fname == NULL) ? L"untitled" : fname);
 	fData_closeTab(peditor);
 	
@@ -508,7 +547,11 @@ static inline void s_femto_inner_closeTab(fData_t * restrict peditor, wchar * re
 
 static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * restrict tempstr)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+
 	fFile_t * restrict pfile = peditor->files[peditor->fileIdx];
+	assert(pfile != NULL);
 
 	wcscpy_s(tempstr, MAX_STATUS, L"Save as... :");
 	fData_statusMsg(peditor, tempstr, NULL);
@@ -559,6 +602,9 @@ static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * rest
 }
 static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * restrict tempstr, bool first)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+
 	if (peditor->psearchTerm == NULL)
 	{
 		wcscpy_s(tempstr, MAX_STATUS, L"No search term entered");
@@ -616,6 +662,9 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 }
 static inline void s_femto_inner_find(fData_t * restrict peditor, wchar * restrict tempstr, bool backward)
 {
+	assert(peditor != NULL);
+	assert(tempstr != NULL);
+	
 	wcscpy_s(tempstr, MAX_STATUS, backward ? L"Search backward: " : L"Search forward: ");
 	fData_statusMsg(peditor, tempstr, NULL);
 
@@ -666,10 +715,11 @@ static inline bool s_femto_inner_kbdHandle(
 		{
 			if (peditor->psearchTerm != NULL)
 			{
-				peditor->psearchTerm = NULL;
-				wcscpy_s(tempstr, MAX_STATUS, L"Exited from search!");
-				pfile->data.bUpdateAll = true;
-				fData_refreshEdit(peditor);
+				fData_cancelSearch(peditor);
+			}
+			else if (pfile->data.hl.beg != NULL)
+			{
+				fData_cancelHighlight(peditor);
 			}
 			else if (!s_femto_inner_quit(peditor, tempstr, key, L"Shift+ESC"))
 			{
@@ -746,6 +796,7 @@ static inline bool s_femto_inner_kbdHandle(
 		}
 		else if ((key == sacCTRL_R) && (prevkey != sacCTRL_R))	// Reload file
 		{
+			fData_cancelHighlight(peditor);
 			bool reload = true;
 			if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000))
 			{
@@ -809,13 +860,101 @@ static inline bool s_femto_inner_kbdHandle(
 			waitingEnc = true;
 			wcscpy_s(tempstr, MAX_STATUS, L"Waiting for EOL combination (F = CRLF, L = LF, C = CR)...");
 		}
+		// Cut
+		else if ((key == sacCTRL_X) && (prevkey != sacCTRL_X))
+		{
+			// Same as copy and then delete
+			// If selected copy first, then delete
+			if (pfile->data.hl.beg != NULL)
+			{
+				if (!fFile_addSpecialCh(
+					pfile, peditor->scrbuf.h,
+					FEMTO_COPY, false,
+					&peditor->settings
+				))
+				{
+					wcscpy_s(tempstr, MAX_STATUS, L"Cut error!");
+				}
+				else
+				{
+					// Now delete
+					fFile_addSpecialCh(
+						pfile, peditor->scrbuf.h,
+						VK_DELETE, false,
+						&peditor->settings
+					);
+					// Refresh
+					fData_refreshEdit(peditor);
+					wcscpy_s(tempstr, MAX_STATUS, L"Cut");
+				}
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Nothing to cut");
+			}
+		}
+		// Copy
+		else if ((key == sacCTRL_C) && (prevkey != sacCTRL_C))
+		{
+			if (pfile->data.hl.beg != NULL)
+			{
+				if (!fFile_addSpecialCh(
+					pfile, peditor->scrbuf.h,
+					FEMTO_COPY, false,
+					&peditor->settings
+				))
+				{
+					wcscpy_s(tempstr, MAX_STATUS, L"Copy error!");
+				}
+				else
+				{
+					wcscpy_s(tempstr, MAX_STATUS, L"Copy");
+				}
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Nothing to copy");
+			}
+		}
+		// Paste
+		else if ((key == sacCTRL_V) && (prevkey != sacCTRL_V))
+		{
+			// Check for anything pasteable
+
+			// If selected, delete first
+			if (pfile->data.hl.beg != NULL)
+			{
+				fFile_addSpecialCh(
+					pfile, peditor->scrbuf.h,
+					VK_DELETE, false,
+					&peditor->settings
+				);
+			}
+
+			if (!fFile_addSpecialCh(
+				pfile, peditor->scrbuf.h,
+				FEMTO_PASTE, false,
+				&peditor->settings
+			))
+			{
+				// Paste
+				fData_refreshEdit(peditor);
+				wcscpy_s(tempstr, MAX_STATUS, L"Paste");
+			}
+			else
+			{
+				wcscpy_s(tempstr, MAX_STATUS, L"Paste error!");
+			}
+		}
 		else if (key == sacCTRL_F)
 		{
+			fData_cancelHighlight(peditor);
 			s_femto_inner_find(peditor, tempstr, false);
 		}
 		// Normal keys
 		else if (key > sacLAST_CODE)
 		{
+			fData_cancelHighlight(peditor);
 			swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 			if (fFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 			{
@@ -826,12 +965,14 @@ static inline bool s_femto_inner_kbdHandle(
 		else
 		{
 			bool send = true;
+			const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+
 			switch (wVirtKey)
 			{
 			// Save as...
 			case L'S':
 				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					((GetAsyncKeyState(VK_SHIFT)) & 0x8000) && (prevwVirtKey != L'S') )
+					shift && (prevwVirtKey != L'S') )
 				{
 					send = false;
 					s_femto_inner_saveAs(peditor, tempstr);
@@ -839,7 +980,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case L'W':
 				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'W') )
+					shift && (prevwVirtKey != L'W') )
 				{
 					send = false;
 					if (peditor->filesSize == 1)
@@ -857,7 +998,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case L'R':
 				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					(GetAsyncKeyState(VK_SHIFT) & 0x8000) && (prevwVirtKey != L'R'))
+					shift && (prevwVirtKey != L'R'))
 				{
 					send = false;
 					const wchar * restrict res = fFile_read(pfile);
@@ -880,8 +1021,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_TAB:
 			{
-				const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-				
+				fData_cancelHighlight(peditor);
 				// Shuffle between tabs
 				if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
 				{
@@ -899,6 +1039,7 @@ static inline bool s_femto_inner_kbdHandle(
 						peditor->fileIdx = (peditor->fileIdx >= (isize)peditor->filesSize) ? 0 : peditor->fileIdx;
 					}
 					pfile = peditor->files[peditor->fileIdx];
+					assert(pfile != NULL);
 					
 					if (peditor->filesSize > 1)
 					{
@@ -920,16 +1061,17 @@ static inline bool s_femto_inner_kbdHandle(
 			}
 			case VK_F2:
 			case VK_F3:
+				fData_cancelHighlight(peditor);
 				send = false;
 				peditor->bDirBack = (wVirtKey == VK_F2);
 				s_femto_inner_searchTerm(peditor, tempstr, false);
 				break;
 			case VK_DELETE:
 			{
-				const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 				// Check for shift to alt key
 				if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
 				{
+					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + 'DEL' #%u", shift ? L"\u2191" : L"'ALT'", keyCount);
 					wVirtKey = FEMTO_SHIFT_DEL;
 				}
@@ -943,6 +1085,7 @@ static inline bool s_femto_inner_kbdHandle(
 				// Check for alt key
 				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 				{
+					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2191 #%u", keyCount);
 					wVirtKey = FEMTO_MOVELINE_UP;
 				}
@@ -955,6 +1098,7 @@ static inline bool s_femto_inner_kbdHandle(
 				// Check for alt key
 				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
 				{
+					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"'ALT' + \u2193 #%u", keyCount);
 					wVirtKey = FEMTO_MOVELINE_DOWN;
 				}
@@ -964,13 +1108,15 @@ static inline bool s_femto_inner_kbdHandle(
 				}
 				break;
 			case VK_RETURN:	// Enter key
-			case VK_BACK:	// Backspace
-			case VK_LEFT:	// Left arrow
-			case VK_RIGHT:	// Right arrow
 			case VK_PRIOR:	// Page up
 			case VK_NEXT:	// Page down
 			case VK_END:
 			case VK_HOME:
+				fData_cancelHighlight(peditor);
+				/* fall through */
+			case VK_BACK:	// Backspace
+			case VK_LEFT:	// Left arrow
+			case VK_RIGHT:	// Right arrow
 			{
 				static const wchar * buf[] = {
 					[VK_RETURN] = L"'RET'",
@@ -986,7 +1132,10 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			}
 			case VK_CAPITAL:
-				wcscpy_s(tempstr, MAX_STATUS, (GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off");
+				wcscpy_s(
+					tempstr, MAX_STATUS,
+					(GetKeyState(VK_CAPITAL) & 0x0001) ? L"'CAPS' On" : L"'CAPS' Off"
+				);
 				break;
 			case VK_NUMLOCK:
 				wcscpy_s(
@@ -1007,7 +1156,7 @@ static inline bool s_femto_inner_kbdHandle(
 
 			if (send && fFile_addSpecialCh(
 				pfile, peditor->scrbuf.h,
-				wVirtKey, (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0,
+				wVirtKey, shift,
 				&peditor->settings
 			))
 			{
@@ -1066,7 +1215,6 @@ static inline i32 s_femto_inner_calcMouseScroll(
 	assert(deltaPositive != NULL);
 
 	const i32 delta = (i32)(i16)HIWORD(ir->dwButtonState);
-	fProf_write("Mouse wheel was used, delta: %d", delta);
 	*deltaPositive = (delta > 0);
 
 	*s_delta = (((*s_delta > 0) && (delta < 0)) || ((*s_delta < 0) && (delta > 0))) ? delta : (*s_delta + delta);
@@ -1135,11 +1283,17 @@ static inline bool s_femto_inner_mouseHandle(
 		// If not, don't draw anything on the statusbar
 		draw = s_femto_inner_calcMousePos(peditor, ir, &pos);
 
+		struct fFileHighLight * restrict hl = &pfile->data.hl;
+		assert(hl != NULL);
+
+		bool moved = false;
+
 		// Check if mouse is moving
 		if (ir->dwEventFlags & MOUSE_MOVED)
 		{
 			if (draw)
 			{
+				moved = true;
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
 			}
 		}
@@ -1149,19 +1303,37 @@ static inline bool s_femto_inner_mouseHandle(
 			{
 				fProf_write("Mouse click @%hd, %hd", pos.X, pos.Y);
 
-				if (pfile->data.pcury != NULL)
-				{
-					pfile->data.currentNode = pfile->data.pcury;
-					const fLine_t * restrict lastcurnode = pfile->data.currentNode;
-					fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
-					pfile->data.bUpdateAll |= (pfile->data.currentNode != lastcurnode) & peditor->settings.bRelLineNums;
-					// Now move the cursor to correct X position
-					fLine_moveCursorAbs(pfile->data.currentNode, fLine_calcCursor(pfile->data.currentNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
-					fLine_calcVirtCursor(pfile->data.currentNode, peditor->settings.tabWidth);
-					pfile->data.lastx = pfile->data.currentNode->virtcurx;
-					fData_refreshEditAsync(peditor);
-				}
+				fData_cancelHighlight(peditor);
+
 				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
+			}
+		}
+
+		if (draw)
+		{
+			if (pfile->data.pcury != NULL)
+			{
+				pfile->data.currentNode = pfile->data.pcury;
+				const fLine_t * restrict lastcurnode = pfile->data.currentNode;
+				fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
+				fLine_t * restrict curNode = pfile->data.currentNode;
+				pfile->data.bUpdateAll |= (curNode != lastcurnode) & peditor->settings.bRelLineNums;
+				// Now move the cursor to correct X position
+				fLine_moveCursorAbs(curNode, fLine_calcCursor(curNode, (usize)pos.X + pfile->data.curx, peditor->settings.tabWidth));
+				fLine_calcVirtCursor(curNode, peditor->settings.tabWidth);
+				pfile->data.lastx = curNode->virtcurx;
+
+				if (moved && (hl->beg == NULL))
+				{
+					hl->beg  = pfile->data.currentNode;
+					hl->begx = pfile->data.currentNode->curx & USIZE_BIT_1_MASK;
+				}
+				if (hl->beg != NULL)
+				{
+					hl->backwards = (hl->beg->lineNumber > curNode->lineNumber) || 
+						((hl->beg == curNode) && (hl->begx > curNode->curx));
+				}
+				fData_refreshEditAsync(peditor);
 			}
 		}
 	}
@@ -1205,6 +1377,7 @@ DWORD WINAPI femto_asyncDraw(LPVOID pdataV)
 {
 	fData_t * restrict pdata = pdataV;
 	assert(pdata != NULL);
+	
 	fDrawThreadData_t * dt = &pdata->drawThread;
 	assert(dt != NULL);
 
@@ -1325,7 +1498,10 @@ bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict curline)
 		node = pfile->data.firstNode;
 		while (node != NULL)
 		{
-			fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm, peditor->settings.tabWidth);
+			fLine_updateSyntax(
+				node, pfile->syntax, peditor->settings.syntaxColors,
+				peditor->psearchTerm, &pfile->data.hl,
+				pfile->data.currentNode->lineNumber, peditor->settings.tabWidth);
 
 			node = node->nextNode;
 		}
@@ -1457,7 +1633,11 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 		}
 	}
 
-	if (!fLine_updateSyntax(node, pfile->syntax, peditor->settings.syntaxColors, peditor->psearchTerm, peditor->settings.tabWidth))
+	if (!fLine_updateSyntax(
+		node, pfile->syntax, peditor->settings.syntaxColors,
+		peditor->psearchTerm, &pfile->data.hl,
+		pfile->data.currentNode->lineNumber, peditor->settings.tabWidth
+	))
 	{
 		fData_statusMsg(peditor, L"Error refreshing syntax highlighting!", NULL);
 	}
@@ -1507,6 +1687,7 @@ u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict pu
 {
 	assert(utf8 != NULL);
 	assert(putf16 != NULL);
+
 	// Query the needed size
 	const u32 size = (numBytes == 0) ? 1 : (u32)MultiByteToWideChar(
 		CP_UTF8,
@@ -1681,6 +1862,13 @@ bool femto_testFile(const wchar * restrict filename)
 		return true;
 	}
 }
+isize femto_fileSize(HANDLE hfile)
+{
+	assert((hfile != INVALID_HANDLE_VALUE) && (hfile != NULL));
+	
+	LARGE_INTEGER li;
+	return GetFileSizeEx(hfile, &li) ? (isize)li.QuadPart : -1;
+}
 HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 {
 	assert(fileName != NULL);
@@ -1699,6 +1887,7 @@ HANDLE femto_openFile(const wchar * restrict fileName, bool writemode)
 }
 const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * restrict bytesLen)
 {
+	assert(hfile    != NULL);
 	assert(bytes    != NULL);
 	assert(bytesLen != NULL);
 
@@ -1707,11 +1896,12 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * rest
 		return L"File opening error!";
 	}
 
-	usize fileSize;
+	const isize fileSize_i = femto_fileSize(hfile);
+	if (fileSize_i == -1)
 	{
-		LARGE_INTEGER li;
-		fileSize = GetFileSizeEx(hfile, &li) ? (usize)li.QuadPart : 0;
+		return L"File size error!";
 	}
+	const usize fileSize = (usize)fileSize_i;
 
 	if ((fileSize >= *bytesLen) || (*bytes == NULL))
 	{

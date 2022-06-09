@@ -4,6 +4,9 @@
 #include "fCommon.h"
 #include "fSyntax.h"
 
+// Forward-declare from fFile.h
+struct fFileHighLight;
+
 #define FEMTO_LNODE_DEFAULT_FREE 10
 
 
@@ -220,14 +223,16 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * 
  * @param fs Syntax identifier
  * @param colors Syntax token coloring palette
  * @param searchTerm Phrase to be searched, can be NULL
+ * @param hl Highlighting data
+ * @param curLineNum Current active line number
  * @param tabWidth Tab width in characters
  * @return true Success
  * @return false Failure, usually when allocating memory
  */
 bool fLine_updateSyntax(
 	fLine_t * restrict node, fStx_e fs, const WORD * colors,
-	const wchar * restrict searchTerm,
-	u8 tabWidth
+	const wchar * restrict searchTerm, const struct fFileHighLight * restrict hl,
+	usize curLineNum, u8 tabWidth
 );
 
 /**

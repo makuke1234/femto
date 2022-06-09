@@ -2,6 +2,9 @@
 
 bool fArg_strToBool(fArg_t arg)
 {
+	assert(arg.begin != NULL);
+	assert(arg.end   != NULL);
+
 	if (((arg.end - arg.begin) >= 4) && (wcsncmp(arg.begin, L"true", 4) == 0))
 	{
 		return true;

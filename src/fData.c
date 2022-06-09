@@ -43,6 +43,7 @@ bool fData_reset(fData_t * restrict self)
 bool fData_init(fData_t * restrict self)
 {
 	assert(self != NULL);
+
 	self->conIn  = GetStdHandle(STD_INPUT_HANDLE);
 	self->conOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Set exit handler
@@ -294,6 +295,29 @@ void fData_statusRefresh(fData_t * restrict self)
 			.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)
 		}
 	);
+}
+
+void fData_cancelSearch(fData_t * restrict self)
+{
+	assert(self != NULL);
+
+	fFile_t * restrict pfile = self->files[self->fileIdx];
+	assert(pfile != NULL);
+
+	self->psearchTerm = NULL;
+	pfile->data.bUpdateAll = true;
+	fData_refreshEdit(self);
+}
+void fData_cancelHighlight(fData_t * restrict self)
+{
+	assert(self != NULL);
+
+	fFile_t * restrict pfile = self->files[self->fileIdx];
+	assert(pfile != NULL);
+
+	pfile->data.hl.beg = NULL;
+	pfile->data.bUpdateAll = true;
+	fData_refreshEditAsync(self);
 }
 
 bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)

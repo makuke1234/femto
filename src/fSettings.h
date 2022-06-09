@@ -2,6 +2,7 @@
 #define FEMTOSETTINGS_H
 
 #include "fCommon.h"
+#include "fSyntax.h"
 
 typedef struct fColor
 {

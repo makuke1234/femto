@@ -140,7 +140,9 @@ void fStx_checkGenericToken(
 	const fStatHash_t * restrict map
 )
 {
-	assert(node != NULL);
+	assert(node  != NULL);
+	assert(lasti >= start);
+	assert(map   != NULL);
 	
 	if ((lasti - start) < 1)
 	{
@@ -187,6 +189,8 @@ void fStx_checkCToken(fLine_t * restrict node, usize start, usize lasti, WORD kw
 {
 	static usize memory[MAX_C_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
+
+	assert(node != NULL);
 	
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, s_keyWordsC, ARRAYSIZE(s_keyWordsC));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
@@ -196,6 +200,8 @@ void fStx_checkCPPToken(fLine_t * restrict node, usize start, usize lasti, WORD 
 	static usize memory[MAX_CPP_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 
+	assert(node != NULL);
+
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, s_keyWordsCPP, ARRAYSIZE(s_keyWordsCPP));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
@@ -203,6 +209,8 @@ void fStx_checkPyToken(fLine_t * restrict node, usize start, usize lasti, WORD k
 {
 	static usize memory[MAX_PY_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
+	
+	assert(node != NULL);
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, s_keyWordsPy, ARRAYSIZE(s_keyWordsPy));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
@@ -212,6 +220,8 @@ void fStx_checkJSToken(fLine_t * restrict node, usize start, usize lasti, WORD k
 	static usize memory[MAX_JS_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 
+	assert(node != NULL);
+
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, s_keyWordsJS, ARRAYSIZE(s_keyWordsJS));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
@@ -219,6 +229,8 @@ void fStx_checkRustToken(fLine_t * restrict node, usize start, usize lasti, WORD
 {
 	static usize memory[MAX_RUST_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
+	
+	assert(node != NULL);
 	
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, s_keyWordsRust, ARRAYSIZE(s_keyWordsRust));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
@@ -228,12 +240,17 @@ void fStx_checkGoToken(fLine_t * restrict node, usize start, usize lasti, WORD k
 	static usize memory[MAX_GO_TOKEN_MEM];
 	static fStatHash_t map = { 0 };
 	
+	assert(node != NULL);
+	
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, s_keyWordsGo, ARRAYSIZE(s_keyWordsGo));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 
 bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+	
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -261,6 +278,10 @@ bool fStx_parseCLike(
 	fStx_e lang
 )
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+	assert(func   != NULL);
+	
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -475,6 +496,9 @@ bool fStx_parseCLike(
 }
 bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -696,6 +720,9 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 
 bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -918,6 +945,9 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 
 bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -1048,6 +1078,9 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 }
 bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+	
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -1233,6 +1266,9 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 
 bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 {
+	assert(node   != NULL);
+	assert(colors != NULL);
+	
 	if (!fStx_autoAlloc(node))
 	{
 		return false;

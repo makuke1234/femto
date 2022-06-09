@@ -32,7 +32,7 @@ void fProf_close(void)
 void fProf_write_inner(const char * restrict function, const char * restrict format, ...)
 {
 	assert(function != NULL);
-	assert(format != NULL);
+	assert(format   != NULL);
 
 	if (s_profilingFile == NULL)
 	{
@@ -69,12 +69,13 @@ static usize s_curStackLen = 0;
 void fProf_start(void)
 {
 	assert(s_curStackLen < FEMTO_PROFILER_STACK_SIZE);
+
 	s_profilerStack[s_curStackLen] = clock();
 	++s_curStackLen;
 }
 void fProf_end_inner(const char * funcName)
 {
-	assert(funcName != NULL);
+	assert(funcName      != NULL);
 	assert(s_curStackLen > 0);
 	
 	--s_curStackLen;

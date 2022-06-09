@@ -8,6 +8,9 @@ static fData_t editor;
 
 int wmain(int argc, const wchar * argv[])
 {
+	assert(argc > 0);
+	assert(argv != NULL);
+	
 	femto_exitHandlerSetVars(&editor);
 	if (!fData_reset(&editor))
 	{

@@ -13,7 +13,7 @@ typedef struct fHashNode
 
 } fHashNode_t;
 
-#if UINT64_MAX == SIZE_MAX
+#if SSIZE_MAX == INT64_MAX
 	#define MAPSIZE_BITS 63
 #else
 	#define MAPSIZE_BITS 31

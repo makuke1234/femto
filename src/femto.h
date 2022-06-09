@@ -42,22 +42,27 @@ typedef enum specialASCIIcodes
 i32 min_i32(i32 a, i32 b);
 i32 max_i32(i32 a, i32 b);
 i32 clamp_i32(i32 value, i32 min, i32 max);
+i32 clampdc_i32(i32 value, i32 range1, i32 range2);
 
 u32 min_u32(u32 a, u32 b);
 u32 max_u32(u32 a, u32 b);
 u32 clamp_u32(u32 value, u32 min, u32 max);
+u32 clampdc_u32(u32 value, u32 range1, u32 range2);
 
 i64 min_i64(i64 a, i64 b);
 i64 max_i64(i64 a, i64 b);
 i64 clamp_i64(i64 value, i64 min, i64 max);
+i64 clampdc_i64(i64 value, i64 range1, i64 range2);
 
 u64 min_u64(u64 a, u64 b);
 u64 max_u64(u64 a, u64 b);
 u64 clamp_u64(u64 value, u64 min, u64 max);
+u64 clampdc_u64(u64 value, u64 range1, u64 range2);
 
 usize min_usize(usize a, usize b);
 usize max_usize(usize a, usize b);
 usize clamp_usize(usize value, usize min, usize max);
+usize clampdc_usize(usize value, usize range1, usize range2);
 
 
 
@@ -221,6 +226,13 @@ usize femto_strnToLines(wchar * restrict utf16, usize chars, wchar *** restrict 
  * @return false File doesn't exist/is inaccessible
  */
 bool femto_testFile(const wchar * restrict filename);
+/**
+ * @brief Retrieves the size of the desired filename
+ * 
+ * @param hfile Open file handle
+ * @return isize File size in bytes, -1 on error of some kind
+ */
+isize femto_fileSize(HANDLE hfile);
 /**
  * @brief Opens new file with desired name and write access
  * 
