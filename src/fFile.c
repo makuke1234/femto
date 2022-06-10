@@ -561,10 +561,10 @@ bool fFile_addSpecialCh(
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case FEMTO_COPY:	 // Copy selection to clipboard
-
+		fFile_cbCopy(self);
 		break;
 	case FEMTO_PASTE:	// Paste from clipboard
-
+		fFile_cbPaste(self);
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
@@ -846,6 +846,115 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 	hl->beg = NULL;
 	return true;
 }
+
+bool fFile_cbCopy(fFile_t * restrict self)
+{
+	assert(self != NULL);
+
+	if (!OpenClipboard(GetConsoleWindow()))
+	{
+		return false;
+	}
+
+	struct fFileHighLight * restrict hl = &self->data.hl;
+	assert(hl != NULL);
+
+	const fLine_t * restrict beg = hl->beg;
+
+	if (beg != NULL)
+	{
+		CloseClipboard();
+		return false;
+	}
+
+	// Copy "stuff" onto clipboard
+
+	const fLine_t * restrict curnode = self->data.currentNode;
+	assert(curnode != NULL);
+
+	// Find first & last node
+	const fLine_t * restrict begnode = NULL, * restrict endnode = NULL;
+	if (beg->lineNumber < curnode->lineNumber)
+	{
+		begnode = hl->beg;
+		endnode = curnode;
+	}
+	else
+	{
+		begnode = curnode;
+		endnode = hl->beg;
+	}
+
+	assert(begnode != NULL);
+	assert(endnode != NULL);
+
+	do
+	{
+		// Calculate begining cursor & ending cursor
+		usize begCur, endCur;
+
+		if (curnode == beg)
+		{
+			begCur = hl->backwards ? begnode->curx : hl->begx;
+			endCur = hl->backwards ? hl->begx      : begnode->curx;
+		}
+		else if (begnode == beg)
+		{
+			begCur = hl->backwards ? 0 : hl->begx;
+			endCur = hl->backwards ? hl->begx : begnode->lineEndx - begnode->freeSpaceLen;
+		}
+		else if (begnode == curnode)
+		{
+			begCur = hl->backwards ? begnode->curx                             : 0;
+			endCur = hl->backwards ? begnode->lineEndx - begnode->freeSpaceLen : begnode->curx;
+		}
+		else
+		{
+			begCur = 0;
+			endCur = begnode->lineEndx - begnode->freeSpaceLen;
+		}
+
+		begCur += ((begCur >= begnode->curx) && (begnode->freeSpaceLen > 0)) ? begnode->freeSpaceLen : 0;
+		endCur += ((endCur >= begnode->curx) && (begnode->freeSpaceLen > 0)) ? begnode->freeSpaceLen : 0;
+
+		while (begCur < endCur)
+		{
+			if ((begCur == begnode->curx) && (begnode->freeSpaceLen > 0))
+			{
+				begCur += begnode->freeSpaceLen;
+				continue;
+			}
+
+			// Add character to clipboard
+			
+
+			++begCur;
+		}
+
+
+		begnode = begnode->nextNode;
+		assert(begnode != NULL);
+
+		if (begnode != endnode)
+		{
+			// Add newline to clipboard
+
+		}
+
+	} while (begnode != endnode);
+
+
+	CloseClipboard();
+
+	return true;
+}
+bool fFile_cbPaste(fFile_t * restrict self)
+{
+	assert(self != NULL);
+
+	return true;
+}
+
 bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
 {
 	assert(self     != NULL);
