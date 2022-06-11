@@ -25,6 +25,7 @@ bool warr_pushBack(warr_t * restrict This, vptr item);
 bool warr_removeBack(warr_t * restrict This);
 vptr warr_get(const warr_t * restrict This, usize idx);
 
+vptr warr_data(const warr_t * restrict This);
 usize warr_size(const warr_t * restrict This);
 usize warr_cap(const warr_t * restrict This);
 usize warr_itemSize(const warr_t * restrict This);
