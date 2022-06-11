@@ -236,6 +236,24 @@ bool fFile_deleteLine(fFile_t * restrict self);
  * @return false Failure
  */
 bool fFile_deleteSelection(fFile_t * restrict self);
+
+/**
+ * @brief Copies currently selected characters to the clipboard
+ * 
+ * @param self Pointer to fFile_t structure
+ * @return true Success
+ * @return false Failure
+ */
+bool fFile_cbCopy(fFile_t * restrict self);
+/**
+ * @brief Pastes current clipboard to current cursor location
+ * 
+ * @param self Pointer to fFile_t structure
+ * @return true Success
+ * @return false Failure
+ */
+bool fFile_cbPaste(fFile_t * restrict self);
+
 /**
  * @brief Adds a new line after current active line
  * 

@@ -1,5 +1,6 @@
 #include "fFile.h"
 #include "femto.h"
+#include "winarr.h"
 
 void fFile_reset(fFile_t * restrict self)
 {
@@ -561,10 +562,16 @@ bool fFile_addSpecialCh(
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case FEMTO_COPY:	 // Copy selection to clipboard
-
+		if (!fFile_cbCopy(self))
+		{
+			return false;
+		}
 		break;
 	case FEMTO_PASTE:	// Paste from clipboard
-
+		if (!fFile_cbPaste(self))
+		{
+			return false;
+		}
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
@@ -846,6 +853,158 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 	hl->beg = NULL;
 	return true;
 }
+
+bool fFile_cbCopy(fFile_t * restrict self)
+{
+	assert(self != NULL);
+
+	if (!OpenClipboard(GetConsoleWindow()))
+	{
+		return false;
+	}
+	EmptyClipboard();
+
+	struct fFileHighLight * restrict hl = &self->data.hl;
+	assert(hl != NULL);
+
+	const fLine_t * restrict beg = hl->beg;
+
+	if (beg == NULL)
+	{
+		fProf_write("Nothing selected, nothing to copy");
+		CloseClipboard();
+		return false;
+	}
+
+	// Copy "stuff" onto clipboard
+
+	const fLine_t * restrict curnode = self->data.currentNode;
+	assert(curnode != NULL);
+
+	// Find first & last node
+	const fLine_t * restrict begnode = NULL, * restrict endnode = NULL;
+	if (beg->lineNumber < curnode->lineNumber)
+	{
+		begnode = hl->beg;
+		endnode = curnode;
+	}
+	else
+	{
+		begnode = curnode;
+		endnode = hl->beg;
+	}
+
+	assert(begnode != NULL);
+	assert(endnode != NULL);
+
+	// Initialize clipboard buffer
+	warr_t clipBuf = { 0 };
+	warr_init(&clipBuf, sizeof(wchar));
+
+	while (1)
+	{
+		// Calculate begining cursor & ending cursor
+		usize begCur, endCur;
+
+		if (curnode == beg)
+		{
+			begCur = hl->backwards ? begnode->curx : hl->begx;
+			endCur = hl->backwards ? hl->begx      : begnode->curx;
+		}
+		else if (begnode == beg)
+		{
+			begCur = hl->backwards ? 0 : hl->begx;
+			endCur = hl->backwards ? hl->begx : begnode->lineEndx - begnode->freeSpaceLen;
+		}
+		else if (begnode == curnode)
+		{
+			begCur = hl->backwards ? begnode->curx                             : 0;
+			endCur = hl->backwards ? begnode->lineEndx - begnode->freeSpaceLen : begnode->curx;
+		}
+		else
+		{
+			begCur = 0;
+			endCur = begnode->lineEndx - begnode->freeSpaceLen;
+		}
+
+		begCur += ((begCur >= begnode->curx) && (begnode->freeSpaceLen > 0)) ? begnode->freeSpaceLen : 0;
+		endCur += ((endCur >= begnode->curx) && (begnode->freeSpaceLen > 0)) ? begnode->freeSpaceLen : 0;
+
+		while (begCur < endCur)
+		{
+			if ((begCur == begnode->curx) && (begnode->freeSpaceLen > 0))
+			{
+				begCur += begnode->freeSpaceLen;
+				continue;
+			}
+
+			// Add character to clipboard
+			if (!warr_pushBack(&clipBuf, &begnode->line[begCur]))
+			{
+				fProf_write("Error pushing character %C!", begnode->line[begCur]);
+				warr_destroy(&clipBuf);
+				CloseClipboard();
+				return false;
+			}
+
+			++begCur;
+		}
+
+
+		if (begnode != endnode)
+		{
+			// Add newline to clipboard
+			if (!warr_pushBack(&clipBuf, &(wchar){ L'\n' }))
+			{
+				fProf_write("Error pushing newline!");
+				warr_destroy(&clipBuf);
+				CloseClipboard();
+				return false;
+			}
+		}
+		else
+		{
+			break;
+		}
+		begnode = begnode->nextNode;
+		assert(begnode != NULL);
+	};
+
+	// Add null-terminator to clipboard buffer
+	if (!warr_pushBack(&clipBuf, &(wchar){ L'\0' }))
+	{
+		fProf_write("Error pushing null-terminator!");
+		warr_destroy(&clipBuf);
+		CloseClipboard();
+		return false;
+	}
+
+	// Save some memory here
+	warr_shrinkToFit(&clipBuf);
+	fProf_write(
+		"Copying %zu characters to clipboard:\n%S\n",
+		warr_size(&clipBuf) - 1,
+		warr_data(&clipBuf)
+	);
+
+	HGLOBAL clipBufMem = warr_unlock(&clipBuf);
+	assert(clipBufMem != NULL);
+
+	SetClipboardData(CF_UNICODETEXT, clipBufMem);
+	// Finalize operation
+	CloseClipboard();
+
+	fProf_write("Copied to clipboard");
+
+	return true;
+}
+bool fFile_cbPaste(fFile_t * restrict self)
+{
+	assert(self != NULL);
+
+	return true;
+}
+
 bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
 {
 	assert(self     != NULL);
