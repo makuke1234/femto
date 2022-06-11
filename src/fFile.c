@@ -1,5 +1,6 @@
 #include "fFile.h"
 #include "femto.h"
+#include "winarr.h"
 
 void fFile_reset(fFile_t * restrict self)
 {
@@ -561,10 +562,16 @@ bool fFile_addSpecialCh(
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case FEMTO_COPY:	 // Copy selection to clipboard
-		fFile_cbCopy(self);
+		if (!fFile_cbCopy(self))
+		{
+			return false;
+		}
 		break;
 	case FEMTO_PASTE:	// Paste from clipboard
-		fFile_cbPaste(self);
+		if (!fFile_cbPaste(self))
+		{
+			return false;
+		}
 		break;
 	case FEMTO_MOVELINE_UP:
 		// Swap current line with previous if possible
@@ -861,8 +868,9 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	const fLine_t * restrict beg = hl->beg;
 
-	if (beg != NULL)
+	if (beg == NULL)
 	{
+		fProf_write("Nothing selected, nothing to copy");
 		CloseClipboard();
 		return false;
 	}
@@ -887,6 +895,10 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	assert(begnode != NULL);
 	assert(endnode != NULL);
+
+	// Initialize clipboard buffer
+	warr_t clipBuf = { 0 };
+	warr_init(&clipBuf, sizeof(wchar));
 
 	do
 	{
@@ -926,25 +938,63 @@ bool fFile_cbCopy(fFile_t * restrict self)
 			}
 
 			// Add character to clipboard
-			
+			if (!warr_pushBack(&clipBuf, &begnode->line[begCur]))
+			{
+				fProf_write("Error pushing character %C!", begnode->line[begCur]);
+				warr_destroy(&clipBuf);
+				CloseClipboard();
+				return false;
+			}
 
 			++begCur;
 		}
 
 
-		begnode = begnode->nextNode;
-		assert(begnode != NULL);
-
 		if (begnode != endnode)
 		{
 			// Add newline to clipboard
-
+			if (!warr_pushBack(&clipBuf, &(wchar){ L'\n' }))
+			{
+				fProf_write("Error pushing newline!");
+				warr_destroy(&clipBuf);
+				CloseClipboard();
+				return false;
+			}
 		}
+		else
+		{
+			break;
+		}
+		begnode = begnode->nextNode;
+		assert(begnode != NULL);
 
-	} while (begnode != endnode);
+	} while (1);
 
+	// Add null-terminator to clipboard buffer
+	if (!warr_pushBack(&clipBuf, &(wchar){ L'\0' }))
+	{
+		fProf_write("Error pushing null-terminator!");
+		warr_destroy(&clipBuf);
+		CloseClipboard();
+		return false;
+	}
 
+	// Save some memory here
+	warr_shrinkToFit(&clipBuf);
+	fProf_write(
+		"Copying %zu characters to clipboard:\n%S\n",
+		warr_size(&clipBuf) - 1,
+		warr_data(&clipBuf)
+	);
+
+	HGLOBAL clipBufMem = warr_unlock(&clipBuf);
+	assert(clipBufMem != NULL);
+
+	SetClipboardData(CF_TEXT, clipBufMem);
+	// Finalize operation
 	CloseClipboard();
+
+	fProf_write("Copied to clipboard");
 
 	return true;
 }
