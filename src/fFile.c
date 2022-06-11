@@ -901,7 +901,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	warr_t clipBuf = { 0 };
 	warr_init(&clipBuf, sizeof(wchar));
 
-	do
+	while (1)
 	{
 		// Calculate begining cursor & ending cursor
 		usize begCur, endCur;
@@ -968,8 +968,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 		}
 		begnode = begnode->nextNode;
 		assert(begnode != NULL);
-
-	} while (1);
+	};
 
 	// Add null-terminator to clipboard buffer
 	if (!warr_pushBack(&clipBuf, &(wchar){ L'\0' }))
