@@ -3,6 +3,8 @@
 bool warr_init(warr_t * restrict This, usize itemSize)
 {
 	assert(This != NULL);
+	assert(itemSize > 0);
+
 	if (This->init)
 	{
 		return false;
@@ -21,6 +23,8 @@ bool warr_init(warr_t * restrict This, usize itemSize)
 bool warr_initSz(warr_t * restrict This, usize itemSize, usize numItems)
 {
 	assert(This != NULL);
+	assert(itemSize > 0);
+
 	if (!warr_init(This, itemSize))
 	{
 		return false;
@@ -31,6 +35,9 @@ bool warr_initSz(warr_t * restrict This, usize itemSize, usize numItems)
 bool warr_initData(warr_t * restrict This, usize itemSize, const vptr items, usize numItems)
 {
 	assert(This != NULL);
+	assert(itemSize > 0);
+	assert(items != NULL);
+	assert(numItems > 0);
 	
 	if (!warr_initSz(This, itemSize, numItems))
 	{
@@ -69,11 +76,17 @@ bool warr_reserve(warr_t * restrict This, usize newCap)
 	}
 
 	// Reallocating memory
+	HGLOBAL newmem = NULL;
 	if (This->mem != NULL)
 	{
 		GlobalUnlock(This->mem);
+		newmem = GlobalReAlloc(This->mem, newCap * This->itemSize, GMEM_MOVEABLE);
 	}
-	HGLOBAL newmem = GlobalReAlloc(This->mem, newCap * This->itemSize, GMEM_MOVEABLE);
+	else
+	{
+		newmem = GlobalAlloc(GMEM_MOVEABLE, newCap * This->itemSize);
+	}
+
 	if (newmem == NULL)
 	{
 		return false;
@@ -98,7 +111,7 @@ bool warr_pushBack(warr_t * restrict This, vptr item)
 	assert(This != NULL);
 	assert(This->init);
 
-	if ((This->numItems >= This->maxItems) && !warr_resize(This, (This->numItems + 1) * 2))
+	if ((This->numItems >= This->maxItems) && !warr_reserve(This, (This->numItems + 1) * 2))
 	{
 		return false;
 	}
