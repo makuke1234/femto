@@ -862,6 +862,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	{
 		return false;
 	}
+	EmptyClipboard();
 
 	struct fFileHighLight * restrict hl = &self->data.hl;
 	assert(hl != NULL);
@@ -990,7 +991,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	HGLOBAL clipBufMem = warr_unlock(&clipBuf);
 	assert(clipBufMem != NULL);
 
-	SetClipboardData(CF_TEXT, clipBufMem);
+	SetClipboardData(CF_UNICODETEXT, clipBufMem);
 	// Finalize operation
 	CloseClipboard();
 
