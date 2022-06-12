@@ -249,10 +249,12 @@ bool fFile_cbCopy(fFile_t * restrict self);
  * @brief Pastes current clipboard to current cursor location
  * 
  * @param self Pointer to fFile_t structure
+ * @param height Console screen buffer height in characters
+ * @param pset Pointer to fSettings_t structure
  * @return true Success
  * @return false Failure
  */
-bool fFile_cbPaste(fFile_t * restrict self);
+bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * restrict pset);
 
 /**
  * @brief Adds a new line after current active line

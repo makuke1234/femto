@@ -931,7 +931,7 @@ static inline bool s_femto_inner_kbdHandle(
 				);
 			}
 
-			if (!fFile_addSpecialCh(
+			if (fFile_addSpecialCh(
 				pfile, peditor->scrbuf.h,
 				FEMTO_PASTE, false,
 				&peditor->settings
