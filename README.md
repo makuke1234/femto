@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~7000 source code lines (excluding whitespace, comments, language keywords & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~7100 source code lines (excluding whitespace, comments, language keywords & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -25,7 +25,7 @@ reports ~7000 source code lines (excluding whitespace, comments, language keywor
 
 # Features
 
-- [ ] Built-in copy-pasting support
+- [x] Built-in copy-pasting support
 - [x] All saved files use CRLF line-ending format by default, LF and CR are also supported
 	* *Editing text files is sublime*
 - [x] The femto editor utilizes the whole command prompt window, window is as big as your console currently is
@@ -203,10 +203,10 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
-* 2.1 (planned)
+* 2.1
 	* [x] Pointer checking in every function
 	* [x] Text highlighting using keyboard & mouse
-	* [ ] Proper text copying/pasting support
+	* [x] Proper text copying/pasting support
 	* [x] Port codebase to use universal integer sizes `size_t` & `ssize_t` (signed)
 	* [x] Properly fixed search functionality
 
