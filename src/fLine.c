@@ -315,19 +315,20 @@ bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * 
 	}
 
 	isize idx = (isize)node->curx + maxdelta, i = 0;
+	idx += (maxdelta > 0) ? (isize)node->freeSpaceLen : 0;
 	const isize m = (isize)maxString;
 	if (idx < 0)
 	{
 		return false;
 	}
-	for (; idx < (isize)node->lineEndx && i < m && *string != L'\0';)
+	for (; (idx < (isize)node->lineEndx) && (i < m) && ((*string) != L'\0');)
 	{
 		if ((idx == (isize)node->curx) && (node->freeSpaceLen > 0))
 		{
 			idx += (isize)node->freeSpaceLen;
 			continue;
 		}
-		else if (node->line[idx] != *string)
+		else if (node->line[idx] != (*string))
 		{
 			return false;
 		}
@@ -336,7 +337,7 @@ bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * 
 		++i;
 		++idx;
 	}
-	if ((i < m) && (*string != L'\0'))
+	if ((i < m) && ((*string) != L'\0'))
 	{
 		return false;
 	}

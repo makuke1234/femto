@@ -203,6 +203,9 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
+* 2.2 (planned)
+	* [ ] Fix bug that editor sometimes crashes on Shift+Tab
+
 * 2.1
 	* [x] Pointer checking in every function
 	* [x] Text highlighting using keyboard & mouse

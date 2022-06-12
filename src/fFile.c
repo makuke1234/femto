@@ -496,6 +496,7 @@ bool fFile_addSpecialCh(
 		// Check if there's 4 spaces before the caret
 		if (fLine_checkAt(lastcurnode, -1, L" ", 1))
 		{
+			fProf_write("Back-tabbing SPACE before caret");
 			fFile_deleteBackward(self);
 			--lastcurnode->virtcurx;
 			const usize max = lastcurnode->virtcurx % pset->tabWidth;
@@ -509,20 +510,29 @@ bool fFile_addSpecialCh(
 		}
 		else if (fLine_checkAt(lastcurnode, -1, L"\t", 1))
 		{
+			fProf_write("Back-tabbing TAB before caret");
 			fFile_deleteBackward(self);
 		}
-		// If there isn't, check if there's 4 spaces after the caret
-		else if (fLine_checkAt(lastcurnode, 0, pset->tabSpaceStr1, pset->tabWidth))
+		// If there isn't, check if there's up to 4 spaces after the caret
+		else if (fLine_checkAt(lastcurnode, 0, L" ", 1))
 		{
-			for (u8 i = 0; i < pset->tabWidth; ++i)
+			fProf_write("Back-tabbing SPACE after caret");
+			for (usize i = 0; i < pset->tabWidth; ++i)
 			{
+				if (!fLine_checkAt(lastcurnode, 0, L" ", 1))
+				{
+					break;
+				}
 				fFile_deleteForward(self);
 			}
 		}
 		else if (fLine_checkAt(lastcurnode, 0, L"\t", 1))
 		{
+			fProf_write("Back-tabbing TAB after caret");
 			fFile_deleteForward(self);
 		}
+
+		fProf_write("Calculating new virtual cursor");
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
