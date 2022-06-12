@@ -568,7 +568,7 @@ bool fFile_addSpecialCh(
 		}
 		break;
 	case FEMTO_PASTE:	// Paste from clipboard
-		if (!fFile_cbPaste(self))
+		if (!fFile_cbPaste(self, height, pset))
 		{
 			return false;
 		}
@@ -998,9 +998,62 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	return true;
 }
-bool fFile_cbPaste(fFile_t * restrict self)
+bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * restrict pset)
 {
 	assert(self != NULL);
+
+	if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
+	{
+		return true;
+	}
+	else if (!OpenClipboard(GetConsoleWindow()))
+	{
+		return false;
+	}
+
+	HGLOBAL data = GetClipboardData(CF_UNICODETEXT);
+	if (data != NULL)
+	{
+		const wchar * restrict clipstr = GlobalLock(data);
+		if (clipstr != NULL)
+		{
+			fSettings_t set = *pset;
+			set.bAutoIndent = false;
+			// Copy text
+
+			for (const wchar * restrict str = clipstr; (*str) != L'\0'; ++str)
+			{
+				// Add character to current location
+				const wchar ch = *str;
+				bool ret = true;
+				
+				if (ch == L'\r')
+				{
+					continue;
+				}
+				else if (ch == L'\n')
+				{
+					ret = fFile_addSpecialCh(self, height, VK_RETURN, false, &set);
+				}
+				else
+				{
+					ret = fFile_addNormalCh(self, ch, set.tabWidth);
+				}
+
+				if (!ret)
+				{
+					fProf_write("Failed pasting on character '%C'", ch);
+
+					GlobalUnlock(data);
+					CloseClipboard();
+					return false;
+				}
+			}
+
+			GlobalUnlock(data);
+		}
+	}
+	CloseClipboard();
 
 	return true;
 }
