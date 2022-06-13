@@ -32,7 +32,7 @@ bool warr_initSz(warr_t * restrict This, usize itemSize, usize numItems)
 	This->init = warr_reserve(This, numItems);
 	return This->init;
 }
-bool warr_initData(warr_t * restrict This, usize itemSize, const vptr items, usize numItems)
+bool warr_initData(warr_t * restrict This, usize itemSize, const vptr restrict items, usize numItems)
 {
 	assert(This != NULL);
 	assert(itemSize > 0);
@@ -106,7 +106,7 @@ bool warr_shrinkToFit(warr_t * restrict This)
 	return warr_reserve(This, This->numItems);
 }
 
-bool warr_pushBack(warr_t * restrict This, vptr item)
+bool warr_pushBack(warr_t * restrict This, const vptr restrict item)
 {
 	assert(This != NULL);
 	assert(This->init);
