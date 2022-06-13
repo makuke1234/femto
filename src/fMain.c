@@ -18,9 +18,6 @@ int wmain(int argc, const wchar * argv[])
 		return 1;
 	}
 
-	// Initialise profiler, if applicable
-	fProf_init();
-
 	// Limit the scope of errCode
 	{
 		fErr_e errCode = fSettings_cmdLine(&editor.settings, argc, argv);

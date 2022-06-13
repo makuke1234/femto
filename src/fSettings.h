@@ -21,20 +21,22 @@ typedef struct fPalette
 
 typedef struct fSettings
 {
-	bool bHelpRequest:1;
 	wchar * fileName;
 	wchar * settingsFileName;
 
-	bool bTabsToSpaces:1;
 	u8 tabWidth;
 	wchar * tabSpaceStr1;	// Contains space characters
 
-	bool bAutoIndent:1;
 
-	bool bWhiteSpaceVis:1;
 	wchar whitespaceCh;
 	WORD whitespaceCol;
 
+	bool bHelpRequest:1;
+	bool bTabsToSpaces:1;
+	bool bAutoIndent:1;
+	bool bWhiteSpaceVis:1;
+	bool bEnableLogging:1;
+	
 	bool bRelLineNums:1;
 	WORD lineNumCol;
 

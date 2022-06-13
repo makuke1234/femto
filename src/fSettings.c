@@ -10,20 +10,22 @@ void fSettings_reset(fSettings_t * restrict self)
 	assert(self != NULL);
 
 	*self = (fSettings_t){
-		.bHelpRequest     = false,
 		.fileName         = NULL,
 		.settingsFileName = NULL,
 
-		.bTabsToSpaces = false,
-		.tabWidth      = 4,
-		.tabSpaceStr1  = NULL,
+		.tabWidth     = 4,
+		.tabSpaceStr1 = NULL,
 
-		.bAutoIndent = true,
 		
-		.bWhiteSpaceVis = false,
-		.whitespaceCh   = L'→',
-		.whitespaceCol  = FEMTO_DEFAULT_COLOR,
+		.whitespaceCh  = L'→',
+		.whitespaceCol = FEMTO_DEFAULT_COLOR,
 
+		.bHelpRequest   = false,
+		.bTabsToSpaces  = false,
+		.bAutoIndent    = true,
+		.bWhiteSpaceVis = false,
+		.bEnableLogging = false,
+		
 		.bRelLineNums = false,
 		.lineNumCol   = FEMTO_DEFAULT_COLOR,
 
@@ -327,6 +329,36 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 		argumentsUsed[mi - 1] = true;
 	}
 
+	fArg_fetchArgv(argc, argv, L"loggingMode", &mi, 1, &farg);
+	if (mi == 0)
+	{
+		fArg_fetchArgv(argc, argv, L"logging", &mi, 1, &farg);
+	}
+	if (mi == 0)
+	{
+		fArg_fetchArgv(argc, argv, L"logEnable", &mi, 1, &farg);
+	}
+	if (mi == 0)
+	{
+		fArg_fetchArgv(argc, argv, L"logMode", &mi, 1, &farg);
+	}
+	if (mi == 0)
+	{
+		fArg_fetchArgv(argc, argv, L"loggerEnable", &mi, 1, &farg);
+	}
+	if (mi == 0)
+	{
+		fArg_fetchArgv(argc, argv, L"logger", &mi, 1, &farg);
+	}
+	if (mi == 0)
+	{
+		fArg_fetchArgv(argc, argv, L"log", &mi, 1, &farg);
+	}
+	if (mi != 0)
+	{
+		self->bEnableLogging = fArg_strToBool(farg);
+		argumentsUsed[mi - 1] = true;
+	}
 
 	/* *************************************************** */
 
@@ -372,6 +404,8 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 
 	// Everything is OK
 	free(argumentsUsed);
+
+	fProf_enable(self->bEnableLogging);
 
 	return (result == NULL) ? ferrOK : ferrUNKNOWN;
 }
@@ -617,6 +651,15 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		if (((val = s_fSettings_checkColor(obj, "lineNumColor", self->palette.colorNames)) != CHECK_ERR) && (val != def.lineNumCol))
 		{
 			self->lineNumCol = val;
+		}
+
+		if ((attr = jsonObject_get(obj, "logging")) != NULL)
+		{
+			const bool value = jsonValue_getBoolean(attr, &suc);
+			if (suc && (def.bEnableLogging != value))
+			{
+				self->bEnableLogging = value;
+			}
 		}
 
 		// Fill palette

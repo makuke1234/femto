@@ -47,6 +47,7 @@
 	"whitespaceCh": "\u2192",
 	"lineNumRelative": true,
 	"lineNumColor": "bright_black",
+	"logging": true,
 	
 	"highlighting":
 	{

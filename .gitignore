@@ -6,5 +6,5 @@ obj*
 *.exe
 *.dll
 *.a
-profiler.txt
+femto.log
 test*.txt

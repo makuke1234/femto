@@ -7,6 +7,17 @@
 
 static FILE * s_profilingFile = NULL;
 
+void fProf_enable(bool enable)
+{
+	if (enable && (s_profilingFile == NULL))
+	{
+		fProf_init();
+	}
+	else if (!enable && (s_profilingFile != NULL))
+	{
+		fProf_close();
+	}
+}
 void fProf_init(void)
 {
 	s_profilingFile = fopen(FEMTO_PROFILER_FILE, "a+");	
@@ -36,7 +47,6 @@ void fProf_write_inner(const char * restrict function, const char * restrict for
 
 	if (s_profilingFile == NULL)
 	{
-		fputs("Profiling file not open!\n", stderr);
 		return;
 	}
 

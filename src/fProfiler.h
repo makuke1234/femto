@@ -6,6 +6,12 @@
 #include "fCommon.h"
 
 /**
+ * @brief Enables/disables the logger
+ * 
+ * @param enable Determines whether to enable or disable the logger
+ */
+void fProf_enable(bool enable);
+/**
  * @brief Initialise profiler, exits on failure
  * 
  */
@@ -40,6 +46,7 @@ void fProf_end_inner(const char * funcName);
 
 #else
 
+#define fProf_enable(enable)
 #define fProf_init()
 #define fProf_close()
 #define fProf_write(...)

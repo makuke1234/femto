@@ -13,7 +13,7 @@ It is also written in vanilla C & Win32 Console API - it's designed to be used s
 It has been compiled with MinGW GCC.
 
 Currently, my other tool [slocWin32](https://github.com/makuke1234/slocWin32)
-reports ~7100 source code lines (excluding whitespace, comments, language keywords & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
+reports ~7200 source code lines (excluding whitespace, comments, language keywords & [jsonlite2](https://github.com/makuke1234/jsonlite2) library):
 
 ![SLOC](./images/sloc.png)
 
@@ -137,6 +137,13 @@ reports ~7100 source code lines (excluding whitespace, comments, language keywor
 	| --lineNumRelative=\[value\]   | Value can be either true/false or 1/0               |
 	| --lineNumColor=\[value\]      | Specifies line number color, number between 0-255   |
 	| --lineNumCol=\[value\]        | Same as above                                       |
+	| --logging=\[value\]           | Specifies whether logging mode is enabled           |
+	| --loggingMode=\[value\]       | Same as above                                       |
+	| --log=\[value\]               | Same as above                                       |
+	| --logMode=\[value\]           | Same as above                                       |
+	| --logEnable=\[value\]         | Same as above                                       |
+	| --logger=\[value\]            | Same as above                                       |
+	| --loggerEnable=\[value\]      | Same as above                                       |
 - [x] List of settings:
 	| Setting             | Type    |
 	| ------------------- | ------- |
@@ -148,6 +155,7 @@ reports ~7100 source code lines (excluding whitespace, comments, language keywor
 	| whitespaceColor     | number  |
 	| lineNumRelative     | boolean |
 	| lineNumColor        | number  |
+	| logging             | boolean |
 	| palette             | object  |
 	| highlighting        | object  |
 
@@ -206,6 +214,9 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 * 2.2 (planned)
 	* [ ] Fix bug that editor sometimes crashes on Shift+Tab
 	* [x] Document winarr structure implementation & enforce `restrict` pointers
+	* [x] Add logging mode as a command-line option + setting in settings.json
+	* [x] Change logging destination file to `femto.log`
+	* [x] Better logging in debug mode
 
 * 2.1
 	* [x] Pointer checking in every function

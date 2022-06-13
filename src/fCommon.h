@@ -47,7 +47,7 @@ typedef unsigned char uchar;
 
 
 // Since 0x88 - 0x8F are unassigned, they are free to be used by my editor
-#define FEMTO_PROFILER_FILE "profiler.txt"
+#define FEMTO_PROFILER_FILE "femto.log"
 #define FEMTO_PROFILER_STACK_SIZE 256
 
 
