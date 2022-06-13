@@ -405,7 +405,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	// Everything is OK
 	free(argumentsUsed);
 
-	fProf_enable(self->bEnableLogging);
+	fLog_enable(self->bEnableLogging);
 
 	return (result == NULL) ? ferrOK : ferrUNKNOWN;
 }

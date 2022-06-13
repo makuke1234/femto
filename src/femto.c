@@ -1301,7 +1301,7 @@ static inline bool s_femto_inner_mouseHandle(
 		{
 			if (draw)
 			{
-				fProf_write("Mouse click @%hd, %hd", pos.X, pos.Y);
+				fLog_write("Mouse click @%hd, %hd", pos.X, pos.Y);
 
 				fData_cancelHighlight(peditor);
 

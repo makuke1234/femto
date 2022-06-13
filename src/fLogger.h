@@ -1,7 +1,7 @@
-#ifndef FEMTO_PROFILER_H
-#define FEMTO_PROFILER_H
+#ifndef FEMTO_LOGGER_H
+#define FEMTO_LOGGER_H
 
-#if PROFILING_ENABLE == 1
+#if LOGGING_ENABLE == 1
 
 #include "fCommon.h"
 
@@ -10,17 +10,17 @@
  * 
  * @param enable Determines whether to enable or disable the logger
  */
-void fProf_enable(bool enable);
+void fLog_enable(bool enable);
 /**
  * @brief Initialise profiler, exits on failure
  * 
  */
-void fProf_init(void);
+void fLog_init(void);
 /**
  * @brief Closes profiler
  * 
  */
-void fProf_close(void);
+void fLog_close(void);
 /**
  * @brief Write a profiler log message
  * 
@@ -28,30 +28,30 @@ void fProf_close(void);
  * @param format Standard printf message format
  * @param ... Variadic format arguments
  */
-void fProf_write_inner(const char * restrict function, const char * restrict format, ...);
+void fLog_write_inner(const char * restrict function, const char * restrict format, ...);
 /**
  * @brief Start profiler timestamp
  * 
  */
-void fProf_start(void);
+void fLog_start(void);
 /**
  * @brief Stop profiler timestamp
  * 
  * @param funcName Function name of timestamp writer
  */
-void fProf_end_inner(const char * funcName);
+void fLog_end_inner(const char * funcName);
 
-#define fProf_write(...) fProf_write_inner(__func__, __VA_ARGS__)
-#define fProf_end() fProf_end_inner(__func__)
+#define fLog_write(...) fLog_write_inner(__func__, __VA_ARGS__)
+#define fLog_end() fLog_end_inner(__func__)
 
 #else
 
-#define fProf_enable(enable)
-#define fProf_init()
-#define fProf_close()
-#define fProf_write(...)
-#define fProf_start()
-#define fProf_end()
+#define fLog_enable(enable)
+#define fLog_init()
+#define fLog_close()
+#define fLog_write(...)
+#define fLog_start()
+#define fLog_end()
 
 typedef int make_iso_compilers_happy;
 

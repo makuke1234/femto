@@ -18,7 +18,7 @@
 
 #include <safec.h>
 
-#include "fProfiler.h"
+#include "fLogger.h"
 #include "fErr.h"
 
 // Conscise type definitions

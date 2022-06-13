@@ -134,7 +134,7 @@ void fStatHash_initData(
 	{
 		if (!fStatHash_insert(hash, data[i]))
 		{
-			fProf_write("Failed on %S", data[i]);
+			fLog_write("Failed on %S", data[i]);
 			hash->init = false;
 			return;
 		}

@@ -1,24 +1,24 @@
-#include "fProfiler.h"
+#include "fLogger.h"
 
-#if PROFILING_ENABLE == 1
+#if LOGGING_ENABLE == 1
 
 #include <time.h>
 #include <stdarg.h>
 
 static FILE * s_profilingFile = NULL;
 
-void fProf_enable(bool enable)
+void fLog_enable(bool enable)
 {
 	if (enable && (s_profilingFile == NULL))
 	{
-		fProf_init();
+		fLog_init();
 	}
 	else if (!enable && (s_profilingFile != NULL))
 	{
-		fProf_close();
+		fLog_close();
 	}
 }
-void fProf_init(void)
+void fLog_init(void)
 {
 	s_profilingFile = fopen(FEMTO_PROFILER_FILE, "a+");	
 	if (s_profilingFile == NULL)
@@ -27,20 +27,20 @@ void fProf_init(void)
 		exit(1);
 	}
 	fputc('\n', s_profilingFile);
-	fProf_write_inner("fProf_init", "Started application...");
+	fLog_write_inner("fLog_init", "Started application...");
 }
-void fProf_close(void)
+void fLog_close(void)
 {
 	assert(s_profilingFile != NULL);
 	
 	fputc('\n', s_profilingFile);
-	fProf_write_inner("fProf_close", "Closing profiler session...");
+	fLog_write_inner("fLog_close", "Closing profiler session...");
 	
 	// Closing file actually
 	fclose(s_profilingFile);
 	s_profilingFile = NULL;
 }
-void fProf_write_inner(const char * restrict function, const char * restrict format, ...)
+void fLog_write_inner(const char * restrict function, const char * restrict format, ...)
 {
 	assert(function != NULL);
 	assert(format   != NULL);
@@ -76,20 +76,20 @@ void fProf_write_inner(const char * restrict function, const char * restrict for
 static clock_t s_profilerStack[FEMTO_PROFILER_STACK_SIZE];
 static usize s_curStackLen = 0;
 
-void fProf_start(void)
+void fLog_start(void)
 {
 	assert(s_curStackLen < FEMTO_PROFILER_STACK_SIZE);
 
 	s_profilerStack[s_curStackLen] = clock();
 	++s_curStackLen;
 }
-void fProf_end_inner(const char * funcName)
+void fLog_end_inner(const char * funcName)
 {
 	assert(funcName      != NULL);
 	assert(s_curStackLen > 0);
 	
 	--s_curStackLen;
-	fProf_write_inner(
+	fLog_write_inner(
 		funcName,
 		"Elapsed %.3f s",
 		(f64)(clock() - s_profilerStack[s_curStackLen]) / (f64)CLOCKS_PER_SEC

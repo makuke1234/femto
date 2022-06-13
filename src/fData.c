@@ -71,7 +71,7 @@ bool fData_init(fData_t * restrict self)
 	self->scrbuf.w = (u32)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
 	self->scrbuf.h = (u32)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
 
-	fProf_write("Screen buffer size: %u %u", self->scrbuf.w, self->scrbuf.h);
+	fLog_write("Screen buffer size: %u %u", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
 	self->scrbuf.handle = CreateConsoleScreenBuffer(
 		GENERIC_READ | GENERIC_WRITE,
@@ -154,7 +154,7 @@ bool fData_restorePalette(const fData_t * restrict self)
 {
 	assert(self != NULL);
 
-	fProf_write("Restoring palette...");
+	fLog_write("Restoring palette...");
 
 	const fPalette_t * restrict pal = &self->settings.palette;
 	if (!pal->bUsePalette)
@@ -180,7 +180,7 @@ bool fData_restorePalette(const fData_t * restrict self)
 	++csbiex.srWindow.Right;
 	++csbiex.srWindow.Bottom;
 
-	fProf_write("Almost complete...");
+	fLog_write("Almost complete...");
 	return SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex) != 0;
 }
 

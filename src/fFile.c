@@ -147,7 +147,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 	{
 		return L"Unicode conversion error!";
 	}
-	fProf_write("Converted %u bytes of character to %u UTF-16 characters.", size, chars);
+	fLog_write("Converted %u bytes of character to %u UTF-16 characters.", size, chars);
 
 	// Save lines to structure
 	wchar ** lines = NULL;
@@ -157,7 +157,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 		free(utf16);
 		return L"Line reading error!";
 	}
-	fProf_write("Total of %zu lines", numLines);
+	fLog_write("Total of %zu lines", numLines);
 
 	fFile_clearLines(self);
 	if (numLines == 0)
@@ -214,7 +214,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 	{
 		if (fLine_getText(node, &line, &lineCap) == false)
 		{
-			fProf_write("Failed to fetch line!");
+			fLog_write("Failed to fetch line!");
 			if (line != NULL)
 			{
 				free(line);
@@ -360,7 +360,7 @@ isize fFile_write(fFile_t * restrict self)
 		return ffwrWRITE_ERROR;
 	}
 
-	fProf_write("Opened file for writing");
+	fLog_write("Opened file for writing");
 
 	// Try to write UTF-8 lines string to file
 	DWORD dwWritten = 0;
@@ -381,7 +381,7 @@ isize fFile_write(fFile_t * restrict self)
 	// Do error checking
 	if (!res)
 	{
-		fProf_write("Error writing to file");
+		fLog_write("Error writing to file");
 		return ffwrWRITE_ERROR;
 	}
 	else
@@ -401,7 +401,7 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 	assert(node != NULL);
 	self->data.bTyped = true;
 	
-	fProf_write("Add character %C", ch);
+	fLog_write("Add character %C", ch);
 
 	if (!fLine_addChar(node, ch, tabWidth))
 	{
@@ -496,7 +496,7 @@ bool fFile_addSpecialCh(
 		// Check if there's 4 spaces before the caret
 		if (fLine_checkAt(lastcurnode, -1, L" ", 1))
 		{
-			fProf_write("Back-tabbing SPACE before caret");
+			fLog_write("Back-tabbing SPACE before caret");
 			fFile_deleteBackward(self);
 			--lastcurnode->virtcurx;
 			const usize max = lastcurnode->virtcurx % pset->tabWidth;
@@ -510,13 +510,13 @@ bool fFile_addSpecialCh(
 		}
 		else if (fLine_checkAt(lastcurnode, -1, L"\t", 1))
 		{
-			fProf_write("Back-tabbing TAB before caret");
+			fLog_write("Back-tabbing TAB before caret");
 			fFile_deleteBackward(self);
 		}
 		// If there isn't, check if there's up to 4 spaces after the caret
 		else if (fLine_checkAt(lastcurnode, 0, L" ", 1))
 		{
-			fProf_write("Back-tabbing SPACE after caret");
+			fLog_write("Back-tabbing SPACE after caret");
 			for (usize i = 0; i < pset->tabWidth; ++i)
 			{
 				if (!fLine_checkAt(lastcurnode, 0, L" ", 1))
@@ -528,11 +528,11 @@ bool fFile_addSpecialCh(
 		}
 		else if (fLine_checkAt(lastcurnode, 0, L"\t", 1))
 		{
-			fProf_write("Back-tabbing TAB after caret");
+			fLog_write("Back-tabbing TAB after caret");
 			fFile_deleteForward(self);
 		}
 
-		fProf_write("Calculating new virtual cursor");
+		fLog_write("Calculating new virtual cursor");
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
@@ -779,7 +779,7 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 
 	if (hl->backwards)
 	{
-		fProf_write("Backwards selection delete");
+		fLog_write("Backwards selection delete");
 		// Use delete
 		// Calculate how many times to hit delete
 		usize rep = 0;
@@ -811,7 +811,7 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 			}
 			
 		}
-		fProf_write("%zu deletions", rep);
+		fLog_write("%zu deletions", rep);
 		for (usize i = 0; i < rep; ++i)
 		{
 			if (!fFile_deleteForward(self))
@@ -850,7 +850,7 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 				}
 			}
 		}
-		fProf_write("%zu deletions", rep);
+		fLog_write("%zu deletions", rep);
 		for (usize i = 0; i < rep; ++i)
 		{
 			if (!fFile_deleteBackward(self))
@@ -881,7 +881,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	if (beg == NULL)
 	{
-		fProf_write("Nothing selected, nothing to copy");
+		fLog_write("Nothing selected, nothing to copy");
 		CloseClipboard();
 		return false;
 	}
@@ -951,7 +951,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 			// Add character to clipboard
 			if (!warr_pushBack(&clipBuf, &begnode->line[begCur]))
 			{
-				fProf_write("Error pushing character %C!", begnode->line[begCur]);
+				fLog_write("Error pushing character %C!", begnode->line[begCur]);
 				warr_destroy(&clipBuf);
 				CloseClipboard();
 				return false;
@@ -966,7 +966,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 			// Add newline to clipboard
 			if (!warr_pushBack(&clipBuf, &(wchar){ L'\n' }))
 			{
-				fProf_write("Error pushing newline!");
+				fLog_write("Error pushing newline!");
 				warr_destroy(&clipBuf);
 				CloseClipboard();
 				return false;
@@ -983,7 +983,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	// Add null-terminator to clipboard buffer
 	if (!warr_pushBack(&clipBuf, &(wchar){ L'\0' }))
 	{
-		fProf_write("Error pushing null-terminator!");
+		fLog_write("Error pushing null-terminator!");
 		warr_destroy(&clipBuf);
 		CloseClipboard();
 		return false;
@@ -991,7 +991,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	// Save some memory here
 	warr_shrinkToFit(&clipBuf);
-	fProf_write(
+	fLog_write(
 		"Copying %zu characters to clipboard:\n%S\n",
 		warr_size(&clipBuf) - 1,
 		warr_data(&clipBuf)
@@ -1004,7 +1004,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	// Finalize operation
 	CloseClipboard();
 
-	fProf_write("Copied to clipboard");
+	fLog_write("Copied to clipboard");
 
 	return true;
 }
@@ -1052,7 +1052,7 @@ bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * rest
 
 				if (!ret)
 				{
-					fProf_write("Failed pasting on character '%C'", ch);
+					fLog_write("Failed pasting on character '%C'", ch);
 
 					GlobalUnlock(data);
 					CloseClipboard();
