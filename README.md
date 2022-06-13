@@ -205,6 +205,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 * 2.2 (planned)
 	* [ ] Fix bug that editor sometimes crashes on Shift+Tab
+	* [x] Document winarr structure implementation & enforce `restrict` pointers
 
 * 2.1
 	* [x] Pointer checking in every function
