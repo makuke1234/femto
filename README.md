@@ -211,8 +211,8 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 # Changelog
 
-* 2.2 (planned)
-	* [ ] Fix bug that editor sometimes crashes on Shift+Tab
+* 2.2
+	* [x] Fix bug that editor sometimes crashes on Shift+Tab
 	* [x] Document winarr structure implementation & enforce `restrict` pointers
 	* [x] Add logging mode as a command-line option + setting in settings.json
 	* [x] Change logging destination file to `femto.log`

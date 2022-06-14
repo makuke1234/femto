@@ -82,7 +82,7 @@ typedef unsigned char uchar;
 
 #define FEMTO_DEFAULT_COLOR (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
 
-#define FEMTO_VERSION_STR "v2.2-pre"
+#define FEMTO_VERSION_STR "v2.2"
 #define FEMTO_VERSION_SEQ 2,2,0,0
 
 #define fRGB(r, g, b) ( (COLORREF)( (DWORD)((BYTE)r) | (DWORD)(((BYTE)g) << 8) | (DWORD)(((BYTE)b) << 16) ) )
