@@ -315,9 +315,12 @@ void fData_cancelHighlight(fData_t * restrict self)
 	fFile_t * restrict pfile = self->files[self->fileIdx];
 	assert(pfile != NULL);
 
-	pfile->data.hl.beg = NULL;
-	pfile->data.bUpdateAll = true;
-	fData_refreshEditAsync(self);
+	if (pfile->data.hl.beg != NULL)
+	{
+		pfile->data.hl.beg = NULL;
+		pfile->data.bUpdateAll = true;
+		fData_refreshEditAsync(self);
+	}
 }
 
 bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
