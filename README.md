@@ -212,9 +212,11 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 2.3 (planned)
-	* [x] Fix bug that tabs' system doesn't work
 	* [ ] Advanced theming support, load themes from separate files
 	* [ ] Advanced undo/redo, choose which way to redo
+
+* 2.2.1
+	* [x] Fix bug that tabs' system doesn't work
 
 * 2.2
 	* [x] Fix bug that editor sometimes crashes on Shift+Tab
