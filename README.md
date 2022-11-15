@@ -20,7 +20,7 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 
 # Obtaining
 
-32-bit (x86) & 64-bit (x64) Windows binaries can be obtained [here](https://github.com/makuke1234/femto/releases).
+64-bit (x64) Windows binaries can be obtained [here](https://github.com/makuke1234/femto/releases).
 
 
 # Features
@@ -217,6 +217,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 * 2.2.1
 	* [x] Fix bug that tabs' system doesn't work
+	* [x] Dropped 32-bit (x86) support, you can still compile it yourself :)
 
 * 2.2
 	* [x] Fix bug that editor sometimes crashes on Shift+Tab
