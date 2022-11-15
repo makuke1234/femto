@@ -46,7 +46,7 @@ fFile_t * fFile_resetDyn(void)
 bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool writemode)
 {
 	assert(self != NULL);
-	
+
 	fileName = (fileName == NULL) ? self->fileName : fileName;
 
 	// Get syntax type from file suffix
@@ -65,16 +65,17 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 			return false;
 		}
 	}
-	
+
 	self->bCanWrite = writemode;
 	self->fileName  = (fileName != NULL) ? wcsredup(self->fileName, fileName) : NULL;
 
+	// Only fail if file name was given but the saving of the filename was unsuccessful
 	return !((fileName != NULL) && (self->fileName == NULL));
 }
 void fFile_close(fFile_t * restrict self)
 {
 	assert(self != NULL);
-	
+
 	if (self->hFile != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(self->hFile);
@@ -84,7 +85,7 @@ void fFile_close(fFile_t * restrict self)
 void fFile_clearLines(fFile_t * restrict self)
 {
 	assert(self != NULL);
-	
+
 	fLine_t * restrict node = self->data.firstNode;
 	self->data.firstNode   = NULL;
 	self->data.currentNode = NULL;
@@ -101,12 +102,12 @@ const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u
 	assert(self      != NULL);
 	assert(bytes     != NULL);
 	assert((bytesLen != NULL) && "Pointer to length variable is mandatory!");
-	
+
 	if (fFile_open(self, NULL, false) == false)
 	{
 		return L"File opening error!";
 	}
-	
+
 	if (self->bExists)
 	{
 		const wchar * result = femto_readBytes(self->hFile, bytes, bytesLen);
@@ -347,7 +348,7 @@ isize fFile_write(fFile_t * restrict self)
 	case ffcrNEEDS_SAVING:
 		break;
 	}
-	
+
 	// Try to open file for writing
 	if (fFile_open(self, NULL, true) == false)
 	{
@@ -400,7 +401,7 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 	fLine_t * restrict node = self->data.currentNode;
 	assert(node != NULL);
 	self->data.bTyped = true;
-	
+
 	fLog_write("Add character %C", ch);
 
 	if (!fLine_addChar(node, ch, tabWidth))
@@ -418,7 +419,7 @@ bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
 
 	struct fFileHighLight * restrict hl = &self->data.hl;
 	assert(hl != NULL);
-	
+
 	if ((ch == VK_DELETE) || (ch == FEMTO_SEL_DELETE) || (ch == VK_BACK))
 	{
 		return hl->beg != NULL;
@@ -461,11 +462,11 @@ bool fFile_addSpecialCh(
 	assert(self   != NULL);
 	assert(height > 0);
 	assert(pset   != NULL);
-	
+
 	self->data.bTyped = true;
 	fLine_t * restrict lastcurnode = self->data.currentNode;
 	assert(lastcurnode != NULL);
-	
+
 	const fLine_t * restrict prevbeg = self->data.hl.beg;
 	fFile_startHighlighting(self, ch, shift);
 
@@ -661,7 +662,7 @@ bool fFile_addSpecialCh(
 		return false;
 	}
 
-	self->data.bUpdateAll |= ((self->data.currentNode != lastcurnode) & pset->bRelLineNums) || 
+	self->data.bUpdateAll |= ((self->data.currentNode != lastcurnode) & pset->bRelLineNums) ||
 		((self->data.hl.beg != NULL) && (self->data.hl.beg != self->data.currentNode)) ||
 		(self->data.hl.beg != prevbeg);
 
@@ -718,7 +719,7 @@ bool fFile_deleteBackward(fFile_t * restrict self)
 bool fFile_deleteLine(fFile_t * restrict self)
 {
 	assert(self != NULL);
-	
+
 	fLine_t * restrict node = self->data.currentNode;
 	assert(node != NULL);
 
@@ -783,13 +784,13 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 		// Use delete
 		// Calculate how many times to hit delete
 		usize rep = 0;
-	
+
 		usize idx = node->curx;
 		usize curx = idx;
-	
+
 		while ((node != begNode) || (idx < begNodex))
 		{
-			
+
 			if (idx == node->lineEndx)
 			{
 				node = node->nextNode;
@@ -809,7 +810,7 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 					++idx;
 				}
 			}
-			
+
 		}
 		fLog_write("%zu deletions", rep);
 		for (usize i = 0; i < rep; ++i)
@@ -827,7 +828,7 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 		usize rep = 0;
 		usize curx = node->curx + node->freeSpaceLen;
 		usize idx = node->curx;
-		
+
 		while ((node != begNode) || (idx > begNodex))
 		{
 			if (idx == 0)
@@ -1036,7 +1037,7 @@ bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * rest
 				// Add character to current location
 				const wchar ch = *str;
 				bool ret = true;
-				
+
 				if (ch == L'\r')
 				{
 					continue;
@@ -1097,10 +1098,15 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 	assert(self   != NULL);
 	assert(height > 0);
 
+	if (self->data.currentNode == NULL)
+	{
+		return;
+	}
+
 	if (self->data.pcury == NULL)
 	{
 		fLine_t * restrict node = self->data.currentNode;
-		for (u32 i = 0; i < height && node->prevNode != NULL; ++i)
+		for (u32 i = 0; i < height && (node->prevNode != NULL); ++i)
 		{
 			node = node->prevNode;
 		}
@@ -1109,7 +1115,7 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 	else
 	{
 		const fLine_t * restrict node = self->data.currentNode;
-		for (u32 i = 0; i < height && node != NULL; ++i)
+		for (u32 i = 0; i < height && (node != NULL); ++i)
 		{
 			if (node == self->data.pcury)
 			{
