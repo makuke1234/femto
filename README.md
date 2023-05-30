@@ -118,6 +118,8 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 	| Option                        | Description                                         |
 	| ----------------------------- | --------------------------------------------------- |
 	| --help                        | Shows help                                          |
+	| --h                           | Same as above                                       |
+	| --?                           | Same as above                                       |
 	| --file=\[file\]               | Specifies file name to open                         |
 	| \[file\]                      | Same as above, must be given as the last argument   |
 	| --settings=\[file\]           | Specify custom settings file explicitly             |

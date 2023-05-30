@@ -56,23 +56,26 @@ usize fArg_vfetch(
 	const usize len = (maxStr == -1) ? wcslen(rawStr) : (usize)maxStr;
 
 	/*
-	 * Pattern
+	 * Patterns:
 	 * --option
 	 * -option
 	 * /option
+	 * /-option <- also, this f'ed up combination works cause I'm lazy af
 	 * 
 	 * Values:
 	 * --option=value1,value2,value3
 	 * --option=value1;value2;value3
+	 * --option=value1?value2?value3
 	 * --option=value1 value2 value3
 	 * 
 	 */
 	const wchar * restrict rawIt = rawStr;
-	const wchar * restrict endp = rawIt + len;
+	const wchar * restrict endp  = rawIt + len;
+	// scan for a '-', '--' or '/' or '/-'
 	if ((len > 1) && ((*rawIt == L'-') || (*rawIt == L'/')))
 	{
 		++rawIt;
-		if ((len > 2) || (*rawIt == L'-'))
+		if ((len > 2) && (*rawIt == L'-'))
 		{
 			++rawIt;
 		}
@@ -82,7 +85,7 @@ usize fArg_vfetch(
 		return 0;
 	}
 
-	// Scan for a match
+	// Scan for a 'key' match
 	const usize matchLen = wcslen(argMatch);
 	if (wcsncmp(rawIt, argMatch, matchLen) != 0)
 	{
@@ -92,8 +95,16 @@ usize fArg_vfetch(
 
 	// Advance search location
 	rawIt += matchLen;
+	for (; rawIt != endp; ++rawIt)
+	{
+		if (*rawIt == L'=')
+		{
+			break;
+		}
+	}
 
-	if (*rawIt == L'=')
+	// In case of equal sign there must be a key-value pair
+	if ((rawIt != endp) && (*rawIt == L'='))
 	{
 		++rawIt;
 		// Search for arguments

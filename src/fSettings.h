@@ -31,6 +31,8 @@ typedef struct fSettings
 	wchar whitespaceCh;
 	WORD whitespaceCol;
 
+	wchar * helpArg;
+
 	bool bHelpRequest:1;
 	bool bTabsToSpaces:1;
 	bool bAutoIndent:1;

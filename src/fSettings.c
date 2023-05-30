@@ -20,6 +20,8 @@ void fSettings_reset(fSettings_t * restrict self)
 		.whitespaceCh  = L'→',
 		.whitespaceCol = FEMTO_DEFAULT_COLOR,
 
+		.helpArg = NULL,
+
 		.bHelpRequest   = false,
 		.bTabsToSpaces  = false,
 		.bAutoIndent    = true,
@@ -186,18 +188,27 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	}
 
 	int mi;
+	usize ret;
+	fArg_t farg;
 	// Search for help argument first
-	fArg_fetchArgv(argc, argv, L"help", &mi, 0);
+	ret = fArg_fetchArgv(argc, argv, L"h", &mi, 1, &farg);
+	if (mi == 0)
+	{
+		ret = fArg_fetchArgv(argc, argv, L"?", &mi, 1, &farg);
+	}
 	if (mi != 0)
 	{
+		if (ret == 2)
+		{
+			self->helpArg = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
+		}
 		self->bHelpRequest = true;
 		free(argumentsUsed);
 		return ferrOK;
 	}
-	fArg_t farg;
 
-	fArg_fetchArgv(argc, argv, L"file", &mi, 1, &farg);
-	if (mi != 0)
+	ret = fArg_fetchArgv(argc, argv, L"f", &mi, 1, &farg);
+	if ((mi != 0) && (ret == 2))
 	{
 		self->fileName = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
 		if (self->fileName == NULL)
@@ -210,12 +221,8 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 
 	/* **************** Other settings ******************* */
 
-	fArg_fetchArgv(argc, argv, L"settings", &mi, 1, &farg);
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"setting", &mi, 1, &farg);
-	}
-	if (mi != 0)
+	fArg_fetchArgv(argc, argv, L"setting", &mi, 1, &farg);
+	if ((mi != 0) && (ret == 2))
 	{
 		wchar * mem = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
 		if (mem == NULL)
@@ -240,7 +247,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	{
 		fArg_fetchArgv(argc, argv, L"tabsToSpaces", &mi, 1, &farg);
 	}
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->bTabsToSpaces = fArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
@@ -251,7 +258,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	{
 		fArg_fetchArgv(argc, argv, L"tabw", &mi, 1, &farg);
 	}
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->tabWidth = (u8)clamp_u64(
 			(u64)wcstoul(farg.begin, NULL, 10),
@@ -267,16 +274,12 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 		argumentsUsed[mi - 1] = true;
 	}
 
-	fArg_fetchArgv(argc, argv, L"autoIndent", &mi, 1, &farg);
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"autoI", &mi, 1, &farg);
-	}
+	fArg_fetchArgv(argc, argv, L"autoI", &mi, 1, &farg);
 	if (mi == 0)
 	{
 		fArg_fetchArgv(argc, argv, L"aIndent", &mi, 1, &farg);
 	}
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->bAutoIndent = fArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
@@ -287,32 +290,28 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	{
 		fArg_fetchArgv(argc, argv, L"visibleWhitespace", &mi, 1, &farg);
 	}
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->bWhiteSpaceVis = fArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
 	fArg_fetchArgv(argc, argv, L"whitespaceCh", &mi, 1, &farg);
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->whitespaceCh = fArg_strToCh(farg);
 		argumentsUsed[mi - 1] = true;
 	}
 
-	fArg_fetchArgv(argc, argv, L"whitespaceColor", &mi, 1, &farg);
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"whitespaceCol", &mi, 1, &farg);
-	}
-	if (mi != 0)
+	fArg_fetchArgv(argc, argv, L"whitespaceCol", &mi, 1, &farg);
+	if ((mi != 0) && (ret == 2))
 	{
 		self->whitespaceCol = (WORD)clamp_usize((usize)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
 		argumentsUsed[mi - 1] = true;
 	}
 
 	fArg_fetchArgv(argc, argv, L"lineNumRelative", &mi, 1, &farg);
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->bRelLineNums = fArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;
@@ -323,38 +322,14 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 	{
 		fArg_fetchArgv(argc, argv, L"lineNumCol", &mi, 1, &farg);
 	}
-	if (mi != 0)
+	if ((mi != 0) && (ret == 2))
 	{
 		self->lineNumCol = (WORD)clamp_usize((usize)wcstoul(farg.begin, NULL, 10), FEMTO_SETTINGS_MINCOLOR, FEMTO_SETTINGS_MAXCOLOR);
 		argumentsUsed[mi - 1] = true;
 	}
 
-	fArg_fetchArgv(argc, argv, L"loggingMode", &mi, 1, &farg);
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"logging", &mi, 1, &farg);
-	}
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"logEnable", &mi, 1, &farg);
-	}
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"logMode", &mi, 1, &farg);
-	}
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"loggerEnable", &mi, 1, &farg);
-	}
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"logger", &mi, 1, &farg);
-	}
-	if (mi == 0)
-	{
-		fArg_fetchArgv(argc, argv, L"log", &mi, 1, &farg);
-	}
-	if (mi != 0)
+	fArg_fetchArgv(argc, argv, L"log", &mi, 1, &farg);
+	if ((mi != 0) && (ret == 2))
 	{
 		self->bEnableLogging = fArg_strToBool(farg);
 		argumentsUsed[mi - 1] = true;

@@ -39,7 +39,7 @@ int wmain(int argc, const wchar * argv[])
 		}
 		else if (editor.settings.bHelpRequest)
 		{
-			femto_printHelp(argv[0]);
+			femto_printHelp(argv[0], editor.settings.helpArg);
 			return 0;
 		}
 	}

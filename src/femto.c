@@ -284,11 +284,52 @@ void femto_exitHandler(void)
 	fData_destroy(s_atExitData);
 }
 
-void femto_printHelp(const wchar * restrict app)
+void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 {
 	assert(app != NULL);
 
 	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
+	if (helpArg == NULL)
+	{
+		// print standard help
+		fwprintf(
+			stderr,
+			L"\nBy categories:\n"
+			
+			"\nGeneral:\n\n"
+
+			"  --h                 Shows this help\n"
+			"  --h=[value]         Shows help for a keyword\n"
+			"  --file=[file]       Specifies file name to open\n"
+			"  --setting=[file]    Specifies custom settings file explicitly\n"
+
+			"\nIndendation:\n\n"
+
+			"  --tabsToSpaces=[value]    true/false, 1/0\n"
+			"  --tabWidth=[value]        Number from 1-32 (inclusive)\n"
+			"  --autoIndent=[value]      true/false, 1/0\n"
+
+			"\nAesthetics:\n\n"
+
+			"  --whitespaceVisible=[value]    true/false, 1/0\n"
+			"  --whitespaceCh=[value]         Specifies 'visible' whitespace character\n"
+			"  --whitespaceCol=[value]        Specifies whitespace color, 0-255\n"
+			"  --lineNumRelative=[value]      true/false, 1/0\n"
+			"  --lineNumCol=[value]           Specifies line number color, 0-255\n"
+			
+			"\nMiscellaneous:\n\n"
+
+			"  --log=[value] Specifies the use of logging mode\n"
+		);
+
+		return;
+	}
+
+	// print help according to the keyword
+
+	fwprintf(stderr, L"Help keyword: %S\n\n", helpArg);
+
+	
 }
 void femto_printHelpClue(const wchar * restrict app)
 {

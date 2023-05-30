@@ -112,8 +112,9 @@ void femto_exitHandler(void);
  * @brief Shows help
  * 
  * @param app Pointer to application pathname
+ * @param helpArg Pointer to help search keyword, can be NULL
  */
-void femto_printHelp(const wchar * restrict app);
+void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg);
 /**
  * @brief Shows clue how to get help
  * 
