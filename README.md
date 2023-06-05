@@ -100,6 +100,7 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 	| `femto` \[options\] \[file\]        | Starts editor with the specified file,<br>does not have to exist<br>*where \[file\] is the file's name* |
 	| `femto` \[options\] --file=\[file\] | Same as above, just a different syntax                                                                  |
 	| `femto` --help                      | Shows help<br>![help image](./images/help.png)                                                          |
+	| `femto` --version                   | Shows version info<br>![version image](./images/version.png)                                            |
 - [x] Command-line options:
 	* Basic option syntax:
 		*	| Syntax         | Description           |
