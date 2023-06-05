@@ -85,9 +85,9 @@ usize fArg_vfetch(
 		return 0;
 	}
 
-	// Scan for a 'key' match
+	// Scan for a 'key' match in a non-case-sensitive way
 	const usize matchLen = wcslen(argMatch);
-	if (wcsncmp(rawIt, argMatch, matchLen) != 0)
+	if (wcsnicmp(rawIt, argMatch, matchLen) != 0)
 	{
 		// Didn't find a match
 		return 0;
