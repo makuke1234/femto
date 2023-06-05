@@ -42,6 +42,11 @@ int wmain(int argc, const wchar * argv[])
 			femto_printHelp(argv[0], editor.settings.helpArg);
 			return 0;
 		}
+		else if (editor.settings.bVersionRequest)
+		{
+			femto_printVersion();
+			return 0;
+		}
 	}
 
 

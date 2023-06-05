@@ -30,6 +30,7 @@ L"\nAesthetics:\n\n" \
 L"\nMiscellaneous:\n\n" \
 "  --log=[value] Specifies the use of logging mode\n"
 
+
 typedef enum specialASCIIcodes
 {
 	sacCTRL_A = 1,
@@ -146,6 +147,12 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
  * @param app Pointer to application pathname
  */
 void femto_printHelpClue(const wchar * restrict app);
+
+/**
+ * @brief Prints version info
+ * 
+ */
+void femto_printVersion(void);
 
 /**
  * @brief Asks user input on last line of editor

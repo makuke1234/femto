@@ -22,11 +22,12 @@ void fSettings_reset(fSettings_t * restrict self)
 
 		.helpArg = NULL,
 
-		.bHelpRequest   = false,
-		.bTabsToSpaces  = false,
-		.bAutoIndent    = true,
-		.bWhiteSpaceVis = false,
-		.bEnableLogging = false,
+		.bHelpRequest    = false,
+		.bVersionRequest = false,
+		.bTabsToSpaces   = false,
+		.bAutoIndent     = true,
+		.bWhiteSpaceVis  = false,
+		.bEnableLogging  = false,
 		
 		.bRelLineNums = false,
 		.lineNumCol   = FEMTO_DEFAULT_COLOR,
@@ -203,6 +204,14 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 			self->helpArg = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
 		}
 		self->bHelpRequest = true;
+		free(argumentsUsed);
+		return ferrOK;
+	}
+
+	fArg_fetchArgv(argc, argv, L"ver", &mi, 0);
+	if (mi != 0)
+	{
+		self->bVersionRequest = true;
 		free(argumentsUsed);
 		return ferrOK;
 	}

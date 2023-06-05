@@ -123,6 +123,7 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 	| --h                           | Shows help                                              |
 	| --?                           | Same as above                                           |
 	| --h=\[keyword\]               | Shows help according to the specified keyword           |
+	| --ver                         | Shows version info
 	| --f=\[file\]                  | Specifies file name to open                             |
 	| \[file\]                      | Same as above, must be given as the last argument       |
 	| --set=\[file\]                | Specifies custom settings file explicitly               |
@@ -210,6 +211,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 
 * 2.3 (planned)
 	* [x] More advanced program help, supports keywords
+	* [x] Version info
 	* [ ] Advanced theming support, load themes from separate files
 	* [ ] Advanced undo/redo, choose which way to redo
 

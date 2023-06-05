@@ -34,6 +34,7 @@ typedef struct fSettings
 	wchar * helpArg;
 
 	bool bHelpRequest:1;
+	bool bVersionRequest:1;
 	bool bTabsToSpaces:1;
 	bool bAutoIndent:1;
 	bool bWhiteSpaceVis:1;

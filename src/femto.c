@@ -301,7 +301,7 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 		FEMTO_HELP_MISCELLANEOUS
 	};
 
-	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
+	fwprintf(stderr, L"Usage: %S [options] [file]\n", app);
 
 	isize selidx = -1;
 
@@ -327,7 +327,7 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 		// print standard help
 		fwprintf(
 			stderr,
-			L"\nBy categories:\n"
+			L"By categories:\n"
 			
 			FEMTO_HELP_GENERAL
 			FEMTO_HELP_INDENDATION
@@ -352,6 +352,18 @@ void femto_printHelpClue(const wchar * restrict app)
 	assert(app != NULL);
 
 	fwprintf(stderr, L"To show all available commands type:\n%S --help\n", app);
+}
+
+void femto_printVersion(void)
+{
+	fwprintf(
+		stderr,
+		L"femto %s\n"
+		"Copyright (C) 2023 makuke1234\n"
+		"This software is provided \"as is\", without warranty. Use at your own risk.\n"
+		"See https://github.com/makuke1234/femto for more details.\n",
+		FEMTO_VERSION_STR
+	);
 }
 
 bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLen)
