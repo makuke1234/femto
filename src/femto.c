@@ -303,19 +303,19 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 
 	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
 
-	ssize_t selidx = -1;
+	isize selidx = -1;
 
 	if (helpArg != NULL)
 	{
-		size_t argLen = wcslen(helpArg);
+		usize argLen = wcslen(helpArg);
 		// scan through
-		for (size_t i = 0; (i < ARRAYSIZE(keywords)) && (selidx == -1); ++i)
+		for (usize i = 0; (i < ARRAYSIZE(keywords)) && (selidx == -1); ++i)
 		{
-			for (size_t j = 0; (j < 10) && (keywords[i][j] != NULL); ++j)
+			for (usize j = 0; (j < 10) && (keywords[i][j] != NULL); ++j)
 			{
 				if (wcsnicmp(keywords[i][j], helpArg, argLen) == 0)
 				{
-					selidx = (ssize_t)i;
+					selidx = (isize)i;
 					break;
 				}
 			}
