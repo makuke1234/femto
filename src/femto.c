@@ -288,8 +288,41 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 {
 	assert(app != NULL);
 
+	const wchar * keywords[][10] = {
+		{ L"general", NULL },
+		{ L"indendation", NULL },
+		{ L"aesthetics", NULL },
+		{ L"miscellaneous", NULL }
+	};
+	const wchar * descriptions[] = {
+		FEMTO_HELP_GENERAL,
+		FEMTO_HELP_INDENDATION,
+		FEMTO_HELP_AESTHETICS,
+		FEMTO_HELP_MISCELLANEOUS
+	};
+
 	fwprintf(stderr, L"Correct usage:\n%S [options] [file]\n", app);
-	if (helpArg == NULL)
+
+	ssize_t selidx = -1;
+
+	if (helpArg != NULL)
+	{
+		size_t argLen = wcslen(helpArg);
+		// scan through
+		for (size_t i = 0; (i < ARRAYSIZE(keywords)) && (selidx == -1); ++i)
+		{
+			for (size_t j = 0; (j < 10) && (keywords[i][j] != NULL); ++j)
+			{
+				if (wcsnicmp(keywords[i][j], helpArg, argLen) == 0)
+				{
+					selidx = (ssize_t)i;
+					break;
+				}
+			}
+		}
+	}
+
+	if ((helpArg == NULL) || (selidx == -1))
 	{
 		// print standard help
 		fwprintf(
@@ -306,22 +339,13 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 	}
 
 	// print help according to the keyword
-	const wchar * keywords[][10] = {
-		{ L"general", NULL },
-		{ L"indendation", NULL },
-		{ L"aesthetics", NULL },
-		{ L"miscellaneous", NULL }
-	};
-	const wchar * descriptions[] = {
-		FEMTO_HELP_GENERAL,
-		FEMTO_HELP_INDENDATION,
-		FEMTO_HELP_AESTHETICS,
-		FEMTO_HELP_MISCELLANEOUS
-	};
 
-	fwprintf(stderr, L"Help keyword: %S\n\n", helpArg);
-
-	
+	fwprintf(
+		stderr,
+		L"Help keyword: %S\n%S",
+		helpArg,
+		descriptions[selidx]
+	);
 }
 void femto_printHelpClue(const wchar * restrict app)
 {
