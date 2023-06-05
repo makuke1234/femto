@@ -115,37 +115,32 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 	* A question mark can also be used as a separator:
 		* `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [x] Option list:
+	* *In this table, only a bare minimum of the possible argument strings is written, any argument can contain any*
+	  *number of extra characters at the end for example `--h` shows help but so does `--help` or `--hasdhhfsdfugsdfgj`.*
+	  *Another example would be `--set=settings.json`, so is valid `--setsas_d_j-hdakjgasd123123AAAfjahsdf=settings.json`.
 	| Option                        | Description                                         |
 	| ----------------------------- | --------------------------------------------------- |
-	| --help                        | Shows help                                          |
 	| --h                           | Same as above                                       |
 	| --?                           | Same as above                                       |
-	| --file=\[file\]               | Specifies file name to open                         |
+	| --h=\[keyword\]               | Shows help according to the specified keyword       |
+	| --f=\[file\]                  | Specifies file name to open                         |
 	| \[file\]                      | Same as above, must be given as the last argument   |
-	| --settings=\[file\]           | Specify custom settings file explicitly             |
-	| --setting=\[file\]            | Same as above                                       |
-	| --tabsSpaces=\[value\]        | Value can be either true/false or 1/0               |
-	| --tabsToSpaces=\[value\]      | Same as above                                       |
-	| --tabWidth=\[value\]          | Value can be any number from 1-32 (inclusive)       |
-	| --tabw=\[value\]              | Same as above                                       |
-	| --autoIndent=\[value\]        | Value can be either true/false or 1/0               |
-	| --autoI=\[value\]             | Same as above                                       |
+	| --set=\[file\]                | Specify custom settings file explicitly             |
+	| --tabsS=\[value\]             | Value can be either true/false or 1/0               |
+	| --tabsToS=\[value\]           | Same as above                                       |
+	| --tabw=\[value\]              | Value can be any number from 1-32 (inclusive)       |
+	| --autoI=\[value\]             | Value can be either true/false or 1/0               |
 	| --aIndent=\[value\]           | Same as above                                       |
-	| --whitespaceVisible=\[value\] | Value can be either true/false or 1/0               |
-	| --visibleWhitespace=\[value\] | Same as above                                       |
+	| --whitespaceVis=\[value\]     | Value can be either true/false or 1/0               |
+	| --wsVis=\[value\]             | Same as above                                       |
+	| --vis=\[value\]               | Same as above                                       |
 	| --whitespaceCh=\[value\]      | Specifies "visible" whitespace character to be used |
-	| --whitespaceColor=\[value\]   | Specifies whitespace color, number between 0-255    |
-	| --whitespaceCol=\[value\]     | Same as above                                       |
-	| --lineNumRelative=\[value\]   | Value can be either true/false or 1/0               |
-	| --lineNumColor=\[value\]      | Specifies line number color, number between 0-255   |
-	| --lineNumCol=\[value\]        | Same as above                                       |
-	| --logging=\[value\]           | Specifies whether logging mode is enabled           |
-	| --loggingMode=\[value\]       | Same as above                                       |
-	| --log=\[value\]               | Same as above                                       |
-	| --logMode=\[value\]           | Same as above                                       |
-	| --logEnable=\[value\]         | Same as above                                       |
-	| --logger=\[value\]            | Same as above                                       |
-	| --loggerEnable=\[value\]      | Same as above                                       |
+	| --wsCh=\[value\]              | Same as above                                       |
+	| --whitespaceCol=\[value\]     | Specifies whitespace color, number between 0-255    |
+	| --wsCol=\[value\]             | Same as above                                       |
+	| --lineNumRel=\[value\]        | Value can be either true/false or 1/0               |
+	| --lineNumCol=\[value\]        | Specifies line number color, number between 0-255   |
+	| --log=\[value\]               | Specifies whether logging mode is enabled           |
 - [x] List of settings:
 	| Setting             | Type    |
 	| ------------------- | ------- |
@@ -214,6 +209,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 # Changelog
 
 * 2.3 (planned)
+	* [x] More advanced program help, supports keywords
 	* [ ] Advanced theming support, load themes from separate files
 	* [ ] Advanced undo/redo, choose which way to redo
 

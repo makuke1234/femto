@@ -281,7 +281,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 		argumentsUsed[mi - 1] = true;
 	}
 
-	ret = fArg_fetchArgv(argc, argv, L"whitespaceVisible", &mi, 1, &farg);
+	ret = fArg_fetchArgv(argc, argv, L"whitespaceVis", &mi, 1, &farg);
 	if (mi == 0)
 	{
 		ret = fArg_fetchArgv(argc, argv, L"vis", &mi, 1, &farg);

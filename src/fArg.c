@@ -5,11 +5,11 @@ bool fArg_strToBool(fArg_t arg)
 	assert(arg.begin != NULL);
 	assert(arg.end   != NULL);
 
-	if (((arg.end - arg.begin) >= 4) && (wcsncmp(arg.begin, L"true", 4) == 0))
+	if (((arg.end - arg.begin) >= 4) && (wcsnicmp(arg.begin, L"true", 4) == 0))
 	{
 		return true;
 	}
-	else if (((arg.end - arg.begin) >= 5) && (wcsncmp(arg.begin, L"false", 5) == 0))
+	else if (((arg.end - arg.begin) >= 5) && (wcsnicmp(arg.begin, L"false", 5) == 0))
 	{
 		return false;
 	}
