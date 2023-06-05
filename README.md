@@ -115,10 +115,10 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 	* A question mark can also be used as a separator:
 		* `--`\[option\]`=`\[argument 1\]`?`\[argument 2\]`?`\[argument 3\]
 - [x] Option list:
-	*In this table, only a bare minimum of the possible argument strings is written, any argument can contain any*
+  * *In this table, only a bare minimum of the possible argument strings is written, any argument can contain any*
 	*number of extra characters at the end for example `--h` shows help but so does `--help` or `--hasdhhfsdfugsdfgj`.*
 	*Another example would be `--set=settings.json`, so is valid `--setsas_d_j-hdakjgasd123123AAAfjahsdf=settings.json`.*
-	| Option                        | Description                                         |
+  * | Option                        | Description                                         |
 	| ----------------------------- | --------------------------------------------------- |
 	| --h                           | Same as above                                       |
 	| --?                           | Same as above                                       |
