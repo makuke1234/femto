@@ -120,7 +120,7 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
 	*Another example would be `--set=settings.json`, so is valid `--setsas_d_j-hdakjgasd123123AAAfjahsdf=settings.json`.*
   * | Option                        | Description                                         |
 	| ----------------------------- | --------------------------------------------------- |
-	| --h                           | Same as above                                       |
+	| --h                           | Shows help                                          |
 	| --?                           | Same as above                                       |
 	| --h=\[keyword\]               | Shows help according to the specified keyword       |
 	| --f=\[file\]                  | Specifies file name to open                         |
