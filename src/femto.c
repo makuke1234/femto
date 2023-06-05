@@ -289,10 +289,10 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 	assert(app != NULL);
 
 	const wchar * keywords[][10] = {
-		{ L"general", NULL },
-		{ L"indendation", NULL },
-		{ L"aesthetics", NULL },
-		{ L"miscellaneous", NULL }
+		{ L"general",       L"common",     NULL },
+		{ L"indendation",   L"typography", NULL },
+		{ L"aesthetics",    L"looks",      NULL },
+		{ L"miscellaneous", L"other",      NULL }
 	};
 	const wchar * descriptions[] = {
 		FEMTO_HELP_GENERAL,
