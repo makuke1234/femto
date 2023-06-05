@@ -296,36 +296,28 @@ void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg)
 			stderr,
 			L"\nBy categories:\n"
 			
-			"\nGeneral:\n\n"
-
-			"  --h                 Shows this help\n"
-			"  --h=[value]         Shows help for a keyword\n"
-			"  --file=[file]       Specifies file name to open\n"
-			"  --setting=[file]    Specifies custom settings file explicitly\n"
-
-			"\nIndendation:\n\n"
-
-			"  --tabsToSpaces=[value]    true/false, 1/0\n"
-			"  --tabWidth=[value]        Number from 1-32 (inclusive)\n"
-			"  --autoIndent=[value]      true/false, 1/0\n"
-
-			"\nAesthetics:\n\n"
-
-			"  --whitespaceVisible=[value]    true/false, 1/0\n"
-			"  --whitespaceCh=[value]         Specifies 'visible' whitespace character\n"
-			"  --whitespaceCol=[value]        Specifies whitespace color, 0-255\n"
-			"  --lineNumRelative=[value]      true/false, 1/0\n"
-			"  --lineNumCol=[value]           Specifies line number color, 0-255\n"
-			
-			"\nMiscellaneous:\n\n"
-
-			"  --log=[value] Specifies the use of logging mode\n"
+			FEMTO_HELP_GENERAL
+			FEMTO_HELP_INDENDATION
+			FEMTO_HELP_AESTHETICS
+			FEMTO_HELP_MISCELLANEOUS
 		);
 
 		return;
 	}
 
 	// print help according to the keyword
+	const wchar * keywords[][10] = {
+		{ L"general", NULL },
+		{ L"indendation", NULL },
+		{ L"aesthetics", NULL },
+		{ L"miscellaneous", NULL }
+	};
+	const wchar * descriptions[] = {
+		FEMTO_HELP_GENERAL,
+		FEMTO_HELP_INDENDATION,
+		FEMTO_HELP_AESTHETICS,
+		FEMTO_HELP_MISCELLANEOUS
+	};
 
 	fwprintf(stderr, L"Help keyword: %S\n\n", helpArg);
 

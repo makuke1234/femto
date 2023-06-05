@@ -5,6 +5,31 @@
 #include "fData.h"
 #include "fSyntax.h"
 
+#define FEMTO_HELP_GENERAL \
+L"\nGeneral:\n\n" \
+"  --h                 Shows this help\n" \
+"  --h=[value]         Shows help for a keyword\n" \
+"  --file=[file]       Specifies file name to open\n" \
+"  --setting=[file]    Specifies custom settings file explicitly\n"
+
+#define FEMTO_HELP_INDENDATION \
+L"\nIndendation:\n\n" \
+"  --tabsToSpaces=[value]    true/false, 1/0\n" \
+"  --tabWidth=[value]        Number from 1-32 (inclusive)\n" \
+"  --autoIndent=[value]      true/false, 1/0\n"
+
+#define FEMTO_HELP_AESTHETICS \
+L"\nAesthetics:\n\n" \
+"  --whitespaceVisible=[value]    true/false, 1/0\n" \
+"  --whitespaceCh=[value]         Specifies 'visible' whitespace character\n" \
+"  --whitespaceCol=[value]        Specifies whitespace color, 0-255\n" \
+"  --lineNumRelative=[value]      true/false, 1/0\n" \
+"  --lineNumCol=[value]           Specifies line number color, 0-255\n"
+
+#define FEMTO_HELP_MISCELLANEOUS \
+L"\nMiscellaneous:\n\n" \
+"  --log=[value] Specifies the use of logging mode\n"
+
 typedef enum specialASCIIcodes
 {
 	sacCTRL_A = 1,
