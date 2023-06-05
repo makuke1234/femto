@@ -118,29 +118,29 @@ reports ~7200 source code lines (excluding whitespace, comments, language keywor
   * *In this table, only a bare minimum of the possible argument strings is written, any argument can contain any*
 	*number of extra characters at the end for example `--h` shows help but so does `--help` or `--hasdhhfsdfugsdfgj`.*
 	*Another example would be `--set=settings.json`, so is valid `--setsas_d_j-hdakjgasd123123AAAfjahsdf=settings.json`.*
-  * | Option                        | Description                                         |
-	| ----------------------------- | --------------------------------------------------- |
-	| --h                           | Shows help                                          |
-	| --?                           | Same as above                                       |
-	| --h=\[keyword\]               | Shows help according to the specified keyword       |
-	| --f=\[file\]                  | Specifies file name to open                         |
-	| \[file\]                      | Same as above, must be given as the last argument   |
-	| --set=\[file\]                | Specify custom settings file explicitly             |
-	| --tabsS=\[value\]             | Value can be either true/false or 1/0               |
-	| --tabsToS=\[value\]           | Same as above                                       |
-	| --tabw=\[value\]              | Value can be any number from 1-32 (inclusive)       |
-	| --autoI=\[value\]             | Value can be either true/false or 1/0               |
-	| --aIndent=\[value\]           | Same as above                                       |
-	| --whitespaceVis=\[value\]     | Value can be either true/false or 1/0               |
-	| --wsVis=\[value\]             | Same as above                                       |
-	| --vis=\[value\]               | Same as above                                       |
-	| --whitespaceCh=\[value\]      | Specifies "visible" whitespace character to be used |
-	| --wsCh=\[value\]              | Same as above                                       |
-	| --whitespaceCol=\[value\]     | Specifies whitespace color, number between 0-255    |
-	| --wsCol=\[value\]             | Same as above                                       |
-	| --lineNumRel=\[value\]        | Value can be either true/false or 1/0               |
-	| --lineNumCol=\[value\]        | Specifies line number color, number between 0-255   |
-	| --log=\[value\]               | Specifies whether logging mode is enabled           |
+  * | Option                        | Description                                             |
+	| ----------------------------- | ------------------------------------------------------- |
+	| --h                           | Shows help                                              |
+	| --?                           | Same as above                                           |
+	| --h=\[keyword\]               | Shows help according to the specified keyword           |
+	| --f=\[file\]                  | Specifies file name to open                             |
+	| \[file\]                      | Same as above, must be given as the last argument       |
+	| --set=\[file\]                | Specifies custom settings file explicitly               |
+	| --tabsS=\[value\]             | Toggles tabs to spaces. Either true/false or 1/0        |
+	| --tabsToS=\[value\]           | Same as above                                           |
+	| --tabw=\[value\]              | Specifies tab width. Any number from 1-32 (inclusive)   |
+	| --autoI=\[value\]             | Toggles auto-indentation. Either true/false or 1/0      |
+	| --aIndent=\[value\]           | Same as above                                           |
+	| --whitespaceVis=\[value\]     | Whitespace visibility. Either true/false or 1/0         |
+	| --wsVis=\[value\]             | Same as above                                           |
+	| --vis=\[value\]               | Same as above                                           |
+	| --whitespaceCh=\[value\]      | Specifies "visible" whitespace character to be used     |
+	| --wsCh=\[value\]              | Same as above                                           |
+	| --whitespaceCol=\[value\]     | Specifies whitespace color, number between 0-255        |
+	| --wsCol=\[value\]             | Same as above                                           |
+	| --lineNumRel=\[value\]        | Toggles relative line numbers. Either true/false or 1/0 |
+	| --lineNumCol=\[value\]        | Specifies line number color, number between 0-255       |
+	| --log=\[value\]               | Toggles loggin mode. Either true/false or 1/0           |
 - [x] List of settings:
 	| Setting             | Type    |
 	| ------------------- | ------- |
