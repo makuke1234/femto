@@ -392,6 +392,58 @@ usize fLine_find(const fLine_t * restrict node, usize startIdx, const wchar * re
 
 	return UINT32_MAX;
 }
+usize fLine_rfind(const fLine_t * restrict node, usize startIdx, const wchar * restrict string, usize maxString)
+{
+	assert(node      != NULL);
+	assert(string    != NULL);
+	assert(maxString > 0);
+
+	// Clamp startIdx
+	const usize cur2 = node->curx + node->freeSpaceLen;
+	startIdx = ((startIdx >= node->curx) && (startIdx < cur2)) ? cur2 : startIdx;
+
+	for (usize i = startIdx; 1;)
+	{
+		if ((i == (cur2 - 1)) && (node->freeSpaceLen > 0))
+		{
+			i -= node->freeSpaceLen;
+			continue;
+		}
+		else if (node->line[i] == string[0])
+		{
+			const wchar * str = string;
+			usize k = 0;
+			for (usize j = i; (j < node->lineEndx) && (k < maxString);)
+			{
+				if ((j == node->curx) && (node->freeSpaceLen > 0))
+				{
+					j = cur2;
+					continue;
+				}
+				else if ((*str == L'\0') || (node->line[j] != *str))
+				{
+					break;
+				}
+				++str;
+				++k;
+				++j;
+			}
+
+			if ((k == maxString) || (*str == L'\0'))
+			{
+				return i;
+			}
+		}
+		if (i == 0)
+		{
+			break;
+		}
+
+		--i;
+	}
+
+	return UINT32_MAX;
+}
 
 bool fLine_mergeNext(fLine_t * restrict self, fLine_t ** restrict ppcury, u8 * restrict noLen)
 {
@@ -589,7 +641,7 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * 
 
 bool fLine_updateSyntax(
 	fLine_t * restrict node, fStx_e fs, const WORD * colors,
-	const wchar * restrict searchTerm, const struct fFileHighLight * restrict hl,
+	const wchar * restrict searchTerm, fSearch_e searchOpts, const struct fFileHighLight * restrict hl,
 	usize curLineNum, u8 tabWidth
 )
 {
@@ -661,9 +713,29 @@ bool fLine_updateSyntax(
 			{
 				break;
 			}
-
-			firstidx = first ? idx : firstidx;
-			first = false;
+			
+			switch (searchOpts)
+			{
+			case fsrchFIRST:
+				firstidx = first ? idx : firstidx;
+				first = false;
+				break;
+			case fsrchLAST:
+				firstidx = idx;
+				first = false;
+				break;
+			case fsrchPREV:
+				firstidx = (idx < node->curx) ? idx : firstidx;
+				first = false;
+				break;
+			case fsrchNEXT:
+				if (first && (idx > (node->curx + node->freeSpaceLen)))
+				{
+					firstidx = idx;
+					first = false;
+				}
+				break;
+			}
 			// Found
 			node->userValue.bits.b8 = true;
 

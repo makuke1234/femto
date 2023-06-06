@@ -38,6 +38,14 @@ typedef struct fLine
 
 } fLine_t;
 
+typedef enum fSearch
+{
+	fsrchFIRST,
+	fsrchLAST,
+	fsrchPREV,
+	fsrchNEXT
+} fSearch_e;
+
 
 /**
  * @brief Initialises already pre-allocated memory of fLine_t structure
@@ -138,7 +146,7 @@ bool fLine_addChar(fLine_t * restrict self, wchar ch, u8 tabWidth);
  */
 bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * restrict string, usize maxString);
 /**
- * @brief Finds the string location on current line
+ * @brief Finds the string location on current line iterating forwards
  * 
  * @param node Pointer to line node
  * @param startIdx Starting index, value is clamped
@@ -147,6 +155,17 @@ bool fLine_checkAt(const fLine_t * restrict node, isize maxdelta, const wchar * 
  * @return usize Index location of string, UINT32_MAX on failure
  */
 usize fLine_find(const fLine_t * restrict node, usize startIdx, const wchar * restrict string, usize maxString);
+/**
+ * @brief Finds the string location on current line iterating backwards from the starting point
+ * 
+ * @param node Pointer to line node
+ * @param startIdx Starting index, value is clamped
+ * @param string Matchable string
+ * @param maxString Absolute maximum number of character to check, stops anyway on null-terminator
+ * @return usize Index location of string, UINT32_MAX on failure
+ */
+usize fLine_rfind(const fLine_t * restrict node, usize startIdx, const wchar * restrict string, usize maxString);
+
 
 /**
  * @brief Merges current line node with next line node, adjusts current
@@ -223,6 +242,7 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * 
  * @param fs Syntax identifier
  * @param colors Syntax token coloring palette
  * @param searchTerm Phrase to be searched, can be NULL
+ * @param searchOpts Search options
  * @param hl Highlighting data
  * @param curLineNum Current active line number
  * @param tabWidth Tab width in characters
@@ -231,7 +251,7 @@ void fLine_updateLineNumbers(fLine_t * restrict startnode, usize startLno, u8 * 
  */
 bool fLine_updateSyntax(
 	fLine_t * restrict node, fStx_e fs, const WORD * colors,
-	const wchar * restrict searchTerm, const struct fFileHighLight * restrict hl,
+	const wchar * restrict searchTerm, fSearch_e searchOpts, const struct fFileHighLight * restrict hl,
 	usize curLineNum, u8 tabWidth
 );
 

@@ -213,6 +213,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 * 2.3 (planned)
 	* [x] More advanced program help, supports keywords
 	* [x] Version info
+	* [x] Lets move between multiple search results on the same line
 	* [ ] Advanced theming support, load themes from separate files
 	* [ ] Advanced undo/redo, choose which way to redo
 

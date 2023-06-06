@@ -692,9 +692,33 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 			wcscpy_s(tempstr, MAX_STATUS, L"No lines to be searched");
 			return;
 		}
-		//
-		node = first ? node : ((peditor->bDirBack) ? node->prevNode : node->nextNode);
-		isize deltaLines = first ? 0 : delta;
+		
+		// try finding another term on the same line
+		bool foundOnSameLine = false;
+		if (peditor->bDirBack)
+		{
+			// search backwards
+			foundOnSameLine = (node->curx > 0) && (fLine_rfind(node, node->curx - 1, peditor->psearchTerm, wcslen(peditor->psearchTerm)) != UINT32_MAX);
+		}
+		else
+		{
+			// search forwards
+			foundOnSameLine = fLine_find(node, node->curx + node->freeSpaceLen + 1, peditor->psearchTerm, wcslen(peditor->psearchTerm)) != UINT32_MAX;
+		}
+
+
+		// that didn't work, multiple search terms weren't found
+		isize deltaLines = 0;
+		if (!foundOnSameLine)
+		{
+			node = first ? node : ((peditor->bDirBack) ? node->prevNode : node->nextNode);
+			deltaLines = first ? 0 : delta;
+			peditor->searchOpts = (peditor->bDirBack) ? fsrchLAST : fsrchFIRST;
+		}
+		else
+		{
+			peditor->searchOpts = (peditor->bDirBack) ? fsrchPREV : fsrchNEXT;
+		}
 
 		if (first)
 		{
@@ -1568,7 +1592,7 @@ bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict curline)
 		{
 			fLine_updateSyntax(
 				node, pfile->syntax, peditor->settings.syntaxColors,
-				peditor->psearchTerm, &pfile->data.hl,
+				peditor->psearchTerm, peditor->searchOpts, &pfile->data.hl,
 				pfile->data.currentNode->lineNumber, peditor->settings.tabWidth
 			);
 
@@ -1708,7 +1732,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 
 	if (!fLine_updateSyntax(
 		node, pfile->syntax, peditor->settings.syntaxColors,
-		peditor->psearchTerm, &pfile->data.hl,
+		peditor->psearchTerm, peditor->searchOpts, &pfile->data.hl,
 		pfile->data.currentNode->lineNumber, peditor->settings.tabWidth
 	))
 	{

@@ -41,6 +41,7 @@ typedef struct fData
 
 	wchar searchBuf[MAX_STATUS];
 	const wchar * psearchTerm;
+	fSearch_e searchOpts;
 	bool bDirBack;
 
 } fData_t;

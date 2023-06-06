@@ -24,6 +24,7 @@ bool fData_reset(fData_t * restrict self)
 		.fileIdx     = -1,
 		.searchBuf   = { [0] = L'\0' },
 		.psearchTerm = NULL,
+		.searchOpts  = fsrchFIRST,
 		.bDirBack    = false
 	};
 
