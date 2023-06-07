@@ -741,7 +741,7 @@ static inline void s_femto_inner_searchTerm(fData_t * restrict peditor, wchar * 
 				fData_refreshEdit(peditor);
 				// Update cursor horizontal position correctly
 				fData_refreshEdit(peditor);
-				swprintf_s(tempstr, MAX_STATUS, L"Found at line %u", node->lineNumber);
+				swprintf_s(tempstr, MAX_STATUS, L"Found @%zu:%zu", node->lineNumber, node->curx + 1U);
 
 				return;
 			}
@@ -1047,10 +1047,17 @@ static inline bool s_femto_inner_kbdHandle(
 		else if (key > sacLAST_CODE)
 		{
 			fData_cancelHighlight(peditor);
-			swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 			if (fFile_addNormalCh(pfile, key, peditor->settings.tabWidth))
 			{
 				fData_refreshEditAsync(peditor);
+			}
+			if (pfile->data.currentNode != NULL)
+			{
+				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u @%zu:%zu", key, keyCount, pfile->data.currentNode->lineNumber, pfile->data.currentNode->curx + 1U);
+			}
+			else
+			{
+				swprintf_s(tempstr, MAX_STATUS, L"'%c' #%u", key, keyCount);
 			}
 		}
 		// Special keys
@@ -1254,6 +1261,21 @@ static inline bool s_femto_inner_kbdHandle(
 			{
 				fData_refreshEdit(peditor);
 			}
+
+			// create status message
+			switch (wVirtKey)
+			{
+			case VK_F2:
+			case VK_F3:
+				break;
+			default:
+				if (pfile->data.currentNode != NULL)
+				{
+					wchar num[32];
+					swprintf_s(num, 32, L" @%zu:%zu", pfile->data.currentNode->lineNumber, pfile->data.currentNode->curx + 1U);
+					wcscat_s(tempstr, MAX_STATUS, num);
+				}
+			}
 		}
 		if (draw)
 		{
@@ -1380,29 +1402,18 @@ static inline bool s_femto_inner_mouseHandle(
 
 		bool moved = false;
 
-		// Check if mouse is moving
-		if (ir->dwEventFlags & MOUSE_MOVED)
-		{
-			if (draw)
-			{
-				moved = true;
-				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%hd, %hd", pos.X, pos.Y);
-			}
-		}
-		else
-		{
-			if (draw)
-			{
-				fLog_write("Mouse click @%hd, %hd", pos.X, pos.Y);
-
-				fData_cancelHighlight(peditor);
-
-				swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%hd, %hd", pos.X, pos.Y);
-			}
-		}
-
 		if (draw)
 		{
+			// Check if mouse is moving
+			if (ir->dwEventFlags & MOUSE_MOVED)
+			{
+				moved = true;
+			}
+			else
+			{
+				fData_cancelHighlight(peditor);
+			}
+	
 			if (pfile->data.pcury != NULL)
 			{
 				pfile->data.currentNode = pfile->data.pcury;
@@ -1426,7 +1437,19 @@ static inline bool s_femto_inner_mouseHandle(
 						((hl->beg == curNode) && (hl->begx > curNode->curx));
 				}
 				fData_refreshEditAsync(peditor);
+				
+				if (ir->dwEventFlags & MOUSE_MOVED)
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' + MOVE @%zu:%zu", curNode->lineNumber, curNode->curx + 1U);
+				}
+				else
+				{
+					fLog_write("Mouse click @%zu, %zu", curNode->lineNumber, curNode->curx + 1U);
+					swprintf_s(tempstr, MAX_STATUS, L"'LCLICK' @%zu:%zu", curNode->lineNumber, curNode->curx + 1U);
+				}
 			}
+
+
 		}
 	}
 	else

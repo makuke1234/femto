@@ -213,7 +213,10 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 * 2.3 (planned)
 	* [x] More advanced program help, supports keywords
 	* [x] Version info
-	* [x] Lets move between multiple search results on the same line
+	* [x] Lets to move between multiple search results on the same line
+	* [x] Shows more information about search result in the status
+	* [x] Actually displays correct line number on mouse clicks
+	* [x] Shows current line & column when typing/moving cursor around
 	* [ ] Advanced theming support, load themes from separate files
 	* [ ] Advanced undo/redo, choose which way to redo
 
