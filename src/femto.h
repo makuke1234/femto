@@ -291,7 +291,9 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * rest
  * editor name on the titlebar
  * 
  * @param fileName File name
+ * @param tabNum Currently active tab #
+ * @param maxTabs Total number of tabs
  */
-void femto_setConTitle(const wchar * restrict fileName);
+void femto_setConTitle(const wchar * restrict fileName, usize tabNum, usize maxTabs);
 
 #endif

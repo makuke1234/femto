@@ -647,7 +647,7 @@ static inline void s_femto_inner_saveAs(fData_t * restrict peditor, wchar * rest
 		default:
 			swprintf_s(tempstr, MAX_STATUS, L"Wrote %zd bytes to %s", saved, inp);
 			// Set console title
-			femto_setConTitle(inp);
+			femto_setConTitle(inp, (usize)(peditor->fileIdx + 1), peditor->filesSize);
 		}
 
 		switch (saved)
@@ -1144,7 +1144,7 @@ static inline bool s_femto_inner_kbdHandle(
 					{
 						pfile->data.bUpdateAll = true;
 						fData_refreshEdit(peditor);
-						femto_setConTitle(pfile->fileName);
+						femto_setConTitle(pfile->fileName, (usize)(peditor->fileIdx + 1), peditor->filesSize);
 					}
 				}
 				else if (shift)
@@ -2051,13 +2051,11 @@ const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * rest
 	return NULL;
 }
 
-void femto_setConTitle(const wchar * restrict fileName)
+void femto_setConTitle(const wchar * restrict fileName, usize tabNum, usize maxTabs)
 {
 	fileName = (fileName == NULL) ? FEMTO_UNTITLED_NAME : fileName;
 
 	wchar wndName[MAX_PATH];
-	const usize fnamelen = wcslen(fileName);
-	memcpy(wndName, fileName, fnamelen * sizeof(wchar));
-	wcscpy_s(wndName + fnamelen, MAX_PATH - fnamelen, L" - femto");
+	swprintf_s(wndName, MAX_PATH, L"(%zu/%zu) %s - femto", tabNum, maxTabs, fileName);
 	SetConsoleTitleW(wndName);
 }

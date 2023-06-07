@@ -368,7 +368,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 	fFile_close(self->files[self->fileIdx]);
 
 	// Set console title
-	femto_setConTitle(self->files[self->fileIdx]->fileName);
+	femto_setConTitle(self->files[self->fileIdx]->fileName, (usize)(self->fileIdx + 1), self->filesSize);
 
 	return true;
 }
@@ -403,7 +403,7 @@ void fData_closeTab(fData_t * restrict self)
 	// Set console title back
 	if (self->fileIdx != -1)
 	{
-		femto_setConTitle(self->files[self->fileIdx]->fileName);
+		femto_setConTitle(self->files[self->fileIdx]->fileName, (usize)(self->fileIdx + 1), self->filesSize);
 	}
 }
 
