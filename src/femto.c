@@ -1416,8 +1416,8 @@ static inline bool s_femto_inner_mouseHandle(
 	
 			if (pfile->data.pcury != NULL)
 			{
-				pfile->data.currentNode = pfile->data.pcury;
 				const fLine_t * restrict lastcurnode = pfile->data.currentNode;
+				pfile->data.currentNode = pfile->data.pcury;
 				fLine_moveCursorVert(&pfile->data.currentNode, (isize)pos.Y);
 				fLine_t * restrict curNode = pfile->data.currentNode;
 				pfile->data.bUpdateAll |= (curNode != lastcurnode) & peditor->settings.bRelLineNums;
@@ -1738,7 +1738,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
 	usize number = (!peditor->settings.bRelLineNums || (node == curnode)) ?
-		(usize)node->lineNumber :
+		(usize)node->lineNumber+1000 :
 		(usize)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	const u8 noLen = (u8)log10((f64)number) + 1;
 	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
