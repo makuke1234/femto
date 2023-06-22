@@ -1738,7 +1738,7 @@ bool femto_updateScrbufLine(fData_t * restrict peditor, fLine_t * restrict node,
 	idx -= ((idx > 0) && (node->line[idx - 1] == L'\t') && ((pfile->data.curx % peditor->settings.tabWidth)));
 
 	usize number = (!peditor->settings.bRelLineNums || (node == curnode)) ?
-		(usize)node->lineNumber+1000 :
+		(usize)node->lineNumber :
 		(usize)labs((long)curnode->lineNumber - (long)node->lineNumber);
 	const u8 noLen = (u8)log10((f64)number) + 1;
 	destination[pfile->data.noLen].Attributes       = peditor->settings.lineNumCol;
