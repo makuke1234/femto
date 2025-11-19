@@ -15,10 +15,9 @@ typedef enum fErr
 } fErr_e;
 /**
  * @brief Prints error message to stderr, adds newline character
- * 
+ *
  * @param errCode Error code, ferrOK on success
  */
 void fErr_print(fErr_e errCode);
-
 
 #endif

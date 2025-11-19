@@ -37,8 +37,8 @@ typedef enum specialASCIIcodes
 
 	sacLAST_CODE = 31
 
-} specialASCIIcodes_e, sac_e;
-
+} specialASCIIcodes_e,
+	sac_e;
 
 i32 min_i32(i32 a, i32 b);
 i32 max_i32(i32 a, i32 b);
@@ -65,157 +65,155 @@ usize max_usize(usize a, usize b);
 usize clamp_usize(usize value, usize min, usize max);
 usize clampdc_usize(usize value, usize range1, usize range2);
 
-
-
 /**
  * @brief Concatenate Unicode code point at the end of the UTF-8 string, resizes if necessary,
  * stores string capacity in psize and length (including null-terminator) in plen
- * 
+ *
  * @param pstr Address of pointer to string array
  * @param psize Address of string capacity, can be NULL
  * @param plen Aadress of string length, not including null-terminator
  * @param cp 16-bit Unicode code point
  * @return char* Pointer to string array, NULL on failure
  */
-char * femto_cpcat_s(char ** restrict pstr, usize * restrict psize, usize * plen, wchar cp);
+char *femto_cpcat_s(char **restrict pstr, usize *restrict psize, usize *plen, wchar cp);
 
 /**
  * @brief Escapes the escape characters in given character array,
  * produces pointer to the new character array
- * 
+ *
  * @param inp Input null-terminated character array
  * @return char* Output character array
  */
-char * femto_escStr(const char * restrict inp);
+char *femto_escStr(const char *restrict inp);
 /**
  * @brief Escapes the escape characters in given character array,
  * produces pointer to the new character array
- * 
+ *
  * @param inp Input character array
  * @param len Input character array length in characters
  * @return char* Output character array
  */
-char * femto_escStr_s(const char * restrict inp, usize len);
+char *femto_escStr_s(const char *restrict inp, usize len);
 
 /**
  * @brief Set exit handler data argument pointer
- * 
+ *
  * @param pdata Pointer to fData_t structure
  */
-void femto_exitHandlerSetVars(fData_t * restrict pdata);
+void femto_exitHandlerSetVars(fData_t *restrict pdata);
 /**
  * @brief Specialised exit handler, executed after returning from main
- * 
+ *
  */
 void femto_exitHandler(void);
 
 /**
  * @brief Shows help
- * 
+ *
  * @param app Pointer to application pathname
  * @param helpArg Pointer to help search keyword, can be NULL
  */
-void femto_printHelp(const wchar * restrict app, const wchar * restrict helpArg);
+void femto_printHelp(const wchar *restrict app, const wchar *restrict helpArg);
 /**
  * @brief Shows clue how to get help
- * 
+ *
  * @param app Pointer to application pathname
  */
-void femto_printHelpClue(const wchar * restrict app);
+void femto_printHelpClue(const wchar *restrict app);
 
 /**
  * @brief Prints version info
- * 
+ *
  */
 void femto_printVersion(void);
 
 /**
  * @brief Asks user input on last line of editor
- * 
+ *
  * @param peditor Pointer to fData_t structure
  * @param line Pointer to array which will hold the result
  * @param maxLen Length of that array in characters (including null-terminator)
  * @return true User accepted and entered input
  * @return false User canceled
  */
-bool femto_askInput(fData_t * restrict peditor, wchar * restrict line, u32 maxLen);
+bool femto_askInput(fData_t *restrict peditor, wchar *restrict line, u32 maxLen);
 /**
  * @brief Performs text editor loop tasks
- * 
+ *
  * @param pdata Pointer to fData_t structure
  * @return true Normal operation
  * @return false Application is ready to quit
  */
-bool femto_loop(fData_t * restrict pdata);
+bool femto_loop(fData_t *restrict pdata);
 /**
  * @brief Performs text editor drawing asynchronously
- * 
+ *
  * @param pdata Pointer to fData_t structure
  * @return DWORD Irrelevant return value
  */
 DWORD WINAPI femto_asyncDraw(LPVOID pdata);
 /**
  * @brief Tries to create a loop-drawing thread
- * 
+ *
  * @param pdata Pointer to fData structure
  * @return true Success
  * @return false Failure creating thread
  */
-bool femto_asyncDrawInit(fData_t * restrict pdata);
+bool femto_asyncDrawInit(fData_t *restrict pdata);
 /**
  * @brief Closes the loopDrawing thread
- * 
+ *
  * @param pdata Pointer to fData structure
  */
-void femto_asyncDrawStop(fData_t * restrict pdata);
+void femto_asyncDrawStop(fData_t *restrict pdata);
 
 /**
  * @brief Update screen buffer
- * 
+ *
  * @param peditor Pointer to fData_t structure
  * @param line Pointer to Y-index of current line in relation to current viewpoint, this variable is a receiver
  * @return true Only current line needs redrawing
  * @return false Whole buffer needs redrawing
  */
-bool femto_updateScrbuf(fData_t * restrict peditor, u32 * restrict line);
+bool femto_updateScrbuf(fData_t *restrict peditor, u32 *restrict line);
 /**
  * @brief Update one line in screen buffer
- * 
+ *
  * @param peditor Pointer to fData_t structure
  * @param node Pointer to line node
  * @param line Line number to update, starting from 0
  * @return true Update only one line
  * @return false Whole screen buffer needs updating
  */
-bool femto_updateScrbufLine(fData_t * restrict peditor, struct fLine * restrict node, u32 line);
+bool femto_updateScrbufLine(fData_t *restrict peditor, struct fLine *restrict node, u32 line);
 
 /**
  * @brief Convert UTF-8 string to UTF-16 string, allocates memory only if
  * *putf16 is too small or sz == NULL
- * 
+ *
  * @param utf8 Pointer to UTF-8 character array
  * @param numBytes Maximum number of bytes to convert (including null-terminator)
  * @param putf16 Address of wchar pointer, the pointer itself can be initally NULL
  * @param sz Address of UTF-16 array size, can be NULL
  * @return u32 Number of characters converted
  */
-u32 femto_toutf16(const char * restrict utf8, int numBytes, wchar ** restrict putf16, usize * restrict sz);
+u32 femto_toutf16(const char *restrict utf8, int numBytes, wchar **restrict putf16, usize *restrict sz);
 /**
  * @brief Convert UTF-16 string to UTF-8 string, allocates memory only if
  * *putf8 is too small or sz == NULL
- * 
+ *
  * @param utf16 Pointer to UTF-16 character array
  * @param numChars Maximum number of bytes to convert (including null-terminator)
  * @param putf8 Address of char pointer, the pointer itself can be initally NULL
  * @param sz Address of UTF-8 array size, can be NULL
  * @return u32 Number of characters converted
  */
-u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict putf8, usize * restrict sz);
+u32 femto_toutf8(const wchar *restrict utf16, int numChars, char **restrict putf8, usize *restrict sz);
 /**
  * @brief Convert UTF-16 string to lines array, modifies original string. After
  * creation the double-pointer's "lines" can be safely freed with a single free.
  * It's just an array of pointer pointing to parts of the original string
- * 
+ *
  * @param utf16 Pointer to UTF-16 character array
  * @param chars Maximum number of bytes to scan
  * @param lines Address of wchar double-pointer, double-pointer hosts wchar
@@ -224,51 +222,51 @@ u32 femto_toutf8(const wchar * restrict utf16, int numChars, char ** restrict pu
  * @param eolSeq Address of eolSequence enumerator, receives the EOL format used
  * @return usize Number of lines found
  */
-usize femto_strnToLines(wchar * restrict utf16, usize chars, wchar *** restrict lines, eolSeq_e * restrict eolSeq);
+usize femto_strnToLines(wchar *restrict utf16, usize chars, wchar ***restrict lines, eolSeq_e *restrict eolSeq);
 
 /**
  * @brief Tests if file with designated filename exists
- * 
+ *
  * @param filename Pointer to filename widestring
  * @return true File exists
  * @return false File doesn't exist/is inaccessible
  */
-bool femto_testFile(const wchar * restrict filename);
+bool femto_testFile(const wchar *restrict filename);
 /**
  * @brief Retrieves the size of the desired filename
- * 
+ *
  * @param hfile Open file handle
  * @return isize File size in bytes, -1 on error of some kind
  */
 isize femto_fileSize(HANDLE hfile);
 /**
  * @brief Opens new file with desired name and write access
- * 
+ *
  * @param fileName Desired file name, CANNOT be NULL
  * @param writemode Desired write access, true for write mode, false for read mode
  * @return HANDLE Opened file handle, INVALID_HANDLE_VALUE on failure; Use
  * CloseHandle() to close the file afterwards
  */
-HANDLE femto_openFile(const wchar * restrict fileName, bool writemode);
+HANDLE femto_openFile(const wchar *restrict fileName, bool writemode);
 /**
  * @brief Reads bytes to an array from open file, allocates memory only if *bytes
  * is too small
- * 
- * @param hfile Handle to open file 
+ *
+ * @param hfile Handle to open file
  * @param bytes Address of pointer to character array
  * @param bytesLen Address of array length in bytes
  * @return const wchar* Error message, NULL on success
  */
-const wchar * femto_readBytes(HANDLE hfile, char ** restrict bytes, usize * restrict bytesLen);
+const wchar *femto_readBytes(HANDLE hfile, char **restrict bytes, usize *restrict bytesLen);
 
 /**
  * @brief Set console title according to last given filename, also shows
  * editor name on the titlebar
- * 
+ *
  * @param fileName File name
  * @param tabNum Currently active tab #
  * @param maxTabs Total number of tabs
  */
-void femto_setConTitle(const wchar * restrict fileName, usize tabNum, usize maxTabs);
+void femto_setConTitle(const wchar *restrict fileName, usize tabNum, usize maxTabs);
 
 #endif

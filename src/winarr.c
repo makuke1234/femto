@@ -1,6 +1,6 @@
 #include "winarr.h"
 
-bool warr_init(warr_t * restrict This, usize itemSize)
+bool warr_init(warr_t *restrict This, usize itemSize)
 {
 	assert(This != NULL);
 	assert(itemSize > 0);
@@ -11,16 +11,15 @@ bool warr_init(warr_t * restrict This, usize itemSize)
 	}
 
 	*This = (warr_t){
-		.mem      = NULL,
-		.realptr  = NULL,
+		.mem = NULL,
+		.realptr = NULL,
 		.numItems = 0,
 		.maxItems = 0,
 		.itemSize = itemSize,
-		.init     = true
-	};
+		.init = true};
 	return true;
 }
-bool warr_initSz(warr_t * restrict This, usize itemSize, usize numItems)
+bool warr_initSz(warr_t *restrict This, usize itemSize, usize numItems)
 {
 	assert(This != NULL);
 	assert(itemSize > 0);
@@ -32,13 +31,13 @@ bool warr_initSz(warr_t * restrict This, usize itemSize, usize numItems)
 	This->init = warr_reserve(This, numItems);
 	return This->init;
 }
-bool warr_initData(warr_t * restrict This, usize itemSize, const vptr restrict items, usize numItems)
+bool warr_initData(warr_t *restrict This, usize itemSize, const vptr restrict items, usize numItems)
 {
 	assert(This != NULL);
 	assert(itemSize > 0);
 	assert(items != NULL);
 	assert(numItems > 0);
-	
+
 	if (!warr_initSz(This, itemSize, numItems))
 	{
 		return false;
@@ -49,7 +48,7 @@ bool warr_initData(warr_t * restrict This, usize itemSize, const vptr restrict i
 	return true;
 }
 
-bool warr_resize(warr_t * restrict This, usize newSize)
+bool warr_resize(warr_t *restrict This, usize newSize)
 {
 	assert(This != NULL);
 	assert(This->init);
@@ -64,7 +63,7 @@ bool warr_resize(warr_t * restrict This, usize newSize)
 	This->numItems = newSize;
 	return true;
 }
-bool warr_reserve(warr_t * restrict This, usize newCap)
+bool warr_reserve(warr_t *restrict This, usize newCap)
 {
 	assert(This != NULL);
 	assert(This->init);
@@ -92,13 +91,13 @@ bool warr_reserve(warr_t * restrict This, usize newCap)
 		return false;
 	}
 
-	This->mem      = newmem;
-	This->realptr  = GlobalLock(This->mem);
+	This->mem = newmem;
+	This->realptr = GlobalLock(This->mem);
 	This->maxItems = newCap;
 
 	return true;
 }
-bool warr_shrinkToFit(warr_t * restrict This)
+bool warr_shrinkToFit(warr_t *restrict This)
 {
 	assert(This != NULL);
 	assert(This->init);
@@ -106,7 +105,7 @@ bool warr_shrinkToFit(warr_t * restrict This)
 	return warr_reserve(This, This->numItems);
 }
 
-bool warr_pushBack(warr_t * restrict This, const vptr restrict item)
+bool warr_pushBack(warr_t *restrict This, const vptr restrict item)
 {
 	assert(This != NULL);
 	assert(This->init);
@@ -121,7 +120,7 @@ bool warr_pushBack(warr_t * restrict This, const vptr restrict item)
 
 	return true;
 }
-bool warr_removeBack(warr_t * restrict This)
+bool warr_removeBack(warr_t *restrict This)
 {
 	assert(This != NULL);
 	assert(This->init);
@@ -134,7 +133,7 @@ bool warr_removeBack(warr_t * restrict This)
 	--This->numItems;
 	return true;
 }
-vptr warr_get(const warr_t * restrict This, usize idx)
+vptr warr_get(const warr_t *restrict This, usize idx)
 {
 	assert(This != NULL);
 	assert(This->init);
@@ -142,42 +141,42 @@ vptr warr_get(const warr_t * restrict This, usize idx)
 	return &((uint8_t *)This->realptr)[idx * This->itemSize];
 }
 
-vptr warr_data(const warr_t * restrict This)
+vptr warr_data(const warr_t *restrict This)
 {
 	assert(This != NULL);
 	assert(This->init);
 
 	return This->realptr;
 }
-usize warr_size(const warr_t * restrict This)
+usize warr_size(const warr_t *restrict This)
 {
 	assert(This != NULL);
 	assert(This->init);
 
 	return This->numItems;
 }
-usize warr_cap(const warr_t * restrict This)
+usize warr_cap(const warr_t *restrict This)
 {
 	assert(This != NULL);
 	assert(This->init);
 
 	return This->maxItems;
 }
-usize warr_itemSize(const warr_t * restrict This)
+usize warr_itemSize(const warr_t *restrict This)
 {
 	assert(This != NULL);
 	assert(This->init);
 
 	return This->itemSize;
 }
-bool warr_isInit(const warr_t * restrict This)
+bool warr_isInit(const warr_t *restrict This)
 {
 	assert(This != NULL);
 
 	return This->init;
 }
 
-HGLOBAL warr_unlock(warr_t * restrict This)
+HGLOBAL warr_unlock(warr_t *restrict This)
 {
 	assert(This != NULL);
 
@@ -194,10 +193,10 @@ HGLOBAL warr_unlock(warr_t * restrict This)
 
 	return mem;
 }
-void warr_destroy(warr_t * restrict This)
+void warr_destroy(warr_t *restrict This)
 {
 	assert(This != NULL);
-	
+
 	if (!This->init)
 	{
 		return;
@@ -207,7 +206,7 @@ void warr_destroy(warr_t * restrict This)
 	{
 		GlobalUnlock(This->mem);
 		GlobalFree(This->mem);
-		This->mem     = NULL;
+		This->mem = NULL;
 		This->realptr = NULL;
 	}
 	This->init = false;

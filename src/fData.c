@@ -1,32 +1,29 @@
 #include "fData.h"
 #include "femto.h"
 
-
-bool fData_reset(fData_t * restrict self)
+bool fData_reset(fData_t *restrict self)
 {
 	assert(self != NULL);
 
 	*self = (fData_t){
-		.prevConsoleMode    = 0,
+		.prevConsoleMode = 0,
 		.bPrevConsoleModeSet = false,
-		.conIn  = INVALID_HANDLE_VALUE,
+		.conIn = INVALID_HANDLE_VALUE,
 		.conOut = INVALID_HANDLE_VALUE,
 		.scrbuf = {
 			.handle = INVALID_HANDLE_VALUE,
-			.mem    = NULL,
-			.w      = 0,
-			.h      = 0
-		},
-		.filesSize   = 0,
-		.filesMax    = 1,
-		.files       = malloc(sizeof(fFile_t *)),
-		.cursorpos   = malloc(sizeof(COORD)),
-		.fileIdx     = -1,
-		.searchBuf   = { [0] = L'\0' },
+			.mem = NULL,
+			.w = 0,
+			.h = 0},
+		.filesSize = 0,
+		.filesMax = 1,
+		.files = malloc(sizeof(fFile_t *)),
+		.cursorpos = malloc(sizeof(COORD)),
+		.fileIdx = -1,
+		.searchBuf = {[0] = L'\0'},
 		.psearchTerm = NULL,
-		.searchOpts  = fsrchFIRST,
-		.bDirBack    = false
-	};
+		.searchOpts = fsrchFIRST,
+		.bDirBack = false};
 
 	if ((self->files == NULL) || (self->cursorpos == NULL))
 	{
@@ -35,17 +32,17 @@ bool fData_reset(fData_t * restrict self)
 		return false;
 	}
 
-	self->cursorpos[0] = (COORD){ 0, 0 };
+	self->cursorpos[0] = (COORD){0, 0};
 
 	fSettings_reset(&self->settings);
 
 	return true;
 }
-bool fData_init(fData_t * restrict self)
+bool fData_init(fData_t *restrict self)
 {
 	assert(self != NULL);
 
-	self->conIn  = GetStdHandle(STD_INPUT_HANDLE);
+	self->conIn = GetStdHandle(STD_INPUT_HANDLE);
 	self->conOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Set exit handler
 	atexit(&femto_exitHandler);
@@ -69,8 +66,8 @@ bool fData_init(fData_t * restrict self)
 		return false;
 	}
 
-	self->scrbuf.w = (u32)(csbi.srWindow.Right  - csbi.srWindow.Left + 1);
-	self->scrbuf.h = (u32)(csbi.srWindow.Bottom - csbi.srWindow.Top  + 1);
+	self->scrbuf.w = (u32)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
+	self->scrbuf.h = (u32)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
 
 	fLog_write("Screen buffer size: %u %u", self->scrbuf.w, self->scrbuf.h);
 	// Create screen buffer
@@ -79,8 +76,7 @@ bool fData_init(fData_t * restrict self)
 		0,
 		NULL,
 		CONSOLE_TEXTMODE_BUFFER,
-		NULL
-	);
+		NULL);
 	if (self->scrbuf.handle == INVALID_HANDLE_VALUE)
 	{
 		return false;
@@ -95,11 +91,10 @@ bool fData_init(fData_t * restrict self)
 	for (usize i = 0, sz = (usize)self->scrbuf.w * (usize)self->scrbuf.h; i < sz; ++i)
 	{
 		self->scrbuf.mem[i] = (CHAR_INFO){
-			.Char       = { .UnicodeChar = L' ' },
-			.Attributes = FEMTO_DEFAULT_COLOR
-		};
+			.Char = {.UnicodeChar = L' '},
+			.Attributes = FEMTO_DEFAULT_COLOR};
 	}
-	if (!SetConsoleScreenBufferSize(self->scrbuf.handle, (COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h }))
+	if (!SetConsoleScreenBufferSize(self->scrbuf.handle, (COORD){.X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h}))
 	{
 		return false;
 	}
@@ -115,18 +110,18 @@ bool fData_init(fData_t * restrict self)
 
 	return true;
 }
-bool fData_loadPalette(fData_t * restrict self)
+bool fData_loadPalette(fData_t *restrict self)
 {
 	assert(self != NULL);
 
-	fPalette_t * restrict pal = &self->settings.palette;
+	fPalette_t *restrict pal = &self->settings.palette;
 	if (!pal->bUsePalette)
 	{
 		return true;
 	}
 
 	// Try to apply new palette
-	CONSOLE_SCREEN_BUFFER_INFOEX csbiex;
+	CONSOLE_SCREEN_BUFFER_INFOEX csbiex = {0};
 	csbiex.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
 	if (!GetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
 	{
@@ -137,7 +132,7 @@ bool fData_loadPalette(fData_t * restrict self)
 	for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 	{
 		const COLORREF old = csbiex.ColorTable[i];
-		fColor_t * restrict oldCol = &self->settings.palette.oldColors[i];
+		fColor_t *restrict oldCol = &self->settings.palette.oldColors[i];
 		oldCol->r = GetRValue(old);
 		oldCol->g = GetGValue(old);
 		oldCol->b = GetBValue(old);
@@ -151,13 +146,13 @@ bool fData_loadPalette(fData_t * restrict self)
 	++csbiex.srWindow.Bottom;
 	return SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex) != 0;
 }
-bool fData_restorePalette(const fData_t * restrict self)
+bool fData_restorePalette(const fData_t *restrict self)
 {
 	assert(self != NULL);
 
 	fLog_write("Restoring palette...");
 
-	const fPalette_t * restrict pal = &self->settings.palette;
+	const fPalette_t *restrict pal = &self->settings.palette;
 	if (!pal->bUsePalette)
 	{
 		return true;
@@ -165,7 +160,7 @@ bool fData_restorePalette(const fData_t * restrict self)
 
 	// Restore old palette
 
-	CONSOLE_SCREEN_BUFFER_INFOEX csbiex;
+	CONSOLE_SCREEN_BUFFER_INFOEX csbiex = {0};
 	csbiex.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
 	if (!GetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex))
 	{
@@ -185,24 +180,21 @@ bool fData_restorePalette(const fData_t * restrict self)
 	return SetConsoleScreenBufferInfoEx(self->scrbuf.handle, &csbiex) != 0;
 }
 
-void fData_refreshEdit(fData_t * restrict self)
+void fData_refreshEdit(fData_t *restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	
+
 	u32 line;
 	if (femto_updateScrbuf(self, &line) == false)
 	{
 		WriteConsoleOutputW(
 			self->scrbuf.handle,
 			self->scrbuf.mem,
-			(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
-			(COORD){ 0, 0 },
+			(COORD){.X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h},
+			(COORD){0, 0},
 			&(SMALL_RECT){
-				.Left = 0, .Top = 0,
-				.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2)
-			}
-		);
+				.Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 2)});
 	}
 	else
 	{
@@ -210,20 +202,17 @@ void fData_refreshEdit(fData_t * restrict self)
 		WriteConsoleOutputW(
 			self->scrbuf.handle,
 			self->scrbuf.mem,
-			(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
-			(COORD){ .X = 0, .Y = (SHORT)line },
+			(COORD){.X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h},
+			(COORD){.X = 0, .Y = (SHORT)line},
 			&(SMALL_RECT){
-				.Left = 0, .Top = (SHORT)line,
-				.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)line
-			}
-		);
+				.Left = 0, .Top = (SHORT)line, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)line});
 	}
 }
-void fData_refreshEditAsync(fData_t * restrict self)
+void fData_refreshEditAsync(fData_t *restrict self)
 {
 	assert(self != NULL);
 
-	fDrawThreadData_t * dt = &self->drawThread;
+	fDrawThreadData_t *dt = &self->drawThread;
 
 	EnterCriticalSection(&dt->crit);
 
@@ -232,38 +221,34 @@ void fData_refreshEditAsync(fData_t * restrict self)
 
 	LeaveCriticalSection(&dt->crit);
 }
-void fData_refreshAll(fData_t * restrict self)
+void fData_refreshAll(fData_t *restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	
-	u32 line;	// Phantom variable
+
+	u32 line; // Phantom variable
 	femto_updateScrbuf(self, &line);
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
-		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
-		(COORD){ 0, 0 },
+		(COORD){.X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h},
+		(COORD){0, 0},
 		&(SMALL_RECT){
-			.Left = 0, .Top = 0,
-			.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)
-		}
-	);
+			.Left = 0, .Top = 0, .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)});
 }
-void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, const WORD * restrict colorData)
+void fData_statusMsg(fData_t *restrict self, const wchar *restrict message, const WORD *restrict colorData)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
 	assert(message != NULL);
 
 	const usize effLen = min_usize(wcslen(message), (usize)self->scrbuf.w);
-	CHAR_INFO * restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
+	CHAR_INFO *restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
 	for (usize i = 0; i < effLen; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
-			.Char       = { .UnicodeChar = message[i] },
-			.Attributes = FEMTO_DEFAULT_COLOR
-		};
+			.Char = {.UnicodeChar = message[i]},
+			.Attributes = FEMTO_DEFAULT_COLOR};
 	}
 	if (colorData != NULL)
 	{
@@ -275,45 +260,41 @@ void fData_statusMsg(fData_t * restrict self, const wchar * restrict message, co
 	for (usize i = effLen; i < self->scrbuf.w; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){
-			.Char       = { .UnicodeChar = L' ' },
-			.Attributes = FEMTO_DEFAULT_COLOR
-		};
+			.Char = {.UnicodeChar = L' '},
+			.Attributes = FEMTO_DEFAULT_COLOR};
 	}
 	fData_statusRefresh(self);
 }
-void fData_statusRefresh(fData_t * restrict self)
+void fData_statusRefresh(fData_t *restrict self)
 {
 	assert(self != NULL);
 	assert(self->scrbuf.mem != NULL);
-	
+
 	WriteConsoleOutputW(
 		self->scrbuf.handle,
 		self->scrbuf.mem,
-		(COORD){ .X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h },
-		(COORD){ .X = 0, .Y = (SHORT)(self->scrbuf.h - 1) },
+		(COORD){.X = (SHORT)self->scrbuf.w, .Y = (SHORT)self->scrbuf.h},
+		(COORD){.X = 0, .Y = (SHORT)(self->scrbuf.h - 1)},
 		&(SMALL_RECT){
-			.Left = 0, .Top = (SHORT)(self->scrbuf.h - 1),
-			.Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)
-		}
-	);
+			.Left = 0, .Top = (SHORT)(self->scrbuf.h - 1), .Right = (SHORT)(self->scrbuf.w - 1), .Bottom = (SHORT)(self->scrbuf.h - 1)});
 }
 
-void fData_cancelSearch(fData_t * restrict self)
+void fData_cancelSearch(fData_t *restrict self)
 {
 	assert(self != NULL);
 
-	fFile_t * restrict pfile = self->files[self->fileIdx];
+	fFile_t *restrict pfile = self->files[self->fileIdx];
 	assert(pfile != NULL);
 
 	self->psearchTerm = NULL;
 	pfile->data.bUpdateAll = true;
 	fData_refreshEdit(self);
 }
-void fData_cancelHighlight(fData_t * restrict self)
+void fData_cancelHighlight(fData_t *restrict self)
 {
 	assert(self != NULL);
 
-	fFile_t * restrict pfile = self->files[self->fileIdx];
+	fFile_t *restrict pfile = self->files[self->fileIdx];
 	assert(pfile != NULL);
 
 	if (pfile->data.hl.beg != NULL)
@@ -324,7 +305,7 @@ void fData_cancelHighlight(fData_t * restrict self)
 	}
 }
 
-bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
+bool fData_openTab(fData_t *restrict self, const wchar *restrict fileName)
 {
 	assert(self != NULL);
 
@@ -350,7 +331,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 
 		self->filesMax = newcap;
 	}
-	
+
 	if ((self->files[self->filesSize] = fFile_resetDyn()) == NULL)
 	{
 		return false;
@@ -363,7 +344,7 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 	self->fileIdx = (isize)self->filesSize;
 	++self->filesSize;
 
-	self->cursorpos[self->fileIdx] = (COORD){ 0, 0 };
+	self->cursorpos[self->fileIdx] = (COORD){0, 0};
 
 	fFile_close(self->files[self->fileIdx]);
 
@@ -372,18 +353,18 @@ bool fData_openTab(fData_t * restrict self, const wchar * restrict fileName)
 
 	return true;
 }
-void fData_closeTab(fData_t * restrict self)
+void fData_closeTab(fData_t *restrict self)
 {
 	assert(self != NULL);
 	assert(self->fileIdx != -1);
 
-	fFile_t * restrict file = self->files[self->fileIdx];
-	
+	fFile_t *restrict file = self->files[self->fileIdx];
+
 	// Remove file from tab list
 	--self->filesSize;
 	for (usize i = (usize)self->fileIdx; i < self->filesSize; ++i)
 	{
-		self->files[i]     = self->files[i + 1];
+		self->files[i] = self->files[i + 1];
 		self->cursorpos[i] = self->cursorpos[i + 1];
 	}
 
@@ -407,8 +388,7 @@ void fData_closeTab(fData_t * restrict self)
 	}
 }
 
-
-void fData_destroy(fData_t * restrict self)
+void fData_destroy(fData_t *restrict self)
 {
 	assert(self != NULL);
 
@@ -435,9 +415,9 @@ void fData_destroy(fData_t * restrict self)
 		fFile_free(self->files[i]);
 	}
 	free(self->files);
-	self->files     = NULL;
+	self->files = NULL;
 	self->filesSize = 0;
-	self->filesMax  = 0;
+	self->filesMax = 0;
 
 	fSettings_destroy(&self->settings);
 	fLang_destroy();

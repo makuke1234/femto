@@ -6,11 +6,11 @@
 // which is run after returning from wmain
 static fData_t editor;
 
-int wmain(int argc, const wchar * argv[])
+int wmain(int argc, const wchar *argv[])
 {
 	assert(argc > 0);
 	assert(argv != NULL);
-	
+
 	femto_exitHandlerSetVars(&editor);
 	if (!fData_reset(&editor))
 	{
@@ -54,7 +54,6 @@ int wmain(int argc, const wchar * argv[])
 		}
 	}
 
-
 	if (!fData_openTab(&editor, editor.settings.fileName))
 	{
 		fErr_print(ferrFILE);
@@ -69,7 +68,7 @@ int wmain(int argc, const wchar * argv[])
 
 	{
 		wchar tempstr[MAX_STATUS];
-		const wchar * restrict res = fFile_read(editor.files[editor.fileIdx]);
+		const wchar *restrict res = fFile_read(editor.files[editor.fileIdx]);
 		if (res != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);
@@ -86,8 +85,7 @@ int wmain(int argc, const wchar * argv[])
 				fLang_get(flangSETTINGS),
 				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-",
 				fLang_get(flangSYNTAX),
-				fStx_name(editor.files[editor.fileIdx]->syntax)
-			);
+				fStx_name(editor.files[editor.fileIdx]->syntax));
 		}
 		fData_statusMsg(&editor, tempstr, NULL);
 	}

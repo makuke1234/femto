@@ -33,10 +33,10 @@ usize fStatHash_findNextPrime(usize lowerBound)
 	return lowerBound;
 }
 
-usize fStatHash_hash(const wchar * restrict key, usize sz)
+usize fStatHash_hash(const wchar *restrict key, usize sz)
 {
 	assert(key != NULL);
-	assert(sz  > 0);
+	assert(sz > 0);
 
 	usize hash = 0;
 	for (; (*key) != L'\0'; ++key)
@@ -46,11 +46,11 @@ usize fStatHash_hash(const wchar * restrict key, usize sz)
 	return hash % sz;
 }
 
-vptr fStatHash_malloc(fStatHash_t * restrict hash, usize bytes)
+vptr fStatHash_malloc(fStatHash_t *restrict hash, usize bytes)
 {
-	assert(hash  != NULL);
+	assert(hash != NULL);
 	assert(bytes > 0);
-	
+
 	if (hash->memSize < bytes)
 	{
 		return NULL;
@@ -62,10 +62,10 @@ vptr fStatHash_malloc(fStatHash_t * restrict hash, usize bytes)
 
 	return mem;
 }
-void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, usize bytes)
+void fStatHash_free(fStatHash_t *restrict hash, vptr restrict mem, usize bytes)
 {
-	assert(hash  != NULL);
-	assert(mem   != NULL);
+	assert(hash != NULL);
+	assert(mem != NULL);
 	assert(bytes > 0);
 
 	vptr newp = ((u8 *)hash->mem) - bytes;
@@ -77,27 +77,26 @@ void fStatHash_free(fStatHash_t * restrict hash, vptr restrict mem, usize bytes)
 }
 
 void fStatHash_init(
-	fStatHash_t * restrict hash,
+	fStatHash_t *restrict hash,
 	vptr restrict memory, usize memoryBytes,
-	usize tableSize
-)
+	usize tableSize)
 {
-	assert(hash        != NULL);
-	assert(memory      != NULL);
+	assert(hash != NULL);
+	assert(memory != NULL);
 	assert(memoryBytes > 0);
-	assert(tableSize   > 0);
+	assert(tableSize > 0);
 
 	if (hash->init)
 	{
 		return;
 	}
 
-	hash->mem     = memory;
+	hash->mem = memory;
 	hash->memSize = memoryBytes;
 
 	hash->mapSize = fStatHash_findNextPrime(tableSize) & 0x7FFFFFFF;
-	hash->nodes   = fStatHash_malloc(hash, sizeof(fHashNode_t *) * hash->mapSize);
-	
+	hash->nodes = fStatHash_malloc(hash, sizeof(fHashNode_t *) * hash->mapSize);
+
 	if (hash->nodes != NULL)
 	{
 		hash->init = true;
@@ -113,16 +112,15 @@ void fStatHash_init(
 	}
 }
 void fStatHash_initData(
-	fStatHash_t * restrict hash,
+	fStatHash_t *restrict hash,
 	vptr restrict memory, usize memoryBytes,
-	const wchar ** data, usize dataSize
-)
+	const wchar **data, usize dataSize)
 {
-	assert(hash        != NULL);
-	assert(memory      != NULL);
+	assert(hash != NULL);
+	assert(memory != NULL);
 	assert(memoryBytes > 0);
-	assert(data        != NULL);
-	assert(dataSize    > 0);
+	assert(data != NULL);
+	assert(dataSize > 0);
 
 	if (hash->init)
 	{
@@ -140,13 +138,13 @@ void fStatHash_initData(
 		}
 	}
 }
-bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
+bool fStatHash_insert(fStatHash_t *restrict hash, const wchar *restrict key)
 {
 	assert(hash != NULL);
-	assert(key  != NULL);
+	assert(key != NULL);
 	assert(hash->init);
 
-	fHashNode_t ** restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
+	fHashNode_t **restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
 
 	while ((*pnode) != NULL)
 	{
@@ -157,24 +155,24 @@ bool fStatHash_insert(fStatHash_t * restrict hash, const wchar * restrict key)
 		pnode = &(*pnode)->next;
 	}
 
-	fHashNode_t * restrict node = fStatHash_malloc(hash, sizeof(fHashNode_t));
+	fHashNode_t *restrict node = fStatHash_malloc(hash, sizeof(fHashNode_t));
 	if (node == NULL)
 	{
 		return false;
 	}
-	node->key  = key;
+	node->key = key;
 	node->next = NULL;
 
 	*pnode = node;
 	return true;
 }
-bool fStatHash_get(const fStatHash_t * restrict hash, const wchar * restrict key)
+bool fStatHash_get(const fStatHash_t *restrict hash, const wchar *restrict key)
 {
 	assert(hash != NULL);
-	assert(key  != NULL);
+	assert(key != NULL);
 	assert(hash->init);
 
-	const fHashNode_t * restrict node = hash->nodes[fStatHash_hash(key, hash->mapSize)];
+	const fHashNode_t *restrict node = hash->nodes[fStatHash_hash(key, hash->mapSize)];
 
 	while (node != NULL)
 	{
@@ -187,18 +185,18 @@ bool fStatHash_get(const fStatHash_t * restrict hash, const wchar * restrict key
 
 	return false;
 }
-bool fStatHash_remove(fStatHash_t * restrict hash, const wchar * restrict key)
+bool fStatHash_remove(fStatHash_t *restrict hash, const wchar *restrict key)
 {
 	assert(hash != NULL);
-	assert(key  != NULL);
+	assert(key != NULL);
 	assert(hash->init);
 
-	fHashNode_t ** restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
+	fHashNode_t **restrict pnode = &hash->nodes[fStatHash_hash(key, hash->mapSize)];
 	while ((*pnode) != NULL)
 	{
 		if (wcscmp((*pnode)->key, key) == 0)
 		{
-			fHashNode_t * restrict node = *pnode;
+			fHashNode_t *restrict node = *pnode;
 			*pnode = node->next;
 
 			fStatHash_free(hash, node, sizeof(fHashNode_t));

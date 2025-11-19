@@ -3,7 +3,7 @@
 bool fArg_strToBool(fArg_t arg)
 {
 	assert(arg.begin != NULL);
-	assert(arg.end   != NULL);
+	assert(arg.end != NULL);
 
 	if (((arg.end - arg.begin) >= 4) && (wcsnicmp(arg.begin, L"true", 4) == 0))
 	{
@@ -22,16 +22,14 @@ bool fArg_strToBool(fArg_t arg)
 wchar fArg_strToCh(fArg_t arg)
 {
 	assert(arg.begin != NULL);
-	assert(arg.end   != NULL);
+	assert(arg.end != NULL);
 
 	return ((arg.end - arg.begin) >= 1) ? arg.begin[0] : L'\0';
 }
 
-
 usize fArg_fetch(
-	const wchar * restrict rawStr, isize maxStr,
-	const wchar * restrict argMatch, usize maxParams, ...
-)
+	const wchar *restrict rawStr, isize maxStr,
+	const wchar *restrict argMatch, usize maxParams, ...)
 {
 	assert(rawStr != NULL);
 	assert(argMatch != NULL);
@@ -45,9 +43,8 @@ usize fArg_fetch(
 	return result;
 }
 usize fArg_vfetch(
-	const wchar * restrict rawStr, isize maxStr,
-	const wchar * restrict argMatch, usize maxParams, va_list ap
-)
+	const wchar *restrict rawStr, isize maxStr,
+	const wchar *restrict argMatch, usize maxParams, va_list ap)
 {
 	assert(rawStr != NULL);
 	assert(argMatch != NULL);
@@ -61,16 +58,16 @@ usize fArg_vfetch(
 	 * -option
 	 * /option
 	 * /-option <- also, this f'ed up combination works cause I'm lazy af
-	 * 
+	 *
 	 * Values:
 	 * --option=value1,value2,value3
 	 * --option=value1;value2;value3
 	 * --option=value1?value2?value3
 	 * --option=value1 value2 value3
-	 * 
+	 *
 	 */
-	const wchar * restrict rawIt = rawStr;
-	const wchar * restrict endp  = rawIt + len;
+	const wchar *restrict rawIt = rawStr;
+	const wchar *restrict endp = rawIt + len;
 	// scan for a '-', '--' or '/' or '/-'
 	if ((len > 1) && ((*rawIt == L'-') || (*rawIt == L'/')))
 	{
@@ -110,7 +107,7 @@ usize fArg_vfetch(
 		// Search for arguments
 		usize numArgs = 0;
 
-		const wchar * restrict argStart = rawIt;
+		const wchar *restrict argStart = rawIt;
 
 		for (; rawIt != endp; ++rawIt)
 		{
@@ -123,12 +120,12 @@ usize fArg_vfetch(
 			{
 				if (numArgs < maxParams)
 				{
-					fArg_t * arg = va_arg(ap, fArg_t *);
+					fArg_t *arg = va_arg(ap, fArg_t *);
 					++numArgs;
 
 					// Set argument settings
 					arg->begin = argStart;
-					arg->end   = rawIt + ((rawIt + 1) == endp);
+					arg->end = rawIt + ((rawIt + 1) == endp);
 
 					// Set new argument start position
 					if ((rawIt + 1) != endp)
@@ -153,28 +150,25 @@ usize fArg_vfetch(
 	}
 }
 
-
 usize fArg_fetchArgv(
-	int argc, const wchar ** restrict argv,
-	const wchar * restrict argMatch, int * restrict matchedIndex, usize maxParams, ...
-)
+	int argc, const wchar **restrict argv,
+	const wchar *restrict argMatch, int *restrict matchedIndex, usize maxParams, ...)
 {
 	assert(argv != NULL);
 	assert(argMatch != NULL);
 	assert(matchedIndex != NULL);
-	
+
 	va_list ap;
 	va_start(ap, maxParams);
-	
+
 	const usize result = fArg_vfetchArgv(argc, argv, argMatch, matchedIndex, maxParams, ap);
 
 	va_end(ap);
 	return result;
 }
 usize fArg_vfetchArgv(
-	int argc, const wchar ** restrict argv,
-	const wchar * restrict argMatch, int * restrict matchedIndex, usize maxParams, va_list ap
-)
+	int argc, const wchar **restrict argv,
+	const wchar *restrict argMatch, int *restrict matchedIndex, usize maxParams, va_list ap)
 {
 	assert(argv != NULL);
 	assert(argMatch != NULL);
