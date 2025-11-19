@@ -56,7 +56,7 @@ objs_d += $(RSC_OBJ_D)
 objs_r += $(jsonlite2_obj)
 objs_r += $(RSC_OBJ_R)
 
-objs_test = $(subst $(OBJD)/main.c.o,,$(objs_d))
+objs_test = $(subst $(OBJD)/fMain.c.o,,$(objs_d))
 
 $(jsonlite2_lib): $(JSONLITE2_SRC)
 	$(MAKE) -C $(JSONLITE2_SRC)
