@@ -1397,7 +1397,7 @@ static inline bool s_femto_inner_mouseHandle(
 
 		if (draw)
 		{
-			fFile_scrollHor(pfile, peditor->scrbuf.w, chDelta);
+			fFile_scrollHor(pfile, peditor->scrbuf.w, peditor->scrbuf.h, chDelta);
 			fData_refreshEditAsync(peditor);
 			swprintf_s(
 				tempstr, MAX_STATUS,
@@ -1604,12 +1604,13 @@ bool femto_updateScrbuf(fData_t *restrict peditor, u32 *restrict curline)
 	// Count to current line
 	u32 line = 0;
 	fLine_t *restrict node = pfile->data.pcury;
-	while ((node != NULL) && (node != pfile->data.currentNode))
+	while ((node != NULL) && (node != pfile->data.currentNode) && (line < peditor->scrbuf.h))
 	{
 		node = node->nextNode;
 		++line;
 	}
-	if (femto_updateScrbufLine(peditor, pfile->data.currentNode, line) == false)
+
+	if ((line >= peditor->scrbuf.h) || (femto_updateScrbufLine(peditor, pfile->data.currentNode, line) == false))
 	{
 		// Whole screen buffer will be updated anyways
 		node = pfile->data.pcury;
@@ -1700,6 +1701,7 @@ bool femto_updateScrbufLine(fData_t *restrict peditor, fLine_t *restrict node, u
 		return false;
 	}
 
+	assert(line < peditor->scrbuf.h);
 	CHAR_INFO *restrict destination = &peditor->scrbuf.mem[(usize)line * (usize)peditor->scrbuf.w];
 	for (u32 i = 0; i < peditor->scrbuf.w; ++i)
 	{

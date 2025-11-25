@@ -289,9 +289,10 @@ void fFile_scrollVert(fFile_t *restrict self, u32 height, isize deltaLines);
  *
  * @param self Pointer to fFile_t structure
  * @param width Editor window width
+ * @param height Editor window height
  * @param deltaCh Characters to scroll, positive values mean scrolling right, negative values mean scrolling left
  */
-void fFile_scrollHor(fFile_t *restrict self, u32 width, isize deltaCh);
+void fFile_scrollHor(fFile_t *restrict self, u32 width, u32 height, isize deltaCh);
 
 /**
  * @brief Destroys fFile_t structure

@@ -642,12 +642,14 @@ bool fFile_addSpecialCh(
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_PRIOR: // Page up
-		fLine_moveCursorVert(&self->data.currentNode, -(isize)height);
+		fLine_moveCursorVert(&self->data.currentNode, -((isize)height - 2));
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
+		self->data.bUpdateAll = true;
 		break;
 	case VK_NEXT: // Page down
-		fLine_moveCursorVert(&self->data.currentNode, (isize)height);
+		fLine_moveCursorVert(&self->data.currentNode, (isize)height - 2);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
+		self->data.bUpdateAll = true;
 		break;
 	case VK_END:
 		fLine_moveCursor(lastcurnode, (isize)lastcurnode->lineEndx);
@@ -1152,7 +1154,7 @@ void fFile_scrollVert(fFile_t *restrict self, u32 height, isize deltaLines)
 		self->data.bUpdateAll = true;
 	}
 }
-void fFile_scrollHor(fFile_t *restrict self, u32 width, isize deltaCh)
+void fFile_scrollHor(fFile_t *restrict self, u32 width, u32 height, isize deltaCh)
 {
 	assert(self != NULL);
 	assert(width > 0);
@@ -1163,7 +1165,17 @@ void fFile_scrollHor(fFile_t *restrict self, u32 width, isize deltaCh)
 	}
 	else if (deltaCh > 0)
 	{
-		const usize curx = self->data.curx + (usize)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
+		const usize curx = self->data.curx + (usize)deltaCh;
+		// scan for all lines in view
+		const fLine_t *restrict node = self->data.pcury;
+		usize total = 0;
+		for (u32 i = 0; (node != NULL) && (i < height); ++i)
+		{
+			const usize running_total = node->lineEndx - node->freeSpaceLen;
+			total = max_usize(total, running_total);
+			node = node->nextNode;
+		}
+
 		--width;
 		if ((total >= width) && (curx <= (total - width)))
 		{
