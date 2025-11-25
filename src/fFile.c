@@ -1173,11 +1173,12 @@ void fFile_scrollHor(fFile_t *restrict self, u32 width, u32 height, isize deltaC
 			total = max_usize(total, running_total);
 			node = node->nextNode;
 		}
+		// Add cursor width
+		++total;
 
-		--width;
-		if ((total >= width) && (curx <= (total - width)))
+		if (total >= width)
 		{
-			self->data.curx = curx;
+			self->data.curx = min_usize(curx, total - (usize)width);
 		}
 	}
 	else

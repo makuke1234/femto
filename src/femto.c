@@ -1397,7 +1397,7 @@ static inline bool s_femto_inner_mouseHandle(
 
 		if (draw)
 		{
-			fFile_scrollHor(pfile, peditor->scrbuf.w, peditor->scrbuf.h - 1, chDelta);
+			fFile_scrollHor(pfile, peditor->scrbuf.w - (pfile->data.noLen + 1), peditor->scrbuf.h - 1, chDelta);
 			fData_refreshEditAsync(peditor);
 			swprintf_s(
 				tempstr, MAX_STATUS,
