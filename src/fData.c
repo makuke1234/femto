@@ -243,7 +243,7 @@ void fData_statusMsg(fData_t *restrict self, const wchar *restrict message, cons
 	assert(message != NULL);
 
 	const usize effLen = min_usize(wcslen(message), (usize)self->scrbuf.w);
-	CHAR_INFO *restrict lastLine = self->scrbuf.mem + (self->scrbuf.h - 1) * self->scrbuf.w;
+	CHAR_INFO *restrict lastLine = &self->scrbuf.mem[(usize)self->scrbuf.w * (usize)(self->scrbuf.h - 1)];
 	for (usize i = 0; i < effLen; ++i)
 	{
 		lastLine[i] = (CHAR_INFO){

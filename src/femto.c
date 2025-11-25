@@ -967,7 +967,7 @@ static inline bool s_femto_inner_kbdHandle(
 			if (pfile->data.hl.beg != NULL)
 			{
 				if (!fFile_addSpecialCh(
-						pfile, peditor->scrbuf.h,
+						pfile, peditor->scrbuf.h - 1,
 						FEMTO_COPY, false,
 						&peditor->settings))
 				{
@@ -977,7 +977,7 @@ static inline bool s_femto_inner_kbdHandle(
 				{
 					// Now delete
 					fFile_addSpecialCh(
-						pfile, peditor->scrbuf.h,
+						pfile, peditor->scrbuf.h - 1,
 						VK_DELETE, false,
 						&peditor->settings);
 					// Refresh
@@ -996,7 +996,7 @@ static inline bool s_femto_inner_kbdHandle(
 			if (pfile->data.hl.beg != NULL)
 			{
 				if (!fFile_addSpecialCh(
-						pfile, peditor->scrbuf.h,
+						pfile, peditor->scrbuf.h - 1,
 						FEMTO_COPY, false,
 						&peditor->settings))
 				{
@@ -1021,13 +1021,13 @@ static inline bool s_femto_inner_kbdHandle(
 			if (pfile->data.hl.beg != NULL)
 			{
 				fFile_addSpecialCh(
-					pfile, peditor->scrbuf.h,
+					pfile, peditor->scrbuf.h - 1,
 					VK_DELETE, false,
 					&peditor->settings);
 			}
 
 			if (fFile_addSpecialCh(
-					pfile, peditor->scrbuf.h,
+					pfile, peditor->scrbuf.h - 1,
 					FEMTO_PASTE, false,
 					&peditor->settings))
 			{
@@ -1276,7 +1276,7 @@ static inline bool s_femto_inner_kbdHandle(
 			}
 
 			if (send && fFile_addSpecialCh(
-							pfile, peditor->scrbuf.h,
+							pfile, peditor->scrbuf.h - 1,
 							wVirtKey, shift,
 							&peditor->settings))
 			{
@@ -1380,7 +1380,7 @@ static inline bool s_femto_inner_mouseHandle(
 
 		if (draw)
 		{
-			fFile_scrollVert(pfile, peditor->scrbuf.h, lineDelta);
+			fFile_scrollVert(pfile, peditor->scrbuf.h - 1, lineDelta);
 			fData_refreshEditAsync(peditor);
 			swprintf_s(
 				tempstr, MAX_STATUS,
@@ -1397,7 +1397,7 @@ static inline bool s_femto_inner_mouseHandle(
 
 		if (draw)
 		{
-			fFile_scrollHor(pfile, peditor->scrbuf.w, peditor->scrbuf.h, chDelta);
+			fFile_scrollHor(pfile, peditor->scrbuf.w, peditor->scrbuf.h - 1, chDelta);
 			fData_refreshEditAsync(peditor);
 			swprintf_s(
 				tempstr, MAX_STATUS,
@@ -1604,18 +1604,19 @@ bool femto_updateScrbuf(fData_t *restrict peditor, u32 *restrict curline)
 	// Count to current line
 	u32 line = 0;
 	fLine_t *restrict node = pfile->data.pcury;
-	while ((node != NULL) && (node != pfile->data.currentNode) && (line < peditor->scrbuf.h))
+	const u32 height = peditor->scrbuf.h - 1;
+	while ((node != NULL) && (node != pfile->data.currentNode) && (line < height))
 	{
 		node = node->nextNode;
 		++line;
 	}
 
-	if ((line >= peditor->scrbuf.h) || (femto_updateScrbufLine(peditor, pfile->data.currentNode, line) == false))
+	if (femto_updateScrbufLine(peditor, pfile->data.currentNode, line) == false)
 	{
 		// Whole screen buffer will be updated anyways
 		node = pfile->data.pcury;
 		bool drawCursor = false;
-		for (u32 i = 0; i < peditor->scrbuf.h; ++i)
+		for (u32 i = 0; i < height; ++i)
 		{
 			femto_updateScrbufLine(peditor, node, i);
 
@@ -1678,7 +1679,7 @@ bool femto_updateScrbufLine(fData_t *restrict peditor, fLine_t *restrict node, u
 		const fLine_t *restrict prevcury = pfile->data.pcury;
 
 		pfile->data.bTyped = false;
-		fFile_updateCury(pfile, peditor->scrbuf.h - 2);
+		fFile_updateCury(pfile, peditor->scrbuf.h - 1);
 		const isize delta = (isize)curnode->virtcurx - (isize)peditor->scrbuf.w - (isize)pfile->data.curx + (isize)pfile->data.noLen + 1;
 		if (delta >= 0)
 		{
@@ -1695,13 +1696,13 @@ bool femto_updateScrbufLine(fData_t *restrict peditor, fLine_t *restrict node, u
 			return false;
 		}
 	}
-	if (pfile->data.bUpdateAll)
+	if (pfile->data.bUpdateAll || (line >= (peditor->scrbuf.h - 1)))
 	{
 		pfile->data.bUpdateAll = false;
 		return false;
 	}
 
-	assert(line < peditor->scrbuf.h);
+	assert(line < (peditor->scrbuf.h - 1));
 	CHAR_INFO *restrict destination = &peditor->scrbuf.mem[(usize)line * (usize)peditor->scrbuf.w];
 	for (u32 i = 0; i < peditor->scrbuf.w; ++i)
 	{

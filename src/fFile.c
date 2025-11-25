@@ -642,14 +642,12 @@ bool fFile_addSpecialCh(
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_PRIOR: // Page up
-		fLine_moveCursorVert(&self->data.currentNode, -((isize)height - 2));
+		fLine_moveCursorVert(&self->data.currentNode, -((isize)height - 1));
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
-		self->data.bUpdateAll = true;
 		break;
 	case VK_NEXT: // Page down
-		fLine_moveCursorVert(&self->data.currentNode, (isize)height - 2);
+		fLine_moveCursorVert(&self->data.currentNode, (isize)height - 1);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
-		self->data.bUpdateAll = true;
 		break;
 	case VK_END:
 		fLine_moveCursor(lastcurnode, (isize)lastcurnode->lineEndx);
@@ -1105,7 +1103,7 @@ void fFile_updateCury(fFile_t *restrict self, u32 height)
 	if (self->data.pcury == NULL)
 	{
 		fLine_t *restrict node = self->data.currentNode;
-		for (u32 i = 0; i < height && (node->prevNode != NULL); ++i)
+		for (u32 i = 1; (i < height) && (node->prevNode != NULL); ++i)
 		{
 			node = node->prevNode;
 		}
@@ -1114,7 +1112,7 @@ void fFile_updateCury(fFile_t *restrict self, u32 height)
 	else
 	{
 		const fLine_t *restrict node = self->data.currentNode;
-		for (u32 i = 0; i < height && (node != NULL); ++i)
+		for (u32 i = 1; (i < height) && (node != NULL); ++i)
 		{
 			if (node == self->data.pcury)
 			{
