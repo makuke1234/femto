@@ -1157,9 +1157,9 @@ void fFile_scrollHor(fFile_t *restrict self, u32 width, u32 height, isize deltaC
 	assert(self != NULL);
 	assert(width > 0);
 
-	if ((deltaCh < 0) && ((usize)-deltaCh <= self->data.curx))
+	if (deltaCh < 0)
 	{
-		self->data.curx -= (usize)-deltaCh;
+		self->data.curx = ((usize)-deltaCh > self->data.curx) ? 0 : self->data.curx - ((usize)-deltaCh);
 	}
 	else if (deltaCh > 0)
 	{
