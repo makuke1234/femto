@@ -780,7 +780,6 @@ bool fLine_updateSyntax(
 		// Highlight whole line, go haywire d: ;P :b B-)
 		else if (node->lineNumber == clampdc_usize(node->lineNumber, hl->beg->lineNumber, curLineNum))
 		{
-
 			// Detect "edge" line
 			if (node->lineNumber == hl->beg->lineNumber)
 			{

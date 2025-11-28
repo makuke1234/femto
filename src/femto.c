@@ -1067,21 +1067,21 @@ static inline bool s_femto_inner_kbdHandle(
 		{
 			bool send = true;
 			const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+			const bool control = ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) != 0;
+			const bool alt = ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)) != 0;
 
 			switch (wVirtKey)
 			{
 			// Save as...
 			case L'S':
-				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					shift && (prevwVirtKey != L'S'))
+				if (control && shift && (prevwVirtKey != L'S'))
 				{
 					send = false;
 					s_femto_inner_saveAs(peditor, tempstr);
 				}
 				break;
 			case L'W':
-				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					shift && (prevwVirtKey != L'W'))
+				if (control && shift && (prevwVirtKey != L'W'))
 				{
 					send = false;
 					if (peditor->filesSize == 1)
@@ -1098,8 +1098,7 @@ static inline bool s_femto_inner_kbdHandle(
 				}
 				break;
 			case L'R':
-				if (((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000)) &&
-					shift && (prevwVirtKey != L'R'))
+				if (control && shift && (prevwVirtKey != L'R'))
 				{
 					send = false;
 					const wchar *restrict res = fFile_read(pfile);
@@ -1125,7 +1124,7 @@ static inline bool s_femto_inner_kbdHandle(
 			{
 				fData_cancelHighlight(peditor);
 				// Shuffle between tabs
-				if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) || (GetAsyncKeyState(VK_RCONTROL) & 0x8000))
+				if (control)
 				{
 					send = false;
 					if (shift)
@@ -1171,7 +1170,7 @@ static inline bool s_femto_inner_kbdHandle(
 			case VK_DELETE:
 			{
 				// Check for shift to alt key
-				if (shift ^ ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000)))
+				if (shift ^ alt)
 				{
 					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + %s #%u", shift ? L"\u2191" : fLang_get(flangBTNALT), fLang_get(flangBTNDEL), keyCount);
@@ -1185,7 +1184,7 @@ static inline bool s_femto_inner_kbdHandle(
 			}
 			case VK_UP: // Up arrow
 				// Check for alt key
-				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+				if (alt)
 				{
 					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2191 #%u", fLang_get(flangBTNALT), keyCount);
@@ -1198,7 +1197,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_DOWN: // Down arrow
 				// Check for alt key
-				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+				if (alt)
 				{
 					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2193 #%u", fLang_get(flangBTNALT), keyCount);
@@ -1211,7 +1210,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_LEFT: // Left arrow
 				// Check for alt key
-				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+				if (alt)
 				{
 					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2190 #%u", fLang_get(flangBTNALT), keyCount);
@@ -1224,7 +1223,7 @@ static inline bool s_femto_inner_kbdHandle(
 				break;
 			case VK_RIGHT: // Right arrow
 				// Check for alt key
-				if ((GetAsyncKeyState(VK_LMENU) & 0x8000) || (GetAsyncKeyState(VK_RMENU) & 0x8000))
+				if (alt)
 				{
 					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2192 #%u", fLang_get(flangBTNALT), keyCount);
@@ -1236,11 +1235,16 @@ static inline bool s_femto_inner_kbdHandle(
 				}
 				break;
 			case VK_RETURN: // Enter key
-			case VK_PRIOR:	// Page up
-			case VK_NEXT:	// Page down
-			case VK_END:
-			case VK_HOME:
 				fData_cancelHighlight(peditor);
+				/* fall through */
+			case VK_PRIOR: // Page up
+			case VK_NEXT:  // Page down
+			case VK_HOME:
+			case VK_END:
+				if (!shift)
+				{
+					fData_cancelHighlight(peditor);
+				}
 				/* fall through */
 			case VK_BACK: // Backspace
 			{
@@ -1369,7 +1373,7 @@ static inline bool s_femto_inner_mouseHandle(
 
 	wchar tempstr[MAX_STATUS];
 	bool draw = true;
-	const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000);
+	const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 
 	if ((ir->dwEventFlags & MOUSE_WHEELED) && !shift)
 	{

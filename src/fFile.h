@@ -181,12 +181,14 @@ bool fFile_addNormalCh(fFile_t *restrict self, wchar ch, u8 tabWidth);
  * @brief Handles highlighting starting/stopping depending on typed character
  *
  * @param self Pointer to fFile_t structure
+ * @param startNode Pointer to starting line node fLine_t structure
+ * @param startNodeCurx Starting line node starting cursor position on the x-axis
  * @param ch Character inserted
  * @param shift Determines whether the shift key is pressed down
  * @return true Highlighting is turned on
  * @return false Highlighting is turned off
  */
-bool fFile_startHighlighting(fFile_t *restrict self, wchar ch, bool shift);
+bool fFile_startHighlighting(fFile_t *restrict self, const fLine_t *startNode, usize startNodeCurx, wchar ch, bool shift);
 /**
  * @brief Inserts a special character to current line
  *
