@@ -13,7 +13,7 @@ CC=gcc
 WARN=-Wall -Wextra -Wpedantic -Wconversion -Wunused-variable -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wdouble-promotion -Waggregate-return -Wunused-function -Wunused-result
 CDEFFLAGS=-std=c99 $(WARN) -municode -D UNICODE -D _UNICODE -D LOGGING_ENABLE=1
 CFLAGS=-O3 -Wl,--strip-all,--build-id=none,--gc-sections -fno-ident -D NDEBUG
-CFLAGSD=-g -Og
+CFLAGSD=-g -Og -D _DEBUG
 LIB=-static -ljsonlite2
 
 

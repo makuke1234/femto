@@ -10,6 +10,11 @@ int wmain(int argc, const wchar *argv[])
 	assert(argc > 0);
 	assert(argv != NULL);
 
+#ifdef _DEBUG
+	printf("PID: %lu, Press any key to continue...", GetCurrentProcessId());
+	getchar();
+#endif
+
 	femto_exitHandlerSetVars(&editor);
 	if (!fData_reset(&editor))
 	{
