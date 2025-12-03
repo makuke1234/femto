@@ -449,7 +449,7 @@ isize fLine_calcWordBounaryOffset(const fLine_t *restrict node, bool backwards)
 	bool first_iteration = true;
 
 	const isize cur2 = (isize)(node->curx + node->freeSpaceLen);
-	for (isize idx = (isize)node->curx; (idx > 0) && (idx < (isize)node->lineEndx);)
+	for (isize idx = (isize)node->curx; (idx >= 0) && (idx < (isize)node->lineEndx);)
 	{
 		if ((node->freeSpaceLen > 0) && (idx >= (isize)node->curx) && (idx < cur2))
 		{
