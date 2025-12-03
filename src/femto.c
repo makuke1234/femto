@@ -1216,6 +1216,11 @@ static inline bool s_femto_inner_kbdHandle(
 					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2190 #%u", fLang_get(flangBTNALT), keyCount);
 					wVirtKey = FEMTO_MOVECURSOR_LEFT;
 				}
+				else if (control)
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2190 #%u", fLang_get(flangBTNCTRL), keyCount);
+					wVirtKey = FEMTO_MOVEWORD_LEFT;
+				}
 				else
 				{
 					swprintf_s(tempstr, MAX_STATUS, L"\u2190 #%u", keyCount);
@@ -1228,6 +1233,11 @@ static inline bool s_femto_inner_kbdHandle(
 					fData_cancelHighlight(peditor);
 					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2192 #%u", fLang_get(flangBTNALT), keyCount);
 					wVirtKey = FEMTO_MOVECURSOR_RIGHT;
+				}
+				else if (control)
+				{
+					swprintf_s(tempstr, MAX_STATUS, L"%s + \u2192 #%u", fLang_get(flangBTNCTRL), keyCount);
+					wVirtKey = FEMTO_MOVEWORD_RIGHT;
 				}
 				else
 				{

@@ -611,9 +611,16 @@ bool fFile_addSpecialCh(
 
 		break;
 	case VK_LEFT: // Left arrow
+	case FEMTO_MOVEWORD_LEFT:
 		if (lastcurnode->curx > 0)
 		{
-			fLine_moveCursor(lastcurnode, -1);
+			isize delta = -1;
+			if (ch == FEMTO_MOVEWORD_LEFT)
+			{
+				// scan for start of word
+				delta = -(isize)max_usize((usize)-delta, (usize)-fLine_calcWordBounaryOffset(lastcurnode, true));
+			}
+			fLine_moveCursor(lastcurnode, delta);
 		}
 		else if (lastcurnode->prevNode != NULL)
 		{
@@ -624,9 +631,16 @@ bool fFile_addSpecialCh(
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case VK_RIGHT: // Right arrow
+	case FEMTO_MOVEWORD_RIGHT:
 		if ((lastcurnode->curx + lastcurnode->freeSpaceLen) < lastcurnode->lineEndx)
 		{
-			fLine_moveCursor(lastcurnode, 1);
+			isize delta = 1;
+			if (ch == FEMTO_MOVEWORD_RIGHT)
+			{
+				// scan for end of word
+				delta = (isize)max_usize((usize)delta, (usize)fLine_calcWordBounaryOffset(lastcurnode, false));
+			}
+			fLine_moveCursor(lastcurnode, delta);
 		}
 		else if (lastcurnode->nextNode != NULL)
 		{

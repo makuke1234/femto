@@ -84,6 +84,7 @@ typedef enum fLangId
 	flangBTNINS,
 	flangBTNDEL,
 	flangBTNALT,
+	flangBTNCTRL,
 
 	flang_size
 
@@ -211,5 +212,6 @@ void fLang_destroy(void);
 #define FLANG_BTNINS L"'INS'"
 #define FLANG_BTNDEL L"'DEL'"
 #define FLANG_BTNALT L"'ALT'"
+#define FLANG_BTNCTRL L"'CTRL'"
 
 #endif

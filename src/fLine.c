@@ -439,6 +439,49 @@ usize fLine_rfind(const fLine_t *restrict node, usize startIdx, const wchar *res
 
 	return UINT32_MAX;
 }
+isize fLine_calcWordBounaryOffset(const fLine_t *restrict node, bool backwards)
+{
+	assert(node != NULL);
+
+	const isize unit_iterator = backwards ? -1 : 1;
+	isize delta = 0;
+	bool parse_letter = false;
+	bool first_iteration = true;
+
+	const isize cur2 = (isize)(node->curx + node->freeSpaceLen);
+	for (isize idx = (isize)node->curx; (idx > 0) && (idx < (isize)node->lineEndx);)
+	{
+		if ((node->freeSpaceLen > 0) && (idx >= (isize)node->curx) && (idx < cur2))
+		{
+			idx = backwards ? ((isize)node->curx - 1) : cur2;
+			continue;
+		}
+
+		// parse character
+		const wchar ch = node->line[idx];
+		if (!(
+				(ch >= L'a' && ch <= L'z') ||
+				(ch >= L'A' && ch <= L'Z') ||
+				(ch >= L'0' && ch <= L'9') ||
+				(ch == L'_')))
+		{
+			if (parse_letter && !first_iteration)
+			{
+				return delta;
+			}
+		}
+		else
+		{
+			parse_letter = true;
+		}
+
+		delta += unit_iterator;
+		idx += unit_iterator;
+		first_iteration = false;
+	}
+
+	return delta;
+}
 
 bool fLine_mergeNext(fLine_t *restrict self, fLine_t **restrict ppcury, u8 *restrict noLen)
 {
