@@ -161,6 +161,14 @@ usize fLine_find(const fLine_t *restrict node, usize startIdx, const wchar *rest
  * @return usize Index location of string, UINT32_MAX on failure
  */
 usize fLine_rfind(const fLine_t *restrict node, usize startIdx, const wchar *restrict string, usize maxString);
+/**
+ * @brief Calculates the offset of a next word bounary from the current cursor depending on chosen direction
+ *
+ * @param node Pointer to line node
+ * @param backwards Determines whether the search should be run backwards
+ * @return isize Offset from current cursor position, 0 on failure
+ */
+isize fLine_calcWordBounaryOffset(const fLine_t *restrict node, bool backwards);
 
 /**
  * @brief Merges current line node with next line node, adjusts current

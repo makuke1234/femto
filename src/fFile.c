@@ -408,9 +408,10 @@ bool fFile_addNormalCh(fFile_t *restrict self, wchar ch, u8 tabWidth)
 	return true;
 }
 
-bool fFile_startHighlighting(fFile_t *restrict self, wchar ch, bool shift)
+bool fFile_startHighlighting(fFile_t *restrict self, const fLine_t *startNode, usize startNodeCurx, wchar ch, bool shift)
 {
 	assert(self != NULL);
+	assert(startNode != NULL);
 
 	struct fFileHighLight *restrict hl = &self->data.hl;
 	assert(hl != NULL);
@@ -419,11 +420,10 @@ bool fFile_startHighlighting(fFile_t *restrict self, wchar ch, bool shift)
 	{
 		return hl->beg != NULL;
 	}
-	else if ((ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN))
+	else if ((ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN) || (ch == VK_PRIOR) || (ch == VK_NEXT) || (ch == VK_HOME) || (ch == VK_END))
 	{
-
-		const fLine_t *restrict node = self->data.currentNode;
-		assert(node != NULL);
+		const fLine_t *curNode = self->data.currentNode;
+		assert(curNode != NULL);
 
 		// Cancel highlighting
 		if (!shift)
@@ -435,12 +435,15 @@ bool fFile_startHighlighting(fFile_t *restrict self, wchar ch, bool shift)
 			// Save cursor position for highlighting
 			if (hl->beg == NULL)
 			{
-				hl->beg = node;
-				hl->begx = node->curx & USIZE_BIT_1_MASK;
+				hl->beg = startNode;
+				hl->begx = startNodeCurx & USIZE_BIT_1_MASK;
 			}
 
-			hl->backwards = ((hl->beg == node) && ((ch == VK_UP) || ((hl->begx > node->curx) || ((hl->begx == node->curx) && (ch == VK_LEFT))))) ||
-							(hl->beg->lineNumber > node->lineNumber);
+			hl->backwards = ((hl->beg == curNode) &&
+							 (hl->begx > curNode->curx)) ||
+							(hl->beg->lineNumber > curNode->lineNumber);
+
+			fLog_write("Line %u, highlight from line %u, from index: %u, backwards: %u", startNode->lineNumber, hl->beg->lineNumber, hl->begx, hl->backwards);
 		}
 	}
 
@@ -459,9 +462,9 @@ bool fFile_addSpecialCh(
 	self->data.bTyped = true;
 	fLine_t *restrict lastcurnode = self->data.currentNode;
 	assert(lastcurnode != NULL);
+	const usize lastcurx = lastcurnode->curx;
 
 	const fLine_t *restrict prevbeg = self->data.hl.beg;
-	fFile_startHighlighting(self, ch, shift);
 
 	switch (ch)
 	{
@@ -608,9 +611,16 @@ bool fFile_addSpecialCh(
 
 		break;
 	case VK_LEFT: // Left arrow
+	case FEMTO_MOVEWORD_LEFT:
 		if (lastcurnode->curx > 0)
 		{
-			fLine_moveCursor(lastcurnode, -1);
+			isize delta = -1;
+			if (ch == FEMTO_MOVEWORD_LEFT)
+			{
+				// scan for start of word
+				delta = -(isize)max_usize((usize)-delta, (usize)-fLine_calcWordBounaryOffset(lastcurnode, true));
+			}
+			fLine_moveCursor(lastcurnode, delta);
 		}
 		else if (lastcurnode->prevNode != NULL)
 		{
@@ -621,9 +631,16 @@ bool fFile_addSpecialCh(
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
 	case VK_RIGHT: // Right arrow
+	case FEMTO_MOVEWORD_RIGHT:
 		if ((lastcurnode->curx + lastcurnode->freeSpaceLen) < lastcurnode->lineEndx)
 		{
-			fLine_moveCursor(lastcurnode, 1);
+			isize delta = 1;
+			if (ch == FEMTO_MOVEWORD_RIGHT)
+			{
+				// scan for end of word
+				delta = (isize)max_usize((usize)delta, (usize)fLine_calcWordBounaryOffset(lastcurnode, false));
+			}
+			fLine_moveCursor(lastcurnode, delta);
 		}
 		else if (lastcurnode->nextNode != NULL)
 		{
@@ -663,6 +680,7 @@ bool fFile_addSpecialCh(
 		return false;
 	}
 
+	fFile_startHighlighting(self, lastcurnode, lastcurx, ch, shift);
 	self->data.bUpdateAll |= ((self->data.currentNode != lastcurnode) & pset->bRelLineNums) ||
 							 ((self->data.hl.beg != NULL) && (self->data.hl.beg != self->data.currentNode)) ||
 							 (self->data.hl.beg != prevbeg);
@@ -1157,9 +1175,9 @@ void fFile_scrollHor(fFile_t *restrict self, u32 width, u32 height, isize deltaC
 	assert(self != NULL);
 	assert(width > 0);
 
-	if ((deltaCh < 0) && ((usize)-deltaCh <= self->data.curx))
+	if (deltaCh < 0)
 	{
-		self->data.curx -= (usize)-deltaCh;
+		self->data.curx = ((usize)-deltaCh > self->data.curx) ? 0 : self->data.curx - ((usize)-deltaCh);
 	}
 	else if (deltaCh > 0)
 	{

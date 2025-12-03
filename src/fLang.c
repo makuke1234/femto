@@ -81,6 +81,7 @@ const fCLangArr8_t fLang_tokens = {
 	[flangBTNINS] = "btn-ins",
 	[flangBTNDEL] = "btn-del",
 	[flangBTNALT] = "btn-alt",
+	[flangBTNCTRL] = "btn-ctrl",
 };
 
 #define fLang_string_contents                                 \
@@ -160,7 +161,8 @@ const fCLangArr8_t fLang_tokens = {
 	[flangBTNHOME] = FLANG_BTNHOME,                           \
 	[flangBTNINS] = FLANG_BTNINS,                             \
 	[flangBTNDEL] = FLANG_BTNDEL,                             \
-	[flangBTNALT] = FLANG_BTNALT,
+	[flangBTNALT] = FLANG_BTNALT,                             \
+	[flangBTNCTRL] = FLANG_BTNCTRL,
 
 static const fCLangArr_t s_fLang_defStrings = {fLang_string_contents};
 fCLangArr_t fLang_strings = {fLang_string_contents};

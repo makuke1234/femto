@@ -1,6 +1,5 @@
 #include "femto.h"
 #include "fArg.h"
-#include "fSyntax.h"
 
 // This variable has to be static because it is used by the exit handler
 // which is run after returning from wmain
