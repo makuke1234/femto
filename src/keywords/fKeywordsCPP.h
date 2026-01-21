@@ -232,6 +232,7 @@ static const wchar * s_keyWordsCPP[] = {
 	L"strcpy",
 	L"strcat",
 	L"strlen",
+	L"strdup",
 
 	// C++ common types
 	L"array",
@@ -242,6 +243,8 @@ static const wchar * s_keyWordsCPP[] = {
 	L"basic_iostream",
 	L"istream",
 	L"ostream",
+	L"ifstream",
+	L"ofstream",
 	L"stringstream",
 	L"istringstream",
 	L"ostringstream",
@@ -254,6 +257,8 @@ static const wchar * s_keyWordsCPP[] = {
 	L"unordered_map",
 	L"set",
 	L"unordered_set",
+	L"unique_ptr",
+	L"shared_ptr",
 
 	L"atol",
 	L"atoll",

@@ -2,39 +2,36 @@
 #include "femto.h"
 #include "winarr.h"
 
-void fFile_reset(fFile_t * restrict self)
+void fFile_reset(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
 	(*self) = (fFile_t){
 		.fileName = NULL,
-		.hFile    = INVALID_HANDLE_VALUE,
-		.data     = {
-			.firstNode   = NULL,
+		.hFile = INVALID_HANDLE_VALUE,
+		.data = {
+			.firstNode = NULL,
 			.currentNode = NULL,
-			.pcury       = NULL,
-			.curx        = 0,
-			.lastx       = 0,
-			.noLen       = 0,
+			.pcury = NULL,
+			.curx = 0,
+			.lastx = 0,
+			.noLen = 0,
 			.hl = {
-				.beg       = NULL,
-				.begx      = 0,
-				.backwards = false
-			},
-			.bTyped      = false,
-			.bUpdateAll  = false
-		},
-		.eolSeq        = eolNOT,
-		.bExists       = false,
-		.bCanWrite     = false,
-		.bUnsaved      = false,
+				.beg = NULL,
+				.begx = 0,
+				.backwards = false},
+			.bTyped = false,
+			.bUpdateAll = false},
+		.eolSeq = eolNOT,
+		.bExists = false,
+		.bCanWrite = false,
+		.bUnsaved = false,
 		.bSyntaxByUser = false,
-		.syntax        = fstxNONE
-	};
+		.syntax = fstxNONE};
 }
-fFile_t * fFile_resetDyn(void)
+fFile_t *fFile_resetDyn(void)
 {
-	fFile_t * file = malloc(sizeof(fFile_t));
+	fFile_t *file = malloc(sizeof(fFile_t));
 	if (file == NULL)
 	{
 		return NULL;
@@ -43,7 +40,7 @@ fFile_t * fFile_resetDyn(void)
 	fFile_reset(file);
 	return file;
 }
-bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool writemode)
+bool fFile_open(fFile_t *restrict self, const wchar *restrict fileName, bool writemode)
 {
 	assert(self != NULL);
 
@@ -67,12 +64,12 @@ bool fFile_open(fFile_t * restrict self, const wchar * restrict fileName, bool w
 	}
 
 	self->bCanWrite = writemode;
-	self->fileName  = (fileName != NULL) ? wcsredup(self->fileName, fileName) : NULL;
+	self->fileName = (fileName != NULL) ? wcsredup(self->fileName, fileName) : NULL;
 
 	// Only fail if file name was given but the saving of the filename was unsuccessful
 	return !((fileName != NULL) && (self->fileName == NULL));
 }
-void fFile_close(fFile_t * restrict self)
+void fFile_close(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
@@ -82,25 +79,25 @@ void fFile_close(fFile_t * restrict self)
 		self->hFile = INVALID_HANDLE_VALUE;
 	}
 }
-void fFile_clearLines(fFile_t * restrict self)
+void fFile_clearLines(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	fLine_t * restrict node = self->data.firstNode;
-	self->data.firstNode   = NULL;
+	fLine_t *restrict node = self->data.firstNode;
+	self->data.firstNode = NULL;
 	self->data.currentNode = NULL;
-	self->data.pcury       = NULL;
+	self->data.pcury = NULL;
 	while (node != NULL)
 	{
-		fLine_t * restrict next = node->nextNode;
+		fLine_t *restrict next = node->nextNode;
 		fLine_free(node);
 		node = next;
 	}
 }
-const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, usize * restrict bytesLen)
+const wchar *fFile_readBytes(fFile_t *restrict self, char **restrict bytes, usize *restrict bytesLen)
 {
-	assert(self      != NULL);
-	assert(bytes     != NULL);
+	assert(self != NULL);
+	assert(bytes != NULL);
 	assert((bytesLen != NULL) && "Pointer to length variable is mandatory!");
 
 	if (fFile_open(self, NULL, false) == false)
@@ -110,7 +107,7 @@ const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u
 
 	if (self->bExists)
 	{
-		const wchar * result = femto_readBytes(self->hFile, bytes, bytesLen);
+		const wchar *result = femto_readBytes(self->hFile, bytes, bytesLen);
 		fFile_close(self);
 		return result;
 	}
@@ -127,20 +124,20 @@ const wchar * fFile_readBytes(fFile_t * restrict self, char ** restrict bytes, u
 		return NULL;
 	}
 }
-const wchar * fFile_read(fFile_t * restrict self)
+const wchar *fFile_read(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	char * bytes = NULL;
+	char *bytes = NULL;
 	usize size;
-	const wchar * restrict res = fFile_readBytes(self, &bytes, &size);
+	const wchar *restrict res = fFile_readBytes(self, &bytes, &size);
 	if (res != NULL)
 	{
 		return res;
 	}
 
 	// Convert to UTF-16
-	wchar * utf16 = NULL;
+	wchar *utf16 = NULL;
 	const u32 chars = femto_toutf16(bytes, (int)size, &utf16, NULL);
 	free(bytes);
 
@@ -151,7 +148,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 	fLog_write("Converted %u bytes of character to %u UTF-16 characters.", size, chars);
 
 	// Save lines to structure
-	wchar ** lines = NULL;
+	wchar **lines = NULL;
 	const usize numLines = femto_strnToLines(utf16, chars, &lines, &self->eolSeq);
 	if (lines == NULL)
 	{
@@ -184,7 +181,7 @@ const wchar * fFile_read(fFile_t * restrict self)
 	self->data.currentNode = self->data.firstNode;
 	for (usize i = 1; i < numLines; ++i)
 	{
-		fLine_t * node = fLine_createText(self->data.currentNode, NULL, lines[i], -1, &self->data.noLen);
+		fLine_t *node = fLine_createText(self->data.currentNode, NULL, lines[i], -1, &self->data.noLen);
 		if (node == NULL)
 		{
 			free(lines);
@@ -198,15 +195,15 @@ const wchar * fFile_read(fFile_t * restrict self)
 
 	return NULL;
 }
-ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize * editorContLen)
+ffcr_e fFile_checkUnsaved(fFile_t *restrict self, char **editorContents, usize *editorContLen)
 {
 	assert(self != NULL);
 
 	// Generate lines
-	wchar * lines = NULL, * line = NULL;
+	wchar *lines = NULL, *line = NULL;
 	usize linesCap = 0, linesLen = 0, lineCap = 0;
 
-	const fLine_t * restrict node = self->data.firstNode;
+	const fLine_t *restrict node = self->data.firstNode;
 
 	const eolSeq_e eolSeq = self->eolSeq;
 	bool isCRLF = (self->eolSeq == eolCRLF);
@@ -253,7 +250,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 				return ffcrMEM_ERROR;
 			}
 
-			lines    = mem;
+			lines = mem;
 			linesCap = newCap;
 		}
 
@@ -287,7 +284,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 	free(line);
 
 	// Try to convert lines string to UTF-8
-	char * utf8 = NULL;
+	char *utf8 = NULL;
 	usize utf8sz = 0;
 	femto_toutf8(lines, (int)linesLen + 1, &utf8, &utf8sz);
 
@@ -301,7 +298,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 	}
 
 	// Check if anything has changed, for that load original file again
-	char * compFile = NULL;
+	char *compFile = NULL;
 	usize compSize;
 	if (fFile_readBytes(self, &compFile, &compSize) == NULL)
 	{
@@ -321,7 +318,7 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 	if ((editorContents != NULL) && (editorContLen != NULL))
 	{
 		*editorContents = utf8;
-		*editorContLen  = utf8sz;
+		*editorContLen = utf8sz;
 	}
 	else
 	{
@@ -331,11 +328,11 @@ ffcr_e fFile_checkUnsaved(fFile_t * restrict self, char ** editorContents, usize
 	self->bUnsaved = true;
 	return ffcrNEEDS_SAVING;
 }
-isize fFile_write(fFile_t * restrict self)
+isize fFile_write(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	char * utf8 = NULL;
+	char *utf8 = NULL;
 	usize utf8sz = 0;
 	ffcr_e checkres = fFile_checkUnsaved(self, &utf8, &utf8sz);
 	checkres = ((checkres == ffcrNOTHING_NEW) && !self->bExists) ? ffcrNEEDS_SAVING : checkres;
@@ -368,12 +365,12 @@ isize fFile_write(fFile_t * restrict self)
 
 	// Write everything except the null terminator
 	BOOL res = (utf8 != NULL) ? WriteFile(
-		self->hFile,
-		utf8,
-		(DWORD)(utf8sz - (usize)1),
-		&dwWritten,
-		NULL
-	) : TRUE;
+									self->hFile,
+									utf8,
+									(DWORD)(utf8sz - (usize)1),
+									&dwWritten,
+									NULL)
+							  : TRUE;
 	// Close file
 	fFile_close(self);
 	// Free utf8 string
@@ -392,13 +389,12 @@ isize fFile_write(fFile_t * restrict self)
 	}
 }
 
-
-bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
+bool fFile_addNormalCh(fFile_t *restrict self, wchar ch, u8 tabWidth)
 {
-	assert(self     != NULL);
+	assert(self != NULL);
 	assert(tabWidth > 0);
 
-	fLine_t * restrict node = self->data.currentNode;
+	fLine_t *restrict node = self->data.currentNode;
 	assert(node != NULL);
 	self->data.bTyped = true;
 
@@ -412,23 +408,22 @@ bool fFile_addNormalCh(fFile_t * restrict self, wchar ch, u8 tabWidth)
 	return true;
 }
 
-
-bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
+bool fFile_startHighlighting(fFile_t *restrict self, const fLine_t *startNode, usize startNodeCurx, wchar ch, bool shift)
 {
 	assert(self != NULL);
+	assert(startNode != NULL);
 
-	struct fFileHighLight * restrict hl = &self->data.hl;
+	struct fFileHighLight *restrict hl = &self->data.hl;
 	assert(hl != NULL);
 
 	if ((ch == VK_DELETE) || (ch == FEMTO_SEL_DELETE) || (ch == VK_BACK))
 	{
 		return hl->beg != NULL;
 	}
-	else if ( (ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN) )
+	else if ((ch == VK_LEFT) || (ch == VK_RIGHT) || (ch == VK_UP) || (ch == VK_DOWN) || (ch == VK_PRIOR) || (ch == VK_NEXT) || (ch == VK_HOME) || (ch == VK_END))
 	{
-
-		const fLine_t * restrict node = self->data.currentNode;
-		assert(node != NULL);
+		const fLine_t *curNode = self->data.currentNode;
+		assert(curNode != NULL);
 
 		// Cancel highlighting
 		if (!shift)
@@ -440,35 +435,36 @@ bool fFile_startHighlighting(fFile_t * restrict self, wchar ch, bool shift)
 			// Save cursor position for highlighting
 			if (hl->beg == NULL)
 			{
-				hl->beg  = node;
-				hl->begx = node->curx & USIZE_BIT_1_MASK;
+				hl->beg = startNode;
+				hl->begx = startNodeCurx & USIZE_BIT_1_MASK;
 			}
 
-			hl->backwards = ((hl->beg == node) && ((ch == VK_UP) || ((hl->begx > node->curx) || ((hl->begx == node->curx) && (ch == VK_LEFT)))) ) ||
-				(hl->beg->lineNumber > node->lineNumber);
+			hl->backwards = ((hl->beg == curNode) &&
+							 (hl->begx > curNode->curx)) ||
+							(hl->beg->lineNumber > curNode->lineNumber);
+
+			fLog_write("Line %u, highlight from line %u, from index: %u, backwards: %u", startNode->lineNumber, hl->beg->lineNumber, hl->begx, hl->backwards);
 		}
 	}
 
 	return hl->beg != NULL;
 }
 
-
 bool fFile_addSpecialCh(
-	fFile_t * restrict self, u32 height,
+	fFile_t *restrict self, u32 height,
 	wchar ch, bool shift,
-	const fSettings_t * pset
-)
+	const fSettings_t *pset)
 {
-	assert(self   != NULL);
+	assert(self != NULL);
 	assert(height > 0);
-	assert(pset   != NULL);
+	assert(pset != NULL);
 
 	self->data.bTyped = true;
-	fLine_t * restrict lastcurnode = self->data.currentNode;
+	fLine_t *restrict lastcurnode = self->data.currentNode;
 	assert(lastcurnode != NULL);
+	const usize lastcurx = lastcurnode->curx;
 
-	const fLine_t * restrict prevbeg = self->data.hl.beg;
-	fFile_startHighlighting(self, ch, shift);
+	const fLine_t *restrict prevbeg = self->data.hl.beg;
 
 	switch (ch)
 	{
@@ -537,12 +533,12 @@ bool fFile_addSpecialCh(
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
-	case VK_RETURN:	// Enter key
+	case VK_RETURN: // Enter key
 		fFile_addNewLine(self, pset->bTabsToSpaces, pset->tabWidth, pset->bAutoIndent);
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
-	case VK_BACK:	// Backspace
+	case VK_BACK: // Backspace
 		if (self->data.hl.beg != NULL)
 		{
 			return fFile_addSpecialCh(self, height, FEMTO_SEL_DELETE, shift, pset);
@@ -554,7 +550,7 @@ bool fFile_addSpecialCh(
 			self->data.lastx = self->data.currentNode->virtcurx;
 		}
 		break;
-	case VK_DELETE:	// Delete
+	case VK_DELETE: // Delete
 		if (self->data.hl.beg != NULL)
 		{
 			return fFile_addSpecialCh(self, height, FEMTO_SEL_DELETE, shift, pset);
@@ -564,21 +560,21 @@ bool fFile_addSpecialCh(
 			fFile_deleteForward(self);
 		}
 		break;
-	case FEMTO_SHIFT_DEL:	// Shift+Delete
+	case FEMTO_SHIFT_DEL: // Shift+Delete
 		fFile_deleteLine(self);
 		break;
-	case FEMTO_SEL_DELETE:	// Delete selection
+	case FEMTO_SEL_DELETE: // Delete selection
 		fFile_deleteSelection(self);
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
-	case FEMTO_COPY:	 // Copy selection to clipboard
+	case FEMTO_COPY: // Copy selection to clipboard
 		if (!fFile_cbCopy(self))
 		{
 			return false;
 		}
 		break;
-	case FEMTO_PASTE:	// Paste from clipboard
+	case FEMTO_PASTE: // Paste from clipboard
 		if (!fFile_cbPaste(self, height, pset))
 		{
 			return false;
@@ -588,28 +584,43 @@ bool fFile_addSpecialCh(
 		// Swap current line with previous if possible
 		if (lastcurnode->prevNode != NULL)
 		{
-			fLine_swap(lastcurnode, self->data.currentNode->prevNode);
-			self->data.currentNode = self->data.currentNode->prevNode;
+			fLine_t *prevnode = lastcurnode->prevNode;
+			fLine_swapLines(lastcurnode, prevnode);
+			self->data.currentNode = prevnode;
 			fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
-			self->data.lastx       = self->data.currentNode->virtcurx;
-			self->data.bUpdateAll  = true;
+			self->data.lastx = self->data.currentNode->virtcurx;
+			self->data.bUpdateAll = true;
 		}
 		break;
 	case FEMTO_MOVELINE_DOWN:
 		// Swap current line with next if possible
 		if (lastcurnode->nextNode != NULL)
 		{
-			fLine_swap(lastcurnode, self->data.currentNode->nextNode);
-			self->data.currentNode = self->data.currentNode->nextNode;
+			fLine_t *nextnode = lastcurnode->nextNode;
+			fLine_swapLines(lastcurnode, nextnode);
+			self->data.currentNode = nextnode;
 			fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
-			self->data.lastx       = self->data.currentNode->virtcurx;
-			self->data.bUpdateAll  = true;
+			self->data.lastx = self->data.currentNode->virtcurx;
+			self->data.bUpdateAll = true;
 		}
 		break;
-	case VK_LEFT:	// Left arrow
+	case FEMTO_MOVECURSOR_LEFT:
+
+		break;
+	case FEMTO_MOVECURSOR_RIGHT:
+
+		break;
+	case VK_LEFT: // Left arrow
+	case FEMTO_MOVEWORD_LEFT:
 		if (lastcurnode->curx > 0)
 		{
-			fLine_moveCursor(lastcurnode, -1);
+			isize delta = -1;
+			if (ch == FEMTO_MOVEWORD_LEFT)
+			{
+				// scan for start of word
+				delta = -(isize)max_usize((usize)-delta, (usize)-fLine_calcWordBounaryOffset(lastcurnode, true));
+			}
+			fLine_moveCursor(lastcurnode, delta);
 		}
 		else if (lastcurnode->prevNode != NULL)
 		{
@@ -619,10 +630,17 @@ bool fFile_addSpecialCh(
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
-	case VK_RIGHT:	// Right arrow
+	case VK_RIGHT: // Right arrow
+	case FEMTO_MOVEWORD_RIGHT:
 		if ((lastcurnode->curx + lastcurnode->freeSpaceLen) < lastcurnode->lineEndx)
 		{
-			fLine_moveCursor(lastcurnode, 1);
+			isize delta = 1;
+			if (ch == FEMTO_MOVEWORD_RIGHT)
+			{
+				// scan for end of word
+				delta = (isize)max_usize((usize)delta, (usize)fLine_calcWordBounaryOffset(lastcurnode, false));
+			}
+			fLine_moveCursor(lastcurnode, delta);
 		}
 		else if (lastcurnode->nextNode != NULL)
 		{
@@ -632,20 +650,20 @@ bool fFile_addSpecialCh(
 		fLine_calcVirtCursor(self->data.currentNode, pset->tabWidth);
 		self->data.lastx = self->data.currentNode->virtcurx;
 		break;
-	case VK_UP:		// Up arrow
+	case VK_UP: // Up arrow
 		fLine_moveCursorVert(&self->data.currentNode, -1);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
-	case VK_DOWN:	// Down arrow
+	case VK_DOWN: // Down arrow
 		fLine_moveCursorVert(&self->data.currentNode, 1);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
-	case VK_PRIOR:	// Page up
-		fLine_moveCursorVert(&self->data.currentNode, -(isize)height);
+	case VK_PRIOR: // Page up
+		fLine_moveCursorVert(&self->data.currentNode, -((isize)height - 1));
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
-	case VK_NEXT:	// Page down
-		fLine_moveCursorVert(&self->data.currentNode, (isize)height);
+	case VK_NEXT: // Page down
+		fLine_moveCursorVert(&self->data.currentNode, (isize)height - 1);
 		fLine_moveCursorAbs(self->data.currentNode, fLine_calcCursor(self->data.currentNode, self->data.lastx, pset->tabWidth));
 		break;
 	case VK_END:
@@ -662,18 +680,19 @@ bool fFile_addSpecialCh(
 		return false;
 	}
 
+	fFile_startHighlighting(self, lastcurnode, lastcurx, ch, shift);
 	self->data.bUpdateAll |= ((self->data.currentNode != lastcurnode) & pset->bRelLineNums) ||
-		((self->data.hl.beg != NULL) && (self->data.hl.beg != self->data.currentNode)) ||
-		(self->data.hl.beg != prevbeg);
+							 ((self->data.hl.beg != NULL) && (self->data.hl.beg != self->data.currentNode)) ||
+							 (self->data.hl.beg != prevbeg);
 
 	return true;
 }
 
-bool fFile_deleteForward(fFile_t * restrict self)
+bool fFile_deleteForward(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	fLine_t * restrict node = self->data.currentNode;
+	fLine_t *restrict node = self->data.currentNode;
 	assert(node != NULL);
 
 	if ((node->curx + node->freeSpaceLen) < node->lineEndx)
@@ -691,11 +710,11 @@ bool fFile_deleteForward(fFile_t * restrict self)
 		return false;
 	}
 }
-bool fFile_deleteBackward(fFile_t * restrict self)
+bool fFile_deleteBackward(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	fLine_t * restrict node = self->data.currentNode;
+	fLine_t *restrict node = self->data.currentNode;
 	assert(node != NULL);
 
 	if (node->curx > 0)
@@ -708,7 +727,7 @@ bool fFile_deleteBackward(fFile_t * restrict self)
 	{
 		// Add current node data to previous node data
 		self->data.currentNode = node->prevNode;
-		self->data.bUpdateAll  = true;
+		self->data.bUpdateAll = true;
 		return fLine_mergeNext(self->data.currentNode, &self->data.pcury, &self->data.noLen);
 	}
 	else
@@ -716,11 +735,11 @@ bool fFile_deleteBackward(fFile_t * restrict self)
 		return false;
 	}
 }
-bool fFile_deleteLine(fFile_t * restrict self)
+bool fFile_deleteLine(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	fLine_t * restrict node = self->data.currentNode;
+	fLine_t *restrict node = self->data.currentNode;
 	assert(node != NULL);
 
 	if (node->nextNode != NULL)
@@ -763,19 +782,19 @@ bool fFile_deleteLine(fFile_t * restrict self)
 	}
 	return true;
 }
-bool fFile_deleteSelection(fFile_t * restrict self)
+bool fFile_deleteSelection(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
-	struct fFileHighLight * restrict hl = &self->data.hl;
+	struct fFileHighLight *restrict hl = &self->data.hl;
 	assert(hl != NULL);
 
-	const fLine_t * restrict begNode = hl->beg;
+	const fLine_t *restrict begNode = hl->beg;
 	const usize begNodex = hl->begx + ((hl->begx > hl->beg->curx) ? hl->beg->freeSpaceLen : 0);
 
 	assert(begNode != NULL);
 
-	const fLine_t * restrict node = self->data.currentNode;
+	const fLine_t *restrict node = self->data.currentNode;
 	assert(node != NULL);
 
 	if (hl->backwards)
@@ -810,7 +829,6 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 					++idx;
 				}
 			}
-
 		}
 		fLog_write("%zu deletions", rep);
 		for (usize i = 0; i < rep; ++i)
@@ -865,7 +883,7 @@ bool fFile_deleteSelection(fFile_t * restrict self)
 	return true;
 }
 
-bool fFile_cbCopy(fFile_t * restrict self)
+bool fFile_cbCopy(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
@@ -875,10 +893,10 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	}
 	EmptyClipboard();
 
-	struct fFileHighLight * restrict hl = &self->data.hl;
+	struct fFileHighLight *restrict hl = &self->data.hl;
 	assert(hl != NULL);
 
-	const fLine_t * restrict beg = hl->beg;
+	const fLine_t *restrict beg = hl->beg;
 
 	if (beg == NULL)
 	{
@@ -889,11 +907,11 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	// Copy "stuff" onto clipboard
 
-	const fLine_t * restrict curnode = self->data.currentNode;
+	const fLine_t *restrict curnode = self->data.currentNode;
 	assert(curnode != NULL);
 
 	// Find first & last node
-	const fLine_t * restrict begnode = NULL, * restrict endnode = NULL;
+	const fLine_t *restrict begnode = NULL, *restrict endnode = NULL;
 	if (beg->lineNumber < curnode->lineNumber)
 	{
 		begnode = hl->beg;
@@ -909,7 +927,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	assert(endnode != NULL);
 
 	// Initialize clipboard buffer
-	warr_t clipBuf = { 0 };
+	warr_t clipBuf = {0};
 	warr_init(&clipBuf, sizeof(wchar));
 
 	while (1)
@@ -920,7 +938,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 		if (curnode == beg)
 		{
 			begCur = hl->backwards ? begnode->curx : hl->begx;
-			endCur = hl->backwards ? hl->begx      : begnode->curx;
+			endCur = hl->backwards ? hl->begx : begnode->curx;
 		}
 		else if (begnode == beg)
 		{
@@ -929,7 +947,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 		}
 		else if (begnode == curnode)
 		{
-			begCur = hl->backwards ? begnode->curx                             : 0;
+			begCur = hl->backwards ? begnode->curx : 0;
 			endCur = hl->backwards ? begnode->lineEndx - begnode->freeSpaceLen : begnode->curx;
 		}
 		else
@@ -961,11 +979,10 @@ bool fFile_cbCopy(fFile_t * restrict self)
 			++begCur;
 		}
 
-
 		if (begnode != endnode)
 		{
 			// Add newline to clipboard
-			if (!warr_pushBack(&clipBuf, &(wchar){ L'\n' }))
+			if (!warr_pushBack(&clipBuf, &(wchar){L'\n'}))
 			{
 				fLog_write("Error pushing newline!");
 				warr_destroy(&clipBuf);
@@ -982,7 +999,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	};
 
 	// Add null-terminator to clipboard buffer
-	if (!warr_pushBack(&clipBuf, &(wchar){ L'\0' }))
+	if (!warr_pushBack(&clipBuf, &(wchar){L'\0'}))
 	{
 		fLog_write("Error pushing null-terminator!");
 		warr_destroy(&clipBuf);
@@ -995,8 +1012,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 	fLog_write(
 		"Copying %zu characters to clipboard:\n%S\n",
 		warr_size(&clipBuf) - 1,
-		warr_data(&clipBuf)
-	);
+		warr_data(&clipBuf));
 
 	HGLOBAL clipBufMem = warr_unlock(&clipBuf);
 	assert(clipBufMem != NULL);
@@ -1009,7 +1025,7 @@ bool fFile_cbCopy(fFile_t * restrict self)
 
 	return true;
 }
-bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * restrict pset)
+bool fFile_cbPaste(fFile_t *restrict self, u32 height, const fSettings_t *restrict pset)
 {
 	assert(self != NULL);
 
@@ -1025,14 +1041,14 @@ bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * rest
 	HGLOBAL data = GetClipboardData(CF_UNICODETEXT);
 	if (data != NULL)
 	{
-		const wchar * restrict clipstr = GlobalLock(data);
+		const wchar *restrict clipstr = GlobalLock(data);
 		if (clipstr != NULL)
 		{
 			fSettings_t set = *pset;
 			set.bAutoIndent = false;
 			// Copy text
 
-			for (const wchar * restrict str = clipstr; (*str) != L'\0'; ++str)
+			for (const wchar *restrict str = clipstr; (*str) != L'\0'; ++str)
 			{
 				// Add character to current location
 				const wchar ch = *str;
@@ -1069,19 +1085,18 @@ bool fFile_cbPaste(fFile_t * restrict self, u32 height, const fSettings_t * rest
 	return true;
 }
 
-bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
+bool fFile_addNewLine(fFile_t *restrict self, bool tabsToSpaces, u8 tabWidth, bool autoIndent)
 {
-	assert(self     != NULL);
+	assert(self != NULL);
 	assert(tabWidth > 0);
 
-	fLine_t * node = fLine_create(
+	fLine_t *node = fLine_create(
 		self->data.currentNode,
 		self->data.currentNode->nextNode,
 		tabsToSpaces,
 		tabWidth,
 		autoIndent,
-		&self->data.noLen
-	);
+		&self->data.noLen);
 	if (node == NULL)
 	{
 		return false;
@@ -1089,13 +1104,13 @@ bool fFile_addNewLine(fFile_t * restrict self, bool tabsToSpaces, u8 tabWidth, b
 
 	self->data.currentNode->nextNode = node;
 	self->data.currentNode = node;
-	self->data.bUpdateAll  = true;
+	self->data.bUpdateAll = true;
 	return true;
 }
 
-void fFile_updateCury(fFile_t * restrict self, u32 height)
+void fFile_updateCury(fFile_t *restrict self, u32 height)
 {
-	assert(self   != NULL);
+	assert(self != NULL);
 	assert(height > 0);
 
 	if (self->data.currentNode == NULL)
@@ -1105,8 +1120,8 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 
 	if (self->data.pcury == NULL)
 	{
-		fLine_t * restrict node = self->data.currentNode;
-		for (u32 i = 0; i < height && (node->prevNode != NULL); ++i)
+		fLine_t *restrict node = self->data.currentNode;
+		for (u32 i = 1; (i < height) && (node->prevNode != NULL); ++i)
 		{
 			node = node->prevNode;
 		}
@@ -1114,8 +1129,8 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 	}
 	else
 	{
-		const fLine_t * restrict node = self->data.currentNode;
-		for (u32 i = 0; i < height && (node != NULL); ++i)
+		const fLine_t *restrict node = self->data.currentNode;
+		for (u32 i = 1; (i < height) && (node != NULL); ++i)
 		{
 			if (node == self->data.pcury)
 			{
@@ -1139,9 +1154,9 @@ void fFile_updateCury(fFile_t * restrict self, u32 height)
 		fFile_updateCury(self, height);
 	}
 }
-void fFile_scrollVert(fFile_t * restrict self, u32 height, isize deltaLines)
+void fFile_scrollVert(fFile_t *restrict self, u32 height, isize deltaLines)
 {
-	assert(self   != NULL);
+	assert(self != NULL);
 	assert(height > 0);
 
 	if (self->data.pcury == NULL)
@@ -1155,22 +1170,33 @@ void fFile_scrollVert(fFile_t * restrict self, u32 height, isize deltaLines)
 		self->data.bUpdateAll = true;
 	}
 }
-void fFile_scrollHor(fFile_t * restrict self, u32 width, isize deltaCh)
+void fFile_scrollHor(fFile_t *restrict self, u32 width, u32 height, isize deltaCh)
 {
-	assert(self  != NULL);
+	assert(self != NULL);
 	assert(width > 0);
 
-	if ((deltaCh < 0) && ((usize)-deltaCh <= self->data.curx))
+	if (deltaCh < 0)
 	{
-		self->data.curx -= (usize)-deltaCh;
+		self->data.curx = ((usize)-deltaCh > self->data.curx) ? 0 : self->data.curx - ((usize)-deltaCh);
 	}
 	else if (deltaCh > 0)
 	{
-		const usize curx = self->data.curx + (usize)deltaCh, total = self->data.currentNode->lineEndx - self->data.currentNode->freeSpaceLen;
-		--width;
-		if ((total >= width) && (curx <= (total - width)))
+		const usize curx = self->data.curx + (usize)deltaCh;
+		// scan for all lines in view
+		const fLine_t *restrict node = self->data.pcury;
+		usize total = 0;
+		for (u32 i = 0; (node != NULL) && (i < height); ++i)
 		{
-			self->data.curx = curx;
+			const usize running_total = node->lineEndx - node->freeSpaceLen;
+			total = max_usize(total, running_total);
+			node = node->nextNode;
+		}
+		// Add cursor width
+		++total;
+
+		if (total >= width)
+		{
+			self->data.curx = min_usize(curx, total - (usize)width);
 		}
 	}
 	else
@@ -1180,8 +1206,7 @@ void fFile_scrollHor(fFile_t * restrict self, u32 width, isize deltaCh)
 	self->data.bUpdateAll = true;
 }
 
-
-void fFile_destroy(fFile_t * restrict self)
+void fFile_destroy(fFile_t *restrict self)
 {
 	assert(self != NULL);
 
@@ -1194,7 +1219,7 @@ void fFile_destroy(fFile_t * restrict self)
 		self->fileName = NULL;
 	}
 }
-void fFile_free(fFile_t * restrict self)
+void fFile_free(fFile_t *restrict self)
 {
 	assert(self != NULL);
 

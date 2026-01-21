@@ -11,16 +11,16 @@
 #include "keywords/fKeywordsRust.h"
 #include "keywords/fKeywordsGo.h"
 
-fStx_e fStx_detect(const wchar * restrict fileName)
+fStx_e fStx_detect(const wchar *restrict fileName)
 {
 	assert(fileName != NULL);
-	
+
 	fStx_e syntax = fstxNONE;
-	
-	const wchar * restrict end = fileName + wcslen(fileName);
+
+	const wchar *restrict end = fileName + wcslen(fileName);
 	if (fileName != end)
 	{
-		const wchar * restrict dot = end - 1;
+		const wchar *restrict dot = end - 1;
 		for (u8 i = 0; (dot != fileName) && (i < (MAX_SUFFIX - 1)); --dot, ++i)
 		{
 			if (*dot == L'.')
@@ -35,7 +35,7 @@ fStx_e fStx_detect(const wchar * restrict fileName)
 
 			wchar suffix[MAX_SUFFIX];
 			++end;
-			for (wchar * suf = suffix; dot != end; ++dot, ++suf)
+			for (wchar *suf = suffix; dot != end; ++dot, ++suf)
 			{
 				*suf = (wchar)towlower(*dot);
 			}
@@ -45,9 +45,9 @@ fStx_e fStx_detect(const wchar * restrict fileName)
 				syntax = fstxC;
 			}
 			else if ((wcscmp(suffix, L"C") == 0) || (wcscmp(suffix, L"cc") == 0) ||
-				(wcscmp(suffix, L"cpp") == 0) || (wcscmp(suffix, L"cxx") == 0) || (wcscmp(suffix, L"c++") == 0) ||
-				(wcscmp(suffix, L"H") == 0) || (wcscmp(suffix, L"hh") == 0) ||
-				(wcscmp(suffix, L"hpp") == 0) || (wcscmp(suffix, L"hxx") == 0) || (wcscmp(suffix, L"h++") == 0))
+					 (wcscmp(suffix, L"cpp") == 0) || (wcscmp(suffix, L"cxx") == 0) || (wcscmp(suffix, L"c++") == 0) ||
+					 (wcscmp(suffix, L"H") == 0) || (wcscmp(suffix, L"hh") == 0) ||
+					 (wcscmp(suffix, L"hpp") == 0) || (wcscmp(suffix, L"hxx") == 0) || (wcscmp(suffix, L"h++") == 0))
 			{
 				syntax = fstxCPP;
 			}
@@ -97,28 +97,27 @@ fStx_e fStx_detect(const wchar * restrict fileName)
 	return syntax;
 }
 
-const char * fStx_name(fStx_e fs)
+const char *fStx_name(fStx_e fs)
 {
-	static const char * syntaxes[fstxSIZE] = {
+	static const char *syntaxes[fstxSIZE] = {
 		[fstxNONE] = "None",
-		[fstxC]    = "C",
-		[fstxCPP]  = "C++",
-		[fstxMD]   = "Markdown",
-		[fstxPY]   = "Python",
-		[fstxJS]   = "ECMAScript (JavaScript)",
+		[fstxC] = "C",
+		[fstxCPP] = "C++",
+		[fstxMD] = "Markdown",
+		[fstxPY] = "Python",
+		[fstxJS] = "ECMAScript (JavaScript)",
 		[fstxJSON] = "JavaScript Object Notation (JSON)",
-		[fstxCSS]  = "Cascading Style Sheets (CSS)",
-		[fstxXML]  = "eXtensible Markup Language (XML)",
+		[fstxCSS] = "Cascading Style Sheets (CSS)",
+		[fstxXML] = "eXtensible Markup Language (XML)",
 		[fstxHTML] = "HyperText Markup Language (HTML)",
-		[fstxSVG]  = "Scalable Vector Graphics (SVG)",
+		[fstxSVG] = "Scalable Vector Graphics (SVG)",
 		[fstxRust] = "Rust",
-		[fstxGo]   = "Go (Golang)"
-	};
+		[fstxGo] = "Go (Golang)"};
 
 	assert(fs < fstxSIZE);
 	return syntaxes[fs];
 }
-bool fStx_autoAlloc(fLine_t * restrict node)
+bool fStx_autoAlloc(fLine_t *restrict node)
 {
 	assert(node != NULL);
 
@@ -135,15 +134,14 @@ bool fStx_autoAlloc(fLine_t * restrict node)
 }
 
 void fStx_checkGenericToken(
-	fLine_t * restrict node, usize start, usize lasti,
+	fLine_t *restrict node, usize start, usize lasti,
 	WORD kwCol,
-	const fStatHash_t * restrict map
-)
+	const fStatHash_t *restrict map)
 {
-	assert(node  != NULL);
+	assert(node != NULL);
 	assert(lasti >= start);
-	assert(map   != NULL);
-	
+	assert(map != NULL);
+
 	if ((lasti - start) < 1)
 	{
 		return;
@@ -185,72 +183,72 @@ void fStx_checkGenericToken(
 		}
 	}
 }
-void fStx_checkCToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
+void fStx_checkCToken(fLine_t *restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_C_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
+	static fStatHash_t map = {0};
 
 	assert(node != NULL);
-	
+
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_C_TOKEN_MEM, s_keyWordsC, ARRAYSIZE(s_keyWordsC));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkCPPToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
+void fStx_checkCPPToken(fLine_t *restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_CPP_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
+	static fStatHash_t map = {0};
 
 	assert(node != NULL);
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_CPP_TOKEN_MEM, s_keyWordsCPP, ARRAYSIZE(s_keyWordsCPP));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkPyToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
+void fStx_checkPyToken(fLine_t *restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_PY_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
-	
+	static fStatHash_t map = {0};
+
 	assert(node != NULL);
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_PY_TOKEN_MEM, s_keyWordsPy, ARRAYSIZE(s_keyWordsPy));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkJSToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
+void fStx_checkJSToken(fLine_t *restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_JS_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
+	static fStatHash_t map = {0};
 
 	assert(node != NULL);
 
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_JS_TOKEN_MEM, s_keyWordsJS, ARRAYSIZE(s_keyWordsJS));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkRustToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
+void fStx_checkRustToken(fLine_t *restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_RUST_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
-	
+	static fStatHash_t map = {0};
+
 	assert(node != NULL);
-	
+
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_RUST_TOKEN_MEM, s_keyWordsRust, ARRAYSIZE(s_keyWordsRust));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
-void fStx_checkGoToken(fLine_t * restrict node, usize start, usize lasti, WORD kwCol)
+void fStx_checkGoToken(fLine_t *restrict node, usize start, usize lasti, WORD kwCol)
 {
 	static usize memory[MAX_GO_TOKEN_MEM];
-	static fStatHash_t map = { 0 };
-	
+	static fStatHash_t map = {0};
+
 	assert(node != NULL);
-	
+
 	fStatHash_initData(&map, memory, sizeof(usize) * MAX_GO_TOKEN_MEM, s_keyWordsGo, ARRAYSIZE(s_keyWordsGo));
 	fStx_checkGenericToken(node, start, lasti, kwCol, &map);
 }
 
-bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
+bool fStx_parseNone(fLine_t *restrict node, const WORD *restrict colors)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
-	
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -272,16 +270,15 @@ bool fStx_parseNone(fLine_t * restrict node, const WORD * restrict colors)
 	return true;
 }
 bool fStx_parseCLike(
-	fLine_t * restrict node,
-	const WORD * restrict colors,
-	fStx_tokeniserFunc_t func,
-	fStx_e lang
-)
+	fLine_t *restrict node,
+	const WORD *restrict colors,
+	fStx_tokeniserFunc_t tokeniser_func,
+	fStx_e lang)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
-	assert(func   != NULL);
-	
+	assert(tokeniser_func != NULL);
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
@@ -292,8 +289,8 @@ bool fStx_parseCLike(
 
 	usize tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
-		isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
-	
+		 isZero = false, hex = false, octal = false, comment = false, blockComment = false, preproc = false;
+
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
 	usize previ = 0;
@@ -308,9 +305,8 @@ bool fStx_parseCLike(
 		}
 		node->syntax[j] = colors[tcTEXT];
 
-
 		const wchar ch = node->line[i];
-		
+
 		if (blockComment)
 		{
 			if ((ch == L'/') && (j > 0) && (node->line[previ] == L'*'))
@@ -353,16 +349,16 @@ bool fStx_parseCLike(
 		else if ((ch == L'*') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			blockComment = true;
-			node->syntax[j-1] = colors[tcCOMMENT_BLOCK];
-			node->syntax[j]   = colors[tcCOMMENT_BLOCK];
+			node->syntax[j - 1] = colors[tcCOMMENT_BLOCK];
+			node->syntax[j] = colors[tcCOMMENT_BLOCK];
 			previ = i;
 			continue;
 		}
 		else if ((ch == '/') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			comment = true;
-			node->syntax[j-1] = colors[tcCOMMENT_LINE];
-			node->syntax[j]   = colors[tcCOMMENT_LINE];
+			node->syntax[j - 1] = colors[tcCOMMENT_LINE];
+			node->syntax[j] = colors[tcCOMMENT_LINE];
 			previ = i;
 			continue;
 		}
@@ -386,100 +382,100 @@ bool fStx_parseCLike(
 		{
 			node->syntax[j] = colors[tcPREPROC];
 		}
-		
+
 		switch (ch)
 		{
-			case L'(':
-			case L')':
-			case L'{':
-			case L'}':
-			case L'[':
-			case L']':
-			case L'.':
-			case L',':
-			case L'*':
-			case L'+':
-			case L'-':
-			case L'/':
-			case L'&':
-			case L'|':
-			case L'<':
-			case L'>':
-			case L'=':
-			case L';':
-			case L':':
-				node->syntax[j] = colors[tcPUNCTUATION];
-				/* fall through */
-			case L' ':
-			case L'\t':
-				letter = false;
-				func(node, tokenStart, previ, colors[tcKEYWORD]);
-				tokenStart = i;
+		case L'(':
+		case L')':
+		case L'{':
+		case L'}':
+		case L'[':
+		case L']':
+		case L'.':
+		case L',':
+		case L'*':
+		case L'+':
+		case L'-':
+		case L'/':
+		case L'&':
+		case L'|':
+		case L'<':
+		case L'>':
+		case L'=':
+		case L';':
+		case L':':
+			node->syntax[j] = colors[tcPUNCTUATION];
+			/* fall through */
+		case L' ':
+		case L'\t':
+			letter = false;
+			tokeniser_func(node, tokenStart, previ, colors[tcKEYWORD]);
+			tokenStart = i;
+			break;
+		case L'\'':
+			littleQuote = true;
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcCHARACTER_QUOTE];
+			break;
+		case L'"':
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcSTRING_QUOTE];
+			break;
+		case L'#':
+			if (bAllowPreproc)
+			{
+				preproc = true;
 				break;
-			case L'\'':
-				littleQuote = true;
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcCHARACTER_QUOTE];
-				break;
-			case L'"':
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcSTRING_QUOTE];
-				break;
-			case L'#':
-				if (bAllowPreproc)
+			}
+			/* fall through */
+		default:
+			if (hex)
+			{
+				const wchar lch = (wchar)towlower(ch);
+				if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 				{
-					preproc = true;
-					break;
-				}
-				/* fall through */
-			default:
-				if (hex)
-				{
-					const wchar lch = (wchar)towlower(ch);
-					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
-					{
-						node->syntax[j] = colors[tcNUMBER];
-					}
-					else
-					{
-						hex = false;
-						tokenStart = i;
-					}
-				}
-				else if (isZero || octal)
-				{
-					isZero = false;
-					if (!letter && ((ch >= L'0') && (ch <= '7')))
-					{
-						octal = true;
-						node->syntax[j] = colors[tcOCT];
-					}
-					else
-					{
-						octal = false;
-						tokenStart = i;
-					}
-				}
-				else if ((ch >= L'0') && (ch <= L'9'))
-				{
-					if (!letter)
-					{
-						isZero = (ch == L'0');
-						node->syntax[j] = colors[tcNUMBER];
-						tokenStart = i;
-					}
+					node->syntax[j] = colors[tcNUMBER];
 				}
 				else
 				{
-					const wchar lch = (wchar)towlower(ch);
-					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
-					if (!letter)
-					{
-						tokenStart = i;
-					}
+					hex = false;
+					tokenStart = i;
 				}
+			}
+			else if (isZero || octal)
+			{
+				isZero = false;
+				if (!letter && ((ch >= L'0') && (ch <= '7')))
+				{
+					octal = true;
+					node->syntax[j] = colors[tcOCT];
+				}
+				else
+				{
+					octal = false;
+					tokenStart = i;
+				}
+			}
+			else if ((ch >= L'0') && (ch <= L'9'))
+			{
+				if (!letter)
+				{
+					isZero = (ch == L'0');
+					node->syntax[j] = colors[tcNUMBER];
+					tokenStart = i;
+				}
+			}
+			else
+			{
+				const wchar lch = (wchar)towlower(ch);
+				letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+				if (!letter)
+				{
+					tokenStart = i;
+				}
+			}
 		}
 
 		previ = i;
@@ -487,30 +483,30 @@ bool fStx_parseCLike(
 
 	if (!blockComment && !comment && !preproc && !quoteMode)
 	{
-		func(node, tokenStart, previ, colors[tcKEYWORD]);
+		tokeniser_func(node, tokenStart, previ, colors[tcKEYWORD]);
 	}
 
 	node->userValue.bits.b1 = blockComment;
 
 	return true;
 }
-bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
+bool fStx_parseMd(fLine_t *restrict node, const WORD *restrict colors)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
 
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
-	
+
 	/*
 		Markdown logic:
-		
+
 		Find '#' at the beginning of the line, there can be less than tabWidth worth of spaces
 		Count number of spaces at beginning of line, if more than tabWidth, highlight
 		If less than tabWidth search dash '-'
-		
+
 		Patterns:
 		![asd]
 		[asd]
@@ -518,15 +514,15 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 		*asd* & _asd_
 		**asd** & __asd__
 		~~sdd~~
-		
+
 	*/
-	
+
 	usize firstChIdx = 0;
 	bool done = false, headingMode = false, valueMode = false, bracketMode = false,
-		extraBracketMode = false, italicsMode = false, boldMode = false,
-		containsStar = false, strikeMode = false, parenMode1 = false,
-		parenMode2 = false, enable = false, coneMode = false, codeMode = false;
-	
+		 extraBracketMode = false, italicsMode = false, boldMode = false,
+		 containsStar = false, strikeMode = false, parenMode1 = false,
+		 parenMode2 = false, enable = false, coneMode = false, codeMode = false;
+
 	for (usize i = 0, j = 0, previ = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
@@ -539,7 +535,7 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 		node->syntax[j] = colors[tcTEXT];
 
 		const wchar ch = node->line[i];
-		
+
 		if (valueMode)
 		{
 			node->syntax[j] = colors[tcMD_VALUE];
@@ -561,8 +557,8 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 			if ((ch == L'~') && (node->line[previ] == L'~'))
 			{
 				strikeMode = false;
-				node->syntax[j-1] = colors[tcPUNCTUATION];
-				node->syntax[j]   = colors[tcPUNCTUATION];
+				node->syntax[j - 1] = colors[tcPUNCTUATION];
+				node->syntax[j] = colors[tcPUNCTUATION];
 			}
 			else
 			{
@@ -571,12 +567,12 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		else if (italicsMode)
 		{
-			if (containsStar && ( ( (ch == L'*') && (node->line[previ] == L'*') ) || ( (ch == L'_') && (node->line[previ] == L'_') ) ) )
+			if (containsStar && (((ch == L'*') && (node->line[previ] == L'*')) || ((ch == L'_') && (node->line[previ] == L'_'))))
 			{
 				boldMode = true;
 				italicsMode = false;
-				node->syntax[j]   = colors[tcMD_BOLD];
-				node->syntax[j-1] = colors[tcMD_BOLD];
+				node->syntax[j] = colors[tcMD_BOLD];
+				node->syntax[j - 1] = colors[tcMD_BOLD];
 			}
 			else if ((ch == L'*') || (ch == L'_'))
 			{
@@ -592,7 +588,7 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		else if (boldMode)
 		{
-			if ( ( (ch == L'*') && (node->line[previ] == L'*') ) || ( (ch == L'_') && (node->line[previ] == L'_') ) )
+			if (((ch == L'*') && (node->line[previ] == L'*')) || ((ch == L'_') && (node->line[previ] == L'_')))
 			{
 				boldMode = false;
 				node->syntax[j] = colors[tcMD_BOLD];
@@ -688,7 +684,7 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 				bracketMode = true;
 				if ((j > 0) && (node->line[previ] == L'!'))
 				{
-					node->syntax[j-1] = colors[tcPUNCTUATION];
+					node->syntax[j - 1] = colors[tcPUNCTUATION];
 					extraBracketMode = true;
 				}
 				node->syntax[j] = colors[tcPUNCTUATION];
@@ -702,8 +698,8 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 			else if ((ch == L'~') && (j > 0) && (node->line[previ] == L'~'))
 			{
 				strikeMode = true;
-				node->syntax[j-1] = colors[tcPUNCTUATION];
-				node->syntax[j]   = colors[tcPUNCTUATION];
+				node->syntax[j - 1] = colors[tcPUNCTUATION];
+				node->syntax[j] = colors[tcPUNCTUATION];
 			}
 			else if (ch == L'`')
 			{
@@ -718,9 +714,9 @@ bool fStx_parseMd(fLine_t * restrict node, const WORD * restrict colors)
 	return true;
 }
 
-bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
+bool fStx_parsePy(fLine_t *restrict node, const WORD *restrict colors)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
 
 	if (!fStx_autoAlloc(node))
@@ -730,10 +726,10 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 
 	usize tokenStart = 0;
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
-		isZero = false, hex = false, octal = false, comment = false, blockComment = false,
-		preComment = false, firstQuote = false;
-	
-	littleQuote  = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
+		 isZero = false, hex = false, octal = false, comment = false, blockComment = false,
+		 preComment = false, firstQuote = false;
+
+	littleQuote = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
 	usize previ = 0, prevprevi = UINT32_MAX;
@@ -748,13 +744,11 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		node->syntax[j] = colors[tcTEXT];
 
-
 		const wchar ch = node->line[i];
-		
+
 		if (blockComment)
 		{
-			if ((j > 1) && (prevprevi != UINT32_MAX) && ((!littleQuote && (ch == L'"') && (node->line[previ] == L'"') && (node->line[prevprevi] == L'"')) ||
-				(littleQuote && (ch == L'\'') && (node->line[previ] == L'\'') && (node->line[prevprevi] == L'\''))) )
+			if ((j > 1) && (prevprevi != UINT32_MAX) && ((!littleQuote && (ch == L'"') && (node->line[previ] == L'"') && (node->line[prevprevi] == L'"')) || (littleQuote && (ch == L'\'') && (node->line[previ] == L'\'') && (node->line[prevprevi] == L'\''))))
 			{
 				blockComment = false;
 				littleQuote = false;
@@ -808,9 +802,9 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 			{
 				prevprevi = UINT32_MAX;
 				blockComment = true;
-				node->syntax[j-2] = colors[tcCOMMENT_BLOCK];
-				node->syntax[j-1] = colors[tcCOMMENT_BLOCK];
-				node->syntax[j]   = colors[tcCOMMENT_BLOCK];
+				node->syntax[j - 2] = colors[tcCOMMENT_BLOCK];
+				node->syntax[j - 1] = colors[tcCOMMENT_BLOCK];
+				node->syntax[j] = colors[tcCOMMENT_BLOCK];
 				previ = i;
 			}
 			continue;
@@ -838,95 +832,95 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 				octal = true;
 			}
 		}
-		
+
 		switch (ch)
 		{
-			case L'(':
-			case L')':
-			case L'{':
-			case L'}':
-			case L'[':
-			case L']':
-			case L'.':
-			case L',':
-			case L'*':
-			case L'+':
-			case L'-':
-			case L'/':
-			case L'&':
-			case L'|':
-			case L'<':
-			case L'>':
-			case L'=':
-			case L';':
-			case L':':
-				node->syntax[j] = colors[tcPUNCTUATION];
-				/* fall through */
-			case L' ':
-			case L'\t':
-				letter = false;
-				fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
-				tokenStart = i;
-				break;
-			case L'\'':
-				littleQuote = true;
-				quoteMode = true;
-				firstQuote = true;
-				letter = false;
-				node->syntax[j] = colors[tcCHARACTER_QUOTE];
-				break;
-			case L'"':
-				quoteMode = true;
-				firstQuote = true;
-				letter = false;
-				node->syntax[j] = colors[tcSTRING_QUOTE];
-				break;
-			default:
-				if (hex)
+		case L'(':
+		case L')':
+		case L'{':
+		case L'}':
+		case L'[':
+		case L']':
+		case L'.':
+		case L',':
+		case L'*':
+		case L'+':
+		case L'-':
+		case L'/':
+		case L'&':
+		case L'|':
+		case L'<':
+		case L'>':
+		case L'=':
+		case L';':
+		case L':':
+			node->syntax[j] = colors[tcPUNCTUATION];
+			/* fall through */
+		case L' ':
+		case L'\t':
+			letter = false;
+			fStx_checkPyToken(node, tokenStart, previ, colors[tcKEYWORD]);
+			tokenStart = i;
+			break;
+		case L'\'':
+			littleQuote = true;
+			quoteMode = true;
+			firstQuote = true;
+			letter = false;
+			node->syntax[j] = colors[tcCHARACTER_QUOTE];
+			break;
+		case L'"':
+			quoteMode = true;
+			firstQuote = true;
+			letter = false;
+			node->syntax[j] = colors[tcSTRING_QUOTE];
+			break;
+		default:
+			if (hex)
+			{
+				const wchar lch = (wchar)towlower(ch);
+				if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 				{
-					const wchar lch = (wchar)towlower(ch);
-					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
-					{
-						node->syntax[j] = colors[tcNUMBER];
-					}
-					else
-					{
-						hex = false;
-						tokenStart = i;
-					}
-				}
-				else if (isZero || octal)
-				{
-					isZero = false;
-					if (!letter && ((ch >= L'0') && (ch <= '7')))
-					{
-						octal = true;
-						node->syntax[j] = colors[tcOCT];
-					}
-					else
-					{
-						octal = false;
-						tokenStart = i;
-					}
-				}
-				else if ((ch >= L'0') && (ch <= L'9'))
-				{
-					if (!letter)
-					{
-						isZero = (ch == L'0');
-						node->syntax[j] = colors[tcNUMBER];
-						tokenStart = i;
-					}
+					node->syntax[j] = colors[tcNUMBER];
 				}
 				else
 				{
-					const wchar lch = (wchar)towlower(ch);
-					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
-					if (!letter)
-					{
-						tokenStart = i;
-					}
+					hex = false;
+					tokenStart = i;
 				}
+			}
+			else if (isZero || octal)
+			{
+				isZero = false;
+				if (!letter && ((ch >= L'0') && (ch <= '7')))
+				{
+					octal = true;
+					node->syntax[j] = colors[tcOCT];
+				}
+				else
+				{
+					octal = false;
+					tokenStart = i;
+				}
+			}
+			else if ((ch >= L'0') && (ch <= L'9'))
+			{
+				if (!letter)
+				{
+					isZero = (ch == L'0');
+					node->syntax[j] = colors[tcNUMBER];
+					tokenStart = i;
+				}
+			}
+			else
+			{
+				const wchar lch = (wchar)towlower(ch);
+				letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+				if (!letter)
+				{
+					tokenStart = i;
+				}
+			}
 		}
 
 		previ = i;
@@ -943,9 +937,9 @@ bool fStx_parsePy(fLine_t * restrict node, const WORD * restrict colors)
 	return true;
 }
 
-bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
+bool fStx_parseJSON(fLine_t *restrict node, const WORD *restrict colors)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
 
 	if (!fStx_autoAlloc(node))
@@ -954,8 +948,8 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 	}
 
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
-		isZero = false, hex = false, octal = false;
-	
+		 isZero = false, hex = false, octal = false;
+
 	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
@@ -967,9 +961,8 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		node->syntax[j] = colors[tcTEXT];
 
-
 		const wchar ch = node->line[i];
-		
+
 		if (quoteMode)
 		{
 			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
@@ -1005,91 +998,91 @@ bool fStx_parseJSON(fLine_t * restrict node, const WORD * restrict colors)
 				octal = true;
 			}
 		}
-		
+
 		switch (ch)
 		{
-			case L'{':
-			case L'}':
-			case L'[':
-			case L']':
-			case L'.':
-			case L',':
-			case L':':
-				node->syntax[j] = colors[tcPUNCTUATION];
-				/* fall through */
-			case L' ':
-			case L'\t':
-				letter = false;
-				break;
-			case L'\'':
-				littleQuote = true;
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcCHARACTER_QUOTE];
-				break;
-			case L'"':
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcSTRING_QUOTE];
-				break;
-			default:
-				if (hex)
+		case L'{':
+		case L'}':
+		case L'[':
+		case L']':
+		case L'.':
+		case L',':
+		case L':':
+			node->syntax[j] = colors[tcPUNCTUATION];
+			/* fall through */
+		case L' ':
+		case L'\t':
+			letter = false;
+			break;
+		case L'\'':
+			littleQuote = true;
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcCHARACTER_QUOTE];
+			break;
+		case L'"':
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcSTRING_QUOTE];
+			break;
+		default:
+			if (hex)
+			{
+				const wchar lch = (wchar)towlower(ch);
+				if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 				{
-					const wchar lch = (wchar)towlower(ch);
-					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
-					{
-						node->syntax[j] = colors[tcNUMBER];
-					}
-					else
-					{
-						hex = false;
-					}
-				}
-				else if (isZero || octal)
-				{
-					isZero = false;
-					if (!letter && ((ch >= L'0') && (ch <= '7')))
-					{
-						octal = true;
-						node->syntax[j] = colors[tcOCT];
-					}
-					else
-					{
-						octal = false;
-					}
-				}
-				else if ((ch >= L'0') && (ch <= L'9'))
-				{
-					if (!letter)
-					{
-						isZero = (ch == L'0');
-						node->syntax[j] = colors[tcNUMBER];
-					}
+					node->syntax[j] = colors[tcNUMBER];
 				}
 				else
 				{
-					const wchar lch = (wchar)towlower(ch);
-					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+					hex = false;
 				}
+			}
+			else if (isZero || octal)
+			{
+				isZero = false;
+				if (!letter && ((ch >= L'0') && (ch <= '7')))
+				{
+					octal = true;
+					node->syntax[j] = colors[tcOCT];
+				}
+				else
+				{
+					octal = false;
+				}
+			}
+			else if ((ch >= L'0') && (ch <= L'9'))
+			{
+				if (!letter)
+				{
+					isZero = (ch == L'0');
+					node->syntax[j] = colors[tcNUMBER];
+				}
+			}
+			else
+			{
+				const wchar lch = (wchar)towlower(ch);
+				letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+			}
 		}
 	}
 
 	return true;
 }
-bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
+bool fStx_parseCSS(fLine_t *restrict node, const WORD *restrict colors)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
-	
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
 
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
-		isZero = false, hex = false, octal = false, propertyMode = false,
-		valueMode = false, blockComment = false;
-	
+		 isZero = false, hex = false, octal = false, propertyMode = false,
+		 valueMode = false, blockComment = false;
+
 	propertyMode = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b2 : false;
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
@@ -1105,9 +1098,8 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		node->syntax[j] = colors[tcCSS_SELECTOR];
 
-
 		const wchar ch = node->line[i];
-		
+
 		if (blockComment)
 		{
 			if ((ch == L'/') && (j > 0) && (node->line[previ] == L'*'))
@@ -1141,8 +1133,8 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 		else if ((ch == L'*') && (j > 0) && (node->line[previ] == L'/'))
 		{
 			blockComment = true;
-			node->syntax[j-1] = colors[tcCOMMENT_BLOCK];
-			node->syntax[j]   = colors[tcCOMMENT_BLOCK];
+			node->syntax[j - 1] = colors[tcCOMMENT_BLOCK];
+			node->syntax[j] = colors[tcCOMMENT_BLOCK];
 			previ = i;
 			continue;
 		}
@@ -1187,72 +1179,72 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 				continue;
 			}
 		}
-		
+
 		switch (ch)
 		{
-			case L'{':
-				propertyMode = true;
-				/* fall through */
-			case L'.':
-			case L',':
-			case L':':
-			case L';':
-				node->syntax[j] = colors[tcPUNCTUATION];
-				/* fall through */
-			case L' ':
-			case L'\t':
-				letter = false;
-				break;
-			case L'\'':
-				littleQuote = true;
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcCHARACTER_QUOTE];
-				break;
-			case L'"':
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcSTRING_QUOTE];
-				break;
-			default:
-				if (hex)
+		case L'{':
+			propertyMode = true;
+			/* fall through */
+		case L'.':
+		case L',':
+		case L':':
+		case L';':
+			node->syntax[j] = colors[tcPUNCTUATION];
+			/* fall through */
+		case L' ':
+		case L'\t':
+			letter = false;
+			break;
+		case L'\'':
+			littleQuote = true;
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcCHARACTER_QUOTE];
+			break;
+		case L'"':
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcSTRING_QUOTE];
+			break;
+		default:
+			if (hex)
+			{
+				const wchar lch = (wchar)towlower(ch);
+				if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 				{
-					const wchar lch = (wchar)towlower(ch);
-					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
-					{
-						node->syntax[j] = colors[tcNUMBER];
-					}
-					else
-					{
-						hex = false;
-					}
-				}
-				else if (isZero || octal)
-				{
-					isZero = false;
-					if (!letter && ((ch >= L'0') && (ch <= '7')))
-					{
-						octal = true;
-						node->syntax[j] = colors[tcOCT];
-					}
-					else
-					{
-						octal = false;
-					}
-				}
-				else if ((ch >= L'0') && (ch <= L'9'))
-				{
-					if (!letter)
-					{
-						isZero = (ch == L'0');
-						node->syntax[j] = colors[tcNUMBER];
-					}
+					node->syntax[j] = colors[tcNUMBER];
 				}
 				else
 				{
-					const wchar lch = (wchar)towlower(ch);
-					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+					hex = false;
 				}
+			}
+			else if (isZero || octal)
+			{
+				isZero = false;
+				if (!letter && ((ch >= L'0') && (ch <= '7')))
+				{
+					octal = true;
+					node->syntax[j] = colors[tcOCT];
+				}
+				else
+				{
+					octal = false;
+				}
+			}
+			else if ((ch >= L'0') && (ch <= L'9'))
+			{
+				if (!letter)
+				{
+					isZero = (ch == L'0');
+					node->syntax[j] = colors[tcNUMBER];
+				}
+			}
+			else
+			{
+				const wchar lch = (wchar)towlower(ch);
+				letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+			}
 		}
 
 		previ = i;
@@ -1264,25 +1256,25 @@ bool fStx_parseCSS(fLine_t * restrict node, const WORD * restrict colors)
 	return true;
 }
 
-bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
+bool fStx_parseXML(fLine_t *restrict node, const WORD *restrict colors)
 {
-	assert(node   != NULL);
+	assert(node != NULL);
 	assert(colors != NULL);
-	
+
 	if (!fStx_autoAlloc(node))
 	{
 		return false;
 	}
 
 	bool quoteMode = false, littleQuote = false, skip = false, letter = false,
-		isZero = false, hex = false, octal = false, tagMode = false, firstTag = false,
-		tagEnd = false, blockComment = false, specialTag = false, value = false,
-		escapeChar = false;
+		 isZero = false, hex = false, octal = false, tagMode = false, firstTag = false,
+		 tagEnd = false, blockComment = false, specialTag = false, value = false,
+		 escapeChar = false;
 
 	blockComment = (node->prevNode != NULL) ? node->prevNode->userValue.bits.b1 : false;
 
-	usize comm[5] = { 0 };
-	
+	usize comm[5] = {0};
+
 	for (usize i = 0, j = 0; i < node->lineEndx; ++i, ++j)
 	{
 		if ((i == node->curx) && (node->freeSpaceLen > 0))
@@ -1294,9 +1286,8 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		node->syntax[j] = colors[tcTEXT];
 
-
 		const wchar ch = node->line[i];
-		
+
 		if (quoteMode)
 		{
 			node->syntax[j] = colors[littleQuote ? tcCHARACTER : tcSTRING];
@@ -1408,7 +1399,7 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 					if (comm[3] && comm[4])
 					{
 						blockComment = true;
-						node->syntax[j]       = colors[tcCOMMENT_BLOCK];
+						node->syntax[j] = colors[tcCOMMENT_BLOCK];
 						node->syntax[comm[2]] = colors[tcCOMMENT_BLOCK];
 						node->syntax[comm[1]] = colors[tcCOMMENT_BLOCK];
 						node->syntax[comm[0]] = colors[tcCOMMENT_BLOCK];
@@ -1434,79 +1425,79 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 		}
 		else if (ch == L'<')
 		{
-			tagMode  = true;
+			tagMode = true;
 			firstTag = true;
-			comm[0]  = j;
+			comm[0] = j;
 			node->syntax[j] = colors[tcKEYWORD];
 			value = false;
 		}
-		
+
 		switch (ch)
 		{
-			case '&':
-				node->syntax[j] = colors[tcESCAPE];
-				escapeChar = true;
-				break;
-			case L'.':
-			case L',':
-			case L'=':
-				node->syntax[j] = colors[tcPUNCTUATION];
-				/* fall through */
-			case L' ':
-			case L'\t':
-				letter = false;
-				value = true;
-				break;
-			case L'\'':
-				littleQuote = true;
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcCHARACTER_QUOTE];
-				break;
-			case L'"':
-				quoteMode = true;
-				letter = false;
-				node->syntax[j] = colors[tcSTRING_QUOTE];
-				break;
-			default:
-				if (hex)
+		case '&':
+			node->syntax[j] = colors[tcESCAPE];
+			escapeChar = true;
+			break;
+		case L'.':
+		case L',':
+		case L'=':
+			node->syntax[j] = colors[tcPUNCTUATION];
+			/* fall through */
+		case L' ':
+		case L'\t':
+			letter = false;
+			value = true;
+			break;
+		case L'\'':
+			littleQuote = true;
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcCHARACTER_QUOTE];
+			break;
+		case L'"':
+			quoteMode = true;
+			letter = false;
+			node->syntax[j] = colors[tcSTRING_QUOTE];
+			break;
+		default:
+			if (hex)
+			{
+				const wchar lch = (wchar)towlower(ch);
+				if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
 				{
-					const wchar lch = (wchar)towlower(ch);
-					if (!letter && (((ch >= L'0') && (ch <= L'9')) || ((lch >= L'a') && (lch <= L'f'))))
-					{
-						node->syntax[j] = colors[tcNUMBER];
-					}
-					else
-					{
-						hex = false;
-					}
-				}
-				else if (isZero || octal)
-				{
-					isZero = false;
-					if (!letter && ((ch >= L'0') && (ch <= '7')))
-					{
-						octal = true;
-						node->syntax[j] = colors[tcOCT];
-					}
-					else
-					{
-						octal = false;
-					}
-				}
-				else if ((ch >= L'0') && (ch <= L'9'))
-				{
-					if (!letter)
-					{
-						isZero = (ch == L'0');
-						node->syntax[j] = colors[tcNUMBER];
-					}
+					node->syntax[j] = colors[tcNUMBER];
 				}
 				else
 				{
-					const wchar lch = (wchar)towlower(ch);
-					letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+					hex = false;
 				}
+			}
+			else if (isZero || octal)
+			{
+				isZero = false;
+				if (!letter && ((ch >= L'0') && (ch <= '7')))
+				{
+					octal = true;
+					node->syntax[j] = colors[tcOCT];
+				}
+				else
+				{
+					octal = false;
+				}
+			}
+			else if ((ch >= L'0') && (ch <= L'9'))
+			{
+				if (!letter)
+				{
+					isZero = (ch == L'0');
+					node->syntax[j] = colors[tcNUMBER];
+				}
+			}
+			else
+			{
+				const wchar lch = (wchar)towlower(ch);
+				letter = ((lch >= L'a') && (lch <= L'z')) || (ch == L'_');
+			}
 		}
 	}
 
@@ -1514,4 +1505,3 @@ bool fStx_parseXML(fLine_t * restrict node, const WORD * restrict colors)
 
 	return true;
 }
-

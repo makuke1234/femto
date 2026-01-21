@@ -7,39 +7,39 @@
 
 /**
  * @brief Enables/disables the logger
- * 
+ *
  * @param enable Determines whether to enable or disable the logger
  */
 void fLog_enable(bool enable);
 /**
  * @brief Initialise profiler, exits on failure
- * 
+ *
  */
 void fLog_init(void);
 /**
  * @brief Closes profiler
- * 
+ *
  */
 void fLog_close(void);
 /**
  * @brief Write a profiler log message
- * 
+ *
  * @param function Function name of writer
  * @param format Standard printf message format
  * @param ... Variadic format arguments
  */
-void fLog_write_inner(const char * restrict function, const char * restrict format, ...);
+void fLog_write_inner(const char *restrict function, const char *restrict format, ...);
 /**
  * @brief Start profiler timestamp
- * 
+ *
  */
 void fLog_start(void);
 /**
  * @brief Stop profiler timestamp
- * 
+ *
  * @param funcName Function name of timestamp writer
  */
-void fLog_end_inner(const char * funcName);
+void fLog_end_inner(const char *funcName);
 
 #define fLog_write(...) fLog_write_inner(__func__, __VA_ARGS__)
 #define fLog_end() fLog_end_inner(__func__)

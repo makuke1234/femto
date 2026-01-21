@@ -1,24 +1,24 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include "../src/common.h"
+#include "../src/fCommon.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
 
-static const char * lib = "";
+static const char *lib = "";
 
-static inline void setlib(const char * newlib)
+static inline void setlib(const char *newlib)
 {
 	lib = newlib;
 }
 
-static inline void test(bool cond, const char * errmsg, ...)
+static inline void test(bool cond, const char *errmsg, ...)
 {
 	static int testnum = 0;
-	
+
 	++testnum;
 	if (cond)
 	{
@@ -36,7 +36,7 @@ static inline void test(bool cond, const char * errmsg, ...)
 	}
 }
 
-static inline void testn(const char * newlib, bool cond, const char * errmsg)
+static inline void testn(const char *newlib, bool cond, const char *errmsg)
 {
 	setlib(newlib);
 	test(cond, errmsg);

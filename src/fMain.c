@@ -1,16 +1,20 @@
 #include "femto.h"
 #include "fArg.h"
-#include "fSyntax.h"
 
 // This variable has to be static because it is used by the exit handler
 // which is run after returning from wmain
 static fData_t editor;
 
-int wmain(int argc, const wchar * argv[])
+int wmain(int argc, const wchar *argv[])
 {
 	assert(argc > 0);
 	assert(argv != NULL);
-	
+
+#ifdef _DEBUG
+	printf("PID: %lu, Press any key to continue...", GetCurrentProcessId());
+	getchar();
+#endif
+
 	femto_exitHandlerSetVars(&editor);
 	if (!fData_reset(&editor))
 	{
@@ -29,13 +33,18 @@ int wmain(int argc, const wchar * argv[])
 				wchar errMsg[FEMTO_SETTINGS_ERR_MAX];
 				fSettings_lastError(&editor.settings, errMsg, FEMTO_SETTINGS_ERR_MAX);
 				wprintf(L"[Settings]: %S\n", errMsg);
+				if (editor.settings.settingsFileName == NULL)
+				{
+					editor.settings.settingsFileName = wcsdup(errMsg);
+				}
+
 				femto_printHelpClue(argv[0]);
 			}
 			else
 			{
 				fErr_print(errCode);
+				return 2;
 			}
-			return 2;
 		}
 		else if (editor.settings.bHelpRequest)
 		{
@@ -48,7 +57,6 @@ int wmain(int argc, const wchar * argv[])
 			return 0;
 		}
 	}
-
 
 	if (!fData_openTab(&editor, editor.settings.fileName))
 	{
@@ -64,7 +72,7 @@ int wmain(int argc, const wchar * argv[])
 
 	{
 		wchar tempstr[MAX_STATUS];
-		const wchar * restrict res = fFile_read(editor.files[editor.fileIdx]);
+		const wchar *restrict res = fFile_read(editor.files[editor.fileIdx]);
 		if (res != NULL)
 		{
 			wcscpy_s(tempstr, MAX_STATUS, res);
@@ -73,12 +81,15 @@ int wmain(int argc, const wchar * argv[])
 		{
 			swprintf_s(
 				tempstr, MAX_STATUS,
-				L"File loaded successfully! %s%s EOL sequences; Settings file: %s; Syntax: %S",
+				L"%s %s%s %s; %s: %s; %s: %S",
+				fLang_get(flangLOAD),
 				(editor.files[editor.fileIdx]->eolSeq & eolCR) ? L"CR" : L"",
 				(editor.files[editor.fileIdx]->eolSeq & eolLF) ? L"LF" : L"",
+				fLang_get(flangEOL),
+				fLang_get(flangSETTINGS),
 				(editor.settings.settingsFileName != NULL) ? editor.settings.settingsFileName : L"-",
-				fStx_name(editor.files[editor.fileIdx]->syntax)
-			);
+				fLang_get(flangSYNTAX),
+				fStx_name(editor.files[editor.fileIdx]->syntax));
 		}
 		fData_statusMsg(&editor, tempstr, NULL);
 	}

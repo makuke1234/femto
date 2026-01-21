@@ -192,6 +192,7 @@ static const wchar * s_keyWordsC[] = {
 	L"strcpy",
 	L"strcat",
 	L"strlen",
+	L"strdup",
 
 	L"roundf",
 	L"round",

@@ -219,6 +219,7 @@ Have a look at the provided [settings file](./settings.json) to get a better und
 	* [x] Shows current line & column when typing/moving cursor around
 	* [x] Shows current tab number and number of tabs on the title bar
 	* [x] Correct relative line number rendering
+	* [ ] Support translations through settings.json
 	* [ ] Advanced theming support, load themes from separate files
 	* [ ] Advanced undo/redo, choose which way to redo
 

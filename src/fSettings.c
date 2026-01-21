@@ -2,35 +2,35 @@
 #include "fArg.h"
 #include "femto.h"
 #include "fSyntax.h"
+#include "fLang.h"
 
 #include <jsonParser.h>
 
-void fSettings_reset(fSettings_t * restrict self)
+void fSettings_reset(fSettings_t *restrict self)
 {
 	assert(self != NULL);
 
 	*self = (fSettings_t){
-		.fileName         = NULL,
+		.fileName = NULL,
 		.settingsFileName = NULL,
 
-		.tabWidth     = 4,
+		.tabWidth = 4,
 		.tabSpaceStr1 = NULL,
 
-		
-		.whitespaceCh  = L'→',
+		.whitespaceCh = L'→',
 		.whitespaceCol = FEMTO_DEFAULT_COLOR,
 
 		.helpArg = NULL,
 
-		.bHelpRequest    = false,
+		.bHelpRequest = false,
 		.bVersionRequest = false,
-		.bTabsToSpaces   = false,
-		.bAutoIndent     = true,
-		.bWhiteSpaceVis  = false,
-		.bEnableLogging  = false,
-		
+		.bTabsToSpaces = false,
+		.bAutoIndent = true,
+		.bWhiteSpaceVis = false,
+		.bEnableLogging = false,
+
 		.bRelLineNums = false,
-		.lineNumCol   = FEMTO_DEFAULT_COLOR,
+		.lineNumCol = FEMTO_DEFAULT_COLOR,
 
 		.palette = {
 			.colorNames = {
@@ -49,90 +49,12 @@ void fSettings_reset(fSettings_t * restrict self)
 				"bright_red",
 				"bright_magenta",
 				"bright_yellow",
-				"white"
-			},
-			.colors = {
-				{  12,  12,  12 },
-				{   0,  55, 218 },
-				{  19, 161,  14 },
-				{  58, 150, 221 },
-				{ 197,  15,  31 },
-				{ 136,  23, 152 },
-				{ 193, 156,   0 },
-				{ 204, 204, 204 },
-				{ 118, 118, 118 },
-				{  59, 120, 255 },
-				{  22, 198,  12 },
-				{  97, 214, 214 },
-				{ 231,  72,  86 },
-				{ 180,   0, 158 },
-				{ 249, 241, 165 },
-				{ 242, 242, 242 }
-			}
-		},
-		.syntaxColors = {
-			[tcTEXT]            = FEMTO_DEFAULT_COLOR,
-			[tcSEARCH_RESULT]   = BACKGROUND_RED | FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-			[tcHIGHLIGHT]       = BACKGROUND_INTENSITY | BACKGROUND_BLUE | FEMTO_DEFAULT_COLOR,
-			[tcCOMMENT_LINE]    = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
-			[tcCOMMENT_BLOCK]   = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY,
-			[tcKEYWORD]         = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED,
-			[tcSTRING]          = FOREGROUND_RED,
-			[tcSTRING_QUOTE]    = FOREGROUND_RED,
-			[tcCHARACTER]       = FOREGROUND_RED,
-			[tcCHARACTER_QUOTE] = FOREGROUND_RED,
-			[tcESCAPE]          = FOREGROUND_INTENSITY | FOREGROUND_RED,
-			[tcPREPROC]         = FOREGROUND_INTENSITY | FOREGROUND_RED,
-			[tcNUMBER]          = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
-			[tcHEX]             = FOREGROUND_GREEN | FOREGROUND_RED,
-			[tcOCT]             = FOREGROUND_RED,
-			[tcPUNCTUATION]     = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE,
-			[tcMD_HEADING]      = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN,
-			[tcMD_ITALIC]       = FOREGROUND_INTENSITY | FOREGROUND_RED,
-			[tcMD_BOLD]         = FOREGROUND_RED | FOREGROUND_BLUE,
-			[tcMD_STRIKE]       = FOREGROUND_INTENSITY,
-			[tcMD_VALUE]        = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE,
-			[tcMD_CONETEXT]     = FOREGROUND_RED | FOREGROUND_GREEN,
-			[tcMD_BRACKET]      = FOREGROUND_GREEN,
-			[tcMD_BRACKETPIC]   = FOREGROUND_INTENSITY | FOREGROUND_GREEN,
-			[tcMD_LINK]         = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
-			[tcXML_ID]          = FOREGROUND_INTENSITY | FOREGROUND_RED,
-			[tcCSS_SELECTOR]    = FOREGROUND_RED | FOREGROUND_GREEN,
-			[tcCSS_PROPERTY]    = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED
-		},
-		.syntaxTokens = {
-			[tcTEXT]            = "text",
-			[tcSEARCH_RESULT]   = "searchResult",
-			[tcHIGHLIGHT]       = "highlight",
-			[tcCOMMENT_LINE]    = "lineComment",
-			[tcCOMMENT_BLOCK]   = "blockComment",
-			[tcKEYWORD]         = "keyword",
-			[tcSTRING]          = "string",
-			[tcSTRING_QUOTE]    = "stringQuote",
-			[tcCHARACTER]       = "character",
-			[tcCHARACTER_QUOTE] = "characterQuote",
-			[tcESCAPE]          = "escapeCharacter",
-			[tcPREPROC]         = "preprocessor",
-			[tcNUMBER]          = "number",
-			[tcHEX]             = "hex",
-			[tcOCT]             = "octal",
-			[tcPUNCTUATION]     = "punctuation",
-			[tcMD_HEADING]      = "MDheading",
-			[tcMD_ITALIC]       = "MDitalic",
-			[tcMD_BOLD]         = "MDbold",
-			[tcMD_STRIKE]       = "MDstrike",
-			[tcMD_VALUE]        = "MDvalue",
-			[tcMD_CONETEXT]     = "MDconeText",
-			[tcMD_BRACKET]      = "MDbracket",
-			[tcMD_BRACKETPIC]   = "MDbracketPicture",
-			[tcMD_LINK]         = "MDlink",
-			[tcXML_ID]          = "XMLid",
-			[tcCSS_SELECTOR]    = "CSSselector",
-			[tcCSS_PROPERTY]    = "CSSproperty"
-		},
+				"white"},
+			.colors = {{12, 12, 12}, {0, 55, 218}, {19, 161, 14}, {58, 150, 221}, {197, 15, 31}, {136, 23, 152}, {193, 156, 0}, {204, 204, 204}, {118, 118, 118}, {59, 120, 255}, {22, 198, 12}, {97, 214, 214}, {231, 72, 86}, {180, 0, 158}, {249, 241, 165}, {242, 242, 242}}},
+		.syntaxColors = {[tcTEXT] = FEMTO_DEFAULT_COLOR, [tcSEARCH_RESULT] = BACKGROUND_RED | FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE, [tcHIGHLIGHT] = BACKGROUND_INTENSITY | BACKGROUND_BLUE | FEMTO_DEFAULT_COLOR, [tcCOMMENT_LINE] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE, [tcCOMMENT_BLOCK] = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE | BACKGROUND_INTENSITY, [tcKEYWORD] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED, [tcSTRING] = FOREGROUND_RED, [tcSTRING_QUOTE] = FOREGROUND_RED, [tcCHARACTER] = FOREGROUND_RED, [tcCHARACTER_QUOTE] = FOREGROUND_RED, [tcESCAPE] = FOREGROUND_INTENSITY | FOREGROUND_RED, [tcPREPROC] = FOREGROUND_INTENSITY | FOREGROUND_RED, [tcNUMBER] = FOREGROUND_INTENSITY | FOREGROUND_BLUE, [tcHEX] = FOREGROUND_GREEN | FOREGROUND_RED, [tcOCT] = FOREGROUND_RED, [tcPUNCTUATION] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE, [tcMD_HEADING] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN, [tcMD_ITALIC] = FOREGROUND_INTENSITY | FOREGROUND_RED, [tcMD_BOLD] = FOREGROUND_RED | FOREGROUND_BLUE, [tcMD_STRIKE] = FOREGROUND_INTENSITY, [tcMD_VALUE] = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE, [tcMD_CONETEXT] = FOREGROUND_RED | FOREGROUND_GREEN, [tcMD_BRACKET] = FOREGROUND_GREEN, [tcMD_BRACKETPIC] = FOREGROUND_INTENSITY | FOREGROUND_GREEN, [tcMD_LINK] = FOREGROUND_INTENSITY | FOREGROUND_BLUE, [tcXML_ID] = FOREGROUND_INTENSITY | FOREGROUND_RED, [tcCSS_SELECTOR] = FOREGROUND_RED | FOREGROUND_GREEN, [tcCSS_PROPERTY] = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED},
+		.syntaxTokens = {[tcTEXT] = "text", [tcSEARCH_RESULT] = "searchResult", [tcHIGHLIGHT] = "highlight", [tcCOMMENT_LINE] = "lineComment", [tcCOMMENT_BLOCK] = "blockComment", [tcKEYWORD] = "keyword", [tcSTRING] = "string", [tcSTRING_QUOTE] = "stringQuote", [tcCHARACTER] = "character", [tcCHARACTER_QUOTE] = "characterQuote", [tcESCAPE] = "escapeCharacter", [tcPREPROC] = "preprocessor", [tcNUMBER] = "number", [tcHEX] = "hex", [tcOCT] = "octal", [tcPUNCTUATION] = "punctuation", [tcMD_HEADING] = "MDheading", [tcMD_ITALIC] = "MDitalic", [tcMD_BOLD] = "MDbold", [tcMD_STRIKE] = "MDstrike", [tcMD_VALUE] = "MDvalue", [tcMD_CONETEXT] = "MDconeText", [tcMD_BRACKET] = "MDbracket", [tcMD_BRACKETPIC] = "MDbracketPicture", [tcMD_LINK] = "MDlink", [tcXML_ID] = "XMLid", [tcCSS_SELECTOR] = "CSSselector", [tcCSS_PROPERTY] = "CSSproperty"},
 
-		.lastErr = { 0 }
-	};
+		.lastErr = {0}};
 	if (!fSettings_makeTabSpaceStr(self))
 	{
 		fprintf(stderr, "Cannot recover from this memory allocation error!\n");
@@ -140,9 +62,9 @@ void fSettings_reset(fSettings_t * restrict self)
 	}
 }
 
-bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, usize errMax)
+bool fSettings_lastError(fSettings_t *restrict self, wchar *restrict errArr, usize errMax)
 {
-	assert(self   != NULL);
+	assert(self != NULL);
 	assert(errArr != NULL);
 	assert(errMax > 0);
 
@@ -157,11 +79,11 @@ bool fSettings_lastError(fSettings_t * restrict self, wchar * restrict errArr, u
 	return true;
 }
 
-bool fSettings_makeTabSpaceStr(fSettings_t * restrict self)
+bool fSettings_makeTabSpaceStr(fSettings_t *restrict self)
 {
 	assert(self != NULL);
-	
-	wchar * mem = realloc(self->tabSpaceStr1, sizeof(wchar) * (usize)(self->tabWidth + 1));
+
+	wchar *mem = realloc(self->tabSpaceStr1, sizeof(wchar) * (usize)(self->tabWidth + 1));
 	if (mem == NULL)
 	{
 		return false;
@@ -176,13 +98,13 @@ bool fSettings_makeTabSpaceStr(fSettings_t * restrict self)
 	return true;
 }
 
-fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** restrict argv)
+fErr_e fSettings_cmdLine(fSettings_t *restrict self, int argc, const wchar **restrict argv)
 {
 	assert(self != NULL);
 	assert(argc > 0);
 	assert(argv != NULL);
 
-	bool * argumentsUsed = calloc((usize)(argc - 1), sizeof(bool));
+	bool *argumentsUsed = calloc((usize)(argc - 1), sizeof(bool));
 	if (argumentsUsed == NULL)
 	{
 		return ferrMEMORY;
@@ -204,8 +126,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 			self->helpArg = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
 		}
 		self->bHelpRequest = true;
-		free(argumentsUsed);
-		return ferrOK;
+		goto loadSettings_label1;
 	}
 
 	fArg_fetchArgv(argc, argv, L"ver", &mi, 0);
@@ -230,10 +151,11 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 
 	/* **************** Other settings ******************* */
 
+loadSettings_label1:;
 	ret = fArg_fetchArgv(argc, argv, L"set", &mi, 1, &farg);
 	if ((mi != 0) && (ret == 2))
 	{
-		wchar * mem = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
+		wchar *mem = wcsdup_s(farg.begin, (usize)(farg.end - farg.begin));
 		if (mem == NULL)
 		{
 			free(argumentsUsed);
@@ -249,6 +171,10 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 		{
 			free(mem);
 		}
+	}
+	if (self->bHelpRequest)
+	{
+		goto loadSettings_label2;
 	}
 
 	ret = fArg_fetchArgv(argc, argv, L"tabsS", &mi, 1, &farg);
@@ -268,8 +194,7 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 		self->tabWidth = (u8)clamp_u64(
 			(u64)wcstoul(farg.begin, NULL, 10),
 			(u64)FEMTO_SETTINGS_MINTAB,
-			(u64)FEMTO_SETTINGS_MAXTAB
-		);
+			(u64)FEMTO_SETTINGS_MAXTAB);
 		if (!fSettings_makeTabSpaceStr(self))
 		{
 			free(argumentsUsed);
@@ -363,60 +288,59 @@ fErr_e fSettings_cmdLine(fSettings_t * restrict self, int argc, const wchar ** r
 		// Just in case, redundant otherwise
 		argumentsUsed[argc - 2] = true;
 	}
+
+loadSettings_label2:;
 	if (self->settingsFileName == NULL)
 	{
-		if (femto_testFile(FEMTO_SETTINGS_FILE1))
+		const wchar *fSetFile = NULL;
+		if (femto_testFile(fSetFile = FEMTO_SETTINGS_FILE1) ||
+			femto_testFile(fSetFile = FEMTO_SETTINGS_FILE2) ||
+			femto_testFile(fSetFile = FEMTO_SETTINGS_FILE3) ||
+			femto_testFile(fSetFile = FEMTO_SETTINGS_FILE4))
 		{
-			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE1);
-		}
-		else if (femto_testFile(FEMTO_SETTINGS_FILE2))
-		{
-			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE2);
-		}
-		else if (femto_testFile(FEMTO_SETTINGS_FILE3))
-		{
-			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE3);
-		}
-		else if (femto_testFile(FEMTO_SETTINGS_FILE4))
-		{
-			self->settingsFileName = wcsdup(FEMTO_SETTINGS_FILE4);
+			self->settingsFileName = wcsdup(fSetFile);
 		}
 	}
 
 	// try to load settings from file
-	const wchar * result = fSettings_loadFromFile(self);
+	const wchar *result = fSettings_loadFromFile(self);
 	if (result != NULL)
 	{
 		wcsncpy_s(self->lastErr, FEMTO_SETTINGS_ERR_MAX, result, FEMTO_SETTINGS_ERR_MAX);
+		free(self->settingsFileName);
+		self->settingsFileName = NULL;
 	}
 
 	// Everything is OK
 	free(argumentsUsed);
+	if (self->bHelpRequest)
+	{
+		return ferrOK;
+	}
 
 	fLog_enable(self->bEnableLogging);
 
 	return (result == NULL) ? ferrOK : ferrUNKNOWN;
 }
 
-
 #define CHECK_ERR UINT16_MAX
 
-static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, const char * restrict key, const char * colorNames[])
+static inline u16 s_fSettings_checkColor(const jsonObject_t *restrict obj, const char *restrict key, const char *colorNames[])
 {
-	assert(obj        != NULL);
-	assert(key        != NULL);
+	assert(obj != NULL);
+	assert(key != NULL);
 	assert(colorNames != NULL);
 
-	const jsonValue_t * restrict attr = jsonObject_get(obj, key);
+	const jsonValue_t *restrict attr = jsonObject_get(obj, key);
 	if (attr == NULL)
 	{
 		return CHECK_ERR;
 	}
 
 	bool success;
-	const char * restrict value = jsonValue_getString(attr, &success);
+	const char *restrict value = jsonValue_getString(attr, &success);
 	// Check for comma
-	const char * restrict comma = strchr(value, (int)',');
+	const char *restrict comma = strchr(value, (int)',');
 	const usize commaIdx = (comma == NULL) ? PTRDIFF_MAX : (usize)(comma - value);
 	usize charIdx = 0;
 	if (comma != NULL)
@@ -425,7 +349,7 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 		// Skip whitespace
 		for (; (value[charIdx] != '\0'); ++charIdx)
 		{
-			if ((value[charIdx] != ' ') && (value[charIdx] != '\t') )
+			if ((value[charIdx] != ' ') && (value[charIdx] != '\t'))
 			{
 				break;
 			}
@@ -440,7 +364,7 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 		// Search through colorNames
 		for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 		{
-			if (!firstDone && strncmp(value, colorNames[i], commaIdx) == 0)
+			if (!firstDone && (strncmp(value, colorNames[i], commaIdx) == 0))
 			{
 				if (comma == NULL)
 				{
@@ -449,7 +373,7 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 				ret |= i;
 				firstDone = true;
 			}
-			else if ((charIdx != 0) && strcmp(&value[charIdx], colorNames[i]) == 0)
+			else if ((charIdx != 0) && (strcmp(&value[charIdx], colorNames[i]) == 0))
 			{
 				ret |= (u8)(i << 4);
 				secondDone = true;
@@ -464,26 +388,26 @@ static inline u16 s_fSettings_checkColor(const jsonObject_t * restrict obj, cons
 
 	return CHECK_ERR;
 }
-static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const jsonObject_t * restrict obj, const char * restrict key)
+static inline bool s_fSettings_checkRGBColor(fColor_t *restrict col, const jsonObject_t *restrict obj, const char *restrict key)
 {
 	assert(col != NULL);
 	assert(obj != NULL);
 	assert(key != NULL);
-	
-	const jsonValue_t * restrict attr = jsonObject_get(obj, key);
+
+	const jsonValue_t *restrict attr = jsonObject_get(obj, key);
 	if (attr == NULL)
 	{
 		return CHECK_ERR;
 	}
 
 	bool success;
-	const char * restrict value = jsonValue_getString(attr, &success);
+	const char *restrict value = jsonValue_getString(attr, &success);
 	if (success && (value != NULL))
 	{
-		const char * restrict rgbBeg;
+		const char *restrict rgbBeg;
 		u16 r, g, b;
 		if ((((rgbBeg = strstr(value, "rgb(")) != NULL) && (sscanf(rgbBeg + 4, "%hu,%hu,%hu)", &r, &g, &b) == 3)) ||
-		( ((rgbBeg = strchr(value, (int)'#')) != NULL) && (sscanf(rgbBeg + 1, "%02hx%02hx%02hx", &r, &g, &b) == 3) ) )
+			(((rgbBeg = strchr(value, (int)'#')) != NULL) && (sscanf(rgbBeg + 1, "%02hx%02hx%02hx", &r, &g, &b) == 3)))
 		{
 			if ((r <= UINT8_MAX) && (g <= UINT8_MAX) && (b <= UINT8_MAX))
 			{
@@ -499,8 +423,32 @@ static inline bool s_fSettings_checkRGBColor(fColor_t * restrict col, const json
 	return false;
 }
 
+static inline void s_fSettings_loadLanguage(isize langIdx, const jsonObject_t *restrict obj)
+{
+	// load language details
 
-const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
+	const jsonValue_t *restrict attr;
+	for (usize i = 0; i < flang_size; ++i)
+	{
+		assert(fLang_tokens[i] != NULL);
+		if ((attr = jsonObject_get(obj, fLang_tokens[i])) == NULL)
+		{
+			continue;
+		}
+
+		bool suc;
+		const char *value = jsonValue_getString(attr, &suc);
+		if ((value != NULL) && suc)
+		{
+			// add token value to language definition
+			char *escValue = femto_escStr(value);
+			fLang_addKeyword8(langIdx, i, escValue);
+			free(escValue);
+		}
+	}
+}
+
+const wchar *fSettings_loadFromFile(fSettings_t *restrict self)
 {
 	assert(self != NULL);
 
@@ -519,10 +467,10 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		return L"Error opening file!";
 	}
 
-	char * bytes = NULL;
+	char *bytes = NULL;
 	usize bytesLen = 0;
 	// Read bytes
-	const wchar * restrict result = femto_readBytes(hset, &bytes, &bytesLen);
+	const wchar *restrict result = femto_readBytes(hset, &bytes, &bytesLen);
 	// Close file
 	CloseHandle(hset);
 	if (result != NULL)
@@ -550,11 +498,11 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 	// Browse JSON object
 	bool suc;
-	const jsonObject_t * restrict obj = jsonValue_getObject(&json.value, &suc);
+	const jsonObject_t *restrict obj = jsonValue_getObject(&json.value, &suc);
 
 	if (suc)
 	{
-		const jsonValue_t * restrict attr;
+		const jsonValue_t *restrict attr;
 		u16 val;
 
 		if ((attr = jsonObject_get(obj, "tabsToSpaces")) != NULL)
@@ -596,17 +544,17 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 
 		if ((attr = jsonObject_get(obj, "whitespaceCh")) != NULL)
 		{
-			const char * str = jsonValue_getString(attr, &suc);
+			const char *str = jsonValue_getString(attr, &suc);
 			const usize len = strlen(str);
 			if (suc && (str != NULL) && len)
 			{
-				char * esc = femto_escStr_s(str, len);
+				char *esc = femto_escStr_s(str, len);
 				usize esclen = strlen(esc);
 				if (esc != NULL)
 				{
 					if (esclen)
 					{
-						wchar * esc16 = NULL;
+						wchar *esc16 = NULL;
 						u32 esc16len = femto_toutf16(esc, (int)esclen, &esc16, NULL);
 						if (esc16 != NULL)
 						{
@@ -651,27 +599,27 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 		}
 
 		// Fill palette
-		const jsonObject_t * restrict pObj;
-		if ( ((attr = jsonObject_get(obj, "palette")) != NULL) &&
-			((pObj = jsonValue_getObject(attr, &suc)) != NULL) && suc )
+		const jsonObject_t *restrict pObj;
+		if (((attr = jsonObject_get(obj, "palette")) != NULL) &&
+			((pObj = jsonValue_getObject(attr, &suc)) != NULL) && suc)
 		{
 			for (u8 i = 0; i < MAX_CONSOLE_COLORS; ++i)
 			{
-				const char * color = self->palette.colorNames[i];
+				const char *color = self->palette.colorNames[i];
 				s_fSettings_checkRGBColor(&self->palette.colors[i], pObj, color);
 			}
 
 			self->palette.bUsePalette = true;
 		}
 
-		const jsonObject_t * restrict hObj;
-		if (((attr = jsonObject_get(obj, "highlighting")) != NULL) && 
-			(((hObj = jsonValue_getObject(attr, &suc)) != NULL) && suc) )
+		const jsonObject_t *restrict hObj;
+		if (((attr = jsonObject_get(obj, "highlighting")) != NULL) &&
+			(((hObj = jsonValue_getObject(attr, &suc)) != NULL) && suc))
 		{
 			// If highlighting settings exist
-			WORD * restrict colors = self->syntaxColors;
-			const char ** restrict tokenNames = self->syntaxTokens;
-			const char ** restrict colorNames = self->palette.colorNames;
+			WORD *restrict colors = self->syntaxColors;
+			const char **restrict tokenNames = self->syntaxTokens;
+			const char **restrict colorNames = self->palette.colorNames;
 
 			for (u8 i = 0; i < tcNUM_OF_TOKENS; ++i)
 			{
@@ -681,6 +629,30 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 				}
 			}
 		}
+
+		const char *langStr = NULL;
+		if ((attr = jsonObject_get(obj, "language")) != NULL)
+		{
+			langStr = jsonValue_getString(attr, &suc);
+		}
+		isize langIdx = fLang_setLang8(langStr);
+
+		const jsonObject_t *restrict lObjs;
+		if (((langStr != NULL) && ((attr = jsonObject_get(obj, "languages")) != NULL) &&
+			 ((lObjs = jsonValue_getObject(attr, &suc)) != NULL) && suc))
+		{
+			const jsonObject_t *restrict lObj;
+			// language is defined
+			if (((attr = jsonObject_get(lObjs, langStr)) != NULL) &&
+				((lObj = jsonValue_getObject(attr, &suc)) != NULL) && suc)
+			{
+				// start loading parts of language
+				s_fSettings_loadLanguage(langIdx, lObj);
+			}
+		}
+
+		// initialize currently selected language
+		fLang_init();
 	}
 
 	// Free JSON object
@@ -689,11 +661,10 @@ const wchar * fSettings_loadFromFile(fSettings_t * restrict self)
 	return NULL;
 }
 
-
-void fSettings_destroy(fSettings_t * restrict self)
+void fSettings_destroy(fSettings_t *restrict self)
 {
 	assert(self != NULL);
-	
+
 	if (self->fileName != NULL)
 	{
 		free(self->fileName);

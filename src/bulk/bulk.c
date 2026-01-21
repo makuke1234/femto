@@ -9,4 +9,5 @@
 #include "../fSettings.c"
 #include "../fStatHashmap.c"
 #include "../fSyntax.c"
+#include "../fLang.c"
 #include "../winarr.c"

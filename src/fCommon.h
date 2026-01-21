@@ -36,7 +36,7 @@ typedef size_t usize;
 typedef ssize_t isize;
 typedef intptr_t iptr;
 typedef uintptr_t uptr;
-typedef void * vptr;
+typedef void *vptr;
 
 typedef float f32;
 typedef double f64;
@@ -45,19 +45,16 @@ typedef long double f128;
 typedef wchar_t wchar;
 typedef unsigned char uchar;
 
-
 // Since 0x88 - 0x8F are unassigned, they are free to be used by my editor
 #define FEMTO_PROFILER_FILE "femto.log"
 #define FEMTO_PROFILER_STACK_SIZE 256
-
-
-
-#define FEMTO_SETTINGS_ERR_MAX 256
 
 #define FEMTO_SETTINGS_FILE1 L"femto.json"
 #define FEMTO_SETTINGS_FILE2 L"femto-settings.json"
 #define FEMTO_SETTINGS_FILE3 L"femto_settings.json"
 #define FEMTO_SETTINGS_FILE4 L"settings.json"
+
+#define FEMTO_SETTINGS_ERR_MAX 256
 
 #define FEMTO_SETTINGS_MINTAB 1
 #define FEMTO_SETTINGS_MAXTAB 32
@@ -67,24 +64,24 @@ typedef unsigned char uchar;
 
 #define MAX_CONSOLE_COLORS 16
 
-
-
-#define FEMTO_UNTITLED_NAME L"untitled"
-
 #define MAX_STATUS 512
 
-#define FEMTO_SHIFT_DEL     0xE000
-#define FEMTO_MOVELINE_UP   0xE001
+#define FEMTO_SHIFT_DEL 0xE000
+#define FEMTO_MOVELINE_UP 0xE001
 #define FEMTO_MOVELINE_DOWN 0xE002
-#define FEMTO_SEL_DELETE    0xE003
-#define FEMTO_COPY          0xE004
-#define FEMTO_PASTE         0xE005
+#define FEMTO_SEL_DELETE 0xE003
+#define FEMTO_COPY 0xE004
+#define FEMTO_PASTE 0xE005
+#define FEMTO_MOVECURSOR_LEFT 0xE006
+#define FEMTO_MOVECURSOR_RIGHT 0xE007
+#define FEMTO_MOVEWORD_LEFT 0xE008
+#define FEMTO_MOVEWORD_RIGHT 0xE009
 
 #define FEMTO_DEFAULT_COLOR (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
 
 #define FEMTO_VERSION_STR "v2.3-pre"
-#define FEMTO_VERSION_SEQ 2,3,0,0
+#define FEMTO_VERSION_SEQ 2, 3, 0, 0
 
-#define fRGB(r, g, b) ( (COLORREF)( (DWORD)((BYTE)r) | (DWORD)(((BYTE)g) << 8) | (DWORD)(((BYTE)b) << 16) ) )
+#define fRGB(r, g, b) ((COLORREF)((DWORD)((BYTE)r) | (DWORD)(((BYTE)g) << 8) | (DWORD)(((BYTE)b) << 16)))
 
 #endif
